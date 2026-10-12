@@ -1495,6 +1495,8 @@ const en = {
   "message.code_block_copied": "Code block copied",
   "message.copied": "Copied",
   "message.copy": "Copy message",
+  "message.read_aloud": "Read aloud",
+  "message.stop_reading": "Stop reading",
   "message.copy_code_block": "Copy code block",
   "message.download": "Download",
   "message.edit": "Edit message",

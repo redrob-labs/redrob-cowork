@@ -154,6 +154,57 @@ export async function deleteRedrobEngineAuth(input: RedrobAuthInput): Promise<vo
   }
 }
 
+/** At most what the engine accepts for one request, checked here so a bad request never reaches it. */
+const MAX_SPEECH_CHARACTERS = 4_096;
+
+/**
+ * Speak text on the engine's Redrob credential and return the audio, for read-aloud in the app.
+ *
+ * The engine's `POST /redrob/speech` holds the key and calls the gateway; this only relays. Work
+ * never sees the credential here either, which is the point of going through the engine rather than
+ * calling the console with a key of its own.
+ *
+ * The engine's refusals keep their status and message: 400 for text it will not speak, 503 when no
+ * Redrob credential is connected, 502 and 504 for the gateway's own failures.
+ */
+export async function speakWithRedrobEngine(
+  input: RedrobAuthInput,
+  payload: { text: string; voice?: string; model?: string },
+): Promise<{ audio: ArrayBuffer; contentType: string }> {
+  const text = payload.text.trim();
+  if (!text) throw new ApiError(400, "speech_text_missing", "Give the words to speak.");
+  if ([...text].length > MAX_SPEECH_CHARACTERS) {
+    throw new ApiError(400, "speech_text_too_long", `Speak at most ${MAX_SPEECH_CHARACTERS} characters at a time.`);
+  }
+  const target = resolveEngineTarget(input);
+  let response: Response;
+  try {
+    response = await target.fetchImpl(`${target.baseUrl}/redrob/speech`, {
+      method: "POST",
+      headers: target.headers,
+      body: JSON.stringify({
+        text,
+        ...(payload.voice ? { voice: payload.voice } : {}),
+        ...(payload.model ? { model: payload.model } : {}),
+      }),
+    });
+  } catch {
+    throw new ApiError(503, "engine_unavailable", "Redrob Code is not reachable yet");
+  }
+  if (!response.ok) {
+    const body: unknown = await response.json().catch(() => null);
+    const message = isRecord(body) && typeof body.message === "string" ? body.message : "Speech could not be made.";
+    if (response.status === 503) throw new ApiError(503, "redrob_not_connected", message);
+    if (response.status === 400) throw new ApiError(400, "speech_invalid", message);
+    throw new ApiError(response.status === 504 ? 504 : 502, "speech_failed", message);
+  }
+  const contentType = response.headers.get("content-type")?.split(";")[0]?.trim() ?? "";
+  if (!contentType.startsWith("audio/")) {
+    throw new ApiError(502, "speech_failed", "Redrob Code answered speech with something that is not audio.");
+  }
+  return { audio: await response.arrayBuffer(), contentType };
+}
+
 type EngineProviderEntry = {
   id?: unknown;
   source?: unknown;

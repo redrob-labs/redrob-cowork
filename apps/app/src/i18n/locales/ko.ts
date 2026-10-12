@@ -1478,6 +1478,8 @@ const ko = {
   "message.code_block_copied": "코드 블록을 복사했습니다",
   "message.copied": "복사됨",
   "message.copy": "메시지 복사",
+  "message.read_aloud": "소리 내어 읽기",
+  "message.stop_reading": "읽기 중지",
   "message.copy_code_block": "코드 블록 복사",
   "message.download": "다운로드",
   "message.edit": "메시지 편집",
