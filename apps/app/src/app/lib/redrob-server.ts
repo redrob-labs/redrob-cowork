@@ -332,6 +332,18 @@ export type RedrobMcpAppSandbox = {
   expectedOrigin: string;
 };
 
+/**
+ * A sandbox document on this server, at an origin that differs from the host's. When the app itself
+ * is served from the same server, the loopback name is swapped so the two still differ.
+ */
+function sandboxUrl(baseUrl: string, path: string, hostOrigin: string): URL {
+  const url = new URL(`${baseUrl}${path}`);
+  if (url.origin === hostOrigin && url.hostname === "localhost") url.hostname = "127.0.0.1";
+  else if (url.origin === hostOrigin && url.hostname === "127.0.0.1") url.hostname = "localhost";
+  url.searchParams.set("hostOrigin", normalizeMcpAppHostOrigin(hostOrigin));
+  return url;
+}
+
 export function normalizeMcpAppHostOrigin(hostOrigin: string): string {
   return hostOrigin === "file://" ? "null" : hostOrigin;
 }
@@ -1612,12 +1624,13 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         },
       ),
     mcpAppSandbox: (app: RedrobMcpAppResource, hostOrigin: string): RedrobMcpAppSandbox => {
-      const messageOrigin = normalizeMcpAppHostOrigin(hostOrigin);
-      const url = new URL(`${baseUrl}/mcp-apps/sandbox.html`);
-      if (url.origin === hostOrigin && url.hostname === "localhost") url.hostname = "127.0.0.1";
-      else if (url.origin === hostOrigin && url.hostname === "127.0.0.1") url.hostname = "localhost";
+      const url = sandboxUrl(baseUrl, "/mcp-apps/sandbox.html", hostOrigin);
       url.searchParams.set("csp", JSON.stringify(app.csp));
-      url.searchParams.set("hostOrigin", messageOrigin);
+      return { url: url.toString(), expectedOrigin: url.origin };
+    },
+    /** Where a model-written HTML page is previewed: this server's origin, never the app's. */
+    artifactPreviewSandbox: (hostOrigin: string): RedrobMcpAppSandbox => {
+      const url = sandboxUrl(baseUrl, "/artifact-preview/sandbox.html", hostOrigin);
       return { url: url.toString(), expectedOrigin: url.origin };
     },
     callMcpAppTool: (
