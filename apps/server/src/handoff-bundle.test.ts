@@ -147,13 +147,11 @@ describe("the draft and the bundle", () => {
       workspaceRoot: root,
       sessionDirectory: root,
       skills: [{ name: "house-style", content: "# House style" }, { name: "../evil", content: "x" }],
-      commands: [{ name: "weekly-update", template: "Write the update" }],
       includeRead: [],
     });
     const paths = draft.entries.map((entry) => entry.path);
     expect(paths).toContain("files/memo.md");
     expect(paths).toContain("workspace/skills/house-style/SKILL.md");
-    expect(paths).toContain("workspace/commands/weekly-update.json");
     expect(paths).not.toContain("files/lease.txt");
     expect(paths.some((path) => path.includes("evil"))).toBe(false);
     expect(draft.readCandidates).toEqual(["lease.txt"]);
@@ -169,7 +167,6 @@ describe("the draft and the bundle", () => {
       workspaceRoot: root,
       sessionDirectory: root,
       skills: [],
-      commands: [],
       includeRead: ["lease.txt"],
     });
     expect(withRead.entries.map((entry) => entry.path)).toContain("files/lease.txt");
@@ -179,7 +176,7 @@ describe("the draft and the bundle", () => {
   test("redacts by default, keeps what the sender keeps, and refuses to drop the transcript", async () => {
     const root = await workspaceWithFiles();
     const exported = sampleSession({ directory: root, tools: [{ tool: "write", filePath: "memo.md" }] });
-    const draft = await buildHandoffDraft({ exported, review: emptyReview(), workspaceRoot: root, sessionDirectory: root, skills: [], commands: [], includeRead: [] });
+    const draft = await buildHandoffDraft({ exported, review: emptyReview(), workspaceRoot: root, sessionDirectory: root, skills: [], includeRead: [] });
     const memoFinding = draft.findings.find((finding) => finding.path === "files/memo.md");
     expect(memoFinding).toBeDefined();
 
@@ -195,7 +192,7 @@ describe("the draft and the bundle", () => {
   test("the bundle opens with a manifest whose digest matches its contents", async () => {
     const root = await workspaceWithFiles();
     const exported = sampleSession({ directory: root });
-    const draft = await buildHandoffDraft({ exported, review: emptyReview(), workspaceRoot: root, sessionDirectory: root, skills: [], commands: [], includeRead: [] });
+    const draft = await buildHandoffDraft({ exported, review: emptyReview(), workspaceRoot: root, sessionDirectory: root, skills: [], includeRead: [] });
     const { manifest, zip } = writeHandoffBundle(applyDecisions(draft, { keep: new Set(), exclude: new Set() }), {
       from: kim,
       to: "Park",

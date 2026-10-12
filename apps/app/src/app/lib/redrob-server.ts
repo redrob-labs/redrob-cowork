@@ -418,7 +418,7 @@ function reviewPath(workspaceId: string, sessionId: string): string {
 
 /** Mirrors apps/server/src/routes/handoff.ts. */
 export type RedrobHandoffAsk = "review" | "continue" | "approve";
-export type RedrobHandoffEntryKind = "engine" | "transcript" | "desk" | "review" | "produced" | "read" | "skill" | "command";
+export type RedrobHandoffEntryKind = "engine" | "transcript" | "desk" | "review" | "produced" | "read" | "skill";
 export type RedrobHandoffFinding = {
   id: string;
   path: string;
@@ -466,7 +466,6 @@ export type RedrobHandoffInspection = {
     engine: { redrobCodeVersion: string };
     files: Array<{ path: string; kind: "produced" | "read"; bytes: number }>;
     skills: string[];
-    commands: string[];
     comments: number;
     state: RedrobReviewStatus;
   };

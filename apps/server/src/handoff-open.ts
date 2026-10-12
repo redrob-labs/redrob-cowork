@@ -43,7 +43,6 @@ export type OpenedBundle = {
   desk: unknown[];
   files: Array<{ relativePath: string; kind: "produced" | "read"; data: Buffer }>;
   skills: Array<{ name: string; content: string }>;
-  commands: Array<{ name: string; template: string; description?: string }>;
 };
 
 const sha256 = (data: Buffer) => createHash("sha256").update(data).digest("hex");
@@ -55,7 +54,6 @@ const KIND_FOR_PATH: Array<[RegExp, HandoffEntryKind]> = [
   [/^session\/review\.json$/, "review"],
   [/^files\/.+$/, "produced"],
   [/^workspace\/skills\/[A-Za-z0-9][A-Za-z0-9._-]{0,99}\/SKILL\.md$/, "skill"],
-  [/^workspace\/commands\/[A-Za-z0-9][A-Za-z0-9._-]{0,99}\.json$/, "command"],
 ];
 
 function allowedKind(path: string): HandoffEntryKind | null {
@@ -175,7 +173,6 @@ export function openHandoffBundle(buffer: Buffer): OpenedBundle {
 
   const files: OpenedBundle["files"] = [];
   const skills: OpenedBundle["skills"] = [];
-  const commands: OpenedBundle["commands"] = [];
   for (const entry of entries) {
     const kind = allowedKind(entry.name);
     if (kind === "produced") {
@@ -183,15 +180,6 @@ export function openHandoffBundle(buffer: Buffer): OpenedBundle {
       files.push({ relativePath: entry.name.slice("files/".length), kind: listedKind, data: entry.data });
     } else if (kind === "skill") {
       skills.push({ name: entry.name.split("/")[2]!, content: entry.data.toString("utf8") });
-    } else if (kind === "command") {
-      const value = parseJson(entry.data, "playbook");
-      if (isRecord(value) && typeof value.name === "string" && typeof value.template === "string") {
-        commands.push({
-          name: entry.name.split("/")[2]!.replace(/\.json$/, ""),
-          template: value.template,
-          ...(typeof value.description === "string" ? { description: value.description } : {}),
-        });
-      }
     }
   }
 
@@ -203,7 +191,6 @@ export function openHandoffBundle(buffer: Buffer): OpenedBundle {
     desk: Array.isArray(deskValue) ? deskValue : [],
     files,
     skills,
-    commands,
   };
 }
 
@@ -221,7 +208,6 @@ export function describeBundle(opened: OpenedBundle) {
     engine: opened.manifest.engine,
     files: opened.files.map((file) => ({ path: file.relativePath, kind: file.kind, bytes: file.data.length })),
     skills: opened.skills.map((skill) => skill.name),
-    commands: opened.commands.map((command) => command.name),
     comments: opened.review.comments.length,
     state: opened.review.state.status,
   };

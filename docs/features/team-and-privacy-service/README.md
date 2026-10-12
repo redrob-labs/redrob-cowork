@@ -29,7 +29,9 @@ there is no separate service and no new sign-in.
 
 ## Non-goals
 
-- Real-time co-editing of chats. Workspace sharing over a URL and token stays as it is.
+- Real-time co-editing of chats in this plan. It is planned separately, peer to peer and never
+  through the console, in [Handoff and live co-working](../handoff-and-live-coworking/README.md).
+  Workspace sharing over a URL and token stays as it is.
 - Sending chat content, files or the label map to the console. It never sees them.
 - Training a model. Existing pretrained models are measured first (see Detector).
 

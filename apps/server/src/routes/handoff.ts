@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { recordAudit } from "../audit.js";
-import { listCommands } from "../commands.js";
 import { EngineCliError, exportEngineSession, importEngineSession } from "../engine-cli.js";
 import { ApiError } from "../errors.js";
 import {
@@ -24,7 +23,6 @@ import {
   transcriptSeedSession,
   writeCarriedFiles,
 } from "../handoff-open.js";
-import { upsertCommand } from "../commands.js";
 import { upsertSkill } from "../skills.js";
 import { isSafeId, mergeReview, readSessionReview, type ReviewAuthor, type ReviewComment } from "../review-store.js";
 import {
@@ -160,18 +158,12 @@ export function registerHandoffRoutes(options: RegisterHandoffRoutesOptions): vo
     const skills = await Promise.all(
       (await listSkills(workspace.path, false)).map(async (skill) => ({ name: skill.name, content: await readFile(skill.path, "utf8") })),
     );
-    const commands = (await listCommands(workspace.path, "workspace")).map((command) => ({
-      name: command.name,
-      template: command.template,
-      ...(command.description ? { description: command.description } : {}),
-    }));
     const draft = await buildHandoffDraft({
       exported,
       review: await readSessionReview(config, workspace.id, sessionId),
       workspaceRoot: workspace.path,
       sessionDirectory: typeof exported.info.directory === "string" ? exported.info.directory : workspace.path,
       skills,
-      commands,
       includeRead,
     });
     return { workspace, sessionId, exported, draft };
@@ -272,7 +264,7 @@ export function registerHandoffRoutes(options: RegisterHandoffRoutesOptions): vo
   });
 
   // Opens a handoff into a workspace made for it (POST /workspaces/local with managed: true):
-  // the files, the skills and playbooks, the chat, and its comments.
+  // the files, the skills, the chat, and its comments.
   addRoute(routes, "POST", "/workspace/:id/handoff/open", "host", async (ctx) => {
     ensureWritable(config);
     const workspace = await resolveWorkspace(config, ctx.params.id ?? "");
@@ -287,9 +279,6 @@ export function registerHandoffRoutes(options: RegisterHandoffRoutesOptions): vo
     await writeCarriedFiles(workspace.path, opened.files).catch(openFailure);
     for (const skill of opened.skills) {
       await upsertSkill(workspace.path, { name: skill.name, content: skill.content, description: "" }).catch(() => undefined);
-    }
-    for (const command of opened.commands) {
-      await upsertCommand(workspace.path, command).catch(() => undefined);
     }
 
     // The same chat id already here (a handoff opened twice, or back on the machine it came from)

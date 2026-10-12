@@ -22,7 +22,7 @@ export const HANDOFF_EXTENSION = ".redrobhandoff";
 export const HANDOFF_ASKS = ["review", "continue", "approve"] as const;
 export type HandoffAsk = (typeof HANDOFF_ASKS)[number];
 
-export type HandoffEntryKind = "engine" | "transcript" | "desk" | "review" | "produced" | "read" | "skill" | "command";
+export type HandoffEntryKind = "engine" | "transcript" | "desk" | "review" | "produced" | "read" | "skill";
 
 export type HandoffManifest = {
   format: typeof HANDOFF_FORMAT;
@@ -206,7 +206,6 @@ export type DraftInput = {
   workspaceRoot: string;
   sessionDirectory: string;
   skills: Array<{ name: string; content: string }>;
-  commands: Array<{ name: string; template: string; description?: string }>;
   /** Workspace-relative paths of read files the sender chose to add. */
   includeRead: readonly string[];
 };
@@ -300,10 +299,6 @@ export async function buildHandoffDraft(input: DraftInput): Promise<HandoffDraft
     const name = safeName(skill.name);
     if (name) add(`workspace/skills/${name}/SKILL.md`, "skill", Buffer.from(skill.content, "utf8"));
   }
-  for (const command of input.commands) {
-    const name = safeName(command.name);
-    if (name) add(`workspace/commands/${name}.json`, "command", json(command));
-  }
 
   const { findings, unscanned } = scan(entries);
   return { entries, readCandidates, missing, findings, unscanned, fingerprint: draftFingerprint(entries) };
@@ -314,7 +309,7 @@ export async function buildHandoffDraft(input: DraftInput): Promise<HandoffDraft
 export type HandoffDecisions = {
   /** Findings to leave as they are. Every other finding is redacted. */
   keep: ReadonlySet<string>;
-  /** Produced, read, skill or command entries to leave out. */
+  /** Produced, read or skill entries to leave out. */
   exclude: ReadonlySet<string>;
 };
 
@@ -325,7 +320,7 @@ export class HandoffBuildError extends Error {
   }
 }
 
-const EXCLUDABLE: ReadonlySet<HandoffEntryKind> = new Set(["produced", "read", "skill", "command"]);
+const EXCLUDABLE: ReadonlySet<HandoffEntryKind> = new Set(["produced", "read", "skill"]);
 
 /** The draft's entries with the decisions applied: left-out entries dropped, findings redacted. */
 export function applyDecisions(draft: HandoffDraft, decisions: HandoffDecisions): DraftEntry[] {

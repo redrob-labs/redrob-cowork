@@ -59,7 +59,6 @@ describe("handoff logic", () => {
   test("labels and sizes read plainly", () => {
     expect(entryLabel("files/notes/a.md")).toBe("notes/a.md");
     expect(entryLabel("workspace/skills/house-style/SKILL.md")).toBe("house-style");
-    expect(entryLabel("workspace/commands/weekly.json")).toBe("weekly");
     expect(formatBytes(2048)).toBe("2 KB");
     expect(findingWhere(PREVIEW.findings[1]!)).toBe(t("desk.handoff_where_chat"));
     expect(findingWhere(PREVIEW.findings[0]!)).toBe(t("desk.handoff_where_file", { name: "memo.md", line: 3 }));

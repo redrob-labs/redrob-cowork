@@ -69,7 +69,7 @@ export function HandoffForm(props: HandoffFormProps) {
           <Checkbox
             key={entry.path}
             label={entryLabel(entry.path)}
-            hint={entry.kind === "skill" ? t("desk.handoff_skill") : t("desk.handoff_playbook")}
+            hint={t("desk.handoff_skill")}
             checked={!choices.exclude.includes(entry.path)}
             onChange={(event) => set({ exclude: toggle(choices.exclude, entry.path, !event.currentTarget.checked) })}
           />

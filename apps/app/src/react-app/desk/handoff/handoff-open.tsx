@@ -141,7 +141,7 @@ export function HandoffOpenView(props: { inspection: RedrobHandoffInspection; on
           </div>
         ) : null}
       </dl>
-      {handoff.files.length + handoff.skills.length + handoff.commands.length > 0 ? (
+      {handoff.files.length + handoff.skills.length > 0 ? (
         <section className="desk-handoff__group">
           <b>{t("desk.handoff_contents_title")}</b>
           <ul className="list-disc pl-5">
@@ -152,9 +152,6 @@ export function HandoffOpenView(props: { inspection: RedrobHandoffInspection; on
             ))}
             {handoff.skills.map((skill) => (
               <li key={`skill-${skill}`}>{t("desk.handoff_open_skill", { name: skill })}</li>
-            ))}
-            {handoff.commands.map((command) => (
-              <li key={`command-${command}`}>{t("desk.handoff_open_playbook", { name: command })}</li>
             ))}
           </ul>
         </section>

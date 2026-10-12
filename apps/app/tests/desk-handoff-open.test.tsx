@@ -27,7 +27,6 @@ const INSPECTION: RedrobHandoffInspection = {
     engine: { redrobCodeVersion: "0.1.0" },
     files: [{ path: "memo.md", kind: "produced", bytes: 2048 }],
     skills: ["house-style"],
-    commands: ["weekly-update"],
     comments: 2,
     state: "open",
   },

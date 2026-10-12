@@ -42,13 +42,13 @@ export function toggle(list: readonly string[], value: string, on: boolean): str
 
 /** Items the sender may leave out. The conversation itself always goes. */
 export function isOptional(kind: RedrobHandoffEntryKind): boolean {
-  return kind === "produced" || kind === "read" || kind === "skill" || kind === "command";
+  return kind === "produced" || kind === "read" || kind === "skill";
 }
 
 /** The optional items, grouped the way the dialog lists them. */
 export function optionalEntries(preview: RedrobHandoffPreview) {
   const pick = (kinds: RedrobHandoffEntryKind[]) => preview.entries.filter((entry) => kinds.includes(entry.kind));
-  return { files: pick(["produced", "read"]), library: pick(["skill", "command"]) };
+  return { files: pick(["produced", "read"]), library: pick(["skill"]) };
 }
 
 /** `files/notes/a.md` as `notes/a.md`; `workspace/skills/x/SKILL.md` as `x`. */
@@ -56,8 +56,6 @@ export function entryLabel(path: string): string {
   if (path.startsWith("files/")) return path.slice("files/".length);
   const skill = /^workspace\/skills\/([^/]+)\/SKILL\.md$/.exec(path);
   if (skill) return skill[1]!;
-  const command = /^workspace\/commands\/([^/]+)\.json$/.exec(path);
-  if (command) return command[1]!;
   return path;
 }
 

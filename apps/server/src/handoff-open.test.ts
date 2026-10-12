@@ -32,7 +32,6 @@ async function bundleFor(options: { session?: EngineSessionExport; review?: Sess
     workspaceRoot: root,
     sessionDirectory: root,
     skills: [{ name: "house-style", content: "---\nname: house-style\ndescription: House style\n---\nNumbered clauses." }],
-    commands: [{ name: "weekly-update", template: "Write the weekly update" }],
     includeRead: [],
   });
   return writeHandoffBundle(applyDecisions(draft, { keep: new Set(), exclude: new Set() }), {
@@ -57,7 +56,7 @@ describe("opening a bundle", () => {
     const opened = openHandoffBundle(zip);
     expect(opened.files.map((file) => file.relativePath)).toEqual(["memo.md"]);
     expect(opened.skills.map((skill) => skill.name)).toEqual(["house-style"]);
-    expect(opened.commands.map((command) => command.name)).toEqual(["weekly-update"]);
+    expect(describeBundle(opened)).not.toHaveProperty("commands");
     expect(describeBundle(opened)).toMatchObject({ from: kim, ask: "review", note: "Check clause 4", to: "Park", session: { title: "Lease review", messages: 2 } });
   });
 
@@ -67,6 +66,9 @@ describe("opening a bundle", () => {
     expect(() => openHandoffBundle(changed)).toThrow(HandoffOpenError);
     const added = rezip(zip, (entries) => [...entries, { name: "files/extra.md", data: Buffer.from("x") }]);
     expect(() => openHandoffBundle(added)).toThrow(HandoffOpenError);
+    // Workspace commands (the retired playbooks) are not part of the format.
+    const command = rezip(zip, (entries) => [...entries, { name: "workspace/commands/weekly.json", data: Buffer.from("{}") }]);
+    expect(() => openHandoffBundle(command)).toThrow(HandoffOpenError);
     const missing = rezip(zip, (entries) => entries.filter((entry) => entry.name !== "files/memo.md"));
     expect(() => openHandoffBundle(missing)).toThrow(HandoffOpenError);
     const forged = rezip(zip, (entries) =>
