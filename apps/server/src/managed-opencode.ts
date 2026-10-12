@@ -189,6 +189,9 @@ async function startManagedOpencodeServer(
     ...options.env,
     REDROB_SERVER_USERNAME: username,
     REDROB_SERVER_PASSWORD: password,
+    // The engine sends this as `x-redrob-app` on every Redrob request, so the Console can group AI
+    // work by app. A label, nothing else.
+    REDROB_APP: "cowork",
   };
   // The managed engine needs its own provider environment, but never the key
   // that decrypts Redrob Cowork-owned OAuth credentials.
