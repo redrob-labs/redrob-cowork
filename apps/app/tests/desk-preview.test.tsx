@@ -35,7 +35,7 @@ import { createFixtureDeskServices, resetSampleBoard } from "../src/react-app/de
 import { HISTORY } from "../src/react-app/desk/services/fixtures/history";
 import { PLAYBOOKS } from "../src/react-app/desk/services/fixtures/playbooks";
 import { createDeskServices } from "../src/react-app/desk/services/real-services";
-import type { Playbook, ScheduleBoard } from "../src/react-app/desk/services/types";
+import type { DeskResult, Playbook, ScheduleBoard } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
 
@@ -83,13 +83,10 @@ function playbook(id: string): Playbook {
 async function withoutNetwork<T>(work: () => Promise<T>): Promise<{ result: T; fetched: number }> {
   const originalFetch = globalThis.fetch;
   let fetched = 0;
-  globalThis.fetch = Object.assign(
-    () => {
-      fetched += 1;
-      throw new Error("no network in this test");
-    },
-    { preconnect: originalFetch.preconnect },
-  );
+  globalThis.fetch = () => {
+    fetched += 1;
+    throw new Error("no network in this test");
+  };
   try {
     return { result: await work(), fetched };
   } finally {
@@ -254,7 +251,7 @@ describe("Playbooks", () => {
     const saved = result.data.schedules.filter((entry) => entry.playbookId === "renewal-sweep" && entry.projectId === "supplier");
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({ cadence: "Every Monday at 08:00 Seoul time", enabled: true });
-    expect(client.getQueryData(previewKey("preview", "board"))).toEqual(result);
+    expect(client.getQueryData<DeskResult<ScheduleBoard>>(previewKey("preview", "board"))).toEqual(result);
     expect(toasts).toEqual([["Schedule saved", "This is a preview, so nothing ran and nothing was sent."]]);
 
     // A playbook new to a project is added, not yet run.
@@ -383,7 +380,7 @@ describe("Scheduled", () => {
     expect(fetched).toBe(0);
     expect(result.data.waiting.map((run) => run.id)).toEqual(["w2"]);
     expect(client.getQueryState(navWaitingKey("preview"))?.isInvalidated).toBe(true);
-    expect(client.getQueryData(previewKey("preview", "board"))).toEqual(result);
+    expect(client.getQueryData<DeskResult<ScheduleBoard>>(previewKey("preview", "board"))).toEqual(result);
     // The menu builds its own services; it sees the same board.
     expect((await createDeskServices({ client: null, workspaceId: null }).schedules.list()).data.waiting).toHaveLength(1);
     expect(result.data.schedules.find((entry) => entry.id === "s1")?.lastRun?.state).toBe("done");

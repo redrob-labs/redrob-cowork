@@ -307,7 +307,8 @@ describe("feedback dialog", () => {
 });
 
 describe("toast", () => {
-  const timers: DeskTimers = { setTimeout: () => 0, clearTimeout: () => {} };
+  // A real handle that never runs the toast's callback, so no toast dismisses itself.
+  const timers: DeskTimers = { setTimeout: () => globalThis.setTimeout(() => {}, 0), clearTimeout: () => {} };
 
   test("shows the title and the text in a status region with a close button", () => {
     const html = renderToStaticMarkup(

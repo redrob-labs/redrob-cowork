@@ -30,7 +30,7 @@ there is no separate service and no new sign-in.
 ## Non-goals
 
 - Real-time co-editing of chats. Workspace sharing over a URL and token stays as it is.
-- Sending chat content, files or the label map to the console. It never sees them.
+- Sending chat content, files or the label map to the console. It never sees them. What the console does receive from Cowork is labels and counts about each session, for insights; see `docs/features/ai-work-insights/README.md`.
 - Training a model. Existing pretrained models are measured first (see Detector).
 
 ## Threat model

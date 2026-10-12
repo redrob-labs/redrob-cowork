@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { WORK_ACTIONS, WORK_TASKS } from "../vocabulary.js";
+import { WORK_ACTIONS, WORK_TASKS } from "../../src/index.js";
 import { WORK_SAMPLES } from "./work-samples.js";
 
 describe("work classifier evaluation set", () => {
