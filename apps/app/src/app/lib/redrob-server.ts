@@ -1054,7 +1054,7 @@ async function requestMultipartRaw(
 async function requestBinary(
   baseUrl: string,
   path: string,
-  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number } = {},
+  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number; body?: unknown } = {},
 ): Promise<{ data: ArrayBuffer; contentType: string | null; filename: string | null }>{
   const url = `${baseUrl}${path}`;
   const fetchImpl = resolveFetch(url);
@@ -1063,7 +1063,12 @@ async function requestBinary(
     url,
     {
       method: options.method ?? "GET",
-      headers: buildAuthHeaders(options.token, options.hostToken),
+      headers: buildAuthHeaders(
+        options.token,
+        options.hostToken,
+        options.body === undefined ? undefined : { "Content-Type": "application/json" },
+      ),
+      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     },
     options.timeoutMs ?? DEFAULT_REDROB_SERVER_TIMEOUT_MS,
   );
@@ -2093,6 +2098,16 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         hostToken,
         method: "DELETE",
         timeoutMs: timeouts.config,
+      }),
+
+    /** Read-aloud: mp3 of `text`, spoken by the engine on its own Redrob credential. */
+    speakText: (text: string) =>
+      requestBinary(baseUrl, "/voice/speech", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { text },
+        timeoutMs: timeouts.binary,
       }),
 
     createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string }) =>
