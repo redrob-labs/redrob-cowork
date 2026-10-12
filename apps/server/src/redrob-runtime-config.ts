@@ -22,6 +22,8 @@ import {
   redrobAnthropicToolSchemaPluginPath,
   redrobOfficeAttachmentsPluginPath,
   redrobPrivacyGatePluginPath,
+  redrobRouteLabelsPluginPath,
+  redrobInsightsRecorderPluginPath,
   redrobTeamConnectorsPluginPath,
 } from "./redrob-extensions-plugin-path.js";
 import { blockedConnectorNames } from "./team-policy/connectors.js";
@@ -141,9 +143,14 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
       redrobAnthropicToolSchemaPluginPath(),
       // Enforces a team policy's connector allowlist on every MCP source; see the plugin.
       redrobTeamConnectorsPluginPath(),
+      // Labels each request to Redrob Auto with its ModelGuide profession and task, on this machine.
+      // Before the privacy gate, so it reads what the person typed; only two ids leave. See the plugin.
+      redrobRouteLabelsPluginPath(),
       // Last of Redrob's own, after the office plugin has turned attachments into text: labels
       // everything the model reads and restores what comes back. See the plugin.
       redrobPrivacyGatePluginPath(),
+      // Records counts and flags about each session for insights, never text; see the plugin.
+      redrobInsightsRecorderPluginPath(),
       ...runtimePluginList(runtimeConfig),
     ],
     ...(disabledProviders.length ? { disabled_providers: disabledProviders } : {}),

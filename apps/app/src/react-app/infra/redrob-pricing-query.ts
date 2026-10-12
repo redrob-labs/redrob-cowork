@@ -11,7 +11,7 @@ const REDROB_PRICING_CACHE_MS = 60 * 60 * 1000;
 
 export const redrobPricingQueryKey = ["redrob", "pricing"] as const;
 
-const EMPTY_PRICING: RedrobPricing = { byModelId: {}, costProfiles: [] };
+const EMPTY_PRICING: RedrobPricing = { byModelId: {}, costProfiles: [], featured: [] };
 
 export function useRedrobPricingQuery(input?: { enabled?: boolean }) {
   return useQuery({

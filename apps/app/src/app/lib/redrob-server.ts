@@ -1042,7 +1042,7 @@ async function requestMultipartRaw(
 async function requestBinary(
   baseUrl: string,
   path: string,
-  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number } = {},
+  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number; body?: unknown } = {},
 ): Promise<{ data: ArrayBuffer; contentType: string | null; filename: string | null }>{
   const url = `${baseUrl}${path}`;
   const fetchImpl = resolveFetch(url);
@@ -1051,7 +1051,12 @@ async function requestBinary(
     url,
     {
       method: options.method ?? "GET",
-      headers: buildAuthHeaders(options.token, options.hostToken),
+      headers: buildAuthHeaders(
+        options.token,
+        options.hostToken,
+        options.body === undefined ? undefined : { "Content-Type": "application/json" },
+      ),
+      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     },
     options.timeoutMs ?? DEFAULT_REDROB_SERVER_TIMEOUT_MS,
   );
@@ -2070,6 +2075,26 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         hostToken,
         method: "DELETE",
         timeoutMs: timeouts.config,
+      }),
+
+    /** Read-aloud: mp3 of `text`, spoken by the engine on its own Redrob credential. */
+    speakText: (workspaceId: string, text: string) =>
+      requestBinary(baseUrl, "/voice/speech", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { workspaceId, text },
+        timeoutMs: timeouts.binary,
+      }),
+
+    /** Push-to-talk: the text of a recording, transcribed by the engine on its own Redrob credential. */
+    transcribeAudio: (workspaceId: string, recording: { audio: string; format: string; language?: string }) =>
+      requestJson<{ text: string; seconds?: number; costUsd?: number }>(baseUrl, "/voice/transcribe", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { workspaceId, ...recording },
+        timeoutMs: timeouts.binary,
       }),
 
     createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string }) =>

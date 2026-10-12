@@ -31,6 +31,7 @@ function option(modelID: string, title = modelID): ModelOption {
 }
 
 const pricing: RedrobPricing = {
+  featured: [],
   costProfiles: [{ id: "code", label: "Coding turn" }],
   byModelId: {
     auto: {

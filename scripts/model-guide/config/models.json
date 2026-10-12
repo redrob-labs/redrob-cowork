@@ -1,0 +1,379 @@
+{
+ "models": [
+  {
+   "id": "claude-opus-5-5",
+   "name": "Claude Opus 5.5",
+   "vendor": "Anthropic",
+   "family": "claude opus 5 5",
+   "effort": "max",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "Claude Opus 5.5 (low with fallback)",
+    "medium": "Claude Opus 5.5 (medium with fallback)",
+    "high": "Claude Opus 5.5 (high with fallback)",
+    "xhigh": "Claude Opus 5.5 (xhigh with fallback)",
+    "max": "Claude Opus 5.5 (max with fallback)"
+   },
+   "harnesses": [
+    "redrob-desk",
+    "claude-cowork"
+   ],
+   "priceUrl": "https://docs.anthropic.com/en/docs/about-claude/pricing",
+   "carried": {
+    "speed": 40.4,
+    "reliability": 72.0
+   },
+   "costPerRun": {
+    "high": 0.4488,
+    "low": 0.2756,
+    "max": 1.0,
+    "medium": 0.3826,
+    "xhigh": 0.6485
+   }
+  },
+  {
+   "id": "claude-sonnet-5-5",
+   "name": "Claude Sonnet 5.5",
+   "vendor": "Anthropic",
+   "family": "claude sonnet 5 5",
+   "effort": "max",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "Claude Sonnet 5.5 (low with fallback)",
+    "medium": "Claude Sonnet 5.5 (medium with fallback)",
+    "high": "Claude Sonnet 5.5 (high with fallback)",
+    "xhigh": "Claude Sonnet 5.5 (xhigh with fallback)",
+    "max": "Claude Sonnet 5.5 (max with fallback)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://docs.anthropic.com/en/docs/about-claude/pricing",
+   "carried": {
+    "speed": 55.5,
+    "reliability": 79.0
+   },
+   "costPerRun": {
+    "high": 0.2355,
+    "low": 0.157,
+    "max": 0.7632,
+    "medium": 0.18,
+    "xhigh": 0.3602
+   }
+  },
+  {
+   "id": "claude-fable-5-1",
+   "name": "Claude Fable 5.1",
+   "vendor": "Anthropic",
+   "family": "claude fable 5 1",
+   "effort": "xhigh",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "Claude Fable 5.1 (low with fallback)",
+    "medium": "Claude Fable 5.1 (medium with fallback)",
+    "high": "Claude Fable 5.1 (high with fallback)",
+    "xhigh": "Claude Fable 5.1 (xhigh with fallback)",
+    "max": "Claude Fable 5.1 (max with fallback)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://docs.anthropic.com/en/docs/about-claude/pricing",
+   "carried": {
+    "speed": 26.2,
+    "reliability": 62.6
+   },
+   "costPerRun": {
+    "high": 1.1496,
+    "low": 0.8725,
+    "max": 1.8111,
+    "medium": 0.9793,
+    "xhigh": 1.522
+   }
+  },
+  {
+   "id": "claude-haiku-5-5",
+   "name": "Claude Haiku 5.5",
+   "vendor": "Anthropic",
+   "family": "claude haiku 5 5",
+   "effort": "max",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "Claude Haiku 5.5 (low)",
+    "medium": "Claude Haiku 5.5 (medium)",
+    "high": "Claude Haiku 5.5 (high)",
+    "xhigh": "Claude Haiku 5.5 (xhigh)",
+    "max": "Claude Haiku 5.5 (max)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://docs.anthropic.com/en/docs/about-claude/pricing"
+  },
+  {
+   "id": "gpt-6-astra",
+   "name": "GPT-6 Astra",
+   "vendor": "OpenAI",
+   "family": "gpt 6 astra",
+   "effort": "xhigh",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "GPT-6 Astra (low)",
+    "medium": "GPT-6 Astra (medium)",
+    "high": "GPT-6 Astra (high)",
+    "xhigh": "GPT-6 Astra (xhigh)",
+    "max": "GPT-6 Astra (max)"
+   },
+   "harnesses": [
+    "redrob-desk",
+    "chatgpt-work"
+   ],
+   "priceUrl": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+   "carried": {
+    "speed": 22.3,
+    "reliability": 72.7
+   },
+   "costPerRun": {
+    "high": 0.7493,
+    "low": 0.6248,
+    "max": 1.002,
+    "medium": 0.7121,
+    "xhigh": 0.8337
+   }
+  },
+  {
+   "id": "gpt-6-1-sol",
+   "name": "GPT-6.1 Sol",
+   "vendor": "OpenAI",
+   "family": "gpt 6 1 sol",
+   "effort": "xhigh",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "GPT-6.1 Sol (low)",
+    "medium": "GPT-6.1 Sol (medium)",
+    "high": "GPT-6.1 Sol (high)",
+    "xhigh": "GPT-6.1 Sol (xhigh)",
+    "max": "GPT-6.1 Sol (max)"
+   },
+   "harnesses": [
+    "redrob-desk",
+    "chatgpt-work"
+   ],
+   "priceUrl": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+   "carried": {
+    "speed": 18.6,
+    "reliability": 69.5
+   },
+   "costPerRun": {
+    "high": 0.1506,
+    "low": 0.1186,
+    "max": 0.2339,
+    "medium": 0.133,
+    "xhigh": 0.1656
+   }
+  },
+  {
+   "id": "gpt-6-luna",
+   "name": "GPT-6 Luna",
+   "vendor": "OpenAI",
+   "family": "gpt 6 luna",
+   "effort": "max",
+   "efforts": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "low": "GPT-6 Luna (low)",
+    "medium": "GPT-6 Luna (medium)",
+    "high": "GPT-6 Luna (high)",
+    "xhigh": "GPT-6 Luna (xhigh)",
+    "max": "GPT-6 Luna (max)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://developers.openai.com/api/docs/models/gpt-6-luna"
+  },
+  {
+   "id": "gemini-3-8-flash",
+   "name": "Gemini 3.8 Flash",
+   "vendor": "Google",
+   "family": "gemini 3 8 flash",
+   "effort": "high",
+   "efforts": [
+    "low",
+    "medium",
+    "high"
+   ],
+   "aa": {
+    "low": "Gemini 3.8 Flash (low)",
+    "medium": "Gemini 3.8 Flash (medium)",
+    "high": "Gemini 3.8 Flash (high)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://ai.google.dev/gemini-api/docs/pricing"
+  },
+  {
+   "id": "muse-spark-1-3",
+   "name": "Muse Spark 1.3",
+   "vendor": "Meta",
+   "family": "muse spark 1 3",
+   "effort": "max",
+   "efforts": [
+    "xhigh",
+    "max"
+   ],
+   "aa": {
+    "xhigh": "Muse Spark 1.3 (xhigh)",
+    "max": "Muse Spark 1.3 (max)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://dev.meta.ai/docs/pricing-rate-limits.md",
+   "carried": {
+    "speed": 72.5,
+    "reliability": 64.7
+   },
+   "costPerRun": {
+    "max": 0.1566,
+    "xhigh": 0.1466
+   }
+  },
+  {
+   "id": "grok-4-7",
+   "name": "Grok 4.7",
+   "vendor": "SpaceXAI",
+   "family": "grok 4 7",
+   "effort": "xhigh",
+   "efforts": [
+    "low",
+    "high",
+    "xhigh"
+   ],
+   "aa": {
+    "low": "Grok 4.7 (low)",
+    "high": "Grok 4.7 (high)",
+    "xhigh": "Grok 4.7 (xhigh)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://docs.x.ai/docs/models"
+  },
+  {
+   "id": "qwen3-8-max",
+   "name": "Qwen3.8-Max",
+   "vendor": "Alibaba",
+   "family": "qwen3 8 max",
+   "effort": "default",
+   "efforts": [
+    "default"
+   ],
+   "aa": {
+    "default": "Qwen3.8 Max (0902)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://www.alibabacloud.com/help/en/model-studio/model-pricing",
+   "aliases": [
+    "qwen3 8 max 0902",
+    "qwen 3 8 max"
+   ],
+   "outsideUs": true
+  },
+  {
+   "id": "glm-5-3",
+   "name": "GLM-5.3",
+   "vendor": "Z AI",
+   "family": "glm 5 3",
+   "effort": "max",
+   "efforts": [
+    "low",
+    "max"
+   ],
+   "aa": {
+    "low": "GLM-5.3 (low)",
+    "max": "GLM-5.3 (max)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://docs.z.ai/guides/overview/pricing",
+   "outsideUs": true
+  },
+  {
+   "id": "kimi-k3",
+   "name": "Kimi K3",
+   "vendor": "Kimi",
+   "family": "kimi k3",
+   "effort": "max",
+   "efforts": [
+    "low",
+    "max"
+   ],
+   "aa": {
+    "low": "Kimi K3 (low)",
+    "max": "Kimi K3 (max)"
+   },
+   "harnesses": [
+    "redrob-desk"
+   ],
+   "priceUrl": "https://platform.moonshot.ai/docs/pricing",
+   "outsideUs": true
+  }
+ ],
+ "imageModels": [
+  {
+   "id": "gpt-image-2-5-sunburst",
+   "name": "GPT Image 2.5 Sunburst",
+   "vendor": "OpenAI",
+   "family": "gpt image 2 5 sunburst",
+   "pricePerImage": 0.0047,
+   "imagesPerRun": 4,
+   "priceUrl": "https://developers.openai.com/api/docs/models/gpt-image-2.5-sunburst"
+  }
+ ]
+}

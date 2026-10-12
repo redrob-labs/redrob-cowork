@@ -1,0 +1,1552 @@
+{
+ "professions": [
+  {
+   "id": "accountant",
+   "label": {
+    "en": "Accountant (CPA)",
+    "ko": "회계사"
+   },
+   "tasks": [
+    {
+     "id": "close-books",
+     "label": {
+      "en": "Close the books and reconcile accounts",
+      "ko": "결산 마감과 계정 대사"
+     },
+     "runs": 120,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "code-execution"
+     ],
+     "image": false,
+     "costPerRun": 0.93629,
+     "benchmarks": {
+      "vals-emb": 0.56,
+      "vals-finance-agent": 0.4,
+      "gdpval": 0.32,
+      "aa-index": 0.32
+     },
+     "outputs": [
+      "spreadsheets"
+     ],
+     "noKoreanBenchmark": true
+    },
+    {
+     "id": "prepare-tax",
+     "label": {
+      "en": "Research tax and prepare returns (US, Korea)",
+      "ko": "세무 검토와 신고서 작성(미국·한국)"
+     },
+     "runs": 30,
+     "tools": [
+      "web-search",
+      "file-read",
+      "spreadsheet",
+      "pdf-generation"
+     ],
+     "image": false,
+     "costPerRun": 1.65917,
+     "benchmarks": {
+      "vals-tax-agent": 0.8,
+      "vals-finance-agent": 0.24,
+      "aa-index": 0.24,
+      "arena-text": 0.32
+     },
+     "outputs": [
+      "spreadsheets",
+      "documents"
+     ],
+     "noKoreanBenchmark": true
+    },
+    {
+     "id": "audit-workpapers",
+     "label": {
+      "en": "Test audit samples and write workpapers",
+      "ko": "감사 표본 검증과 조서 작성"
+     },
+     "runs": 40,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "pdf-generation"
+     ],
+     "image": false,
+     "costPerRun": 1.23586,
+     "benchmarks": {
+      "gdpval": 0.48,
+      "vals-emb": 0.48,
+      "vals-finance-agent": 0.32,
+      "aa-index": 0.32
+     },
+     "outputs": [
+      "spreadsheets",
+      "documents"
+     ],
+     "noKoreanBenchmark": true
+    },
+    {
+     "id": "financial-statements",
+     "label": {
+      "en": "Prepare financial statements and notes (US GAAP, K-IFRS)",
+      "ko": "재무제표와 주석 작성(US GAAP·K-IFRS)"
+     },
+     "runs": 12,
+     "tools": [
+      "spreadsheet",
+      "file-read",
+      "pdf-generation",
+      "presentation"
+     ],
+     "image": false,
+     "costPerRun": 1.2359,
+     "benchmarks": {
+      "vals-finance-agent": 0.56,
+      "vals-emb": 0.48,
+      "briefcase": 0.32,
+      "gdpval": 0.24
+     },
+     "outputs": [
+      "spreadsheets",
+      "documents",
+      "presentations"
+     ],
+     "noKoreanBenchmark": true
+    },
+    {
+     "id": "client-advisory",
+     "label": {
+      "en": "Write client advisory and variance reports",
+      "ko": "고객 자문과 차이 분석 보고서 작성"
+     },
+     "runs": 16,
+     "tools": [
+      "spreadsheet",
+      "presentation",
+      "email",
+      "file-read"
+     ],
+     "image": false,
+     "costPerRun": 1.24562,
+     "benchmarks": {
+      "briefcase": 0.56,
+      "gdpval": 0.4,
+      "vals-finance-agent": 0.32,
+      "arena-text": 0.32
+     },
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "noKoreanBenchmark": true
+    }
+   ]
+  },
+  {
+   "id": "designer",
+   "label": {
+    "en": "Designer",
+    "ko": "디자이너"
+   },
+   "tasks": [
+    {
+     "id": "design-screens",
+     "label": {
+      "en": "Design app screens and prototypes",
+      "ko": "앱 화면과 프로토타입 디자인"
+     },
+     "runs": 20,
+     "tools": [
+      "ui-ux-design",
+      "code-execution",
+      "browser",
+      "web-search",
+      "file-read"
+     ],
+     "outputs": [
+      "web"
+     ],
+     "image": true,
+     "costPerRun": 2.06883,
+     "benchmarks": {
+      "arena-webdev-brand": 0.5337
+     }
+    },
+    {
+     "id": "create-graphics",
+     "label": {
+      "en": "Create graphics and marketing visuals",
+      "ko": "그래픽과 마케팅 비주얼 제작"
+     },
+     "runs": 40,
+     "tools": [
+      "graphic-design",
+      "web-search",
+      "file-read",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "graphics",
+      "documents"
+     ],
+     "image": true,
+     "costPerRun": 1.32395,
+     "benchmarks": {
+      "arena-webdev-brand": 0.1358,
+      "arena-text": 0.901,
+      "terminal-bench": 0.5242
+     }
+    },
+    {
+     "id": "research-users",
+     "label": {
+      "en": "Research users and synthesize feedback",
+      "ko": "사용자 조사와 피드백 정리"
+     },
+     "runs": 4,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "presentation",
+      "web-search"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.40086,
+     "benchmarks": {
+      "arena-webdev-brand": 0.3611,
+      "arena-webdev-reference": 0.1337,
+      "arena-text": 0.6739
+     }
+    },
+    {
+     "id": "handoff-specs",
+     "label": {
+      "en": "Hand off designs to developers",
+      "ko": "개발자에게 디자인 전달"
+     },
+     "runs": 8,
+     "tools": [
+      "ui-ux-design",
+      "code-execution",
+      "file-read"
+     ],
+     "outputs": [
+      "web"
+     ],
+     "image": false,
+     "costPerRun": 1.16576,
+     "benchmarks": {
+      "arena-webdev-brand": 0.1791,
+      "arena-text": 0.9001,
+      "terminal-bench": 0.4361
+     }
+    },
+    {
+     "id": "review-usability",
+     "label": {
+      "en": "Review designs for usability and accessibility",
+      "ko": "사용성·접근성 디자인 검토"
+     },
+     "runs": 15,
+     "tools": [
+      "ui-ux-design",
+      "browser",
+      "file-read"
+     ],
+     "outputs": [
+      "web"
+     ],
+     "image": true,
+     "costPerRun": 1.07434,
+     "benchmarks": {
+      "arena-webdev-brand": 0.0944,
+      "arena-text": 1.0434,
+      "terminal-bench": 0.5342
+     }
+    }
+   ]
+  },
+  {
+   "id": "engineer",
+   "label": {
+    "en": "Engineer",
+    "ko": "엔지니어"
+   },
+   "tasks": [
+    {
+     "id": "build-features",
+     "label": {
+      "en": "Build features and write code",
+      "ko": "기능 개발과 코드 작성"
+     },
+     "runs": 60,
+     "tools": [
+      "code-execution",
+      "file-read",
+      "web-search",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 1.33624,
+     "benchmarks": {
+      "arena-text": 1.154,
+      "terminal-bench": 0.7139
+     }
+    },
+    {
+     "id": "debug-fix",
+     "label": {
+      "en": "Debug and fix bugs",
+      "ko": "디버깅과 버그 수정"
+     },
+     "runs": 30,
+     "tools": [
+      "code-execution",
+      "file-read",
+      "web-search",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 1.33625,
+     "benchmarks": {
+      "arena-text": 1.154,
+      "terminal-bench": 0.7139
+     }
+    },
+    {
+     "id": "design-systems",
+     "label": {
+      "en": "Design systems and plan technical work",
+      "ko": "시스템 설계와 기술 계획"
+     },
+     "runs": 4,
+     "tools": [
+      "file-read",
+      "web-search",
+      "code-execution",
+      "presentation"
+     ],
+     "outputs": [
+      "presentations"
+     ],
+     "image": true,
+     "costPerRun": 1.61595,
+     "benchmarks": {
+      "arena-text": 1.0585,
+      "terminal-bench": 0.7363
+     }
+    },
+    {
+     "id": "write-tests",
+     "label": {
+      "en": "Write tests and validate releases",
+      "ko": "테스트 작성과 릴리스 검증"
+     },
+     "runs": 20,
+     "tools": [
+      "code-execution",
+      "file-read",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 1.3363,
+     "benchmarks": {
+      "arena-text": 1.154,
+      "terminal-bench": 0.7139
+     }
+    },
+    {
+     "id": "review-code",
+     "label": {
+      "en": "Review code and pull requests",
+      "ko": "코드와 풀 리퀘스트 리뷰"
+     },
+     "runs": 40,
+     "tools": [
+      "file-read",
+      "code-execution",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 1.24705,
+     "benchmarks": {
+      "arena-text": 1.1698,
+      "terminal-bench": 0.7096
+     }
+    }
+   ]
+  },
+  {
+   "id": "founder",
+   "label": {
+    "en": "Founder",
+    "ko": "창업자"
+   },
+   "tasks": [
+    {
+     "id": "raise-funding",
+     "label": {
+      "en": "Build pitch decks and raise money",
+      "ko": "피치덱 작성과 투자 유치"
+     },
+     "runs": 35,
+     "tools": [
+      "presentation",
+      "spreadsheet",
+      "web-search",
+      "email",
+      "crm",
+      "graphic-design"
+     ],
+     "outputs": [
+      "presentations",
+      "spreadsheets",
+      "graphics"
+     ],
+     "image": true,
+     "costPerRun": 1.14598,
+     "benchmarks": {
+      "gdpval": 0.1236,
+      "arena-agent": 0.0501,
+      "arena-text": 0.7472,
+      "terminal-bench": 0.2411
+     }
+    },
+    {
+     "id": "plan-finances",
+     "label": {
+      "en": "Plan budgets and financial models",
+      "ko": "예산과 재무 모델 수립"
+     },
+     "runs": 4,
+     "tools": [
+      "spreadsheet",
+      "code-execution",
+      "file-read"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.2359,
+     "benchmarks": {
+      "arena-text": 0.5683,
+      "terminal-bench": 0.213,
+      "vals-finance-agent": 0.2794,
+      "tau2": 0.6654
+     }
+    },
+    {
+     "id": "sell-customers",
+     "label": {
+      "en": "Write sales and customer outreach",
+      "ko": "영업과 고객 아웃리치 작성"
+     },
+     "runs": 150,
+     "tools": [
+      "crm",
+      "email",
+      "web-search",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.92455,
+     "benchmarks": {
+      "gdpval": 0.1293,
+      "arena-text": 0.9102,
+      "terminal-bench": 0.2814
+     }
+    },
+    {
+     "id": "hire-team",
+     "label": {
+      "en": "Hire and grow the team",
+      "ko": "채용과 팀 성장"
+     },
+     "runs": 40,
+     "tools": [
+      "web-search",
+      "browser",
+      "email",
+      "calendar",
+      "crm",
+      "file-read"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 1.33621,
+     "benchmarks": {
+      "gdpval": 0.1608,
+      "arena-text": 0.8337,
+      "vals-emb": 0.016
+     }
+    },
+    {
+     "id": "update-investors",
+     "label": {
+      "en": "Update investors and the board",
+      "ko": "투자자·이사회 업데이트"
+     },
+     "runs": 2,
+     "tools": [
+      "spreadsheet",
+      "presentation",
+      "email",
+      "file-read"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.02752,
+     "benchmarks": {
+      "arena-agent": 0.3072,
+      "arena-text": 0.8665,
+      "terminal-bench": 0.5411
+     }
+    }
+   ]
+  },
+  {
+   "id": "hr",
+   "label": {
+    "en": "HR",
+    "ko": "인사(HR)"
+   },
+   "tasks": [
+    {
+     "id": "answer-policy-questions",
+     "label": {
+      "en": "Answer employee policy and benefits questions",
+      "ko": "직원 정책·복리후생 문의 답변"
+     },
+     "runs": 80,
+     "tools": [
+      "file-read",
+      "web-search",
+      "email"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.74657,
+     "benchmarks": {
+      "aa-index": 0.8887,
+      "arena-text": 1.0764,
+      "terminal-bench": 0.1564
+     }
+    },
+    {
+     "id": "prepare-employment-documents",
+     "label": {
+      "en": "Prepare offer letters and employment documents",
+      "ko": "오퍼레터와 고용 서류 준비"
+     },
+     "runs": 20,
+     "tools": [
+      "file-read",
+      "pdf-generation",
+      "email",
+      "spreadsheet"
+     ],
+     "outputs": [
+      "documents",
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 0.90131,
+     "benchmarks": {
+      "gdpval": 0.2298,
+      "arena-text": 0.2396
+     }
+    },
+    {
+     "id": "handle-employee-relations",
+     "label": {
+      "en": "Handle employee relations cases",
+      "ko": "노무·직원 관계 사안 처리"
+     },
+     "runs": 3,
+     "tools": [
+      "file-read",
+      "pdf-generation",
+      "email"
+     ],
+     "outputs": [
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 1.53627,
+     "benchmarks": {
+      "aa-index": 0.6125,
+      "gdpval": 0.0868,
+      "arena-text": 0.8986
+     }
+    },
+    {
+     "id": "run-performance-reviews",
+     "label": {
+      "en": "Run performance reviews",
+      "ko": "성과 평가 진행"
+     },
+     "runs": 15,
+     "tools": [
+      "spreadsheet",
+      "file-read",
+      "presentation",
+      "email"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.05879,
+     "benchmarks": {
+      "gdpval": 0.1218,
+      "arena-text": 0.8597,
+      "terminal-bench": 0.2384
+     }
+    },
+    {
+     "id": "write-hr-policies",
+     "label": {
+      "en": "Write HR policies and handbooks",
+      "ko": "인사 규정과 핸드북 작성"
+     },
+     "runs": 2,
+     "tools": [
+      "file-read",
+      "web-search",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 0.90812,
+     "benchmarks": {
+      "gdpval": 0.222,
+      "arena-text": 0.2667
+     }
+    }
+   ]
+  },
+  {
+   "id": "investor",
+   "label": {
+    "en": "Investor",
+    "ko": "투자자"
+   },
+   "tasks": [
+    {
+     "id": "screen-deals",
+     "label": {
+      "en": "Screen deals",
+      "ko": "딜 스크리닝"
+     },
+     "runs": 60,
+     "tools": [
+      "file-read",
+      "web-search",
+      "crm",
+      "spreadsheet"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.398,
+     "benchmarks": {
+      "arena-text": 0.706,
+      "terminal-bench": 0.3194,
+      "vals-emb": 1.0588
+     }
+    },
+    {
+     "id": "research-companies",
+     "label": {
+      "en": "Research markets and companies",
+      "ko": "시장과 기업 조사"
+     },
+     "runs": 10,
+     "tools": [
+      "web-search",
+      "browser",
+      "file-read",
+      "spreadsheet"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.81922,
+     "benchmarks": {
+      "aa-index": 0.6491,
+      "arena-text": 0.4154,
+      "vals-finance-agent": 0.5922
+     }
+    },
+    {
+     "id": "write-memos",
+     "label": {
+      "en": "Write investment memos",
+      "ko": "투자 메모 작성"
+     },
+     "runs": 3,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "presentation",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations",
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 1.104,
+     "benchmarks": {
+      "arena-agent": 0.0628,
+      "arena-text": 0.2616,
+      "terminal-bench": 0.244,
+      "tau2": 0.8571
+     }
+    },
+    {
+     "id": "review-diligence",
+     "label": {
+      "en": "Review diligence documents",
+      "ko": "실사 자료 검토"
+     },
+     "runs": 100,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "code-execution"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.23586,
+     "benchmarks": {
+      "arena-text": 0.5683,
+      "terminal-bench": 0.213,
+      "vals-finance-agent": 0.2794,
+      "tau2": 0.6654
+     }
+    },
+    {
+     "id": "report-portfolio",
+     "label": {
+      "en": "Report to LPs and track the portfolio",
+      "ko": "LP 보고와 포트폴리오 관리"
+     },
+     "runs": 16,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "email",
+      "presentation",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations",
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 1.24562,
+     "benchmarks": {
+      "gdpval": 0.143,
+      "arena-text": 0.8146,
+      "terminal-bench": 0.1381
+     }
+    }
+   ]
+  },
+  {
+   "id": "lawyer",
+   "label": {
+    "en": "Lawyer",
+    "ko": "변호사"
+   },
+   "tasks": [
+    {
+     "id": "client",
+     "label": {
+      "en": "Advise and update clients",
+      "ko": "의뢰인 자문과 진행 상황 공유"
+     },
+     "runs": 60,
+     "tools": [
+      "file-read",
+      "email",
+      "calendar",
+      "crm"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.85292,
+     "benchmarks": {
+      "gdpval": 0.2066,
+      "vals-harvey-lab": 0.0825,
+      "arena-text": 1.1262
+     }
+    },
+    {
+     "id": "research",
+     "label": {
+      "en": "Research the law",
+      "ko": "법률 리서치"
+     },
+     "runs": 20,
+     "tools": [
+      "web-search",
+      "browser",
+      "file-read"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 1.65917,
+     "benchmarks": {
+      "aa-index": 0.6568,
+      "vals-harvey-lab": 0.0267,
+      "arena-text": 1.2971,
+      "vals-legalbench": 0.0435,
+      "tau2": 0.506
+     }
+    },
+    {
+     "id": "review",
+     "label": {
+      "en": "Review documents and contracts",
+      "ko": "문서와 계약서 검토"
+     },
+     "runs": 40,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 1.78978,
+     "benchmarks": {
+      "aa-index": 0.7686,
+      "vals-harvey-lab": 0.1466,
+      "arena-text": 1.3839,
+      "vals-legalbench": 0.1727
+     }
+    },
+    {
+     "id": "memo",
+     "label": {
+      "en": "Write briefs and memos",
+      "ko": "서면과 메모 작성"
+     },
+     "runs": 8,
+     "tools": [
+      "file-read",
+      "web-search",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 1.00317,
+     "benchmarks": {
+      "gdpval": 0.0829,
+      "vals-harvey-lab": 0.0901,
+      "arena-text": 1.0557,
+      "terminal-bench": 0.3088
+     }
+    },
+    {
+     "id": "draft",
+     "label": {
+      "en": "Draft contracts",
+      "ko": "계약서 초안 작성"
+     },
+     "runs": 10,
+     "tools": [
+      "file-read",
+      "pdf-generation",
+      "email"
+     ],
+     "outputs": [
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 1.25633,
+     "benchmarks": {
+      "vals-harvey-lab": 0.1072,
+      "arena-text": 0.8661,
+      "vals-legalbench": 0.0446,
+      "terminal-bench": 0.2109,
+      "tau2": 0.3072
+     }
+    }
+   ]
+  },
+  {
+   "id": "marketer",
+   "label": {
+    "en": "Marketer",
+    "ko": "마케터"
+   },
+   "tasks": [
+    {
+     "id": "write-content",
+     "label": {
+      "en": "Write marketing copy and content",
+      "ko": "마케팅 카피와 콘텐츠 작성"
+     },
+     "runs": 20,
+     "tools": [
+      "web-search",
+      "file-read",
+      "graphic-design",
+      "browser"
+     ],
+     "outputs": [
+      "graphics"
+     ],
+     "image": true,
+     "costPerRun": 1.51054,
+     "benchmarks": {
+      "aa-index": 0.9786,
+      "gdpval": 0.0341,
+      "arena-text": 0.8303
+     }
+    },
+    {
+     "id": "plan-campaigns",
+     "label": {
+      "en": "Plan campaigns and marketing strategy",
+      "ko": "캠페인과 마케팅 전략 수립"
+     },
+     "runs": 2,
+     "tools": [
+      "web-search",
+      "file-read",
+      "spreadsheet",
+      "presentation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.52846,
+     "benchmarks": {
+      "aa-index": 0.6237,
+      "gdpval": 0.084,
+      "arena-text": 0.6638
+     }
+    },
+    {
+     "id": "run-messaging-campaigns",
+     "label": {
+      "en": "Create email and messaging campaigns",
+      "ko": "이메일·메시지 캠페인 제작"
+     },
+     "runs": 8,
+     "tools": [
+      "crm",
+      "email",
+      "spreadsheet",
+      "file-read"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.10162,
+     "benchmarks": {
+      "aa-index": 0.276,
+      "gdpval": 0.1245,
+      "arena-text": 0.8716
+     }
+    },
+    {
+     "id": "analyze-campaigns",
+     "label": {
+      "en": "Analyze campaigns and report results",
+      "ko": "캠페인 분석과 결과 보고"
+     },
+     "runs": 4,
+     "tools": [
+      "spreadsheet",
+      "code-execution",
+      "file-read",
+      "presentation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.16568,
+     "benchmarks": {
+      "aa-index": 0.7359,
+      "arena-text": 0.5884,
+      "terminal-bench": 0.0869,
+      "vals-emb": 0.5906
+     }
+    },
+    {
+     "id": "optimize-search",
+     "label": {
+      "en": "Optimize content for search and AI answers",
+      "ko": "검색·AI 답변용 콘텐츠 최적화"
+     },
+     "runs": 8,
+     "tools": [
+      "web-search",
+      "browser",
+      "file-read"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.9891,
+     "benchmarks": {
+      "gdpval": 0.0925,
+      "arena-text": 1.0332,
+      "terminal-bench": 0.3641
+     }
+    }
+   ]
+  },
+  {
+   "id": "pm",
+   "label": {
+    "en": "PM",
+    "ko": "PM"
+   },
+   "tasks": [
+    {
+     "id": "plan-roadmap",
+     "label": {
+      "en": "Plan roadmaps and prioritize features",
+      "ko": "로드맵 수립과 기능 우선순위 결정"
+     },
+     "runs": 2,
+     "tools": [
+      "spreadsheet",
+      "presentation",
+      "file-read",
+      "web-search"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.16661,
+     "benchmarks": {
+      "aa-index": 0.8519,
+      "arena-agent": 0.1637,
+      "arena-text": 0.555,
+      "terminal-bench": 0.1342
+     }
+    },
+    {
+     "id": "write-prd",
+     "label": {
+      "en": "Write PRDs and product specs",
+      "ko": "PRD와 제품 명세 작성"
+     },
+     "runs": 4,
+     "tools": [
+      "file-read",
+      "web-search",
+      "ui-ux-design",
+      "code-execution"
+     ],
+     "outputs": [
+      "web"
+     ],
+     "image": false,
+     "costPerRun": 1.37411,
+     "benchmarks": {
+      "aa-index": 0.7384,
+      "gdpval": 0.0666,
+      "arena-text": 0.7579
+     }
+    },
+    {
+     "id": "synthesize-feedback",
+     "label": {
+      "en": "Synthesize customer feedback and research",
+      "ko": "고객 피드백과 리서치 정리"
+     },
+     "runs": 4,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "crm",
+      "web-search",
+      "presentation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.13954,
+     "benchmarks": {
+      "gdpval": 0.1002,
+      "arena-text": 0.9943,
+      "terminal-bench": 0.3289
+     }
+    },
+    {
+     "id": "stakeholder-updates",
+     "label": {
+      "en": "Write stakeholder updates and decks",
+      "ko": "이해관계자 업데이트와 발표 자료 작성"
+     },
+     "runs": 8,
+     "tools": [
+      "presentation",
+      "pdf-generation",
+      "email",
+      "file-read",
+      "spreadsheet",
+      "calendar"
+     ],
+     "outputs": [
+      "presentations",
+      "documents",
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.15884,
+     "benchmarks": {
+      "gdpval": 0.1394,
+      "arena-text": 1.0038,
+      "terminal-bench": 0.1951
+     }
+    },
+    {
+     "id": "analyze-metrics",
+     "label": {
+      "en": "Analyze product metrics and experiments",
+      "ko": "제품 지표와 실험 분석"
+     },
+     "runs": 6,
+     "tools": [
+      "code-execution",
+      "spreadsheet",
+      "file-read",
+      "presentation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "presentations"
+     ],
+     "image": false,
+     "costPerRun": 1.46974,
+     "benchmarks": {
+      "aa-index": 0.4071,
+      "gdpval": 0.1078,
+      "arena-text": 0.6527
+     }
+    }
+   ]
+  },
+  {
+   "id": "recruiter",
+   "label": {
+    "en": "Recruiter",
+    "ko": "채용 담당자"
+   },
+   "tasks": [
+    {
+     "id": "find-contact-candidates",
+     "label": {
+      "en": "Find and contact candidates",
+      "ko": "후보자 발굴과 연락"
+     },
+     "runs": 200,
+     "tools": [
+      "web-search",
+      "browser",
+      "crm",
+      "email"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.99342,
+     "benchmarks": {
+      "aa-index": 0.3129,
+      "gdpval": 0.1224,
+      "arena-text": 0.7624
+     }
+    },
+    {
+     "id": "screen-resumes",
+     "label": {
+      "en": "Screen resumes and shortlist candidates",
+      "ko": "이력서 검토와 후보 선별"
+     },
+     "runs": 400,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "crm"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.28069,
+     "benchmarks": {
+      "aa-index": 0.2079,
+      "gdpval": 0.1248,
+      "arena-text": 0.7678
+     }
+    },
+    {
+     "id": "prepare-interviews",
+     "label": {
+      "en": "Prepare interviews and summarize feedback",
+      "ko": "면접 준비와 피드백 정리"
+     },
+     "runs": 40,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "calendar"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.55718,
+     "benchmarks": {
+      "aa-index": 0.6995,
+      "gdpval": 0.0659,
+      "arena-text": 0.855
+     }
+    },
+    {
+     "id": "write-job-descriptions",
+     "label": {
+      "en": "Write job descriptions and postings",
+      "ko": "채용 공고와 직무 기술서 작성"
+     },
+     "runs": 6,
+     "tools": [
+      "file-read",
+      "web-search",
+      "graphic-design"
+     ],
+     "outputs": [
+      "graphics"
+     ],
+     "image": true,
+     "costPerRun": 1.35699,
+     "benchmarks": {
+      "aa-index": 0.9126,
+      "gdpval": 0.039,
+      "arena-text": 0.7779
+     }
+    },
+    {
+     "id": "schedule-interviews",
+     "label": {
+      "en": "Schedule interviews and update candidates",
+      "ko": "면접 일정 조율과 후보자 안내"
+     },
+     "runs": 60,
+     "tools": [
+      "calendar",
+      "email",
+      "crm"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.56288,
+     "benchmarks": {
+      "aa-index": 1.2458,
+      "arena-text": 0.9093
+     }
+    }
+   ]
+  },
+  {
+   "id": "sales",
+   "label": {
+    "en": "Sales",
+    "ko": "영업"
+   },
+   "tasks": [
+    {
+     "id": "write-outreach",
+     "label": {
+      "en": "Write outreach and follow-up emails",
+      "ko": "아웃리치·팔로업 이메일 작성"
+     },
+     "runs": 150,
+     "tools": [
+      "crm",
+      "email",
+      "web-search",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.60398,
+     "benchmarks": {
+      "aa-index": 0.9849,
+      "arena-text": 0.961,
+      "terminal-bench": 0.1372
+     }
+    },
+    {
+     "id": "create-proposals",
+     "label": {
+      "en": "Create proposals and sales decks",
+      "ko": "제안서와 영업 자료 제작"
+     },
+     "runs": 6,
+     "tools": [
+      "file-read",
+      "presentation",
+      "pdf-generation",
+      "spreadsheet",
+      "crm"
+     ],
+     "outputs": [
+      "presentations",
+      "documents",
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.2165,
+     "benchmarks": {
+      "aa-index": 1.15,
+      "arena-text": 0.767,
+      "terminal-bench": 0.0236
+     }
+    },
+    {
+     "id": "answer-customers",
+     "label": {
+      "en": "Answer customer questions",
+      "ko": "고객 문의 답변"
+     },
+     "runs": 60,
+     "tools": [
+      "crm",
+      "email",
+      "file-read",
+      "web-search"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.74652,
+     "benchmarks": {
+      "aa-index": 0.8887,
+      "arena-text": 1.0764,
+      "terminal-bench": 0.1564
+     }
+    },
+    {
+     "id": "research-prospects",
+     "label": {
+      "en": "Research prospects and accounts",
+      "ko": "잠재 고객과 계정 조사"
+     },
+     "runs": 40,
+     "tools": [
+      "web-search",
+      "browser",
+      "crm",
+      "file-read"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.86534,
+     "benchmarks": {
+      "gdpval": 0.0983,
+      "arena-text": 0.9958,
+      "terminal-bench": 0.2667
+     }
+    },
+    {
+     "id": "update-crm",
+     "label": {
+      "en": "Update the CRM and pipeline",
+      "ko": "CRM과 파이프라인 업데이트"
+     },
+     "runs": 80,
+     "tools": [
+      "crm",
+      "email",
+      "calendar",
+      "spreadsheet",
+      "file-read"
+     ],
+     "outputs": [
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 0.93633,
+     "benchmarks": {
+      "aa-index": 0.6935,
+      "arena-text": 0.7304,
+      "terminal-bench": 0.0471,
+      "vals-emb": 0.5572
+     }
+    }
+   ]
+  },
+  {
+   "id": "small-team",
+   "label": {
+    "en": "Small team",
+    "ko": "소규모 팀"
+   },
+   "tasks": [
+    {
+     "id": "answer-customers",
+     "label": {
+      "en": "Answer customer messages and emails",
+      "ko": "고객 메시지·이메일 답변"
+     },
+     "runs": 300,
+     "tools": [
+      "email",
+      "crm",
+      "calendar",
+      "browser"
+     ],
+     "outputs": [],
+     "image": false,
+     "costPerRun": 0.60399,
+     "benchmarks": {
+      "aa-index": 0.9849,
+      "arena-text": 0.961,
+      "terminal-bench": 0.1372
+     }
+    },
+    {
+     "id": "keep-books",
+     "label": {
+      "en": "Keep the books and track cash flow",
+      "ko": "장부 관리와 현금 흐름 추적"
+     },
+     "runs": 150,
+     "tools": [
+      "file-read",
+      "spreadsheet",
+      "code-execution",
+      "pdf-generation"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 0.93629,
+     "benchmarks": {
+      "aa-index": 0.6935,
+      "arena-text": 0.7304,
+      "terminal-bench": 0.0471,
+      "vals-emb": 0.5572
+     }
+    },
+    {
+     "id": "send-invoices",
+     "label": {
+      "en": "Send invoices and chase payments",
+      "ko": "청구서 발송과 미수금 독촉"
+     },
+     "runs": 40,
+     "tools": [
+      "pdf-generation",
+      "email",
+      "spreadsheet",
+      "crm"
+     ],
+     "outputs": [
+      "documents",
+      "spreadsheets"
+     ],
+     "image": false,
+     "costPerRun": 1.15029,
+     "benchmarks": {
+      "aa-index": 0.1829,
+      "gdpval": 0.1483,
+      "arena-text": 0.7368
+     }
+    },
+    {
+     "id": "create-marketing",
+     "label": {
+      "en": "Create marketing posts and flyers",
+      "ko": "마케팅 게시물과 전단지 제작"
+     },
+     "runs": 12,
+     "tools": [
+      "graphic-design",
+      "web-search",
+      "browser"
+     ],
+     "outputs": [
+      "graphics"
+     ],
+     "image": true,
+     "costPerRun": 0.96118,
+     "benchmarks": {
+      "aa-index": 0.9906,
+      "arena-text": 0.8255,
+      "terminal-bench": 0.1441
+     }
+    },
+    {
+     "id": "prepare-quotes",
+     "label": {
+      "en": "Prepare quotes and proposals",
+      "ko": "견적서와 제안서 준비"
+     },
+     "runs": 10,
+     "tools": [
+      "spreadsheet",
+      "pdf-generation",
+      "email",
+      "file-read"
+     ],
+     "outputs": [
+      "spreadsheets",
+      "documents"
+     ],
+     "image": false,
+     "costPerRun": 0.90721,
+     "benchmarks": {
+      "aa-index": 1.077,
+      "arena-text": 0.9357
+     }
+    }
+   ]
+  }
+ ]
+}

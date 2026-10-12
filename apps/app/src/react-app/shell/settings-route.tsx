@@ -1970,6 +1970,11 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
             providerDisconnectStatus={configActionStatus}
             providerDisconnectError={null}
             onOpenProviderAuth={handleOpenProviderAuth}
+            onOpenAllModels={() => {
+              modelPicker.setQuery("");
+              modelPicker.setRecentProviderIds(new Set());
+              modelPicker.setOpen(true);
+            }}
             onDisconnectProvider={async (providerId) => {
               const message = await providerAuthStore.disconnectProvider(providerId);
               if (typeof message === "string" && message.trim()) {

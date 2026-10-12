@@ -1,0 +1,121 @@
+{
+ "weights": {
+  "quality": 0.55,
+  "reliability": 0.25,
+  "speed": 0.05,
+  "cost": 0.15
+ },
+ "languages": [
+  "en",
+  "ko",
+  "hi"
+ ],
+ "limit": 5,
+ "quality": {
+  "note": "quality = 100 - sum(weight[b] * gap[b]). gap is how far below the best candidate a model is on benchmark b, in percent of the best for accuracy benchmarks and in percent of win probability for Elo boards.",
+  "elo": [
+   "arena-text",
+   "arena-text-ko",
+   "arena-webdev",
+   "arena-webdev-brand",
+   "arena-webdev-reference",
+   "arena-image-to-webdev",
+   "arena-text-to-image",
+   "gdpval",
+   "briefcase"
+  ],
+  "korean": {
+   "note": "For Korean the Text Arena gap is the mean of the overall and Korean-slice gaps, where the model has a Korean-slice rating.",
+   "board": "arena-text-ko",
+   "replaces": "arena-text"
+  },
+  "output": {
+   "note": "With an output chosen, quality = (1 - share) * task quality + share * (100 - gap on the output's own benchmark).",
+   "share": 0.5,
+   "benchmarks": {
+    "documents": [
+     "briefcase-docx",
+     "briefcase-pdf"
+    ],
+    "presentations": [
+     "briefcase-pptx"
+    ],
+    "spreadsheets": [
+     "briefcase-xlsx",
+     "vals-emb"
+    ],
+    "graphics": [
+     "arena-webdev-brand"
+    ],
+    "web": [
+     "arena-webdev",
+     "arena-webdev-reference"
+    ]
+   }
+  }
+ },
+ "reliability": {
+  "note": "Carried per model from the 6 Oct 2026 edition. A model without one takes the lowest carried value, so a model nobody has measured never outranks one that has been and the pick is marked partly estimated. On Redrob Cowork it falls by 15% times the share of the task's tools that are connectors, which Redrob Cowork reaches through MCP rather than natively.",
+  "connectors": [
+   "email",
+   "crm",
+   "calendar"
+  ],
+  "connectorPenalty": 0.15,
+  "nativeConnectors": [
+   "chatgpt-work",
+   "claude-cowork"
+  ]
+ },
+ "speed": {
+  "note": "Carried per model. A model without one: 41.68 * ln(median output tokens per second) - 147.28, the fit of the carried values to Artificial Analysis throughput, clamped to 0..100.",
+  "a": 41.68,
+  "b": -147.28
+ },
+ "cost": {
+  "note": "100 * (ln max - ln c) / (ln max - ln min), c the Artificial Analysis Intelligence Index cost per task at the ranked effort, against the cheapest and dearest model on that board. Reproduces the 6 Oct edition's cost score for every model but Sonnet 5.5."
+ },
+ "monthly": {
+  "note": "runs * task cost per run * model cost per run at the effort * language factor (+ images). Model factors are carried from the 6 Oct edition; a model without one scales Opus 5.5's by the ratio of Artificial Analysis cost per task. Range is half to double.",
+  "languageCost": {
+   "en": 1,
+   "ko": 1.095,
+   "hi": 1.186
+  },
+  "range": [
+   0.5,
+   2
+  ]
+ },
+ "ci": {
+  "note": "Half-width of the 95% interval on the total: the weight on quality times the weighted mean of each benchmark's own interval, as a gap.",
+  "floor": 1.5
+ },
+ "closeCall": 0.5,
+ "benchmarkPicks": {
+  "note": "Shown greyed when they would make the top five, beside the pick they compare with, taking no slot.",
+  "picks": [
+   {
+    "model": "gpt-6-astra",
+    "harness": "chatgpt-work"
+   },
+   {
+    "model": "claude-opus-5-5",
+    "harness": "claude-cowork"
+   }
+  ]
+ },
+ "harnesses": {
+  "redrob-desk": {
+   "planned": [
+    "ui-ux-design",
+    "html-generation",
+    "graphic-design",
+    "image-generation",
+    "browser"
+   ]
+  },
+  "chatgpt-work": {},
+  "claude-cowork": {}
+ }
+}

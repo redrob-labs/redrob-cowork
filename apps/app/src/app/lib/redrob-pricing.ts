@@ -98,12 +98,30 @@ export type RedrobModelPricing = {
   capabilities: RedrobModelCapabilities;
 };
 
+/**
+ * A model the console recommends showing first, one per major lab, in order.
+ *
+ * The model menu shows `auto` and then these, instead of the whole catalogue. The console owns the
+ * list so it can change with the catalogue without an app release, and every entry is a model it
+ * also prices and serves.
+ */
+export type RedrobFeaturedModel = {
+  modelId: string;
+  /** Display name. Canonical ids such as `gpt-6-astra` have no catalogue label of their own. */
+  name?: string;
+  lab: string;
+  /** What it is best for, one line per language. */
+  note: { en: string; ko: string };
+};
+
 export type RedrobPricing = {
   /** Which model id the router bills as. */
   autoModelId?: string;
   /** Usage profiles the per-request estimates are computed against. */
   costProfiles: RedrobCostProfile[];
   byModelId: Record<string, RedrobModelPricing>;
+  /** Empty until the console publishes the list, or when it is unreachable. */
+  featured: RedrobFeaturedModel[];
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -182,6 +200,21 @@ function parseCostProfiles(value: unknown): RedrobCostProfile[] {
   return profiles;
 }
 
+function parseFeatured(value: unknown): RedrobFeaturedModel[] {
+  if (!Array.isArray(value)) return [];
+  const out: RedrobFeaturedModel[] = [];
+  for (const entry of value) {
+    if (!isRecord(entry) || !isRecord(entry.note)) continue;
+    const { modelId, lab } = entry;
+    const { en, ko } = entry.note;
+    if (typeof modelId !== "string" || !modelId.trim() || typeof lab !== "string") continue;
+    if (typeof en !== "string" || typeof ko !== "string") continue;
+    const name = typeof entry.name === "string" && entry.name.trim() ? entry.name.trim() : undefined;
+    out.push({ modelId: modelId.trim(), ...(name ? { name } : {}), lab, note: { en, ko } });
+  }
+  return out;
+}
+
 function parseStrengths(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -192,7 +225,7 @@ function parseStrengths(value: unknown): string[] {
 
 /** Parse the console's pricing response. Malformed entries are skipped. */
 export function parseRedrobPricing(payload: unknown): RedrobPricing {
-  if (!isRecord(payload)) return { byModelId: {}, costProfiles: [] };
+  if (!isRecord(payload)) return { byModelId: {}, costProfiles: [], featured: [] };
 
   const byModelId: Record<string, RedrobModelPricing> = {};
   const models = Array.isArray(payload.models) ? payload.models : [];
@@ -222,6 +255,7 @@ export function parseRedrobPricing(payload: unknown): RedrobPricing {
     ...(typeof payload.autoModelId === "string" ? { autoModelId: payload.autoModelId } : {}),
     costProfiles: parseCostProfiles(payload.costProfiles),
     byModelId,
+    featured: parseFeatured(payload.featured),
   };
 }
 

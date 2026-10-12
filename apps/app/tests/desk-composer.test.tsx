@@ -29,10 +29,24 @@ import {
   deskStatusItems,
   DeskComposerStatusView,
   DeskComposerToolsView,
+  micFailureText,
   micUnavailableReason,
+  secondsLeft,
   type DeskStatusInput,
 } from "../src/react-app/desk/composer/desk-composer";
-import { transcriptFromRealtimeEvent } from "../src/react-app/domains/session/voice/voice-dictation";
+import { RedrobServerError } from "../src/app/lib/redrob-server";
+import {
+  base64Of,
+  HOLD_MS,
+  MAX_RECORDING_MS,
+  micPress,
+  micRelease,
+  pickRecorderType,
+  recordingFormat,
+  spokenText,
+  transcribeClip,
+  type MicPhase,
+} from "../src/react-app/domains/session/voice/voice-dictation";
 
 const SRC = join(import.meta.dir, "..", "src");
 const read = (path: string) => readFileSync(join(SRC, path), "utf8").replaceAll("\r\n", "\n");
@@ -156,19 +170,82 @@ describe("the mic", () => {
     expect(read("react-app/domains/session/voice/voice-dictation.ts")).not.toContain("response.create");
   });
 
-  test("reads only finished transcripts from the realtime channel", () => {
-    const done = JSON.stringify({ type: "conversation.item.input_audio_transcription.completed", transcript: " Hi there " });
-    expect(transcriptFromRealtimeEvent(done)).toBe("Hi there");
-    expect(transcriptFromRealtimeEvent(JSON.stringify({ type: "response.output_text.delta", delta: "x" }))).toBeNull();
-    expect(transcriptFromRealtimeEvent(JSON.stringify({ type: "conversation.item.input_audio_transcription.completed", transcript: "..." }))).toBeNull();
-    expect(transcriptFromRealtimeEvent("not json")).toBeNull();
+  test("a hold stops on release; a tap keeps recording until the next press", () => {
+    const idle: MicPhase = { kind: "idle" };
+    const held = micPress(idle, 1_000);
+    expect(held.action).toBe("start");
+    expect(micRelease(held.phase, 1_000 + HOLD_MS)).toEqual({ phase: { kind: "transcribing" }, action: "stop" });
+
+    const tapped = micRelease(held.phase, 1_000 + HOLD_MS - 1);
+    expect(tapped).toEqual({ phase: { kind: "recording", pressedAt: 1_000, latched: true }, action: null });
+    // The release of the second tap does nothing more: the press already stopped it.
+    const second = micPress(tapped.phase, 5_000);
+    expect(second).toEqual({ phase: { kind: "transcribing" }, action: "stop" });
+    expect(micRelease(second.phase, 5_100).action).toBeNull();
+
+    // While the last clip is being written down, the mic does nothing.
+    expect(micPress({ kind: "transcribing" }, 6_000).action).toBeNull();
+    expect(micRelease(idle, 6_000).action).toBeNull();
+  });
+
+  test("counts down the minute a recording may last", () => {
+    expect(MAX_RECORDING_MS).toBe(60_000);
+    expect(secondsLeft(0, 0)).toBe(60);
+    expect(secondsLeft(0, 500)).toBe(60);
+    expect(secondsLeft(0, 59_001)).toBe(1);
+    expect(secondsLeft(0, 61_000)).toBe(0);
+  });
+
+  test("records in a container the gateway takes", () => {
+    expect(pickRecorderType(() => true)).toBe("audio/webm;codecs=opus");
+    expect(pickRecorderType((type) => type === "audio/mp4")).toBe("audio/mp4");
+    expect(pickRecorderType(() => false)).toBeUndefined();
+    expect(recordingFormat("audio/webm;codecs=opus")).toBe("webm");
+    expect(recordingFormat("audio/ogg; codecs=opus")).toBe("ogg");
+    expect(recordingFormat("audio/mp4")).toBe("m4a");
+    expect(recordingFormat("audio/wav")).toBeNull();
+  });
+
+  test("sends the clip once, in the app's language, and keeps only words", async () => {
+    setLocale("ko");
+    const calls: unknown[] = [];
+    const client = {
+      transcribeAudio: async (workspaceId: string, recording: { audio: string; format: string; language?: string }) => {
+        calls.push({ workspaceId, ...recording });
+        return { text: "  회의 요약해 줘  " };
+      },
+    };
+    const audio = base64Of(new Uint8Array([1, 2, 3, 250]));
+    expect(audio).toBe(Buffer.from([1, 2, 3, 250]).toString("base64"));
+    expect(await transcribeClip(client, "ws", { audio, format: "webm" })).toBe("회의 요약해 줘");
+    expect(calls).toEqual([{ workspaceId: "ws", audio, format: "webm", language: "ko" }]);
+    expect(spokenText(" ... ")).toBeNull();
+    // A minute of audio is far past the argument limit of one fromCharCode call.
+    const long = new Uint8Array(200_000).fill(65);
+    expect(base64Of(long)).toBe(Buffer.from(long).toString("base64"));
   });
 
   test("says why it cannot listen", () => {
-    expect(micUnavailableReason({ desktop: false, media: true, connected: true })).toBe(en["desk.mic_reason_web"]);
-    expect(micUnavailableReason({ desktop: true, media: false, connected: true })).toBe(en["desk.mic_reason_device"]);
-    expect(micUnavailableReason({ desktop: true, media: true, connected: false })).toBe(en["desk.mic_reason_connecting"]);
-    expect(micUnavailableReason({ desktop: true, media: true, connected: true })).toBeNull();
+    expect(micUnavailableReason({ media: false, connected: true, voiceAllowed: true })).toBe(en["desk.mic_reason_device"]);
+    expect(micUnavailableReason({ media: true, connected: false, voiceAllowed: true })).toBe(en["desk.mic_reason_connecting"]);
+    expect(micUnavailableReason({ media: true, connected: true, voiceAllowed: undefined })).toBe(en["desk.mic_reason_connecting"]);
+    expect(micUnavailableReason({ media: true, connected: true, voiceAllowed: false })).toBe(en["desk.mic_reason_privacy"]);
+    expect(micUnavailableReason({ media: true, connected: true, voiceAllowed: true })).toBeNull();
+  });
+
+  test("a privacy refusal reads in the app's language; other failures keep their message", () => {
+    setLocale("ko");
+    expect(micFailureText(new RedrobServerError(403, "voice_off_for_privacy", "Voice is off"))).toBe(ko["desk.mic_reason_privacy"]);
+    expect(micFailureText(new RedrobServerError(502, "transcription_failed", "Out of credit."))).toBe("Out of credit.");
+    expect(micFailureText("nope")).toBeUndefined();
+  });
+
+  test("works on the web too: the recording goes through Work, not to a vendor from the window", () => {
+    const tools = read("react-app/desk/composer/desk-composer.tsx");
+    const reason = tools.slice(tools.indexOf("export function micUnavailableReason"), tools.indexOf("export function secondsLeft"));
+    expect(reason).not.toContain("desktop");
+    const dictation = read("react-app/domains/session/voice/voice-dictation.ts");
+    expect(dictation).not.toMatch(/api\.openai\.com|desktopFetch|createVoiceRealtimeSession/);
   });
 });
 
@@ -177,7 +254,7 @@ const markupOf = (html: string, pattern: string) => html.search(new RegExp(patte
 describe("the tools row", () => {
   test("is Mic, then Plan or Run, then the model", () => {
     const html = renderToStaticMarkup(
-      <DeskComposerToolsView listening={false} micUnavailable={null} onMic={noop} mode="run" onModeChange={noop}>
+      <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={null} onMicPress={noop} onMicRelease={noop} mode="run" onModeChange={noop}>
         <button type="button" data-model="1">Redrob Auto</button>
       </DeskComposerToolsView>,
     );
@@ -192,16 +269,29 @@ describe("the tools row", () => {
     expect(html).toMatch(new RegExp(`aria-checked="true"[^>]*aria-label="${en["desk.mode_run"]}"`));
   });
 
-  test("the mic says Stop talking while listening, and why it is off when it cannot listen", () => {
-    const listening = renderToStaticMarkup(
-      <DeskComposerToolsView listening micUnavailable={null} onMic={noop} mode="plan" onModeChange={noop} />,
-    );
-    expect(listening).toContain(`aria-label="${en["desk.mic_stop"]}"`);
-    expect(listening).toContain('aria-pressed="true"');
-    const off = renderToStaticMarkup(
-      <DeskComposerToolsView listening={false} micUnavailable={en["desk.mic_reason_web"]} onMic={noop} mode="plan" onModeChange={noop} />,
-    );
-    expect(off).toMatch(new RegExp(`aria-label="Talk to Desk. ${en["desk.mic_reason_web"]}"[^>]*disabled=""`));
+  test("the mic says Stop talking and counts down while recording, and why it is off when it cannot listen", () => {
+    const view = (props: { mic: "idle" | "recording" | "transcribing"; secondsLeft?: number; micUnavailable?: string }) =>
+      renderToStaticMarkup(
+        <DeskComposerToolsView
+          mic={props.mic}
+          secondsLeft={props.secondsLeft ?? null}
+          micUnavailable={props.micUnavailable ?? null}
+          onMicPress={noop}
+          onMicRelease={noop}
+          mode="plan"
+          onModeChange={noop}
+        />,
+      );
+    const recording = view({ mic: "recording", secondsLeft: 42 });
+    expect(recording).toContain(`aria-label="${en["desk.mic_stop"]}"`);
+    expect(recording).toContain('aria-pressed="true"');
+    expect(recording).toContain(en["desk.mic_seconds_left"].replace("{seconds}", "42"));
+    const transcribing = view({ mic: "transcribing" });
+    expect(transcribing).toContain(`aria-label="${en["desk.mic_transcribing"]}"`);
+    expect(transcribing).toContain('aria-busy="true"');
+    expect(transcribing).not.toContain(en["desk.mic_seconds_left"].replace("{seconds}", ""));
+    const off = view({ mic: "idle", micUnavailable: en["desk.mic_reason_privacy"] });
+    expect(off).toMatch(new RegExp(`aria-label="Talk to Desk. ${en["desk.mic_reason_privacy"]}"[^>]*disabled=""`));
   });
 });
 

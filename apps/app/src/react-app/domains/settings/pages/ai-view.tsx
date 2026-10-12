@@ -37,6 +37,8 @@ export type AiSettingsViewProps = {
   providerDisconnectStatus: string | null;
   providerDisconnectError: string | null;
   onOpenProviderAuth: () => void | Promise<void>;
+  /** Opens the full model list, with search, across every connected provider. */
+  onOpenAllModels: () => void;
   onDisconnectProvider: (providerId: string) => void | Promise<void>;
   canDisconnectProvider: (provider: ConnectedProvider) => boolean;
   canAddProviders: boolean;
@@ -66,6 +68,28 @@ function providerStatusTone(label: string): "ready" | "warning" | "neutral" {
 export function AiSettingsView(props: AiSettingsViewProps) {
   return (
     <LayoutStack>
+      {/*
+        ---- Models ----
+        The composer's model menu shows Redrob Auto and one recommended model per lab. Every model from
+        every connected provider, with search, is here, for whoever wants to pick one by name.
+      */}
+      <LayoutSection>
+        <LayoutSectionHeader>
+          <LayoutSectionTitle>{t("settings.models_title")}</LayoutSectionTitle>
+          <LayoutSectionDescription>{t("settings.models_desc")}</LayoutSectionDescription>
+        </LayoutSectionHeader>
+        <LayoutSectionItem>
+          <LayoutSectionItemHeader>
+            <LayoutSectionItemTitle>{t("model_picker.all_models")}</LayoutSectionItemTitle>
+            <LayoutSectionItemHeaderActions>
+              <Button onClick={props.onOpenAllModels} disabled={props.busy} data-testid="ai-settings-all-models">
+                {t("settings.models_open")}
+              </Button>
+            </LayoutSectionItemHeaderActions>
+          </LayoutSectionItemHeader>
+        </LayoutSectionItem>
+      </LayoutSection>
+
       {/* ---- Providers ---- */}
       <LayoutSection>
         <LayoutSectionHeader>
