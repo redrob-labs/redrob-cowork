@@ -16,7 +16,9 @@ import {
   RotateCcw,
   Scissors,
   Split,
+  Square,
   Undo2,
+  Volume2,
 } from "lucide-react"
 import { PaperGrainGradient } from "@redrob/ui/react"
 import {
@@ -77,6 +79,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { ImageAttachmentBadge } from "@/components/chat/image-attachment-badge"
+import { toast } from "@/components/ui/sonner"
+import { useOptionalWorkspace } from "@/react-app/shell/workspace-provider"
+import {
+  startReadAloud,
+  stopReadAloud,
+  useReadAloudStore,
+  voiceAllowedForPrivacy,
+} from "@/react-app/domains/session/voice/read-aloud"
+import { useQuery } from "@tanstack/react-query"
+import type { RedrobServerClient } from "@/app/lib/redrob-server"
 import { Image } from "@/components/ui/image"
 import {
   Message,
@@ -415,6 +427,66 @@ function CopyMessageButton({ messages }: CopyMessageButtonProps) {
         onClick={() => void onCopy()}
       >
         {copied ? <Check /> : <Copy />}
+      </Button>
+    </MessageAction>
+  )
+}
+
+interface ReadAloudButtonProps {
+  id: string
+  messages: UIMessage[]
+}
+
+/**
+ * Speak this reply. Shown only where there is a server to ask, since the engine behind it holds the
+ * Redrob key; one reply plays at a time, and pressing it again stops it.
+ */
+function ReadAloudButton({ id, messages }: ReadAloudButtonProps) {
+  const workspace = useOptionalWorkspace()
+  const client = workspace?.redrobServerClient ?? null
+  const workspaceId = workspace?.workspaceId ?? ""
+  const text = React.useMemo(() => getMessagesText(messages), [messages])
+  /* No server, nothing to speak with. Checked before any query, so a list rendered outside a workspace
+     (and outside a query provider) never reaches one. */
+  if (!client || !workspaceId || !text) return null
+  return <ReadAloudControl id={id} text={text} client={client} workspaceId={workspaceId} />
+}
+
+interface ReadAloudControlProps {
+  id: string
+  text: string
+  client: RedrobServerClient
+  workspaceId: string
+}
+
+function ReadAloudControl({ id, text, client, workspaceId }: ReadAloudControlProps) {
+  const active = useReadAloudStore((state) => state.activeId === id)
+  const loading = useReadAloudStore((state) => state.activeId === id && state.status === "loading")
+  /* Off at High and Strict privacy, where the server refuses speech; hidden until the level is known. */
+  const { data: allowed } = useQuery({
+    queryKey: ["voice-allowed", workspaceId],
+    queryFn: async () => voiceAllowedForPrivacy((await client.getConfig(workspaceId)).redrob),
+    staleTime: 30_000,
+  })
+
+  if (allowed !== true) return null
+
+  const onClick = () => {
+    if (active) {
+      stopReadAloud()
+      return
+    }
+    void startReadAloud(client, workspaceId, id, text).then(() => {
+      const { error } = useReadAloudStore.getState()
+      if (error) toast.error(error)
+    })
+  }
+
+  const label = active ? t("message.stop_reading") : t("message.read_aloud")
+  return (
+    <MessageAction tooltip={label}>
+      <Button variant="ghost" size="icon" aria-label={label} aria-pressed={active} onClick={onClick}>
+        {loading ? <LoaderCircle className="animate-spin" /> : active ? <Square /> : <Volume2 />}
       </Button>
     </MessageAction>
   )
@@ -1343,6 +1415,10 @@ function MessageGroup({
           <div className="flex flex-wrap items-center gap-2 opacity-0 transition-opacity duration-150 group-hover/message-group:opacity-100 max-lg:opacity-100 pointer-coarse:opacity-100">
           <MessageActions className="flex gap-0">
             <CopyMessageButton messages={renderableItems.map((item) => item.message)} />
+            <ReadAloudButton
+              id={lastTextMessage.id}
+              messages={renderableItems.map((item) => item.message)}
+            />
             {lastRealItem ? (
               <>
                 <MessageAction tooltip={t("message.retry")}>
