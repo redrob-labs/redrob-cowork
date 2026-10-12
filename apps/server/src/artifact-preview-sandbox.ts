@@ -34,7 +34,8 @@ export const ARTIFACT_PREVIEW_CSP = [
   "frame-src 'none'",
   "worker-src 'none'",
   "object-src 'none'",
-  "base-uri 'none'",
+  /* `'self'`, so the page can be given a `<base>` on its own folder (artifact-preview-files.ts). */
+  "base-uri 'self'",
   "form-action 'none'",
 ].join("; ");
 
@@ -62,8 +63,9 @@ const PRELUDE = `<meta http-equiv="Content-Security-Policy" content="${escapeAtt
  * `<script>` before `<html>` is legal: the parser opens `<html>` and `<head>` implicitly and puts both
  * inside, ahead of anything the page itself declares.
  */
-export const SECURE_ARTIFACT_PREVIEW_HTML_SOURCE = String.raw`(source) => {
-  const prelude = ${JSON.stringify(PRELUDE)};
+export const SECURE_ARTIFACT_PREVIEW_HTML_SOURCE = String.raw`(source, base) => {
+  const folder = typeof base === "string" && /^\/artifact-preview\/files\/[0-9a-f]{32}\/$/.test(base) ? base : null;
+  const prelude = ${JSON.stringify(PRELUDE)} + (folder ? '<base href="' + folder + '">' : "");
   const rules = ${JSON.stringify(ARTIFACT_PREVIEW_LIBRARY_RULES)}.map((rule) => ({
     file: rule.file,
     matches: rule.matches.map((pattern) => new RegExp(pattern, "i")),
@@ -103,7 +105,7 @@ export const ARTIFACT_PREVIEW_SANDBOX_SCRIPT = String.raw`
   window.addEventListener("message", (event) => {
     if (event.source === window.parent && event.origin === hostOrigin) {
       if (event.data?.method === "redrob/artifact-preview/render" && typeof event.data?.params?.html === "string") {
-        inner.srcdoc = secureHtml(event.data.params.html);
+        inner.srcdoc = secureHtml(event.data.params.html, event.data.params.base);
       }
       return;
     }

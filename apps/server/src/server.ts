@@ -33,7 +33,16 @@ import {
   ARTIFACT_PREVIEW_SANDBOX_HTML,
   ARTIFACT_PREVIEW_SANDBOX_SCRIPT,
 } from "./artifact-preview-sandbox.js";
+import { normalizeWorkspaceRelativePath } from "./routes/files.js";
 import { readArtifactPreviewLibrary } from "./artifact-preview-vendor.js";
+import {
+  artifactPreviewBasePath,
+  artifactPreviewContentType,
+  grantArtifactPreviewFolder,
+  resolveArtifactPreviewFile,
+  resolveArtifactPreviewPage,
+  streamArtifactPreviewFile,
+} from "./artifact-preview-files.js";
 import {
   buildMcpAppSandboxCsp,
   MCP_APP_SANDBOX_PROXY_CSS,
@@ -3424,6 +3433,27 @@ function createRoutes(
     return new Response(await source, {
       headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
     });
+  });
+  /*
+   * The folder a previewed page sits in, so its relative stylesheets, scripts and images load. The app
+   * asks for a grant with its own token; the page, which has none, reads through the grant. See
+   * artifact-preview-files.ts for why a grant reaches one folder and nothing above it.
+   */
+  addRoute(routes, "POST", "/workspace/:id/artifact-preview/grant", "client", async (ctx) => {
+    requireClientScope(ctx, "viewer");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const relativePath = normalizeWorkspaceRelativePath(String(body.path ?? ""), { allowSubdirs: true });
+    const pagePath = resolve(workspace.path, relativePath);
+    const page = await resolveArtifactPreviewPage(workspace.path, pagePath);
+    if (!page) throw new ApiError(404, "file_not_found", "File not found");
+    const grant = grantArtifactPreviewFolder(page);
+    return jsonResponse({ ok: true, basePath: artifactPreviewBasePath(grant) });
+  });
+  addRoute(routes, "GET", "/artifact-preview/files/:grant/*", "none", async (ctx) => {
+    const file = await resolveArtifactPreviewFile(ctx.params.grant, ctx.params["*"] ?? "");
+    if (!file) throw new ApiError(404, "file_not_found", "File not found");
+    return streamArtifactPreviewFile(file, artifactPreviewContentType(file));
   });
   addRoute(routes, "GET", "/artifact-preview/sandbox.js", "none", async () => new Response(ARTIFACT_PREVIEW_SANDBOX_SCRIPT, {
     headers: { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },

@@ -1628,6 +1628,16 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       url.searchParams.set("csp", JSON.stringify(app.csp));
       return { url: url.toString(), expectedOrigin: url.origin };
     },
+    /**
+     * Read access for a previewed page to the folder it sits in, so its relative stylesheets, scripts
+     * and images load. The `basePath` is a path on the sandbox origin.
+     */
+    grantArtifactPreview: (workspaceId: string, path: string) =>
+      requestJson<{ ok: true; basePath: string }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/artifact-preview/grant`,
+        { token, hostToken, method: "POST", body: { path }, timeoutMs: timeouts.config },
+      ),
     /** Where a model-written HTML page is previewed: this server's origin, never the app's. */
     artifactPreviewSandbox: (hostOrigin: string): RedrobMcpAppSandbox => {
       const url = sandboxUrl(baseUrl, "/artifact-preview/sandbox.html", hostOrigin);
