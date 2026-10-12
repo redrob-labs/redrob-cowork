@@ -205,6 +205,60 @@ export async function speakWithRedrobEngine(
   return { audio: await response.arrayBuffer(), contentType };
 }
 
+/** The containers the engine accepts, which are the ones the gateway's upstream documents. */
+const TRANSCRIPTION_FORMATS = new Set(["wav", "mp3", "flac", "m4a", "ogg", "webm", "aac"]);
+
+/** The engine's limit, 10 MB decoded, as base64 characters, so an over-size clip never reaches it. */
+const MAX_TRANSCRIPTION_BASE64 = Math.ceil((10 * 1024 * 1024) / 3) * 4;
+
+/**
+ * Transcribe a recording on the engine's Redrob credential, for push-to-talk in the app. It relays
+ * the same way read-aloud does, through the engine's `POST /redrob/transcribe`, so Work never holds
+ * the credential, and the engine's refusals keep their status and message.
+ */
+export async function transcribeWithRedrobEngine(
+  input: RedrobAuthInput,
+  payload: { audio: string; format: string; language?: string },
+): Promise<{ text: string; seconds?: number; costUsd?: number }> {
+  if (!payload.audio) throw new ApiError(400, "transcription_audio_missing", "Give the audio to transcribe.");
+  if (payload.audio.length > MAX_TRANSCRIPTION_BASE64) {
+    throw new ApiError(400, "transcription_audio_too_large", "Transcribe at most 10 MB of audio at a time.");
+  }
+  if (!TRANSCRIPTION_FORMATS.has(payload.format)) {
+    throw new ApiError(400, "transcription_format_unsupported", `Audio in ${payload.format || "no"} format cannot be transcribed.`);
+  }
+  const target = resolveEngineTarget(input);
+  let response: Response;
+  try {
+    response = await target.fetchImpl(`${target.baseUrl}/redrob/transcribe`, {
+      method: "POST",
+      headers: target.headers,
+      body: JSON.stringify({
+        audio: payload.audio,
+        format: payload.format,
+        ...(payload.language ? { language: payload.language } : {}),
+      }),
+    });
+  } catch {
+    throw new ApiError(503, "engine_unavailable", "Redrob Code is not reachable yet");
+  }
+  const body: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    const message = isRecord(body) && typeof body.message === "string" ? body.message : "Speech could not be transcribed.";
+    if (response.status === 503) throw new ApiError(503, "redrob_not_connected", message);
+    if (response.status === 400) throw new ApiError(400, "transcription_invalid", message);
+    throw new ApiError(response.status === 504 ? 504 : 502, "transcription_failed", message);
+  }
+  if (!isRecord(body) || typeof body.text !== "string") {
+    throw new ApiError(502, "transcription_failed", "Redrob Code answered without a transcript.");
+  }
+  return {
+    text: body.text,
+    ...(typeof body.seconds === "number" ? { seconds: body.seconds } : {}),
+    ...(typeof body.costUsd === "number" ? { costUsd: body.costUsd } : {}),
+  };
+}
+
 type EngineProviderEntry = {
   id?: unknown;
   source?: unknown;

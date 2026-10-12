@@ -2087,6 +2087,16 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         timeoutMs: timeouts.binary,
       }),
 
+    /** Push-to-talk: the text of a recording, transcribed by the engine on its own Redrob credential. */
+    transcribeAudio: (workspaceId: string, recording: { audio: string; format: string; language?: string }) =>
+      requestJson<{ text: string; seconds?: number; costUsd?: number }>(baseUrl, "/voice/transcribe", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { workspaceId, ...recording },
+        timeoutMs: timeouts.binary,
+      }),
+
     createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string }) =>
       requestJson<{
         ok: true;
