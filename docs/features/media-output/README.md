@@ -1,13 +1,14 @@
 # Media output: images, HTML, and voice
 
-Status: in progress. This is the plan of record for three outputs a model can produce in Redrob Cowork
-beyond text, and the order they land in.
+Status: built, in review. Every slice below has an open pull request; none is merged, and none reaches
+users until the console endpoints deploy, an engine release ships, and `redrobCodeVersion` is bumped
+here. This is the plan of record for three outputs a model can produce in Redrob Cowork beyond text.
 
 ## Decisions
 
 | Question | Decision |
 |---|---|
-| Who serves and bills generation | **Redrob only.** Image, speech, and Voice Mode go through the Redrob gateway on `REDROB_API_KEY`. The OpenAI-key paths are retired once their Redrob replacement ships. |
+| Who serves and bills generation | **Redrob only.** Image, speech, and voice go through the Redrob gateway on `REDROB_API_KEY`. The OpenAI-key paths are retired once their Redrob replacement ships. |
 | Text-to-speech engine | The Redrob gateway. Read-aloud waits for the console to serve speech. |
 | Voice priority | Read replies aloud > generate audio files > Voice Mode speaking for the main agent. |
 | Generated images in model context | **Yes.** They return as tool attachments, so the model sees what it made. At High and Strict privacy the gate leaves images out, as it does for any image it cannot read. |
@@ -41,27 +42,29 @@ never same-origin with the app.
   them is not a safe boundary, and every allowed host would become a renderer entry in
   `docs/enterprise/outbound-access.json`.
 
-**Voice.** One server route per capability, on the Redrob gateway, consumed by the renderer the same
-way `POST /voice/realtime/session` is today. Audio and video files get a player in chat and in the
-artifact panel.
+**Voice.** The engine holds the key, so each capability is an engine route that Cowork's server relays
+on the host token: `POST /voice/speech` → engine `POST /redrob/speech` → gateway `/v1/audio/speech`,
+and `POST /voice/transcribe` → engine `POST /redrob/transcribe` → gateway `/v1/audio/transcriptions`.
+Cowork never sees the key, and both relays refuse at High and Strict privacy before the engine is
+asked. Audio and video files get a player in chat and in the artifact panel.
 
 ## Slices
 
 Each is one `<type>/<slug>` pull request into `develop`.
 
-| # | Slice | Depends on |
-|---|---|---|
-| 0a | `fix/html-preview-isolation`: sandbox origin, deny-by-default CSP, bundled libraries, blocked-resource notice | — |
-| 0b | `fix/dictation-locale`: dictation transcribes in the app language instead of hard-coded English | — |
-| V1 | `feat/audio-video-playback`: audio and video preview types, MIME mapping, inline players | — |
-| H1 | `feat/html-fence-preview`: Preview for `html` and `svg` code blocks in chat, Code/Preview toggle in the panel | 0a |
-| H2 | `feat/artifact-live-refresh`: refresh a preview when a write or edit tool completes | — |
-| H3 | `feat/html-multi-file`: relative assets beside the page resolve through the sandbox origin | 0a |
-| I1 | Engine `feature/image-generate-tool`: `image_generate` on the engine's credential, then a `redrobCodeVersion` bump here | console image relay |
-| I2 | `feat/image-edit`: edit an image or generate from a reference | I1 |
-| V2 | `feat/read-aloud`: speaker button on replies and an optional "Speak replies" setting | console speech endpoint |
-| V3 | `feat/speech-generate-tool`: `redrob_speech_generate` writes an audio artifact | V1, V2 |
-| V4 | `feat/voice-mode-redrob`: Voice Mode on the Redrob gateway, then speaking the main agent's replies | console realtime broker |
+| # | Slice | Depends on | PR |
+|---|---|---|---|
+| 0a | `fix/html-preview-isolation`: sandbox origin, deny-by-default CSP, bundled libraries, blocked-resource notice | — | #175, libraries #176 |
+| 0b | `fix/dictation-locale`: dictation transcribes in the app language instead of hard-coded English | — | #173, closed: superseded by VM3 and VM5 |
+| V1 | `feat/audio-video-playback`: audio and video preview types, MIME mapping, inline players | — | #174 |
+| H1 | `feat/html-fence-preview`: Preview for `html` and `svg` code blocks in chat, Code/Preview toggle in the panel | 0a | #178 |
+| H2 | `feat/artifact-live-refresh`: refresh a preview when a write or edit tool completes | — | #177 |
+| H3 | `feat/html-multi-file`: relative assets beside the page resolve through the sandbox origin | 0a | #179 |
+| I1 | Engine `feature/image-generate-tool`: `image_generate` on the engine's credential, then a `redrobCodeVersion` bump here | console image relay | engine #69 |
+| I2 | `feat/image-edit`: edit an image or generate from a reference | I1 | engine #70 |
+| V2 | `feat/read-aloud`: speaker button on replies and an optional "Speak replies" setting | console speech endpoint | #181, engine #73 |
+| V3 | `feat/speech-generate-tool`: `redrob_speech_generate` writes an audio artifact | V1, V2 | engine #71 (`speech_generate`, in the engine for the reason images are) |
+| V4 | `feat/voice-mode-redrob`: Voice Mode on the Redrob gateway, then speaking the main agent's replies | console realtime broker | superseded by Voice on Redrob below |
 
 ## Console dependencies
 
@@ -71,8 +74,11 @@ Tracked in `mckinley-and-rice/redrob-console`:
   picture was dropped. Fixed by relaying `message.images` and accepting `modalities`.
 - **Speech.** `POST /v1/audio/speech` and `GET /v1/speech-models`, on OpenRouter's speech endpoint and
   priced per character of input, so no audio-token rate is needed.
-- **Realtime.** `POST /voice/realtime/session` minting a client secret on `REDROB_API_KEY`, and a
-  gateway-side SDP exchange so the renderer no longer calls `api.openai.com/v1/realtime/calls` directly.
+- **Transcription.** `POST /v1/audio/transcriptions`, billed from the vendor's reported cost plus margin.
+- A realtime broker was planned here and dropped: OpenRouter has no Realtime API and Vercel functions
+  cannot hold the session. Voice became the turn-based pipeline below.
+
+Pull requests: image relay #230, speech #232, transcription #237 (on #232).
 
 ## Voice on Redrob
 
@@ -96,11 +102,35 @@ Beta defaults: `elevenlabs/scribe-v2` for transcription (`openai/gpt-transcribe`
 `elevenlabs/eleven-flash-v2.5` for spoken replies, chosen for latency. A 30-clip Korean, English and
 mixed-language check picks the final defaults and voice before the beta.
 
-| # | Slice | Depends on |
-|---|---|---|
-| VM1 | Console `POST /v1/audio/transcriptions`, OpenAI compatible, billed from the vendor's reported cost plus margin | — |
-| VM2 | Engine `POST /redrob/transcribe` on its own key | VM1 |
-| VM3 | Push-to-talk dictation on Redrob in both composers, relayed at `POST /voice/transcribe` | VM2 |
-| VM4 | Voice conversation toggle: send on release, read the reply aloud when the turn ends, mic interrupts playback | VM3, read-aloud |
-| VM5 | Remove OpenAI Voice Mode: panel, realtime route, settings, broker code, strings | VM4 shipped |
-| VM6 | Beta check of models, voice and end-to-end latency | VM4 |
+| # | Slice | Depends on | PR |
+|---|---|---|---|
+| VM1 | Console `POST /v1/audio/transcriptions`, OpenAI compatible, billed from the vendor's reported cost plus margin | — | console #237 |
+| VM2 | Engine `POST /redrob/transcribe` on its own key | VM1 | engine #74 |
+| VM3 | Push-to-talk dictation on Redrob in both composers, relayed at `POST /voice/transcribe` | VM2 | #185 |
+| VM4 | Voice conversation toggle: send on release, read the reply aloud when the turn ends, mic interrupts playback | VM3, read-aloud | #186 |
+| VM5 | Remove OpenAI Voice Mode: panel, realtime route, settings, broker code, strings | VM4 shipped | #187, merge last |
+| VM6 | Beta check of models, voice and end-to-end latency | VM4 | blocked on deploy and release |
+
+### As built
+
+- **Dictation (VM3).** The Desk mic records webm/opus while held, or between two taps, with a countdown,
+  and sends at the 60 second limit. One request per recording, in the app language. The words join the
+  draft and are never sent on their own.
+- **Conversation (VM4).** A per-chat toggle beside the mic, off by default. Releasing the mic sends what
+  was said, with anything typed, as Send would; a new chat starts. "Working on it." is spoken on send,
+  once per language and then replayed from memory, with a two-note chime when it cannot be spoken. When
+  that turn ends its answer is read aloud; typed turns never are. Pressing the mic cuts Desk off. While a
+  turn runs, what was said goes into the draft.
+- **Privacy.** Both relays answer 403 `voice_off_for_privacy` at High and Strict, and the mic, the toggle
+  and read-aloud are disabled with that reason.
+- **Proof.** An end-to-end run of the real web app, Cowork server and engine, with only the gateway stood
+  in for, passes all 16 checks (#186).
+
+### Open after the build
+
+- **Speech model.** Spoken replies use the engine's `speech_generate` default,
+  `elevenlabs/eleven-multilingual-v2` with `sarah`, not the `eleven-flash-v2.5` chosen above:
+  `/voice/speech` does not pass a model yet. Settle it with VM6's voice choice.
+- **Who may use voice.** The relays are `host` routes, so only the host token or an owner-scoped token
+  reaches them. Desktop connects with the owner token; a web client on a collaborator token gets 401
+  (#185). Whether collaborators get voice is a policy decision.
