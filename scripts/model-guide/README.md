@@ -4,8 +4,9 @@ These scripts produce `apps/app/src/react-app/desk/guide/model-guide.json`, whic
 guide's "By profession" view.
 
 ```bash
-node scripts/model-guide/fetch.mjs     # reads every board into snapshots/<today>.json
-node scripts/model-guide/build.mjs     # ranks from the newest snapshot and writes the app's JSON
+node scripts/model-guide/fetch.mjs         # reads every board into snapshots/<today>.json
+node scripts/model-guide/fetch-redrob.mjs  # reads what Redrob serves into snapshots/redrob/<today>.json
+node scripts/model-guide/build.mjs         # ranks from the newest snapshots and writes the app's JSON
 ```
 
 `build.mjs --snapshot 2026-10-08` re-ranks from an older snapshot. The fetch writes nothing if any board fails,
@@ -58,6 +59,25 @@ The task weights in `config/tasks.json` were fitted to the 6 Oct 2026 edition, w
 fit reproduces that edition's #1 pick in 159 of 165 rankings. The accountant tasks have no past edition, so their
 weights are set by hand from what each task is measured on. Their Korean rankings are marked *partly estimated*
 because no public benchmark covers Korean tax or K-IFRS work.
+
+## On Redrob Cowork
+
+A pick on Redrob Cowork is ranked as it runs there. Redrob serves each model at its own set of thinking levels
+(`thinkingLevels` in Console's public `GET /v1/pricing`, read by `fetch-redrob.mjs`). Each model's Redrob id is
+`redrob` in `config/models.json`.
+
+- A model is ranked at its configured level when Redrob serves it, else at the highest served level below it. For
+  example, Claude Opus 5.5 is ranked at Max on Claude Cowork but at High on Redrob Cowork.
+- "Try another effort" lists only the served levels.
+- A level with no figures of its own (Muse Spark 1.3 at High) reads the nearest level that has some, and the pick
+  is marked *partly estimated*.
+- A model Redrob serves with no adjustable level (GPT-6 Astra) runs at its provider default, read as
+  `redrob.providerDefault` in `config/method.json`.
+- A model with no Redrob id (`"redrob": null`, Claude Haiku 5.5) is ranked as configured. The guide shows it, but
+  cannot switch a chat to it.
+- The research carries `catalogue`: guide model id to Redrob id, for the app's "Use this" and for Console's sync.
+
+Nothing is marked "coming soon". A task lists the tools it needs, and that is all.
 
 ## Benchmark picks
 

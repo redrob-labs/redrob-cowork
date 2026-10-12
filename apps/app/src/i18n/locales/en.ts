@@ -462,7 +462,6 @@ const en = {
   "desk.guide_band_standard": "Standard",
   "desk.guide_benchmark": "Benchmark",
   "desk.guide_benchmark_note": "Shown for comparison. It runs on its own product, not in Redrob Cowork.",
-  "desk.guide_coming_soon": "Coming soon",
   "desk.guide_effort_default": "Default",
   "desk.guide_effort_high": "High",
   "desk.guide_effort_hint": "Cost changes with effort; the ranking is for the ranked effort.",

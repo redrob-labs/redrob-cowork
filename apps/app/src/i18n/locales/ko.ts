@@ -460,7 +460,6 @@ const ko = {
   "desk.guide_band_standard": "표준",
   "desk.guide_benchmark": "비교 기준",
   "desk.guide_benchmark_note": "비교용으로 보여 줍니다. 이 조합은 해당 제품에서 실행되며 레드롭 코워크에서는 쓸 수 없습니다.",
-  "desk.guide_coming_soon": "출시 예정",
   "desk.guide_effort_default": "기본",
   "desk.guide_effort_high": "높음",
   "desk.guide_effort_hint": "노력 수준에 따라 비용이 달라집니다. 순위는 순위에 쓴 수준 기준입니다.",

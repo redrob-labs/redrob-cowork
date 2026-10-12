@@ -6,6 +6,7 @@ import { autoModel, guideGroups, guideModelCount } from "../src/react-app/desk/g
 import { guideOutputs, guideProfessions, loadGuideResearch } from "../src/react-app/desk/guide/model-guide";
 import { PricingGuideView, ProfessionGuideView, guideFetch } from "../src/react-app/desk/preview/desk-guide";
 import { setLocale } from "../src/i18n";
+import redrobCatalogue from "../../../scripts/model-guide/snapshots/redrob/2026-10-08.json";
 
 const model = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
@@ -154,7 +155,7 @@ describe("the guide by profession", () => {
     expect(sources.filter((source) => source.label === "monthly").every((source) => source.kind === "estimate")).toBe(true);
   });
 
-  test("labels in the app's language; planned tools say soon; efforts sit on the model's own scale", async () => {
+  test("labels in the app's language; no pick or tool says coming soon; efforts sit on the model's own scale", async () => {
     const research = await loadGuideResearch();
     const ko = guideProfessions(research, "ko");
     expect(ko.find((p) => p.id === "lawyer")?.label).toBe("변호사");
@@ -162,12 +163,37 @@ describe("the guide by profession", () => {
     const task = en.find((p) => p.id === "designer")?.tasks?.find((entry) => entry.id === "design-screens");
     const first = task?.picksByLanguage?.en?.[0];
     expect(first?.harness).toBe("Redrob Cowork");
-    expect(first?.tools?.find((tool) => tool.label === "UI design")?.soon).toBe(true);
-    expect(first?.tools?.find((tool) => tool.label === "Reads files")?.soon).toBe(false);
+    const shown = en.flatMap((p) => (p.tasks ?? []).flatMap((entry) => Object.values(entry.picksByLanguage ?? {}).flat()));
+    expect(shown.filter((pick) => pick.comingSoon || pick.tools?.some((tool) => tool.soon))).toEqual([]);
+    expect(first?.tools?.map((tool) => tool.label)).toContain("UI design");
     const levels = first?.efforts ?? [];
     expect(levels.length).toBeGreaterThan(1);
     expect(levels.map((level) => level.level)).toEqual(levels.map((_, i) => i + 1));
     expect(first?.effort?.of).toBe(levels.length);
+  });
+
+  test("a Redrob Cowork pick is ranked only at thinking levels Redrob serves that model at", async () => {
+    const research = await loadGuideResearch();
+    const served: Record<string, { thinking: string[] }> = redrobCatalogue.models;
+    let checked = 0;
+    for (const profession of research.professions)
+      for (const task of profession.tasks)
+        for (const picks of [...Object.values(task.picks), ...Object.values(task.picksByOutput).flatMap((x) => Object.values(x))])
+          for (const pick of picks) {
+            const id = research.catalogue?.[pick.steps[0]?.model ?? ""];
+            if (pick.harness !== "redrob-desk" || !id) continue;
+            // "default" sends no level, which Redrob always serves: the provider's own default.
+            const allowed = [...(served[id]?.thinking ?? []), "default"];
+            expect(allowed).toContain(pick.steps[0]?.effort ?? "default");
+            for (const [effort] of pick.efforts) expect(allowed).toContain(effort);
+            checked += 1;
+          }
+    expect(checked).toBeGreaterThan(700);
+    // Opus 5.5 is ranked at Max elsewhere, but Redrob serves it up to High.
+    const opus = research.professions[0]?.tasks.flatMap((task) => Object.values(task.picks).flat()).find(
+      (pick) => pick.harness === "redrob-desk" && pick.steps[0]?.model === "claude-opus-5-5",
+    );
+    expect(opus?.steps[0]?.effort).toBe("high");
   });
 
   test("a task that needs a picture runs a text model, then an image model, and adds the image cost", async () => {
