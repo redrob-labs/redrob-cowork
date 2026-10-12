@@ -26,6 +26,14 @@ extraResources:
       - "*.onnx"
       - tokenizer.json
       - NOTICE.md
+  # The work classifier's encoder, pinned the same way; scripts/prepare-insights-model.mjs fills it in.
+  - from: resources/insights-model
+    to: insights-model
+    filter:
+      - manifest.json
+      - "*.onnx"
+      - tokenizer.json
+      - NOTICE.md
   # The route model redrob-server labels requests to Redrob Auto with, pinned by the manifest in
   # @redrob-labs/route-labeller. scripts/prepare-route-model.mjs fetches and verifies it.
   - from: resources/route-model
