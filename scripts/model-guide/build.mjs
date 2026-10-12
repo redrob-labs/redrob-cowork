@@ -27,6 +27,13 @@ const { professions } = await readJson(path.join(here, "config/tasks.json"));
 const method = await readJson(path.join(here, "config/method.json"));
 const outFile = arg("--out") || path.join(repo, "apps/app/src/react-app/desk/guide/model-guide.json");
 const date = snapshot.date;
+// What Redrob serves, from the newest catalogue read on or before the snapshot's date (fetch-redrob.mjs).
+const redrobFile = (await readdir(path.join(here, "snapshots/redrob")))
+  .filter((f) => f.endsWith(".json") && f.replace(/\.json$/, "") <= date)
+  .sort()
+  .pop();
+if (!redrobFile) throw new Error(`no Redrob catalogue on or before ${date}: run fetch-redrob.mjs`);
+const redrob = await readJson(path.join(here, "snapshots/redrob", redrobFile));
 
 const round = (x, d = 1) => Math.round(x * 10 ** d) / 10 ** d;
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -61,14 +68,73 @@ function aaFigure(model, read) {
   return { value: others[0][1], effort: others[0][0] };
 }
 
-// Every figure once, and the best on each board among the models we rank.
+const ORDER = ["minimal", "low", "medium", "high", "xhigh", "max"];
+const hasData = (model, effort) => Boolean(model.aa?.[effort] && snapshot.aaModels[model.aa[effort]]);
+
+/** The level with figures closest to `effort` on the maker's scale; a tie takes the lower, never overstating. */
+function nearestData(model, effort) {
+  if (hasData(model, effort)) return effort;
+  const at = ORDER.indexOf(effort);
+  const known = model.efforts.filter((e) => hasData(model, e));
+  known.sort((a, b) => Math.abs(ORDER.indexOf(a) - at) - Math.abs(ORDER.indexOf(b) - at) || ORDER.indexOf(a) - ORDER.indexOf(b));
+  return known[0] ?? effort;
+}
+
+/**
+ * The model as it runs on a harness. Elsewhere it is the configured model. On Redrob Cowork it runs at the
+ * levels Redrob serves: its ranked level if served, else the highest served level below it (the lowest
+ * served, if none is below). A level with no figures of its own reads the nearest level that has some, and
+ * the pick is then partly estimated. Served with no adjustable level, it runs at the provider default.
+ * Absent from the catalogue (no Redrob id), it is ranked as configured and cannot be switched to.
+ */
+function variantFor(model, harness) {
+  if (harness !== method.redrob.harness || !model.redrob) return { ...model, key: model.id, proxied: false };
+  const served = redrob.models[model.redrob]?.thinking;
+  if (!served) throw new Error(`${model.id}: ${model.redrob} is not in ${redrobFile}`);
+  const key = `${model.id}#redrob`;
+  if (model.effort === "default") return { ...model, key, proxied: false };
+  if (!served.length) {
+    const data = nearestData(model, method.redrob.providerDefault);
+    return {
+      ...model,
+      key,
+      effort: "default",
+      efforts: ["default"],
+      aa: { default: model.aa[data] },
+      costPerRun: model.costPerRun?.[data] !== undefined ? { default: model.costPerRun[data] } : undefined,
+      proxied: data !== method.redrob.providerDefault,
+    };
+  }
+  const levels = served.filter((l) => ORDER.includes(l)).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+  const effort = levels.filter((l) => ORDER.indexOf(l) <= ORDER.indexOf(model.effort)).pop() ?? levels[0];
+  const data = Object.fromEntries(levels.map((l) => [l, nearestData(model, l)]));
+  const costPerRun = Object.fromEntries(
+    levels.filter((l) => model.costPerRun?.[data[l]] !== undefined).map((l) => [l, model.costPerRun[data[l]]]),
+  );
+  return {
+    ...model,
+    key,
+    effort,
+    efforts: levels,
+    aa: Object.fromEntries(levels.map((l) => [l, model.aa[data[l]]])),
+    costPerRun: Object.keys(costPerRun).length ? costPerRun : undefined,
+    proxied: data[effort] !== effort,
+  };
+}
+
+/** Every (model, harness) as it runs there; a model on two harnesses may run two ways. */
+const variants = new Map();
+for (const model of models) for (const harness of model.harnesses) variants.set(`${model.id}|${harness}`, variantFor(model, harness));
+
+// Every figure once, and the best on each board among the setups we rank.
 const allBoards = new Set([...Object.keys(BOARDS), ...Object.keys(AA_FIELDS), ...Object.keys(BRIEFCASE_FILE)]);
 const figures = new Map();
 const best = {};
+const uniqueVariants = [...new Map([...variants.values()].map((v) => [v.key, v])).values()];
 for (const board of allBoards) {
-  for (const model of models) {
+  for (const model of uniqueVariants) {
     const f = figure(model, board);
-    figures.set(`${model.id}|${board}`, f);
+    figures.set(`${model.key}|${board}`, f);
     if (f && (best[board] === undefined || f.value > best[board])) best[board] = f.value;
   }
 }
@@ -81,12 +147,12 @@ function gapOf(board, value) {
 }
 
 function gapFor(model, board, language) {
-  const f = figures.get(`${model.id}|${board}`);
+  const f = figures.get(`${model.key}|${board}`);
   if (!f) return null;
   const g = gapOf(board, f.value);
   const ko = method.quality.korean;
   if (language === "ko" && board === ko.replaces) {
-    const k = figures.get(`${model.id}|${ko.board}`);
+    const k = figures.get(`${model.key}|${ko.board}`);
     if (k) return (g + gapOf(ko.board, k.value)) / 2;
   }
   return g;
@@ -94,7 +160,7 @@ function gapFor(model, board, language) {
 
 /** Interval on a gap, from the board's own interval where it prints one, else 2% of the best. */
 function gapCi(model, board) {
-  const f = figures.get(`${model.id}|${board}`);
+  const f = figures.get(`${model.key}|${board}`);
   if (!f) return null;
   if (ELO.has(board) && f.ci) return Math.abs(gapOf(board, f.value - f.ci) - gapOf(board, f.value));
   return 2;
@@ -166,11 +232,12 @@ const benchmarkPick = (model, harness) =>
 
 function candidates(task, language, output) {
   const out = [];
-  for (const model of models) {
-    const q = taskQuality(model, task, language, output);
-    if (!q) continue;
-    const d = dims(model);
-    for (const harness of model.harnesses) {
+  for (const base of models) {
+    for (const harness of base.harnesses) {
+      const model = variants.get(`${base.id}|${harness}`);
+      const q = taskQuality(model, task, language, output);
+      if (!q) continue;
+      const d = dims(model);
       const reliability = reliabilityOn(d.reliability, harness, task);
       const score = { quality: q.quality, reliability, speed: d.speed, cost: d.cost };
       const total = Object.entries(method.weights).reduce((s, [k, w]) => s + w * score[k], 0);
@@ -181,7 +248,7 @@ function candidates(task, language, output) {
 }
 
 function sourceValue(model, board) {
-  const f = figures.get(`${model.id}|${board}`);
+  const f = figures.get(`${model.key}|${board}`);
   const v = ELO.has(board) ? String(Math.round(f.value)) : String(f.value);
   return f.effort ? `${v} (${f.effort})` : v;
 }
@@ -214,7 +281,7 @@ function pick(c, id, task, language, output, flags) {
   const sources = [];
   const seen = new Set();
   for (const board of c.q.used) {
-    if (seen.has(board) || !figures.get(`${model.id}|${board}`)) continue;
+    if (seen.has(board) || !figures.get(`${model.key}|${board}`)) continue;
     seen.add(board);
     const s = sourceOf(board);
     sources.push({ label: s.label, value: sourceValue(model, board), kind: s.kind, url: s.url, date });
@@ -223,8 +290,8 @@ function pick(c, id, task, language, output, flags) {
   sources.push({ label: "monthly", value: `${task.runs} runs/month x $${perRun.toFixed(5)}/run`, kind: "estimate", date });
   if (withImage)
     sources.push({ label: "image", value: `${task.runs} runs x ${image.imagesPerRun} images x $${image.pricePerImage}`, kind: "estimate", date });
-  const estimated = c.q.imputed || c.d.estimated.length > 0 || (language === "ko" && task.noKoreanBenchmark === true);
-  const planned = method.harnesses[harness].planned || [];
+  const estimated =
+    c.q.imputed || c.d.estimated.length > 0 || model.proxied || (language === "ko" && task.noKoreanBenchmark === true);
   const picked = {
     id,
     steps: [{ model: model.id, effort: model.effort }, ...(withImage ? [{ model: image.id, role: "image" }] : [])],
@@ -241,7 +308,6 @@ function pick(c, id, task, language, output, flags) {
     monthlyKind: "estimate",
     monthlyRange: method.monthly.range.map((r) => round(monthly * r, 2)),
     efforts,
-    comingSoon: task.tools.some((t) => planned.includes(t)),
     missing: [],
     flags: [...flags, ...(estimated ? ["partly-estimated"] : []), ...(model.outsideUs ? ["outside-us"] : [])],
     sources,
@@ -281,7 +347,8 @@ const research = {
   asOf: date,
   weights: method.weights,
   models: {},
-  planned: Object.fromEntries(Object.entries(method.harnesses).filter(([, h]) => h.planned).map(([id, h]) => [id, h.planned])),
+  /** Each ranked model's id in the Redrob catalogue, or null where Redrob does not serve it. */
+  catalogue: {},
   professions: professions.map((p) => ({
     id: p.id,
     label: p.label,
@@ -296,8 +363,13 @@ const research = {
     }),
   })),
 };
-for (const m of [...models, ...imageModels]) if (used.has(m.id)) research.models[m.id] = m.name;
+for (const m of [...models, ...imageModels])
+  if (used.has(m.id)) {
+    research.models[m.id] = m.name;
+    research.catalogue[m.id] = m.redrob ?? null;
+  }
 research.models = Object.fromEntries(Object.entries(research.models).sort());
+research.catalogue = Object.fromEntries(Object.entries(research.catalogue).sort());
 
 await writeFile(outFile, JSON.stringify(research));
 const count = research.professions.reduce((n, p) => n + p.tasks.length, 0);

@@ -26,6 +26,12 @@ describe("inferModelVendor", () => {
     expect(inferModelVendor("grok-4")?.name).toBe("xAI");
   });
 
+  test("reads a version number straight after the family name", () => {
+    expect(inferModelVendor("qwen/qwen3.8-max-0902")?.id).toBe("qwen");
+    expect(inferModelVendor("google/gemma3-27b")?.id).toBe("google");
+    expect(inferModelVendor("qwenish-model")).toBe(null);
+  });
+
   test("strips a provider segment before matching", () => {
     expect(inferModelVendor("redrob/claude-opus-5")?.id).toBe("anthropic");
     expect(inferModelVendor("anthropic:claude-haiku-4-5")?.id).toBe("anthropic");

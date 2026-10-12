@@ -4,8 +4,44 @@ import type { Memory } from "@redrob/types/memory";
 
 import type { RedrobWorkspaceInfo } from "../src/app/lib/redrob-server";
 import type { DeskServices } from "../src/react-app/desk/services/desk-services";
-import { createFixtureDeskServices } from "../src/react-app/desk/services/fixture-services";
+import { createFixtureDeskServices, runScripted } from "../src/react-app/desk/services/fixture-services";
 import { createDeskServices, createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
+import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
+
+/** A manual clock: timers fire only when the test advances time. */
+function fakeClock() {
+  let now = 0;
+  let nextId = 0;
+  const pending = new Map<number, { at: number; fn: () => void }>();
+  const handles = new Map<TimerHandle, number>();
+  const timers: DeskTimers = {
+    setTimeout(fn, ms) {
+      const id = ++nextId;
+      pending.set(id, { at: now + ms, fn });
+      // Reuse a real handle value as the opaque token so the type stays honest.
+      const handle = globalThis.setTimeout(() => {}, 1e9);
+      globalThis.clearTimeout(handle);
+      handles.set(handle, id);
+      return handle;
+    },
+    clearTimeout(handle) {
+      const id = handles.get(handle);
+      if (id !== undefined) pending.delete(id);
+    },
+  };
+  const advanceTo = (time: number) => {
+    for (;;) {
+      const due = [...pending.entries()].filter(([, timer]) => timer.at <= time).sort((a, b) => a[1].at - b[1].at)[0];
+      if (!due) break;
+      pending.delete(due[0]);
+      now = due[1].at;
+      due[1].fn();
+    }
+    now = time;
+  };
+  return { timers, advanceTo };
+}
 
 async function everyResult(services: DeskServices) {
   return [
@@ -97,7 +133,7 @@ function fakeClient() {
   ];
   let nextMemory = 3;
   let redrob: Record<string, unknown> = {};
-  const client: DeskServerClient = {
+  const client = deskClient({
     listWorkspaces: async () => {
       calls.push("listWorkspaces");
       return { items: [workspace] };
@@ -149,7 +185,7 @@ function fakeClient() {
       calls.push(`listMcp:${workspaceId}`);
       return { items: [{ name: "notion", config: { type: "remote", url: "https://mcp.notion.com/mcp" }, source: "config.project" }] };
     },
-  };
+  });
   return { client, calls };
 }
 

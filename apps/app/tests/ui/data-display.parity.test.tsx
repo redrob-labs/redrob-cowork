@@ -89,7 +89,7 @@ describe("Table is the design system's Table", () => {
         </TableBody>
       </>
     );
-    const designSystem = rr(markup(<DsTable columns={[{ key: "name", label: "Name" }]} rows={[{ name: "alpha" }]} />));
+    const designSystem = rr(markup(<DsTable columns={[{ key: "name", header: "Name" }]} rows={[{ name: "alpha" }]} />));
     const plain = rr(markup(<Table>{body}</Table>));
     const framed = rr(markup(<Table framed>{body}</Table>));
     expect(sorted(plain)).toEqual(["rr-table"]);

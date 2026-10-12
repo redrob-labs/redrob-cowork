@@ -82,6 +82,18 @@ export type GateTextsResult = {
   detection: "model" | "patterns";
 };
 
+/**
+ * What a chat's outgoing text held that the patterns can recognise, for insights: whether anything
+ * sensitive was there at all, and whether any of it went out unmasked at the chat's level. Two
+ * booleans; which details, and their values, stay in the gate.
+ */
+export type SensitivityReport = { sessionID: string; touched: boolean; unmasked: boolean };
+
+/** The rules the observe-only pass uses: every pattern category, no listed names, no model. */
+const OBSERVE_RULES: PrivacyRules = { level: "strict", names: [] };
+/** Pattern categories that mean sensitive data in Crew's sense: customer details, numbers, keys. */
+const SENSITIVE = new Set<LabelCategory>(["EMAIL", "RRN", "BRN", "CARD", "PHONE", "ACCOUNT", "ADDRESS"]);
+
 export class PrivacyGate {
   private readonly maps = new Map<string, LabelMap>();
 
@@ -89,7 +101,33 @@ export class PrivacyGate {
     private readonly config: ServerConfig,
     private readonly resolveWorkspace: GateWorkspaceResolver = workspaceForDirectory(config),
     private readonly detectors: DetectorSource = DetectorSource.fromEnvironment(),
+    private readonly onSensitivity: (report: SensitivityReport) => void = () => {},
   ) {}
+
+  /**
+   * Which sensitive categories the patterns find in these texts, ignoring the chat's level. A
+   * throwaway label map, so the chat's own labels are untouched and nothing is kept.
+   */
+  private observe(texts: readonly string[]): Set<LabelCategory> {
+    const map = emptyLabelMap();
+    const seen = new Set<LabelCategory>();
+    for (const text of texts) {
+      for (const category of labelText(text, OBSERVE_RULES, map).found) if (SENSITIVE.has(category)) seen.add(category);
+    }
+    return seen;
+  }
+
+  private report(sessionID: string, texts: readonly string[], masked: readonly LabelCategory[]): void {
+    const seen = this.observe(texts);
+    if (!seen.size) return;
+    const covered = new Set(masked);
+    // A report must never fail a send: the gate's job is to label, and this is only counting.
+    try {
+      this.onSensitivity({ sessionID, touched: true, unmasked: [...seen].some((category) => !covered.has(category)) });
+    } catch {
+      /* counting only */
+    }
+  }
 
   /** For the Privacy screen: whether a detection model is in use, and if not, why. */
   detectorStatus(): DetectorStatus {
@@ -121,7 +159,10 @@ export class PrivacyGate {
 
   async label(input: { sessionID: string; directory: string | null; texts: string[] }): Promise<GateTextsResult> {
     const rules = await this.rules(input.directory);
-    if (rules.level === "off") return { texts: input.texts, found: [], level: rules.level, instruction: null, detection: "patterns" };
+    if (rules.level === "off") {
+      this.report(input.sessionID, input.texts, []);
+      return { texts: input.texts, found: [], level: rules.level, instruction: null, detection: "patterns" };
+    }
     const map = this.map(input.sessionID);
     // The model only runs where its finds would be used (High and Strict). A model that fails while
     // reading throws out of here, and the plugin then sends nothing: no silent fallback mid-chat.
@@ -140,6 +181,7 @@ export class PrivacyGate {
       found.push(...result.found);
       texts.push(result.text);
     }
+    this.report(input.sessionID, input.texts, found);
     return {
       texts,
       found: [...new Set(found)],

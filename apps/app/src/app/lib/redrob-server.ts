@@ -1,4 +1,4 @@
-import type { Message, Part, Session, Todo } from "@redrob-labs/sdk/v2/client";
+import type { Message, Part, Session, SessionStatus, Todo } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 import { normalizeBaseUrl } from "@redrob/types/url";
 import { t } from "../../i18n";
@@ -144,10 +144,8 @@ export type RedrobSessionSnapshot = {
   session: Session;
   messages: RedrobSessionMessage[];
   todos: Todo[];
-  status:
-    | { type: "idle" }
-    | { type: "busy" }
-    | { type: "retry"; attempt: number; message: string; next: number };
+  /** The engine's status, `blocked` included: a turn the console refused with an action to take. */
+  status: SessionStatus;
 };
 
 export type RedrobPluginItem = {

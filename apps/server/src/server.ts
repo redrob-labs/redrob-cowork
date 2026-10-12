@@ -171,6 +171,8 @@ import { readTeamSkillsState, startTeamSkillsSync, syncTeamSkills, type TeamSkil
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
+import { startInsightsSync } from "./insights/sync.js";
+import { WorkClassifierSource } from "@redrob-labs/work-labeller/node";
 import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
 import { readLegacyConfigSweepState } from "./legacy-config-sweep.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
@@ -1309,6 +1311,10 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
   const stopTeamSkillsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
     ? () => {}
     : startTeamSkillsSync(config, teamSkillsSyncDeps(config, reloadEvents), logger);
+  // Labeled sessions go to the console with the person's Redrob Key; see insights/sync.ts.
+  const stopInsightsSync = process.env.REDROB_DISABLE_SCHEDULER === "1"
+    ? () => {}
+    : startInsightsSync(config, teamPolicySyncDeps(config), logger);
 
   return {
     ...server,
@@ -1316,6 +1322,7 @@ export async function startServer(config: ServerConfig): Promise<ServeResult> {
       stopScheduler();
       stopTeamPolicySync();
       stopTeamSkillsSync();
+      stopInsightsSync();
       stopConnectorPolicyListener();
         invalidateEngineMcpServerState(config, engineMcpServerState);
       watcherHandle.close();
@@ -2948,7 +2955,20 @@ function createRoutes(
    * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
    * the chats whose labels this resolves, so restoring them reveals nothing new.
    */
-  const privacyGate = new PrivacyGate(config);
+  /*
+   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text,
+   * except each session's first message once, which the work classifier reads here and drops;
+   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
+   * Nothing is sent anywhere from these routes.
+   */
+  const insightsOutbox = new InsightsOutbox(config);
+  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
+  const workClassifier = new WorkClassifierSource({ directory: process.env.REDROB_INSIGHTS_MODEL_DIR?.trim() || null });
+  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
+  insightsSweep.unref?.();
+  const privacyGate = new PrivacyGate(config, undefined, undefined, (report) =>
+    insightsRecorder.observeSensitivity(report.sessionID, Date.now(), report.unmasked),
+  );
   addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -2972,15 +2992,6 @@ function createRoutes(
     }
   });
 
-  /*
-   * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
-   * finished sessions are labeled here and queued in the outbox, which the person can read in full.
-   * Nothing is sent anywhere from these routes.
-   */
-  const insightsOutbox = new InsightsOutbox(config);
-  const insightsRecorder = new InsightsRecorder((session) => insightsOutbox.add(session));
-  const insightsSweep = setInterval(() => void insightsRecorder.sweep(Date.now()).catch(() => undefined), 60_000);
-  insightsSweep.unref?.();
   addRoute(routes, "POST", "/insights/facts", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     const body = await readJsonBody(ctx.request);
@@ -2996,7 +3007,19 @@ function createRoutes(
   });
   addRoute(routes, "GET", "/insights/outbox", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
-    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount() });
+    return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount(), workModel: workClassifier.status() });
+  });
+  // A session's first message, once, for the work classifier. The text is labeled in memory and
+  // dropped; the session keeps only the family.
+  addRoute(routes, "POST", "/insights/work", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const body = await readJsonBody(ctx.request);
+    const { sessionID, messageID, text } = body;
+    if (typeof sessionID !== "string" || typeof messageID !== "string" || typeof text !== "string") {
+      throw new ApiError(400, "invalid_payload", "sessionID, messageID and text (strings) are required");
+    }
+    const read = await insightsRecorder.observeFirstMessage(sessionID, messageID, text.slice(0, 4_000), (value) => workClassifier.label(value));
+    return jsonResponse({ read });
   });
 
   /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */

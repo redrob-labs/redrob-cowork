@@ -4,6 +4,7 @@ import {
   classifyRouteSessionReadError,
   mergeRouteWorkspaces,
   refreshRouteWorkspaceListState,
+  type RouteWorkspace,
 } from "../src/react-app/shell/route-workspaces";
 import {
   mergeWorkspaceRouteSession,
@@ -91,17 +92,19 @@ describe("workspace route session read errors", () => {
 });
 
 describe("workspace route list merging", () => {
-  const previouslyKnownWorkspaces = [{
+  const previouslyKnownWorkspaces: RouteWorkspace[] = [{
     id: "workspace-known",
     name: "Known workspace",
     path: "/tmp/known",
+    preset: "minimal",
     workspaceType: "local",
     displayNameResolved: "Known workspace",
   }];
-  const desktopWorkspaces = [{
+  const desktopWorkspaces: RouteWorkspace[] = [{
     id: "workspace-desktop",
     name: "Desktop workspace",
     path: "/tmp/redrob",
+    preset: "minimal",
     workspaceType: "local",
     displayNameResolved: "Desktop workspace",
   }];

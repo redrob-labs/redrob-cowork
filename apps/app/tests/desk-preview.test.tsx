@@ -25,7 +25,7 @@ import { createFixtureDeskServices, resetSampleBoard, resetSampleSkills } from "
 import { HISTORY } from "../src/react-app/desk/services/fixtures/history";
 import { SKILLS } from "../src/react-app/desk/services/fixtures/skills";
 import { createDeskServices } from "../src/react-app/desk/services/real-services";
-import type { ScheduleBoard } from "../src/react-app/desk/services/types";
+import type { DeskResult, Playbook, ScheduleBoard } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 
 afterEach(() => {
@@ -71,13 +71,10 @@ function route(path: string, client: QueryClient) {
 async function withoutNetwork<T>(work: () => Promise<T>): Promise<{ result: T; fetched: number }> {
   const originalFetch = globalThis.fetch;
   let fetched = 0;
-  globalThis.fetch = Object.assign(
-    () => {
-      fetched += 1;
-      throw new Error("no network in this test");
-    },
-    { preconnect: originalFetch.preconnect },
-  );
+  globalThis.fetch = () => {
+    fetched += 1;
+    throw new Error("no network in this test");
+  };
   try {
     return { result: await work(), fetched };
   } finally {
@@ -144,7 +141,7 @@ describe("the Preview routes", () => {
     expect(route("/scheduled", client)).toContain("나를 기다리는 실행 (2)");
     expect(route("/history", client)).toContain("스스로 실행");
     client.setQueryData(GUIDE_RESEARCH_KEY, await loadGuideResearch());
-    expect(route("/guide", client)).toContain("레드롭 오토");
+    expect(route("/guide", client)).toContain("새 채팅에 사용");
   });
 });
 
@@ -209,7 +206,7 @@ describe("Schedules on sample data", () => {
     const saved = result?.data.schedules.filter((entry) => entry.name === "Sweep the renewals") ?? [];
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({ target, projectId: "supplier", cadence: "Every Monday at 08:00 Seoul time", enabled: true, lastRun: null });
-    expect(client.getQueryData(previewKey("preview", "board"))).toEqual(result);
+    expect(client.getQueryData<DeskResult<ScheduleBoard>>(previewKey("preview", "board"))).toEqual(result);
     expect(toasts).toEqual([["Schedule saved", "This is a preview, so nothing ran and nothing was sent."]]);
 
     // The same prompt again is a second schedule, not a replacement.
@@ -285,7 +282,7 @@ describe("Scheduled", () => {
     expect(fetched).toBe(0);
     expect(result.data.waiting.map((run) => run.id)).toEqual(["w2"]);
     expect(client.getQueryState(navWaitingKey("preview"))?.isInvalidated).toBe(true);
-    expect(client.getQueryData(previewKey("preview", "board"))).toEqual(result);
+    expect(client.getQueryData<DeskResult<ScheduleBoard>>(previewKey("preview", "board"))).toEqual(result);
     // The menu builds its own services; it sees the same board.
     expect((await createDeskServices({ client: null, workspaceId: null }).schedules.list()).data.waiting).toHaveLength(1);
     expect(result.data.schedules.find((entry) => entry.id === "s1")?.lastRun?.state).toBe("done");
@@ -348,8 +345,10 @@ describe("Model Guide", () => {
     expect(html).toContain('href="/guide" aria-current="page"');
     expect(html).toContain('aria-selected="true" aria-controls="panel-profession"');
     expect(html).toContain("By price");
-    expect(html).toContain("every message goes to Redrob Auto");
-    expect(html).toContain("Rankings as of 2026-10-08");
+    expect(html).not.toContain("every message goes to Redrob Auto");
+    expect(html).toContain("Use for new chats");
+    expect(html).toContain("October 2026 edition · Updated monthly");
+    expect(html).not.toContain("Rankings as of");
     expect(html).not.toContain("rr-alert");
     expect(html).not.toContain("Sample output, illustrative");
   });
