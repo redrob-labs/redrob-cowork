@@ -18,7 +18,6 @@ export const SESSION_MODEL_PREF_KEY = "redrob.sessionModels";
 export const THINKING_PREF_KEY = "redrob.showThinking";
 export const VARIANT_PREF_KEY = "redrob.modelVariant";
 export { LANGUAGE_PREF_KEY } from "../i18n";
-export const HIDE_TITLEBAR_PREF_KEY = "redrob.hideTitlebar";
 
 export const DEFAULT_MODEL: ModelRef = {
   providerID: REDROB_PROVIDER_ID,

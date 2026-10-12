@@ -17,6 +17,8 @@ import { isDeskSettingsPath } from "../settings/settings-sections";
 import { useFrameStore, type FrameModal, type FrameToast } from "../store/frame-store";
 import { APP_VERSION, versionLabel } from "./account-menu";
 import { DeskDialog } from "./desk-dialog";
+import { SearchDialog } from "./search-dialog";
+import { hasCommandPalette } from "../../shell/use-shell-shortcuts";
 import { chatPath } from "./desk-routes";
 
 /**
@@ -263,6 +265,30 @@ export function isDeskFramePath(pathname: string): boolean {
   return !/^\/(welcome|extensions|settings|__ds|workspace\/[^/]+\/(extensions|settings))(\/|$)/.test(pathname);
 }
 
+/**
+ * Ctrl/Cmd+K opens Search on Desk screens. A screen with its own command palette (the developer and
+ * settings screens) keeps Ctrl+K for that palette.
+ */
+function useSearchShortcut() {
+  const { pathname } = useLocation();
+  const modal = useFrameStore((state) => state.modal);
+  const openModal = useFrameStore((state) => state.openModal);
+  const closeModal = useFrameStore((state) => state.closeModal);
+  const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    const mod = isMacPlatform() ? event.metaKey : event.ctrlKey;
+    if (!mod || event.shiftKey || event.altKey || event.key.toLowerCase() !== "k") return;
+    if (hasCommandPalette() || !isDeskFramePath(pathname)) return;
+    event.preventDefault();
+    if (modal?.kind === "search") closeModal();
+    else openModal({ kind: "search" });
+  });
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => onKeyDown(event);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+}
+
 /** Ctrl/Cmd+Shift+B opens or closes the browser in the side panel, on any Desk screen. */
 function useToggleBrowserShortcut() {
   const { pathname } = useLocation();
@@ -292,6 +318,7 @@ export function DeskLayerView(props: DeskLayerViewProps) {
   return (
     <>
       {props.modal?.kind === "keys" ? <ShortcutsDialog mac={props.mac} onClose={props.onCloseModal} /> : null}
+      {props.modal?.kind === "search" ? <SearchDialog onClose={props.onCloseModal} /> : null}
       {props.modal?.kind === "feedback" ? <FeedbackDialog onClose={props.onCloseModal} /> : null}
       {props.modal?.kind === "project" ? (
         <ProjectDialog key={props.modal.chatId ?? "new"} chatId={props.modal.chatId} onClose={props.onCloseModal} />
@@ -342,6 +369,7 @@ export function DeskLayer() {
   const closeModal = useFrameStore((state) => state.closeModal);
   const hideToast = useFrameStore((state) => state.hideToast);
   useNewChatShortcut();
+  useSearchShortcut();
   useToggleBrowserShortcut();
   useDeskRunEvents();
 

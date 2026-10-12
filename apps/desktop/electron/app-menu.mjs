@@ -218,14 +218,20 @@ export function createApplicationMenu({ appName, docsUrl, getWindow }) {
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
   }
 
+  /*
+    On Windows and Linux the menu is never shown: the renderer's title bar has no menus by design. It stays
+    INSTALLED, because its accelerators (Ctrl+B, Ctrl+, and the
+    zoom keys) only fire while an application menu is set. Auto-hide stays off so Alt cannot bring the
+    native bar back over the custom one.
+  */
   function applyVisibility(window) {
     if (process.platform === "darwin") return;
     window.setAutoHideMenuBar(false);
-    window.setMenuBarVisibility(applicationMenuVisible);
+    window.setMenuBarVisibility(false);
   }
 
   function setVisible(visible) {
-    applicationMenuVisible = visible === true;
+    applicationMenuVisible = process.platform === "darwin" && visible === true;
     for (const window of BrowserWindow.getAllWindows()) {
       applyVisibility(window);
     }

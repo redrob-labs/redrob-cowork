@@ -18,6 +18,7 @@ const MAIN = readFileSync(join(ELECTRON_DIR, "main.mjs"), "utf8");
 const REDROB_BLACK = "#0a0b0c";
 const REDROB_GRAY_1 = "#f8f9fb";
 const REDROB_GRAY_5 = "#aab0bb";
+const REDROB_GRAY_7 = "#576071";
 
 function shutdownScreenStyles() {
   const screen = /function showShutdownScreen\(\)[\s\S]*?<\/style>/.exec(MAIN);
@@ -59,12 +60,13 @@ test("the window frame stays transparent so the renderer owns the background", (
   assert.match(MAIN, /backgroundColor: "#00000001"/);
 });
 
-test("the Windows title bar draws its controls in a design-system neutral", () => {
-  // The overlay's minimise/maximise/close glyphs are painted by Windows from this
-  // value. It was Tailwind's #9ca3af, a grey from no Redrob palette; Gray 5 is
-  // the design system's neutral for icons on light and dark grounds alike.
-  const overlay = /titleBarOverlay: \{([^}]*)\}/.exec(MAIN);
-  assert.ok(overlay, "the Windows title bar overlay should still be configured");
-  assert.match(overlay[1], new RegExp(`symbolColor: "${REDROB_GRAY_5}"`));
+test("the Windows caption buttons are drawn in the design system's ink-secondary", () => {
+  // Windows paints the minimise/maximise/close glyphs from these values and cannot read the renderer's
+  // tokens. Gray 7 is --ink-secondary on light and Gray 5 on dark; the strip itself stays transparent so
+  // the renderer's title bar is the ground.
+  const colors = /const WINDOWS_CAPTION_COLORS = \{([\s\S]*?)\n\};/.exec(MAIN);
+  assert.ok(colors, "the Windows caption colours should still be declared");
+  assert.match(colors[1], new RegExp(`light: \\{ color: "#00000000", symbolColor: "${REDROB_GRAY_7}" \\}`));
+  assert.match(colors[1], new RegExp(`dark: \\{ color: "#00000000", symbolColor: "${REDROB_GRAY_5}" \\}`));
   assert.doesNotMatch(MAIN, /#9ca3af/);
 });

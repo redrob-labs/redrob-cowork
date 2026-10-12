@@ -15,43 +15,47 @@ const repoRead = (relative: string) => readFileSync(join(REPO, relative), "utf8"
  * a compaction toggle with no threshold beside it, and a summarize path reachable only by typing a command
  * whose name is not written down anywhere in the UI.
  */
-describe("title bar setting", () => {
-  test("the switch reaches the main process", () => {
+describe("window title bar", () => {
+  test("Windows and Linux have no native title bar or menu bar", () => {
     /*
-      It used to write `redrob.hideTitlebar` to localStorage and NOTHING read it - a grep for consumers
-      returned the constant's declaration and nothing else. Verified end to end in a real Electron run:
-      toggling it wrote window-appearance.json, and after a restart the OS title bar was gone.
-    */
-    const route = read("src/react-app/shell/settings-route.tsx");
-    expect(route).toContain('invokeDesktop?.("__setTitleBarHidden"');
-    expect(route).toContain('t("settings.hide_titlebar_restart")');
-  });
-
-  test("the main process persists it where startup can read it", () => {
-    // `frame` and `titleBarStyle` are construction options, so the value must be on disk before the
-    // renderer that owns localStorage exists. That is the whole reason the original wiring could not work.
-    const main = repoRead("apps/desktop/electron/main.mjs");
-    expect(main).toContain("window-appearance.json");
-    expect(main).toContain("await readTitleBarPreference()");
-  });
-
-  test("Windows keeps its window controls and Linux does not pretend to", () => {
-    /*
-      `titleBarOverlay` is Windows-only. On Linux `titleBarStyle: "hidden"` reserves no strip, so the bare
-      controls land on the app's own right-hand rail - observed on xfwm4 with the close button sitting
-      exactly over the browser-panel icon. Linux therefore gets `frame: false`, which is what the setting's
-      stated use case (tiling window managers) actually wants, and Windows keeps the overlay because there
-      the three buttons are the user's only handle on the window.
+      The renderer draws the bar (WindowTitleBar). Windows keeps its own caption buttons through
+      `titleBarOverlay`, because only real caption buttons get Snap Layouts; Linux has no overlay, so it is
+      frameless and the bar draws minimise, maximise and close itself.
     */
     const main = repoRead("apps/desktop/electron/main.mjs");
-    expect(main).toContain('process.platform === "win32"');
+    expect(main).toContain('titleBarStyle: "hidden", titleBarOverlay: windowsCaptionOverlay()');
     expect(main).toContain("{ frame: false }");
-    expect(main).toContain("titleBarOverlay");
+    expect(main).not.toContain("readTitleBarPreference");
+    const menu = repoRead("apps/desktop/electron/app-menu.mjs");
+    expect(menu).toContain("window.setMenuBarVisibility(false)");
+    expect(menu).toContain("Menu.setApplicationMenu(");
   });
 
-  test("macOS reports that it has nothing to do", () => {
-    // Already `hiddenInset`. A silent no-op is what made the original bug invisible.
-    expect(repoRead("apps/desktop/electron/main.mjs")).toContain("macos-always-hidden");
+  test("the bar is mounted once, and its window actions are a fixed list", () => {
+    expect(read("src/react-app/shell/app-root.tsx")).toContain("<WindowTitleBar />");
+    const main = repoRead("apps/desktop/electron/main.mjs");
+    expect(main).toContain('"__windowControl": async (event');
+    expect(main).toContain("Object.hasOwn(WINDOW_CONTROL_ACTIONS, action)");
+  });
+
+  test("the retired switches are gone", () => {
+    expect(read("src/react-app/shell/settings-route.tsx")).not.toContain("__setTitleBarHidden");
+    expect(read("src/react-app/domains/settings/pages/appearance-view.tsx")).not.toContain("WindowSection");
+  });
+
+  test("the bar carries no File/Edit/View menus", () => {
+    const bar = read("src/react-app/shell/window-title-bar.tsx");
+    expect(bar).not.toContain("<Menu");
+    expect(bar).not.toContain("<nav");
+  });
+
+  test("the bar has Back, Forward, the sidebar toggle and Search", () => {
+    const bar = read("src/react-app/shell/window-title-bar.tsx");
+    expect(bar).toContain("navigate(-1)");
+    expect(bar).toContain("navigate(1)");
+    expect(bar).toContain("redrob:native-menu:toggle-sidebar");
+    // Search opens the screen's command palette when it has one, the Desk search dialog otherwise.
+    expect(bar).toContain('if (!openCommandPalette()) openModal({ kind: "search" })');
   });
 });
 
@@ -192,8 +196,10 @@ describe("Korean tooltips", () => {
       "settings.compact_threshold",
       "settings.compact_threshold_desc",
       "settings.compact_threshold_tooltip",
-      "settings.hide_titlebar_restart",
-      "settings.hide_titlebar_macos",
+      "titlebar.minimize",
+      "titlebar.search_placeholder",
+      "titlebar.back",
+      "titlebar.close_window",
     ]) {
       expect(en).toContain(`"${key}":`);
       expect(ko).toContain(`"${key}":`);
