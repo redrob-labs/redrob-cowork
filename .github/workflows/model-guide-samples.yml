@@ -1,0 +1,79 @@
+name: model-guide-samples
+
+# Runs the Model Guide's example prompts on every ranked model, through the Redrob API. Started by hand
+# (Actions > model-guide-samples > Run workflow) on a working branch. The runs and grades are not in git:
+# every 30 runs the job packs them, uploads the tarball to the release named by `tag`, and commits the
+# new pin (scripts/model-guide/samples/data.json) to the branch it runs on. Spend is capped in run.mjs at
+# $150, cumulative over every output in the pinned set, and `cap_usd` can only lower that.
+on:
+  workflow_dispatch:
+    inputs:
+      cap_usd:
+        description: Total spend allowed across every run in the set (run.mjs never exceeds $150)
+        required: true
+        type: number
+      tag:
+        description: Release to upload the new set to, e.g. model-guide-samples-2026-11-02 (created if missing)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: model-guide-samples
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - name: Refuse long-lived branches
+        env:
+          REF: ${{ github.ref_name }}
+        run: |
+          case "$REF" in
+            main|develop) echo "::error::Run this from a working branch, not $REF." >&2; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Run in batches, publishing each
+        env:
+          REDROB_API_KEY: ${{ secrets.REDROB_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          CAP: ${{ inputs.cap_usd }}
+          TAG: ${{ inputs.tag }}
+          REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${REDROB_API_KEY:-}" ]; then
+            echo "::error::REDROB_API_KEY is not set for this repository." >&2
+            exit 1
+          fi
+          samples=scripts/model-guide/samples
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --latest=false --title "Model Guide samples ($TAG)" --notes "Raw Model Guide sample runs and grades; data, not an app release. See $samples/README.md."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          for batch in $(seq 1 40); do
+            node "$samples/run.mjs" --cap "$CAP" --max-runs 30 --concurrency 6
+            node "$samples/data.mjs" --pack --tag "$TAG"
+            gh release upload "$TAG" "$samples/$TAG.tar.gz" --clobber
+            git add "$samples/data.json" "$samples/run-summary.json"
+            if ! git diff --cached --quiet; then
+              git commit -q -m "chore(guide): sample outputs, batch $batch"
+              git push -q origin "HEAD:refs/heads/$REF"
+            fi
+            node -e 'const s=require("./scripts/model-guide/samples/run-summary.json"); console.log(JSON.stringify(s)); process.exit(s.stopped || s.complete ? 1 : 0)' || break
+          done
+
+      - name: Summary
+        if: always()
+        run: cat scripts/model-guide/samples/run-summary.json >> "$GITHUB_STEP_SUMMARY" || true
