@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+﻿import { describe, expect, test } from "bun:test";
 import type { Session } from "@redrob-labs/sdk/v2/client";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -80,7 +80,7 @@ describe("real History", () => {
       listMcp: unused,
       getConfig: unused,
       patchConfig: unused,
-    };
+    });
     const result = await createRealDeskServices({ client, workspaceId: "ws_1" }).history.list();
     expect(result.preview).toBe(false);
     expect(result.data.map((entry) => [entry.id, entry.projectId])).toEqual([["new", "ws_1"], ["mid", "ws_2"], ["old", "ws_1"]]);
