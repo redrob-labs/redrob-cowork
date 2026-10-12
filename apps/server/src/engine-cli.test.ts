@@ -68,7 +68,6 @@ async function fakeEngine(): Promise<string> {
 const fs = require("node:fs");
 const path = require("node:path");
 const store = path.join(process.env.XDG_DATA_HOME || "/nonexistent", "fake");
-fs.mkdirSync(store, { recursive: true });
 const [command, arg] = process.argv.slice(2);
 if (process.env.REDROB_SERVER_PASSWORD) { console.error("password leaked"); process.exit(9); }
 if (command === "export") {
@@ -79,6 +78,8 @@ if (command === "export") {
 } else if (command === "import") {
   const data = JSON.parse(fs.readFileSync(arg, "utf8"));
   data.info.directory = process.cwd();
+  // Only import writes, so only import needs the store: "sleep" must not fail without XDG_DATA_HOME.
+  fs.mkdirSync(store, { recursive: true });
   fs.writeFileSync(path.join(store, data.info.id + ".json"), JSON.stringify(data, null, 2));
   process.stdout.write("Imported session: " + data.info.id + "\\n");
 } else if (command === "sleep") {
