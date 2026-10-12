@@ -65,7 +65,7 @@ import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permis
 import { DeskThreadContext, textDraft, type DeskThread } from "@/react-app/desk/thread/desk-thread-context";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
-import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
+import { completedWritesFingerprint, deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
 import { usePanelTabStore } from "@/react-app/domains/session/panel/panel-tab-store";
 import {
   markSessionSnapshotFetchStart,
@@ -993,6 +993,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
     () => openTargets.map((target) => `${target.kind}:${target.value}:${target.confidence}`).join("|"),
     [openTargets],
   );
+  /* Re-verifying on each completed write is what refreshes an open preview mid-turn; see the function. */
+  const writesFingerprint = useMemo(() => completedWritesFingerprint(renderedMessages), [renderedMessages]);
   const autoOpenTarget = selectAutoOpenTarget(verifiedOpenTargets);
   const pendingSessionLoad = !snapshot && snapshotQuery.isLoading && renderedMessages.length === 0;
   const assistantOutputAfterAwaitStart = useMemo(() => {
@@ -1060,7 +1062,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     }
     void verifyTargets();
     return () => { cancelled = true; };
-  }, [chatStreaming, openTargetsFingerprint, props.client, props.sessionId, props.workspaceId]);
+  }, [chatStreaming, openTargetsFingerprint, writesFingerprint, props.client, props.sessionId, props.workspaceId]);
 
   useEffect(() => {
     usePanelTabStore.getState().syncTranscriptArtifacts(props.sessionId, verifiedOpenTargets);
