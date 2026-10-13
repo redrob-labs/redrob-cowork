@@ -113,7 +113,6 @@ export interface ServerConfig {
    * needed while sessions are live: a standby engine takes new work and the
    * old one is closed once its runs finish. Off by default (alpha).
    */
-  engineRollover?: boolean;
   /** In-memory secure key custody supplied by an embedding host such as Redrob Cowork Desktop. */
   localManagedMcpVaultKey?: LocalManagedMcpVaultKeyProvider;
 }

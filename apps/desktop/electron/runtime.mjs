@@ -327,6 +327,11 @@ export function commandMatchesPackagedSidecar(command, sidecarDirs = []) {
   if (!sidecarDirs.some((dir) => String(dir ?? "").trim() && value.includes(dir))) {
     return false;
   }
+  // `redrob serve --register` is the SHARED daemon: it may have been started from this
+  // bundle's binary, but Office, Design or another Cowork may be attached to it, and it
+  // exits by itself once nobody is. Only an engine a pre-daemon Cowork spawned for
+  // itself (`redrob serve --port N`) is an orphan of ours.
+  if (/\s--register\b/.test(value)) return false;
   return /(?:^|[/\\])redrob[^/\\\s]*\s+serve\b/.test(value);
 }
 
@@ -2062,7 +2067,10 @@ export function createRuntimeManager({
       opencodeBaseUrl: options.opencodeBaseUrl ?? undefined,
       opencodeDirectory: activeWorkspace || undefined,
       manageOpencode: options.manageOpencode === true,
-      opencodeBin: managedOpencode?.path ?? undefined,
+      // A binary the user chose wins; the bundled sidecar only starts the shared daemon
+      // when the user has no `redrob` of their own (one daemon, one version, every app).
+      opencodeBin: managedOpencode?.source === "custom" ? managedOpencode.path : undefined,
+      bundledOpencodeBin: managedOpencode && managedOpencode.source !== "custom" ? managedOpencode.path : undefined,
       opencodeCwd: managedOpencodeWorkdir(),
       localManagedMcpVaultKey,
       engineRollover: options.engineRollover === true,

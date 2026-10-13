@@ -1,19 +1,19 @@
 /**
- * Runtime engine configuration injected via a server-managed config file
- * passed to the Redrob Code engine as REDROB_CONFIG.
+ * Runtime engine configuration injected via a server-managed config file the
+ * Redrob Code engine reads for the workspace directory (see redrobRuntimeConfigFilePath).
  *
  * This is the single source of truth for the redrob agent definition,
  * plugins, and any other config that should be injected at runtime rather
  * than written to the user's own config files. Both cli.ts and embedded.ts
  * use this.
  *
- * The engine re-reads the REDROB_CONFIG file from disk on every instance
+ * The engine re-reads the file from disk on every instance
  * rebuild (e.g. /instance/dispose), so the file is synchronized on every
  * runtime-DB write — unlike the previous config-content env var, which was
  * frozen at spawn and reverted MCP state on each dispose.
  */
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   redrobExtensionsPreviewPluginPath,
@@ -26,7 +26,7 @@ import {
 } from "./redrob-extensions-plugin-path.js";
 import { blockedConnectorNames } from "./team-policy/connectors.js";
 import type { ServerConfig } from "./types.js";
-import { runtimeStorageDir } from "./runtime-db.js";
+import { redrobRuntimeConfigFilePath } from "./engine-config-path.js";
 import {
   onRuntimeOpencodeConfigWrite,
   isEngineGlobalRuntimeConfigId,
@@ -218,9 +218,7 @@ export async function buildRedrobRuntimeConfig(
   return stableStringify(await buildRedrobRuntimeConfigObject(config, workspaceId, options));
 }
 
-export function redrobRuntimeConfigFilePath(config: ServerConfig): string {
-  return join(runtimeStorageDir(config), "runtime-opencode-config.json");
-}
+export { redrobRuntimeConfigFilePath };
 
 // Serialize file writes per path so a slow older write can never land after
 // (and clobber) a newer one. Content is built inside the queued job so each
@@ -247,7 +245,7 @@ export async function writeRedrobRuntimeConfigFile(
     const content = await buildRedrobRuntimeConfig(config, workspaceId, options);
     const current = await readFile(path, "utf8").catch(() => undefined);
     if (current === content) return { path, changed: false };
-    await mkdir(runtimeStorageDir(config), { recursive: true });
+    await mkdir(dirname(path), { recursive: true });
     const tmp = `${path}.${randomUUID()}.tmp`;
     await writeFile(tmp, content, "utf8");
     await rename(tmp, path);
