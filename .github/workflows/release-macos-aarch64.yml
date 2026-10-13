@@ -678,6 +678,17 @@ jobs:
         shell: bash
         run: node scripts/release/launcher-asset-names.mjs rename apps/desktop/dist-electron
 
+      # Redrob Launcher reads one small file from every release to learn that the
+      # release reads its shared account file, so signing in to the launcher is
+      # all a user needs (launcher docs/release-manifest.md, schema 1). It is
+      # written into dist-electron here so the `redrob-*` upload below carries
+      # it like any installer (every platform job uploads it; --clobber makes
+      # the duplicates harmless), and the same script's check refuses a dist
+      # without it. The content is a constant in the script, unit-tested.
+      - name: Write the Redrob Launcher release manifest
+        shell: bash
+        run: node scripts/release/launcher-asset-names.mjs manifest apps/desktop/dist-electron
+
       # The engine reaches the app through an electron-builder `extraResources`
       # filter that names files exactly. A filter naming a file that is not
       # staged drops it SILENTLY and the pack still succeeds, so the installer

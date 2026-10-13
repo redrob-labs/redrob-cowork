@@ -165,7 +165,11 @@ describeMaybe("authorization-required MCP tool error pass-through", () => {
       },
     });
 
-    const runtime = buildRedrobRuntimeConfigObjectFromSnapshot({});
+    const runtime = buildRedrobRuntimeConfigObjectFromSnapshot({}, {
+      serverUrl: "http://127.0.0.1:1",
+      serverToken: "test-token",
+      runtimeConfigPath: join(workspace, "opencode.json"),
+    });
     const configPath = join(workspace, "opencode.json");
     writeFileSync(configPath, JSON.stringify({
       $schema: "https://opencode.ai/config.json",

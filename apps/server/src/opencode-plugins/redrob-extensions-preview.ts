@@ -737,12 +737,24 @@ async function readRedrobWorkSession(rawArgs: unknown): Promise<object> {
   return { ok: false, error: `Session ${args.sessionId} was not found in matching Redrob Cowork workspaces` };
 }
 
+// The server that wrote the config, as the plugin options named it. The engine
+// is a shared daemon, so its environment is not ours; the env vars are only a
+// fallback for an engine that still spawns per server and passes no options.
+let configuredServer: { url?: string; token?: string } = {};
+
+function readPluginServerOptions(value: unknown): { url?: string; token?: string } {
+  if (!isRecord(value)) return {};
+  const url = typeof value.serverUrl === "string" ? value.serverUrl : undefined;
+  const token = typeof value.serverToken === "string" ? value.serverToken : undefined;
+  return { ...(url !== undefined ? { url } : {}), ...(token !== undefined ? { token } : {}) };
+}
+
 function serverUrl(): string {
-  return String(process.env.REDROB_SERVER_URL || "").replace(/\/$/, "");
+  return String(configuredServer.url ?? process.env.REDROB_SERVER_URL ?? "").replace(/\/$/, "");
 }
 
 function serverToken(): string {
-  return String(process.env.REDROB_SERVER_TOKEN || "");
+  return String(configuredServer.token ?? process.env.REDROB_SERVER_TOKEN ?? "");
 }
 
 function requireRedrobWorkServer(): { url: string; token: string } {
@@ -873,7 +885,8 @@ function contextPayload(context: OpenCodeContext) {
   };
 }
 
-export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown) => {
+export const RedrobWorkExtensionsPreview = async (factoryInput?: unknown, options?: unknown) => {
+  configuredServer = readPluginServerOptions(options);
   const factoryContext = normalizeOpenCodeContext(factoryInput);
   const engineMcpStatusClient = readEngineMcpStatusClient(factoryInput);
   const engineMcpStatusDirectory = factoryContext.directory ?? factoryContext.worktree;

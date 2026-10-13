@@ -75,6 +75,14 @@ describe("redrob runtime config file", () => {
     expect(mcp["redrob-connect-stale"]).toBeUndefined();
     expect(parsed.default_agent).toBe("redrob");
     expect(Array.isArray(parsed.plugin)).toBe(true);
+    // Without explicit options the plugins get the server `config` describes.
+    const plugins = parsed.plugin as unknown[];
+    const tupleFor = (name: string) =>
+      plugins.find((entry) => Array.isArray(entry) && String(entry[0]).includes(name)) as unknown[] | undefined;
+    const server = { serverUrl: "http://127.0.0.1:0", serverToken: "owt_test_token" };
+    expect(tupleFor("redrob-extensions-preview")?.[1]).toEqual(server);
+    expect(tupleFor("redrob-insights-recorder")?.[1]).toEqual(server);
+    expect(tupleFor("redrob-team-connectors")?.[1]).toEqual({ runtimeConfigPath: redrobRuntimeConfigFilePath(config) });
     expect(parsed.agent).toMatchObject({
       redrob: {
         permission: {
@@ -88,6 +96,30 @@ describe("redrob runtime config file", () => {
         },
       },
     });
+  });
+
+  test("plugin options travel as [path, options] tuples carrying only what each plugin reads", async () => {
+    const { config } = await setup();
+    const options = {
+      serverUrl: "http://127.0.0.1:4321",
+      serverToken: "owt_explicit",
+      runtimeConfigPath: "/elsewhere/runtime-opencode-config.json",
+      docsDir: "/elsewhere/docs",
+    };
+    await writeRedrobRuntimeConfigFile(config, "ws_1", options);
+
+    const parsed = await readConfigFile(config);
+    const plugins = parsed.plugin as unknown[];
+    const tupleFor = (name: string) =>
+      plugins.find((entry) => Array.isArray(entry) && String(entry[0]).includes(name)) as unknown[] | undefined;
+    const server = { serverUrl: options.serverUrl, serverToken: options.serverToken };
+    expect(tupleFor("redrob-extensions-preview")?.[1]).toEqual(server);
+    expect(tupleFor("redrob-insights-recorder")?.[1]).toEqual(server);
+    expect(tupleFor("redrob-team-connectors")?.[1]).toEqual({ runtimeConfigPath: options.runtimeConfigPath });
+    expect(tupleFor("redrob-capabilities-knowledge")?.[1]).toEqual({ docsDir: options.docsDir });
+    // Plugins that read nothing stay plain strings, and no tuple carries a field it does not need.
+    expect(plugins.filter((entry) => typeof entry === "string").length).toBeGreaterThanOrEqual(4);
+    expect(plugins.some((entry) => typeof entry === "string" && entry.includes("redrob-office-attachments"))).toBe(true);
   });
 
   test("redrob prompt says saved notes arrive in the system text, and names no memory tool", async () => {

@@ -22,14 +22,32 @@
  * that refuses a dist directory whose installable assets would be invisible
  * to the launcher.
  *
- *     node scripts/release/launcher-asset-names.mjs rename <dist-dir>
- *     node scripts/release/launcher-asset-names.mjs check  <dist-dir>
+ * The same dist carries one more release asset, `redrob-launcher.json`: the
+ * launcher reads it from the release to learn that this release reads the
+ * launcher's shared account file, so signing in to the launcher is all a
+ * user needs (launcher docs/release-manifest.md, schema 1). `rename` and
+ * `manifest` write it; `check` refuses a dist without it. It is uploaded by
+ * the same `redrob-*` glob as the installers.
+ *
+ *     node scripts/release/launcher-asset-names.mjs rename   <dist-dir>
+ *     node scripts/release/launcher-asset-names.mjs manifest <dist-dir>
+ *     node scripts/release/launcher-asset-names.mjs check    <dist-dir>
  */
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const STEM = "redrob-cowork";
+
+/** The release manifest Redrob Launcher reads beside the installers. */
+export const LAUNCHER_MANIFEST_NAME = "redrob-launcher.json";
+
+/**
+ * Its content, byte for byte. `sharedAccount: true` because develop reads the
+ * launcher's shared account file through the bundled engine (constants.json
+ * pins an engine at or past v0.5.1, which is where that read landed).
+ */
+export const LAUNCHER_MANIFEST_CONTENT = '{ "schema": 1, "sharedAccount": true }\n';
 
 /** Tokens the launcher's Platform::tokens() looks for, by final os. */
 export const LAUNCHER_TOKENS = [
@@ -243,13 +261,50 @@ export function renameDist(dir) {
 }
 
 export function checkDist(dir) {
-  return checkAssetNames(listFiles(dir));
+  return [...checkAssetNames(listFiles(dir)), ...checkLauncherManifest(dir)];
+}
+
+/**
+ * Problems with the launcher manifest in `dir`, as human-readable strings;
+ * empty when the file is there, is valid JSON, and says what the launcher
+ * must read: schema 1, sharedAccount true.
+ */
+export function checkLauncherManifest(dir) {
+  const path = join(dir, LAUNCHER_MANIFEST_NAME);
+  if (!existsSync(path)) return [`${LAUNCHER_MANIFEST_NAME} is missing from ${dir}`];
+  return checkLauncherManifestContent(readFileSync(path, "utf8"));
+}
+
+export function checkLauncherManifestContent(text) {
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    return [`${LAUNCHER_MANIFEST_NAME} is not valid JSON: ${error.message}`];
+  }
+  const problems = [];
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return [`${LAUNCHER_MANIFEST_NAME} must be a JSON object`];
+  }
+  if (parsed.schema !== 1) problems.push(`${LAUNCHER_MANIFEST_NAME} schema must be 1, got ${JSON.stringify(parsed.schema)}`);
+  if (parsed.sharedAccount !== true) {
+    problems.push(`${LAUNCHER_MANIFEST_NAME} sharedAccount must be true, got ${JSON.stringify(parsed.sharedAccount)}`);
+  }
+  if (!text.endsWith("\n")) problems.push(`${LAUNCHER_MANIFEST_NAME} must end with a newline`);
+  return problems;
+}
+
+/** Write the launcher manifest into `dir`. Idempotent. Returns its path. */
+export function writeLauncherManifest(dir) {
+  const path = join(dir, LAUNCHER_MANIFEST_NAME);
+  writeFileSync(path, LAUNCHER_MANIFEST_CONTENT, "utf8");
+  return path;
 }
 
 function main(argv) {
   const [command, dirArg] = argv;
-  if (!["rename", "check"].includes(command) || !dirArg) {
-    console.error("Usage: node scripts/release/launcher-asset-names.mjs <rename|check> <dist-dir>");
+  if (!["rename", "manifest", "check"].includes(command) || !dirArg) {
+    console.error("Usage: node scripts/release/launcher-asset-names.mjs <rename|manifest|check> <dist-dir>");
     return 2;
   }
   const dir = resolve(dirArg);
@@ -262,6 +317,9 @@ function main(argv) {
     for (const [from, to] of renames) console.log(`${from} -> ${to}`);
     if (renames.size === 0) console.log("No assets needed renaming.");
   }
+  if (command === "rename" || command === "manifest") {
+    console.log(`wrote ${basename(writeLauncherManifest(dir))}`);
+  }
   const problems = checkDist(dir);
   if (problems.length > 0) {
     for (const problem of problems) console.error(`::error::${problem}`);
@@ -269,6 +327,7 @@ function main(argv) {
   }
   const installable = listFiles(dir).filter((name) => parseLauncherAssetName(name));
   console.log(`Launcher-installable assets in ${basename(dir)}: ${installable.join(", ")}`);
+  console.log(`Launcher manifest in ${basename(dir)}: ${LAUNCHER_MANIFEST_NAME} (${LAUNCHER_MANIFEST_CONTENT.trim()})`);
   return 0;
 }
 

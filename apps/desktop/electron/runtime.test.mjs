@@ -226,6 +226,16 @@ describe("commandMatchesPackagedSidecar", () => {
       false,
     );
   });
+
+  it("never reaps the shared daemon, even when it was started from this bundle's binary", () => {
+    assert.equal(
+      commandMatchesPackagedSidecar(
+        "/Applications/Redrob Cowork.app/Contents/Resources/sidecars/redrob-aarch64-apple-darwin serve --register --idle-exit 10",
+        ["/Applications/Redrob Cowork.app/Contents/Resources/sidecars"],
+      ),
+      false,
+    );
+  });
 });
 
 describe("Redrob Code engine resolution", () => {

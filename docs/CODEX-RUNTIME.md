@@ -117,14 +117,13 @@ bundled engine, which makes the model call. Cowork only *declares* the provider
 (`apps/app/src/react-app/domains/settings/redrob-provider.ts:180-187`). No file
 abstracts "AI backend".
 
-The one injectable seam is `EnginePoolHooks.spawn`
-(`apps/server/src/engine-pool.ts:65`), and its contract is the problem: it must
-return a `ManagedOpencodeServer` (`managed-opencode.ts:18-25`) serving the **whole
-OpenCode HTTP session API** on loopback with Basic auth — `/session/:id/prompt_async`,
-`/session/status`, `/event`, `/permission`. `codex` serves none of that. Two
-adjacent facts bind it further: `REDROB_CODE_BIN_NAME = "redrob"` is hardcoded
-with a comment refusing any other binary (`managed-opencode.ts:111`), and
-readiness is matched on the literal string `redrob server listening` (`:119`).
+The one injectable seam used to be `EnginePoolHooks.spawn` in `engine-pool.ts`, and
+its contract was the problem: it had to return a `ManagedOpencodeServer` serving the
+**whole OpenCode HTTP session API** on loopback with Basic auth — `/session/:id/prompt_async`,
+`/session/status`, `/event`, `/permission`. `codex` serves none of that. (Since the
+shared-daemon change Cowork no longer spawns an engine at all: `apps/server/src/engine-startup.ts`
+attaches to the one `redrob` daemon per user, so there is no spawn hook left to inject.
+The analysis below still holds — the engine's HTTP surface is the only AI seam.)
 
 So there are two options, and they are genuinely different bets.
 

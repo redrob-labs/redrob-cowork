@@ -1,15 +1,22 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
+  LAUNCHER_MANIFEST_CONTENT,
+  LAUNCHER_MANIFEST_NAME,
   checkAssetNames,
+  checkDist,
+  checkLauncherManifestContent,
   launcherAssetName,
   parseLauncherAssetName,
   renameDist,
   rewriteManifest,
+  writeLauncherManifest,
 } from "./launcher-asset-names.mjs";
 
 /** What electron-builder writes with artifactName redrob-cowork-${version}-${os}-${arch}.${ext}. */
@@ -188,4 +195,108 @@ test("renameDist refuses a manifest that points at a file the dist does not hold
   writeFileSync(join(dir, "redrob-cowork-0.3.1-mac-arm64.dmg"), "x");
   writeFileSync(join(dir, "latest-mac.yml"), MAC_MANIFEST);
   assert.throws(() => renameDist(dir), /references redrob-cowork-0.3.1-mac-arm64.zip, which is not in/);
+});
+
+// --- redrob-launcher.json -------------------------------------------------
+
+/** A dist in launcher shape, without the manifest. */
+function distWithoutManifest() {
+  const dir = mkdtempSync(join(tmpdir(), "launcher-asset-names-"));
+  for (const name of Object.values(BUILDER_OUTPUT)) writeFileSync(join(dir, name), name);
+  writeFileSync(join(dir, "latest.yml"), "version: 0.3.1\n");
+  return dir;
+}
+
+test("the launcher manifest is exactly the schema-1 contract, newline-terminated", () => {
+  assert.equal(LAUNCHER_MANIFEST_NAME, "redrob-launcher.json");
+  assert.equal(LAUNCHER_MANIFEST_CONTENT, '{ "schema": 1, "sharedAccount": true }\n');
+  assert.deepEqual(JSON.parse(LAUNCHER_MANIFEST_CONTENT), { schema: 1, sharedAccount: true });
+  assert.deepEqual(checkLauncherManifestContent(LAUNCHER_MANIFEST_CONTENT), []);
+});
+
+test("checkLauncherManifestContent refuses anything the launcher would not read as shared-account", () => {
+  assert.match(checkLauncherManifestContent("{")[0], /not valid JSON/);
+  assert.match(checkLauncherManifestContent("[]\n")[0], /must be a JSON object/);
+  assert.match(checkLauncherManifestContent('{ "schema": 2, "sharedAccount": true }\n')[0], /schema must be 1, got 2/);
+  assert.match(checkLauncherManifestContent('{ "schema": 1, "sharedAccount": false }\n')[0], /sharedAccount must be true, got false/);
+  assert.match(checkLauncherManifestContent('{ "schema": 1 }\n')[0], /sharedAccount must be true, got undefined/);
+  assert.match(checkLauncherManifestContent('{ "schema": 1, "sharedAccount": true }')[0], /end with a newline/);
+});
+
+test("checkDist fails a dist without redrob-launcher.json and passes once it is written", () => {
+  const dir = distWithoutManifest();
+  const problems = checkDist(dir);
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /redrob-launcher.json is missing from/);
+
+  const path = writeLauncherManifest(dir);
+  assert.equal(path, join(dir, "redrob-launcher.json"));
+  assert.equal(readFileSync(path, "utf8"), LAUNCHER_MANIFEST_CONTENT);
+  assert.deepEqual(checkDist(dir), []);
+
+  // The manifest is not one of the app's installers, so the name checks leave it alone.
+  assert.equal(launcherAssetName("redrob-launcher.json"), null);
+  assert.equal(parseLauncherAssetName("redrob-launcher.json"), null);
+
+  // A corrupted file is caught, and rewriting repairs it.
+  writeFileSync(path, '{ "schema": 1, "sharedAccount": false }\n');
+  assert.match(checkDist(dir)[0], /sharedAccount must be true/);
+  writeLauncherManifest(dir);
+  assert.deepEqual(checkDist(dir), []);
+});
+
+test("rehearsal: `rename` writes the manifest and `check` refuses a dist that lost it", () => {
+  const script = fileURLToPath(new URL("./launcher-asset-names.mjs", import.meta.url));
+  const dir = mkdtempSync(join(tmpdir(), "launcher-asset-names-"));
+  for (const name of Object.keys(BUILDER_OUTPUT)) writeFileSync(join(dir, name), name);
+  writeFileSync(join(dir, "latest-mac.yml"), MAC_MANIFEST);
+
+  const rename = spawnSync(process.execPath, [script, "rename", dir], { encoding: "utf8" });
+  assert.equal(rename.status, 0, rename.stderr);
+  assert.match(rename.stdout, /wrote redrob-launcher.json/);
+  assert.match(rename.stdout, /Launcher manifest in .*: redrob-launcher.json \(\{ "schema": 1, "sharedAccount": true \}\)/);
+  assert.ok(readdirSync(dir).includes("redrob-launcher.json"));
+  assert.equal(readFileSync(join(dir, "redrob-launcher.json"), "utf8"), LAUNCHER_MANIFEST_CONTENT);
+
+  const check = spawnSync(process.execPath, [script, "check", dir], { encoding: "utf8" });
+  assert.equal(check.status, 0, check.stderr);
+
+  rmSync(join(dir, "redrob-launcher.json"));
+  const failing = spawnSync(process.execPath, [script, "check", dir], { encoding: "utf8" });
+  assert.equal(failing.status, 1);
+  assert.match(failing.stderr, /::error::redrob-launcher.json is missing from/);
+
+  const manifest = spawnSync(process.execPath, [script, "manifest", dir], { encoding: "utf8" });
+  assert.equal(manifest.status, 0, manifest.stderr);
+  assert.ok(readdirSync(dir).includes("redrob-launcher.json"));
+});
+
+test("the release workflow writes the manifest before every asset upload, under the upload glob", () => {
+  const workflow = readFileSync(
+    fileURLToPath(new URL("../../.github/workflows/release-macos-aarch64.yml", import.meta.url)),
+    "utf8",
+  );
+  const manifestStep = workflow.indexOf("launcher-asset-names.mjs manifest apps/desktop/dist-electron");
+  const upload = workflow.indexOf("- name: Upload Electron release assets");
+  assert.ok(manifestStep > 0, "no manifest step in the release workflow");
+  assert.ok(upload > manifestStep, "the manifest must be written before the upload step");
+  // Every platform job uploads `redrob-*` from dist-electron, which is how the manifest travels.
+  assert.ok(workflow.includes("assets=(apps/desktop/dist-electron/${{ matrix.asset_prefix }}-*)"));
+  assert.ok(/asset_prefix: redrob\n/.test(workflow));
+  assert.ok(LAUNCHER_MANIFEST_NAME.startsWith("redrob-"));
+});
+
+test("sharedAccount: true is backed by an engine pin at or past v0.5.1", () => {
+  // The shared account file is read by the bundled Redrob Code engine from v0.5.1; a pin below that
+  // would make the manifest promise a sign-in the installed app cannot use.
+  const constants = JSON.parse(
+    readFileSync(fileURLToPath(new URL("../../constants.json", import.meta.url)), "utf8"),
+  );
+  const parsed = /^v(\d+)\.(\d+)\.(\d+)$/.exec(constants.redrobCodeVersion);
+  assert.ok(parsed, `pin ${constants.redrobCodeVersion} is not a plain release tag`);
+  const [major, minor, patch] = parsed.slice(1).map(Number);
+  const floor = [0, 5, 1];
+  const atOrAbove =
+    major > floor[0] || (major === floor[0] && (minor > floor[1] || (minor === floor[1] && patch >= floor[2])));
+  assert.ok(atOrAbove, `engine pin ${constants.redrobCodeVersion} is below v0.5.1; sharedAccount cannot be true`);
 });

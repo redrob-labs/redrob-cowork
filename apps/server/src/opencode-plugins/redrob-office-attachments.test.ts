@@ -431,6 +431,7 @@ describe("RedrobWorkOfficeAttachments", () => {
     const runtime = await buildRedrobRuntimeConfigObject();
     const plugin = runtime.plugin;
     if (!Array.isArray(plugin)) throw new Error("Expected plugin list");
+    // Carries no options: a plain path, not a `[path, options]` tuple.
     expect(plugin).toContain(redrobOfficeAttachmentsPluginPath());
 
     const packageJson = JSON.parse(await readFile(join(PACKAGE_ROOT, "package.json"), "utf8"));
