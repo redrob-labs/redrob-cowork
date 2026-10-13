@@ -65,6 +65,12 @@ unpacked app, the `.exe` beside it is the installer). Each installer is uploaded
 twice: once stamped with the version, and once under a version-less alias so a page
 can link it without being edited on every release.
 
+Beside the installers every release carries `redrob-launcher.json`
+(`{ "schema": 1, "sharedAccount": true }`): Redrob Launcher reads it to learn that this
+release reads the launcher's shared account file, so signing in to the launcher is all a
+user needs. `scripts/release/launcher-asset-names.mjs` writes it and refuses a release
+directory without it.
+
 ```text
 https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-cowork-{version}-linux-x86_64.AppImage
 https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-cowork-{version}-linux-x86_64.tar.gz
