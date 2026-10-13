@@ -29,8 +29,8 @@ if [[ "$TAG" != v* ]]; then
 fi
 
 VERSION="${TAG#v}"
-ASSET_NAME_AMD64="${AUR_ASSET_NAME:-redrob-linux-x64-${VERSION}.tar.gz}"
-ASSET_NAME_ARM64="redrob-linux-arm64-${VERSION}.tar.gz"
+ASSET_NAME_AMD64="${AUR_ASSET_NAME:-redrob-cowork-${VERSION}-linux-x86_64.tar.gz}"
+ASSET_NAME_ARM64="redrob-cowork-${VERSION}-linux-aarch64.tar.gz"
 ASSET_URL_AMD64="https://github.com/redrob-labs/redrob-work/releases/download/${TAG}/${ASSET_NAME_AMD64}"
 ASSET_URL_ARM64="https://github.com/redrob-labs/redrob-work/releases/download/${TAG}/${ASSET_NAME_ARM64}"
 

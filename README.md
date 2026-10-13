@@ -58,14 +58,18 @@ Redrob Cowork registers the `redrob://` URL scheme (and `redrob-dev://` in devel
 Every build is published to this repository's [Releases](https://github.com/redrob-labs/redrob-cowork/releases),
 which is also where the app reads its updates from. There is no CDN mirror.
 
-Each installer is uploaded twice: once stamped with the version, and once under a
-version-less alias so a page can link it without being edited on every release.
+Assets are named `redrob-cowork-<version>-<os>-<arch>[-portable].<ext>`, the shape
+Redrob Launcher installs from (`macos-aarch64`, `macos-x86_64`, `linux-x86_64`,
+`linux-aarch64`, `windows-x64`, `windows-arm64`; the Windows `-portable.zip` is the
+unpacked app, the `.exe` beside it is the installer). Each installer is uploaded
+twice: once stamped with the version, and once under a version-less alias so a page
+can link it without being edited on every release.
 
 ```text
-https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-linux-x86_64-{version}.AppImage
-https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-linux-x64-{version}.tar.gz
-https://github.com/redrob-labs/redrob-cowork/releases/latest/download/redrob-linux-x86_64.AppImage
-https://github.com/redrob-labs/redrob-cowork/releases/latest/download/redrob-linux-x64.tar.gz
+https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-cowork-{version}-linux-x86_64.AppImage
+https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-cowork-{version}-linux-x86_64.tar.gz
+https://github.com/redrob-labs/redrob-cowork/releases/latest/download/redrob-cowork-linux-x86_64.AppImage
+https://github.com/redrob-labs/redrob-cowork/releases/latest/download/redrob-cowork-linux-x86_64.tar.gz
 ```
 
 Checksums are the `sha512` digests inside the release's `latest*.yml` manifests,
