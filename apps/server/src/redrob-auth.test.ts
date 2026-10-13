@@ -67,6 +67,14 @@ describe("deriveRedrobAuthStatus", () => {
     });
   });
 
+  test("passes the launcher origin through, so the app can say the key is Redrob Launcher's", () => {
+    // Redrob Code reports `source: "launcher"` when it fell back to the shared account file the
+    // launcher wrote (no auth.json entry, no env). The app must not fold that into "api".
+    const status = deriveRedrobAuthStatus(providerList(baseEntry({ source: "launcher", key: FAKE_KEY })));
+    expect(status).toEqual({ connected: true, source: "launcher" });
+    expect(JSON.stringify(status)).not.toContain(FAKE_KEY);
+  });
+
   test("fails closed when the sentinel is gone but nothing positive says a credential exists", () => {
     // Both signals have to agree, so a future engine dropping the sentinel
     // cannot make Work claim a credential it never saw evidence of.

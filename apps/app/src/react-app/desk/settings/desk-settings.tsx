@@ -43,7 +43,7 @@ import { syncCrashReports } from "./crash-reports";
 import { TeamFileGroup } from "../team/team-file-group";
 import { TeamPolicyGroup } from "../team/team-policy-group";
 import type { ChatMode } from "../services/types";
-import { REDROB_KEY_QUERY_KEY, useRedrobKeyConnected } from "../shell/account-menu";
+import { REDROB_KEY_QUERY_KEY, useRedrobKeyStatus, type RedrobKeyLink } from "../shell/account-menu";
 import { useDeskConnection } from "../shell/desk-connection";
 import { DeskShell } from "../shell/desk-shell";
 import { useFrameStore } from "../store/frame-store";
@@ -470,13 +470,16 @@ export type KeyStepState = {
   onCancel: () => void;
 };
 
-export function keyLine(connected: boolean | null): string {
+export function keyLine(connected: boolean | null, link: RedrobKeyLink = connected ? "own" : "none"): string {
   if (connected === null) return t("desk.settings_key_checking");
-  return connected ? t("desk.settings_key_connected") : t("desk.settings_key_not_connected");
+  if (!connected) return t("desk.settings_key_not_connected");
+  return link === "launcher" ? t("desk.settings_key_launcher") : t("desk.settings_key_connected");
 }
 
 export type PlanViewProps = {
   connected: boolean | null;
+  /** Where the key came from; "launcher" shows the Redrob Launcher line and offers to add an own key. */
+  link?: RedrobKeyLink;
   onChangeKey: () => void;
   onOpenBilling: () => void;
   /** The key entry from onboarding, open over the screen while the key is being changed. */
@@ -516,9 +519,11 @@ export function PlanView(props: PlanViewProps) {
             </a>
           </div>
         </div>
-        <Row title={t("desk.settings_key")} description={keyLine(props.connected)}>
+        <Row title={t("desk.settings_key")} description={keyLine(props.connected, props.link)}>
           <Button size="sm" variant="secondary" iconLeft={icons.key(BUTTON_ICON)} onClick={props.onChangeKey}>
-            {props.connected === false ? t("desk.settings_key_add") : t("desk.settings_key_change")}
+            {props.connected === false || props.link === "launcher"
+              ? t("desk.settings_key_add")
+              : t("desk.settings_key_change")}
           </Button>
         </Row>
       </Group>
@@ -558,7 +563,8 @@ async function saveRedrobKey(apiKey: string) {
 }
 
 function PlanSection() {
-  const connected = useRedrobKeyConnected();
+  const status = useRedrobKeyStatus();
+  const connected = status === null ? null : status.connected;
   const showToast = useFrameStore((state) => state.showToast);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -581,6 +587,7 @@ function PlanSection() {
   return (
     <PlanView
       connected={connected}
+      link={status?.link}
       onChangeKey={() => {
         setError(null);
         setOpen(true);

@@ -7,4 +7,8 @@ protocols:
       - redrob
 linux:
   executableName: redrob
-artifactName: redrob-${os}-${arch}-${version}.${ext}
+# <stem>-<version>-<os>-<arch>.<ext>, the order Redrob Launcher parses. electron-builder's
+# ${os}/${arch} are its own tokens (mac/win, x64/arm64); scripts/release/launcher-asset-names.mjs
+# maps them to the launcher's (macos/windows, x86_64/aarch64, -portable for a Windows zip)
+# right after packaging and rewrites latest*.yml to match.
+artifactName: redrob-cowork-${version}-${os}-${arch}.${ext}

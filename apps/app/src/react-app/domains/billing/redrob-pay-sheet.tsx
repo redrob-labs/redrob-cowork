@@ -12,7 +12,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { t } from "@/i18n";
-import { readRedrobKeyStatus } from "../onboarding/redrob-key-connect";
+import { readRedrobKeyStatus, type RedrobKeyStatus } from "../onboarding/redrob-key-connect";
 import { createRedrobServerClient } from "../../../app/lib/redrob-server";
 import { resolveRedrobConnection } from "../../shell/redrob-connection";
 import { REDROB_CONSOLE_BILLING_URL } from "../settings/redrob-provider";
@@ -42,18 +42,25 @@ import {
 export type RedrobPayRecheck = () => Promise<boolean>;
 
 export async function recheckRedrobKey(): Promise<boolean> {
+  return (await recheckRedrobKeyStatus()).connected;
+}
+
+/**
+ * The same check with its origin: `source: "launcher"` means Redrob Code is using the key Redrob
+ * Launcher signed this computer in with, not one pasted here. Never the credential itself.
+ */
+export async function recheckRedrobKeyStatus(): Promise<RedrobKeyStatus> {
   const { normalizedBaseUrl, resolvedToken, resolvedHostToken } = await resolveRedrobConnection();
   if (!normalizedBaseUrl || !(resolvedToken || resolvedHostToken)) {
     throw new Error("redrob_server_unavailable");
   }
-  const status = await readRedrobKeyStatus(
+  return readRedrobKeyStatus(
     createRedrobServerClient({
       baseUrl: normalizedBaseUrl,
       token: resolvedToken || undefined,
       hostToken: resolvedHostToken || undefined,
     }),
   );
-  return status.connected;
 }
 
 export type RedrobPaySheetProps = {

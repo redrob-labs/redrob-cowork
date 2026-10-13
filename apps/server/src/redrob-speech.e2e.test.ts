@@ -160,10 +160,11 @@ describe("read-aloud speech relay", () => {
     }
   });
 
-  test("is off at High and Strict privacy, without asking the engine, and back on at Standard", async () => {
+  test("is off at Strict privacy, without asking the engine, and back on at High", async () => {
     const engine = startStubEngine(() => new Response(MP3, { headers: { "content-type": "audio/mpeg" } }));
     const { base, config } = await boot(engine.baseUrl);
-    for (const level of ["high", "strict"]) {
+    {
+      const level = "strict";
       await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level } }));
       const response = await speak(base, { text: "Hello" });
       expect(response.status).toBe(403);
@@ -171,7 +172,7 @@ describe("read-aloud speech relay", () => {
     }
     expect(engine.requests.some((request) => request.pathname === "/redrob/speech")).toBe(false);
 
-    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "standard" } }));
+    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "high" } }));
     expect((await speak(base, { text: "Hello" })).status).toBe(200);
   });
 

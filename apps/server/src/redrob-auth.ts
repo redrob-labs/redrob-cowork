@@ -38,7 +38,8 @@ export const LEGACY_REDROB_API_KEY_ENV = "REDROB_API_KEY";
  */
 const ENGINE_PUBLIC_API_KEY_SENTINEL = "public";
 
-export type RedrobAuthSource = "api" | "env" | "config" | "none";
+/** `launcher` means the engine fell back to the Redrob Launcher shared account file (no key of this app's own). */
+export type RedrobAuthSource = "api" | "env" | "config" | "launcher" | "none";
 
 export type RedrobAuthStatus = {
   connected: boolean;
@@ -127,6 +128,27 @@ export async function putRedrobEngineAuth(input: RedrobAuthInput, key: string): 
       status: response.status,
     });
     throw new ApiError(502, "engine_auth_rejected", "Redrob Code rejected the Redrob Key");
+  }
+}
+
+/**
+ * Set the engine's PII masking switch (`PUT /api/privacy`). The engine masks in one place for every
+ * provider; Cowork only carries the workspace's level there (engine-privacy.ts).
+ */
+export async function putRedrobEnginePrivacy(input: RedrobAuthInput, mode: "off" | "regex" | "model"): Promise<void> {
+  const target = resolveEngineTarget(input);
+  let response: Response;
+  try {
+    response = await target.fetchImpl(`${target.baseUrl}/api/privacy`, {
+      method: "PUT",
+      headers: target.headers,
+      body: JSON.stringify({ mode }),
+    });
+  } catch {
+    throw new ApiError(503, "engine_unavailable", "Redrob Code is not reachable yet");
+  }
+  if (!response.ok) {
+    throw new ApiError(502, "privacy_not_applied", `Redrob Code did not accept the privacy setting (${response.status})`);
   }
 }
 
@@ -304,11 +326,11 @@ export function deriveRedrobAuthStatus(providerList: unknown): RedrobAuthStatus 
 
   const source = entry.source;
   const hasResolvedKey = typeof entry.key === "string" && entry.key.trim().length > 0;
-  const hasCredentialEvidence = source === "api" || source === "env" || hasResolvedKey;
+  const hasCredentialEvidence = source === "api" || source === "env" || source === "launcher" || hasResolvedKey;
   if (!hasCredentialEvidence) return disconnected;
 
   const reportedSource: RedrobAuthSource =
-    source === "api" || source === "env" || source === "config" ? source : "api";
+    source === "api" || source === "env" || source === "config" || source === "launcher" ? source : "api";
   return { connected: true, source: reportedSource };
 }
 

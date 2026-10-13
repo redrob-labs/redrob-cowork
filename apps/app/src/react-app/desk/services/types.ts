@@ -161,8 +161,6 @@ export type PrivacyState = {
   setBy: string | null;
   /** Set by a team file: the level and names cannot be changed here. */
   locked: boolean;
-  /** Private details swapped for placeholders on this computer this week. */
-  detailsKeptThisWeek: number;
 };
 
 export type ModelEffort = { label: string; level: number; of: number };

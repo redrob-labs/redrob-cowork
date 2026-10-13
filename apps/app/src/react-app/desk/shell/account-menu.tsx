@@ -6,7 +6,7 @@ import { Avatar, Menu, icons, type MenuItem } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
-import { recheckRedrobKey } from "../../domains/billing/redrob-pay-sheet";
+import { recheckRedrobKeyStatus } from "../../domains/billing/redrob-pay-sheet";
 import { useFrameStore } from "../store/frame-store";
 
 const MARK_SRC = resolveExtensionIconSrc("/redrob-mark.svg");
@@ -25,20 +25,31 @@ export const REDROB_KEY_QUERY_KEY: readonly string[] = ["desk", "redrob-key"];
  * the first answer is on its way. A server that cannot be reached counts as not connected.
  */
 export function useRedrobKeyConnected(): boolean | null {
+  const status = useRedrobKeyStatus();
+  return status === null ? null : status.connected;
+}
+
+/** What the key is: this app's own, the one Redrob Launcher signed the computer in with, or none. */
+export type RedrobKeyLink = "own" | "launcher" | "none";
+
+/** Same query as `useRedrobKeyConnected`, keeping where the key came from. Null while loading. */
+export function useRedrobKeyStatus(): { connected: boolean; link: RedrobKeyLink } | null {
   const status = useQuery({
     queryKey: REDROB_KEY_QUERY_KEY,
-    queryFn: recheckRedrobKey,
+    queryFn: recheckRedrobKeyStatus,
     retry: false,
     staleTime: 30_000,
   });
   if (status.isPending) return null;
-  return status.data === true;
+  const connected = status.data?.connected === true;
+  return { connected, link: !connected ? "none" : status.data?.source === "launcher" ? "launcher" : "own" };
 }
 
 /** The line under the name. Nothing while the answer is still loading. */
-export function connectionLine(connected: boolean | null): string | null {
+export function connectionLine(connected: boolean | null, link: RedrobKeyLink = connected ? "own" : "none"): string | null {
   if (connected === null) return null;
-  return connected ? t("desk.account_connected") : t("desk.account_not_connected");
+  if (!connected) return t("desk.account_not_connected");
+  return link === "launcher" ? t("desk.account_launcher") : t("desk.account_connected");
 }
 
 export function versionLabel(version: string): string {
@@ -74,8 +85,8 @@ export function accountMenuItems(actions: AccountMenuActions): MenuItem[] {
 }
 
 /** The trigger's face: the Redrob mark, the name, and whether the key is connected. */
-export function AccountLabel(props: { connected: boolean | null }) {
-  const line = connectionLine(props.connected);
+export function AccountLabel(props: { connected: boolean | null; link?: RedrobKeyLink }) {
+  const line = connectionLine(props.connected, props.link);
   return (
     <span className="desk-account__label">
       <Avatar name={t("desk.account_name")} src={MARK_SRC} size="sm" />
@@ -90,7 +101,8 @@ export function AccountLabel(props: { connected: boolean | null }) {
 /** The foot of the sidebar: the one way into Settings, and the shortcuts and feedback dialogs. */
 export function AccountMenu() {
   const navigate = useNavigate();
-  const connected = useRedrobKeyConnected();
+  const status = useRedrobKeyStatus();
+  const connected = status === null ? null : status.connected;
   const developerMode = useFrameStore((state) => state.developerMode);
   const setDeveloperMode = useFrameStore((state) => state.setDeveloperMode);
   const openModal = useFrameStore((state) => state.openModal);
@@ -115,7 +127,7 @@ export function AccountMenu() {
       showToast(on ? t("desk.developer_mode_on_toast") : t("desk.developer_mode_off_toast"));
     },
   });
-  const line = connectionLine(connected);
+  const line = connectionLine(connected, status?.link);
 
   return (
     <div className="desk-account" ref={rootRef}>

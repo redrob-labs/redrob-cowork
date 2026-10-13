@@ -349,6 +349,11 @@ describe("Plan and usage", () => {
     expect(missing).toContain("Not connected. Add your key to start chatting.");
     expect(missing).toContain("Add key");
     expect(render(<PlanView {...PLAN} connected={null} />)).toContain("Checking the connection");
+    // Signed in through Redrob Launcher: say so, and offer to ADD an own key, since there is none here.
+    const launcher = render(<PlanView {...PLAN} link="launcher" />);
+    expect(launcher).toContain("Signed in with Redrob Launcher");
+    expect(launcher).not.toContain("Connected. Every chat uses it.");
+    expect(launcher).toContain("Add key");
   });
 
   test("Change key opens the existing key entry from onboarding", () => {

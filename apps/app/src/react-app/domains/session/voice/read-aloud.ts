@@ -12,13 +12,12 @@ import { readStoredPrivacy } from "@/react-app/desk/privacy/privacy-store";
  */
 
 /**
- * Whether voice may run for this privacy level. Speech cannot be labelled the way text is, so at High
- * and Strict protection the reply would reach a speech vendor with its real values in it. The server
- * refuses the same requests; this only keeps a button from being offered that would be refused.
+ * Whether voice may run for this privacy level. Speech cannot be masked the way text is, so at Strict
+ * protection the reply would reach a speech vendor with its real values in it. The server refuses the
+ * same requests; this only keeps a button from being offered that would be refused.
  */
 export function voiceAllowedForPrivacy(redrob: Record<string, unknown> | null | undefined): boolean {
-  const level = readStoredPrivacy(redrob).level;
-  return level !== "high" && level !== "strict";
+  return readStoredPrivacy(redrob).level !== "strict";
 }
 
 /** The engine's limit for one request, in code points, which is how it counts. */

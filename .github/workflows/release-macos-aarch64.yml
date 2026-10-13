@@ -665,6 +665,19 @@ jobs:
             ${{ matrix.electron_args }} \
             --publish never
 
+      # Redrob Launcher installs an asset only when its name is
+      # <stem>-<version>-<os>-<arch>[-portable].<ext> with its own os/arch tokens
+      # (macos-aarch64, linux-x86_64, windows-x64 ...). electron-builder writes
+      # mac/win and x64/arm64, so every asset is renamed here, and the
+      # latest*.yml manifests that name them are rewritten so self-update keeps
+      # resolving. This runs BEFORE Windows signing: the signer takes the folder,
+      # and refresh-signed-windows-artifacts.mjs expects the final names. The
+      # same script then refuses a dist whose assets the launcher could not
+      # install, so a packager change cannot regress the names silently.
+      - name: Name release assets for Redrob Launcher
+        shell: bash
+        run: node scripts/release/launcher-asset-names.mjs rename apps/desktop/dist-electron
+
       # The engine reaches the app through an electron-builder `extraResources`
       # filter that names files exactly. A filter naming a file that is not
       # staged drops it SILENTLY and the pack still succeeds, so the installer

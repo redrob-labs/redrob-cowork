@@ -190,6 +190,8 @@ describe("supported locales", () => {
       // absent: `no-hosted-cloud-product-copy.test.ts` keeps it out entirely.
       /Redrob Cowork( Connect| UI Control)?/g,
       /Redrob Code/g,
+      // The launcher that signs the computer in once; its key is what "Redrob Launcher로 로그인됨" names.
+      /Redrob Launcher(?=[로은는을를의와과에서]|(?!\p{L}))/gu,
       /**
        * Korean attaches its particles straight onto the brand name, with no space, which the
        * bare-brand rule below cannot see past: in "Redrob로 연결" the character after "Redrob" is a
@@ -312,7 +314,7 @@ describe("supported locales", () => {
       // v-prefixed semantic version placeholders left after {version} strip.
       /\bv\{version\}/g,
       // Privacy placeholders, quoted exactly as the AI sees them (desk/privacy/redact.ts).
-      /\[(EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|NAME)_\d+\]/g,
+      /\[(EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|NAME|PERSON|ORG|PLACE)_\d+\]/g,
     ];
 
     const englishWordPattern = /[A-Za-z]{2,}/g;

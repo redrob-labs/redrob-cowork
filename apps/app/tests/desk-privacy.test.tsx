@@ -5,12 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Routes } from "react-router";
 
 import { setLocale, type Language } from "../src/i18n";
-import { PRIVACY_QUERY_KEY, PrivacyView, parseNames, privacyLevelMeta } from "../src/react-app/desk/privacy/desk-privacy";
+import { PRIVACY_QUERY_KEY, PrivacyView, privacyLevelMeta } from "../src/react-app/desk/privacy/desk-privacy";
 import { createFixtureDeskServices } from "../src/react-app/desk/services/fixture-services";
 import { PRIVACY } from "../src/react-app/desk/services/fixtures/privacy";
 import type { PrivacyState } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
-import { PrivacyConfirmDialogView } from "../src/react-app/desk/shell/desk-layer";
 
 function render(node: ReactNode, path = "/privacy", client = new QueryClient()) {
   return renderToStaticMarkup(
@@ -27,7 +26,7 @@ function readable(html: string): string {
 }
 
 function view(state: PrivacyState, desktop = true, preview = false) {
-  return render(<PrivacyView state={state} desktop={desktop} preview={preview} busy={false} onLevel={() => {}} onNames={() => {}} />);
+  return render(<PrivacyView state={state} desktop={desktop} preview={preview} busy={false} onLevel={() => {}} />);
 }
 
 afterEach(() => setLocale("en"));
@@ -40,48 +39,40 @@ describe("privacy helpers", () => {
     expect(privacyLevelMeta("off")).toBe("Off");
   });
 
-  test("the names box keeps one name per line, without blanks or repeats", () => {
-    expect(parseNames(" Kim Minjun \n\nSeorin\r\nSeorin\n")).toEqual(["Kim Minjun", "Seorin"]);
-  });
-
-  test("the sample services change the level and the names", async () => {
+  test("the sample services change the level", async () => {
     const fixture = createFixtureDeskServices();
     expect((await fixture.privacy.setLevel("strict")).data.level).toBe("strict");
-    expect((await fixture.privacy.setNames(["Kim Minjun"])).data.names).toEqual(["Kim Minjun"]);
   });
 });
 
 describe("PrivacyView", () => {
-  test("on: the level, the count this week, the levels to choose and the names", () => {
+  test("on: the level, where the masking happens, and the levels to choose", () => {
     const html = view(PRIVACY);
     expect(html).not.toContain("Nothing on this screen is running yet.");
     expect(html).toContain("Privacy protection is on: High");
-    expect(html).toContain("Private details kept from AI this week: 214");
+    expect(html).toContain("Masked by Redrob Code before any AI sees it.");
     expect(html).toContain("Your level");
     expect(html.match(/>Use</g)?.length).toBe(3);
-    expect(html).toContain("Names to keep private");
-    expect(html).toContain("Seorin Partners");
-    expect(html).toContain("Attached files and text in images are sent as they are");
+    // The masker is the engine's; Cowork keeps no names list or counter of its own.
+    expect(html).not.toContain("Names to keep private");
+    expect(html).not.toContain("this week");
+    expect(html).toContain("Text in images is sent as it is");
     expect(html).not.toContain("Keep private work on this laptop");
   });
 
-  test("sample data reads Off, with no level, no count and nothing to change", () => {
+  test("sample data reads Off, with no level and nothing to change", () => {
     const html = view(PRIVACY, true, true);
     expect(html).toContain("Nothing on this screen is running yet.");
     expect(html).toContain("Privacy protection is off");
     expect(html).not.toContain("Privacy protection is on");
-    expect(html).not.toContain("214");
     expect(html).not.toContain("Your level");
     expect(html).not.toContain(">Use<");
-    expect(html).not.toContain("Names to keep private");
   });
 
-  test("locked by the team policy: the level and names cannot change here, and it says who set them", () => {
+  test("locked by the team policy: the level cannot change here, and it says who set it", () => {
     const html = view({ ...PRIVACY, locked: true, setBy: "Park Hyunjin" });
     expect(html).toContain("Set by Park Hyunjin in your team&#x27;s policy. It cannot be changed here.");
     expect(html).not.toContain(">Use<");
-    expect(html).not.toContain("Save names");
-    expect(html).toMatch(/<textarea[^>]*disabled/);
   });
 
   test("on the web: privacy is off here and nothing can be changed", () => {
@@ -104,20 +95,8 @@ describe("PrivacyView", () => {
   test("Korean has the screen's words in Korean", () => {
     setLocale("ko");
     const html = view(PRIVACY);
-    expect(html).toContain("비공개로 둘 이름");
-    expect(html).toContain("이 컴퓨터가 먼저 읽습니다");
-  });
-});
-
-describe("Strict confirm", () => {
-  test("says how many details and which kinds, with Send and Edit", () => {
-    const html = renderToStaticMarkup(
-      <PrivacyConfirmDialogView confirm={{ count: 3, kinds: ["email", "name"], resolve: () => {} }} onAnswer={() => {}} />,
-    );
-    expect(html).toContain("3 private details will be hidden");
-    expect(html).toContain("email addresses, names");
-    expect(html).toContain(">Send<");
-    expect(html).toContain(">Edit<");
+    expect(html).toContain("보호 수준");
+    expect(html).toContain("Redrob Code가 먼저 읽습니다");
   });
 });
 
