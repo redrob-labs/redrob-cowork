@@ -118,6 +118,9 @@ win:
         - versions.json-x86_64-pc-windows-msvc.bin
   target:
     - nsis
+    # The unpacked app as a zip. Redrob Launcher cannot run an NSIS installer, so this is the
+    # Windows package it installs (renamed to -portable.zip by launcher-asset-names.mjs).
+    - zip
 nsis:
   include: build/installer.nsh
   # electron-builder defaults to a one-click installer that starts writing the

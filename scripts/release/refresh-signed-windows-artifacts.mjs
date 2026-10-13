@@ -45,7 +45,8 @@ async function regenerateBlockmap(installerPath) {
 function manifestName(installerName) {
   if (installerName.startsWith("redrob-cloud-win-")) return "cloud.yml";
   if (installerName.startsWith("redrob-enterprise-win-")) return "enterprise.yml";
-  if (installerName.startsWith("redrob-win-")) return "latest.yml";
+  // Launcher-shaped name (scripts/release/launcher-asset-names.mjs ran before signing).
+  if (/^redrob-cowork-.+-windows-(?:x64|arm64)\.exe$/i.test(installerName)) return "latest.yml";
   throw new Error(`Unsupported Windows installer name: ${installerName}`);
 }
 
@@ -85,8 +86,10 @@ if (!existsSync(distRoot)) {
   process.exit(1);
 }
 
-const installers = walk(distRoot).filter((file) =>
-  /^redrob(?:-(?:cloud|enterprise))?-win-(?:x64|arm64)-.+\.exe$/i.test(basename(file)),
+const installers = walk(distRoot).filter(
+  (file) =>
+    /^redrob-cowork-.+-windows-(?:x64|arm64)\.exe$/i.test(basename(file)) ||
+    /^redrob-(?:cloud|enterprise)-win-(?:x64|arm64)-.+\.exe$/i.test(basename(file)),
 );
 
 if (installers.length !== expectedCount) {

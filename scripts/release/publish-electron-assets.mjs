@@ -178,23 +178,23 @@ function validateManifest(name, manifest) {
     throw new Error(`${name} contains an artifact from a different desktop distribution.`);
   }
   if (feedName === "latest-mac.yml") {
-    for (const arch of ["mac-arm64", "mac-x64"]) {
+    for (const arch of ["macos-aarch64", "macos-x86_64"]) {
       if (!urls.some((url) => url.includes(arch))) {
         throw new Error(`${name} is missing ${arch} artifacts.`);
       }
     }
   }
   if (feedName === "latest.yml") {
-    for (const arch of ["win-arm64", "win-x64"]) {
+    for (const arch of ["windows-arm64", "windows-x64"]) {
       if (!urls.some((url) => url.includes(arch))) {
         throw new Error(`${name} is missing ${arch} artifacts.`);
       }
     }
   }
-  if (feedName === "latest-linux.yml" && urls.some((url) => url.includes("arm64"))) {
+  if (feedName === "latest-linux.yml" && urls.some((url) => url.includes("linux-aarch64"))) {
     throw new Error(`${name} should remain the Linux x64 feed; arm64 belongs in latest-linux-arm64.yml.`);
   }
-  if (feedName === "latest-linux-arm64.yml" && !urls.some((url) => url.includes("arm64"))) {
+  if (feedName === "latest-linux-arm64.yml" && !urls.some((url) => url.includes("linux-aarch64"))) {
     throw new Error(`${name} is missing Linux arm64 artifacts.`);
   }
 }

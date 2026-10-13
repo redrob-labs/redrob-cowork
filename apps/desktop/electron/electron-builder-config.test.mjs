@@ -43,7 +43,12 @@ describe("Electron distribution configs", () => {
     assert.equal(config.appId, "io.redrob.work");
     assert.equal(config.productName, "Redrob Cowork");
     assert.equal(config.protocols[0].schemes[0], "redrob");
-    assert.equal(config.artifactName, "redrob-${os}-${arch}-${version}.${ext}");
+    assert.equal(config.artifactName, "redrob-cowork-${version}-${os}-${arch}.${ext}");
+  });
+
+  it("ships a Windows zip beside the installer, which is what Redrob Launcher installs", async () => {
+    const config = await readConfig("electron-builder.base.yml");
+    assert.deepEqual(config.win.target, ["nsis", "zip"]);
   });
 
   /**
