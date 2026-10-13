@@ -40,8 +40,16 @@ function canonical(path: string): string {
 
 type Loaded = { kind: "none" } | { kind: "broken" } | { kind: "policy"; file: NonNullable<ReturnType<typeof parseTeamConnectorsFile>> };
 
-function loadPolicyFile(env: Record<string, string | undefined>): Loaded {
-  const runtimeConfig = env.REDROB_CONFIG?.trim();
+// The config path arrives as a plugin option from the server that wrote it; the
+// engine is a shared daemon, so its environment is not ours. REDROB_CONFIG is
+// only a fallback for an engine that still spawns per server and passes no options.
+function runtimeConfigPathOf(options: unknown, env: Record<string, string | undefined>): string | undefined {
+  const fromOptions = isRecord(options) && typeof options.runtimeConfigPath === "string" ? options.runtimeConfigPath : undefined;
+  return (fromOptions ?? env.REDROB_CONFIG)?.trim();
+}
+
+function loadPolicyFile(options: unknown, env: Record<string, string | undefined>): Loaded {
+  const runtimeConfig = runtimeConfigPathOf(options, env);
   if (!runtimeConfig) return { kind: "none" };
   let text: string;
   try {
@@ -58,10 +66,15 @@ function loadPolicyFile(env: Record<string, string | undefined>): Loaded {
 }
 
 /** Disables, in place, every connector the policy blocks for this directory. Returns their names. */
-function enforce(config: unknown, directory: string | null, env: Record<string, string | undefined>): string[] {
+function enforce(
+  config: unknown,
+  directory: string | null,
+  options: unknown,
+  env: Record<string, string | undefined>,
+): string[] {
   if (!isRecord(config) || !isRecord(config.mcp)) return [];
   const mcp = config.mcp as McpMap;
-  const loaded = loadPolicyFile(env);
+  const loaded = loadPolicyFile(options, env);
   if (loaded.kind === "none") return [];
 
   const disable = (names: string[]) => {
@@ -82,11 +95,11 @@ function enforce(config: unknown, directory: string | null, env: Record<string, 
 
 // Single export: the OpenCode plugin loader treats every export of a plugin
 // module as a plugin factory, so helpers must stay module-private.
-export const RedrobWorkTeamConnectors = async (factoryInput?: unknown) => {
+export const RedrobWorkTeamConnectors = async (factoryInput?: unknown, options?: unknown) => {
   const directory = isRecord(factoryInput) && typeof factoryInput.directory === "string" ? factoryInput.directory : null;
   return {
     config: async (config: unknown) => {
-      const disabled = enforce(config, directory, process.env);
+      const disabled = enforce(config, directory, options, process.env);
       if (disabled.length) {
         // Names only, never the entries: a connector's config can carry a token.
         console.warn(`[redrob-team-connectors] disabled by the team policy: ${disabled.join(", ")}`);

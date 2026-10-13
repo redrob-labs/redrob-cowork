@@ -365,6 +365,24 @@ describe("RedrobWorkExtensionsPreview session tools", () => {
     expect(parsed.result.messages.at(-1)?.text).toContain("archive importer");
   });
 
+  test("the server named in the plugin options wins over the environment", async () => {
+    const fake = startFakeRedrobWorkServer();
+    const serverUrl = process.env.REDROB_SERVER_URL;
+    // The env points nowhere: only the options can reach the fake server.
+    process.env.REDROB_SERVER_URL = "http://127.0.0.1:1";
+    process.env.REDROB_SERVER_TOKEN = "env-token";
+    const plugin = await RedrobWorkExtensionsPreview({}, { serverUrl, serverToken: "test-token" });
+
+    const output = await plugin.tool.redrob_query.execute({
+      id: "session.search",
+      args: { query: "raven launch", limit: 5, scanLimit: 10 },
+    });
+    const parsed = affordanceResultSchema("session.search", searchResultSchema).parse(JSON.parse(output));
+
+    expect(parsed.result.scannedSessions).toBe(3);
+    expect(fake.requests.some((request) => request.pathname === "/workspaces")).toBe(true);
+  });
+
   test("searches past chat transcript text and prefers the user's matching message", async () => {
     const fake = startFakeRedrobWorkServer();
     const plugin = await RedrobWorkExtensionsPreview();

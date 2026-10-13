@@ -95,12 +95,24 @@ type DocsEntry = {
   content: string;
 };
 
-let docsCache: Promise<DocsEntry[]> | null = null;
+// One cache per preferred docs directory: a shared engine daemon may load this
+// plugin for more than one server, each naming its own bundled docs.
+const docsCache = new Map<string, Promise<DocsEntry[]>>();
 
-function docsCandidates(): string[] {
+// The server that wrote the config names its docs directory in the plugin
+// options; the engine is a shared daemon, so its environment is not ours. The
+// env var remains a fallback for an engine that still passes no options.
+function preferredDocsDir(options: unknown): string {
+  const fromOptions = typeof options === "object" && options !== null
+    ? (options as Record<string, unknown>).docsDir
+    : undefined;
+  return (typeof fromOptions === "string" ? fromOptions : process.env.REDROB_DOCS_DIR ?? "").trim();
+}
+
+function docsCandidates(preferred: string): string[] {
   const here = dirname(fileURLToPath(import.meta.url));
   return [
-    process.env.REDROB_DOCS_DIR?.trim() ?? "",
+    preferred,
     join(here, "..", "redrob-docs"),
     join(here, "..", "..", "redrob-docs"),
     resolve(here, "..", "..", "..", "..", "packages", "docs"),
@@ -108,8 +120,8 @@ function docsCandidates(): string[] {
   ].filter(Boolean);
 }
 
-async function existingDocsDir(): Promise<string | null> {
-  for (const candidate of docsCandidates()) {
+async function existingDocsDir(preferred: string): Promise<string | null> {
+  for (const candidate of docsCandidates(preferred)) {
     try {
       const info = await stat(candidate);
       if (info.isDirectory()) return candidate;
@@ -147,10 +159,11 @@ function frontmatterValue(content: string, key: string): string | null {
   return raw;
 }
 
-async function loadDocs(): Promise<DocsEntry[]> {
-  if (docsCache) return docsCache;
-  docsCache = (async () => {
-    const root = await existingDocsDir();
+async function loadDocs(preferred: string): Promise<DocsEntry[]> {
+  const cached = docsCache.get(preferred);
+  if (cached) return cached;
+  const loading = (async () => {
+    const root = await existingDocsDir(preferred);
     if (!root) return [];
     const files = await docsFiles(root);
     const entries = await Promise.all(files.map(async (file) => {
@@ -164,7 +177,8 @@ async function loadDocs(): Promise<DocsEntry[]> {
     }));
     return entries.sort((a, b) => a.path.localeCompare(b.path));
   })();
-  return docsCache;
+  docsCache.set(preferred, loading);
+  return loading;
 }
 
 function scoreDoc(entry: DocsEntry, query: string): number {
@@ -194,7 +208,7 @@ function excerpt(content: string, query: string): string {
   return content.slice(from, from + 500).replace(/\s+/g, " ").trim();
 }
 
-export const RedrobWorkCapabilitiesKnowledge = async () => ({
+export const RedrobWorkCapabilitiesKnowledge = async (_input?: unknown, options?: unknown) => ({
   "experimental.chat.system.transform": async (_input: unknown, output: { system: string[] }) => {
     output.system.push(REDROB_CAPABILITIES_KNOWLEDGE);
   },
@@ -204,7 +218,7 @@ export const RedrobWorkCapabilitiesKnowledge = async () => ({
       args: docsSearchArgsSchema.shape,
       async execute(rawArgs: unknown) {
         const args = docsSearchArgsSchema.parse(rawArgs);
-        const docs = await loadDocs();
+        const docs = await loadDocs(preferredDocsDir(options));
         const matches = docs
           .map((entry) => ({ entry, score: scoreDoc(entry, args.query) }))
           .filter((match) => match.score > 0)
@@ -226,7 +240,7 @@ export const RedrobWorkCapabilitiesKnowledge = async () => ({
         const args = docsReadArgsSchema.parse(rawArgs);
         const normalized = args.path.replace(/^\/+/, "");
         if (normalized.split("/").includes("..")) throw new Error("Invalid docs path");
-        const docs = await loadDocs();
+        const docs = await loadDocs(preferredDocsDir(options));
         const entry = docs.find((doc) => doc.path === normalized);
         if (!entry) throw new Error(`Redrob Cowork docs page not found: ${normalized}`);
         return JSON.stringify(entry, null, 2);

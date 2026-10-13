@@ -22,7 +22,12 @@ import {
 } from "./server.js";
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
 import { findManagedEngineWorkspace } from "./workspaces.js";
-import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
+import {
+  keepRedrobRuntimeConfigFileFresh,
+  redrobRuntimeConfigFilePath,
+  writeRedrobRuntimeConfigFile,
+  type RedrobPluginOptions,
+} from "./redrob-runtime-config.js";
 import { startHarnessShim } from "./harness-shim.js";
 import { setActiveHarnessShim } from "./harness-provider.js";
 import { discoverCodexBinary } from "./codex-runtime.js";
@@ -97,8 +102,17 @@ if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
     // Server-managed config file: the engine re-reads it from disk on every
     // instance rebuild, and keepRedrobRuntimeConfigFileFresh synchronizes it
     // on every runtime-DB write — so disposes always pick up current state.
-    const { path: runtimeConfigPath } = await writeRedrobRuntimeConfigFile(config, workspace.id);
-    keepRedrobRuntimeConfigFileFresh(config, workspace.id);
+    // The plugins read these as options from the config file: the engine is a
+    // shared daemon, so it never sees this process's environment.
+    const docsDir = process.env.REDROB_DOCS_DIR?.trim();
+    const pluginOptions: RedrobPluginOptions = {
+      serverUrl,
+      serverToken: config.token,
+      runtimeConfigPath: redrobRuntimeConfigFilePath(config),
+      ...(docsDir ? { docsDir } : {}),
+    };
+    const { path: runtimeConfigPath } = await writeRedrobRuntimeConfigFile(config, workspace.id, pluginOptions);
+    keepRedrobRuntimeConfigFileFresh(config, workspace.id, pluginOptions);
     const managedOpencodeCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
     await mkdir(managedOpencodeCwd, { recursive: true });
     await sweepLegacyOpenCodeConfig(config).catch(() => undefined);

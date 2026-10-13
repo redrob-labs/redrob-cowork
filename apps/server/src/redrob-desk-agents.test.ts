@@ -7,8 +7,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+const PLUGIN_OPTIONS = { serverUrl: "http://127.0.0.1:1", serverToken: "t", runtimeConfigPath: "/dev/null" };
+
 function agents(): Record<string, unknown> {
-  const config = buildRedrobRuntimeConfigObjectFromSnapshot({});
+  const config = buildRedrobRuntimeConfigObjectFromSnapshot({}, PLUGIN_OPTIONS);
   if (!isRecord(config.agent)) throw new Error("no agent map");
   return config.agent;
 }
@@ -21,7 +23,7 @@ function agent(name: string): Record<string, unknown> {
 
 describe("desk agents in the engine config", () => {
   test("redrob stays the default and the three desk agents exist", () => {
-    expect(buildRedrobRuntimeConfigObjectFromSnapshot({}).default_agent).toBe("redrob");
+    expect(buildRedrobRuntimeConfigObjectFromSnapshot({}, PLUGIN_OPTIONS).default_agent).toBe("redrob");
     expect(Object.keys(agents()).sort()).toEqual(["redrob", DESK_CHECK_AGENT, DESK_PLAN_AGENT, DESK_RUN_AGENT].sort());
   });
 

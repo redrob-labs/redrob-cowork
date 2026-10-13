@@ -19,15 +19,23 @@ const FLUSH_MS = 2_000;
 const MAX_BUFFER = 500;
 const MAX_TRACKED = 2_000;
 
-function server(): { url: string; token: string } | null {
-  const url = String(process.env.REDROB_SERVER_URL || "").replace(/\/$/, "");
-  const token = String(process.env.REDROB_SERVER_TOKEN || "");
+// The server that wrote the config arrives as plugin options; the engine is a
+// shared daemon whose environment is not ours. The env vars remain a fallback
+// for an engine that still spawns per server and passes no options.
+function server(options: unknown): { url: string; token: string } | null {
+  const record = typeof options === "object" && options !== null ? (options as Record<string, unknown>) : {};
+  const url = String(
+    (typeof record.serverUrl === "string" ? record.serverUrl : undefined) ?? process.env.REDROB_SERVER_URL ?? "",
+  ).replace(/\/$/, "");
+  const token = String(
+    (typeof record.serverToken === "string" ? record.serverToken : undefined) ?? process.env.REDROB_SERVER_TOKEN ?? "",
+  );
   return url && token ? { url, token } : null;
 }
 
 // Single export: the OpenCode plugin loader treats every export of a plugin
 // module as a plugin factory, so helpers must stay module-private.
-export const RedrobWorkInsightsRecorder = async () => {
+export const RedrobWorkInsightsRecorder = async (_input?: unknown, options?: unknown) => {
   const parents = new Map<string, string>();
   let buffer: Fact[] = [];
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -44,7 +52,7 @@ export const RedrobWorkInsightsRecorder = async () => {
 
   const flush = async () => {
     timer = null;
-    const target = server();
+    const target = server(options);
     const facts = buffer;
     buffer = [];
     if (!target || !facts.length) return;

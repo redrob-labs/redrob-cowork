@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { RedrobWorkTeamConnectors } from "../opencode-plugins/redrob-team-connectors.js";
-import { buildRedrobRuntimeConfigObject } from "../redrob-runtime-config.js";
+import { buildRedrobRuntimeConfigObject, redrobRuntimeConfigFilePath } from "../redrob-runtime-config.js";
 import { startServer } from "../server.js";
 import type { ServerConfig } from "../types.js";
 import { connectorVerdict, normalizeConnectorUrl, TEAM_CONNECTORS_FILE } from "./connector-rules.js";
@@ -71,13 +71,21 @@ describe("the connector rule", () => {
 });
 
 describe("the engine plugin", () => {
-  async function pluginWith(file: unknown | string | null, directory: string) {
+  async function pluginWith(file: unknown | string | null, directory: string, via: "options" | "env" = "options") {
     const runtimeDir = await temp("redrob-team-connectors-runtime-");
-    process.env.REDROB_CONFIG = join(runtimeDir, "runtime-opencode-config.json");
+    const runtimeConfigPath = join(runtimeDir, "runtime-opencode-config.json");
     if (file !== null) {
       await writeFile(join(runtimeDir, TEAM_CONNECTORS_FILE), typeof file === "string" ? file : JSON.stringify(file));
     }
-    const hooks = await RedrobWorkTeamConnectors({ directory });
+    let hooks: Awaited<ReturnType<typeof RedrobWorkTeamConnectors>>;
+    if (via === "env") {
+      process.env.REDROB_CONFIG = runtimeConfigPath;
+      hooks = await RedrobWorkTeamConnectors({ directory });
+    } else {
+      // The env names a different, policy-free runtime dir: only the option can find the file.
+      process.env.REDROB_CONFIG = join(await temp("redrob-team-connectors-decoy-"), "runtime-opencode-config.json");
+      hooks = await RedrobWorkTeamConnectors({ directory }, { runtimeConfigPath });
+    }
     return async (mcp: Record<string, Record<string, unknown>>) => {
       const config = { mcp: structuredClone(mcp) };
       await hooks.config(config);
@@ -95,6 +103,12 @@ describe("the engine plugin", () => {
   test("disables, at load, every connector the policy blocks for this directory, from any config file", async () => {
     const workspace = await temp("redrob-team-connectors-ws-");
     const run = await pluginWith({ v: 1, workspaces: [{ directory: workspace, accountId: "acc", version: 1, policy: POLICY, managed: {} }] }, workspace);
+    expect(await run(MCP)).toEqual({ notes: true, tool: false, elsewhere: false });
+  });
+
+  test("still finds the policy through REDROB_CONFIG when an older engine passes no options", async () => {
+    const workspace = await temp("redrob-team-connectors-ws-");
+    const run = await pluginWith({ v: 1, workspaces: [{ directory: workspace, accountId: "acc", version: 1, policy: POLICY, managed: {} }] }, workspace, "env");
     expect(await run(MCP)).toEqual({ notes: true, tool: false, elsewhere: false });
   });
 
@@ -178,7 +192,10 @@ describe("the server's side of the allowlist", () => {
       const listed = (await call("GET", "/workspace/workspace/mcp")).body.items as Array<Record<string, any>>;
       expect(listed.find((item) => item.name === "tool")?.teamPolicy).toEqual({ blocked: true, reason: "local_programs_blocked" });
       expect((await buildRedrobRuntimeConfigObject(config, "workspace")).mcp).toEqual({});
-      expect(((await buildRedrobRuntimeConfigObject(config, "workspace")).plugin as string[]).some((path) => path.includes("redrob-team-connectors"))).toBe(true);
+      // The plugin is a `[path, options]` tuple naming the config file it finds the policy beside.
+      const plugins = (await buildRedrobRuntimeConfigObject(config, "workspace")).plugin as unknown[];
+      const connectors = plugins.find((entry) => Array.isArray(entry) && String(entry[0]).includes("redrob-team-connectors")) as unknown[] | undefined;
+      expect(connectors?.[1]).toEqual({ runtimeConfigPath: redrobRuntimeConfigFilePath(config) });
 
       const refused = await call("POST", "/workspace/workspace/mcp", { name: "other", config: { type: "local", command: ["sh"] } });
       expect(refused.status).toBe(403);

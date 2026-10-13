@@ -249,6 +249,16 @@ describe("the engine plugin", () => {
     const hooks = await RedrobWorkInsightsRecorder();
     await hooks.event({ event: ev.idle("s") });
   });
+
+  test("the server named in the plugin options wins over the environment", async () => {
+    const serverUrl = process.env.REDROB_SERVER_URL;
+    // The env points nowhere; only the options can reach the fake server.
+    process.env.REDROB_SERVER_URL = "http://127.0.0.1:1";
+    process.env.REDROB_SERVER_TOKEN = "env-token";
+    const hooks = await RedrobWorkInsightsRecorder({}, { serverUrl, serverToken: "t" });
+    await hooks.event({ event: ev.idle("s") });
+    expect(posted).toHaveLength(1);
+  });
 });
 
 describe("the outbox", () => {
