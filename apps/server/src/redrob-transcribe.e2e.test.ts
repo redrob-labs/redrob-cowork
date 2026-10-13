@@ -10,7 +10,7 @@ import type { ServerConfig } from "./types.js";
 /**
  * Push-to-talk goes `app -> POST /voice/transcribe -> engine POST /redrob/transcribe -> gateway`.
  * The engine holds the Redrob key, so what this pins down is that Work relays the recording and the
- * transcript, never a credential, that a recording is never sent at High or Strict privacy, and that
+ * transcript, never a credential, that a recording is never sent at Strict privacy, and that
  * the engine's refusals reach the app with their own status and message.
  */
 
@@ -165,10 +165,11 @@ describe("push-to-talk transcription relay", () => {
     }
   });
 
-  test("is off at High and Strict privacy, without sending the recording, and back on at Standard", async () => {
+  test("is off at Strict privacy, without sending the recording, and back on at High", async () => {
     const engine = startStubEngine(() => Response.json(TRANSCRIPT));
     const { base, config } = await boot(engine.baseUrl);
-    for (const level of ["high", "strict"]) {
+    {
+      const level = "strict";
       await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level } }));
       const response = await transcribe(base, {});
       expect(response.status).toBe(403);
@@ -176,7 +177,7 @@ describe("push-to-talk transcription relay", () => {
     }
     expect(engine.reached()).toBe(false);
 
-    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "standard" } }));
+    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "high" } }));
     expect((await transcribe(base, {})).status).toBe(200);
   });
 

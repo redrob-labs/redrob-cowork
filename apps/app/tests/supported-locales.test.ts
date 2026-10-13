@@ -312,7 +312,7 @@ describe("supported locales", () => {
       // v-prefixed semantic version placeholders left after {version} strip.
       /\bv\{version\}/g,
       // Privacy placeholders, quoted exactly as the AI sees them (desk/privacy/redact.ts).
-      /\[(EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|NAME)_\d+\]/g,
+      /\[(EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|NAME|PERSON|ORG|PLACE)_\d+\]/g,
     ];
 
     const englishWordPattern = /[A-Za-z]{2,}/g;

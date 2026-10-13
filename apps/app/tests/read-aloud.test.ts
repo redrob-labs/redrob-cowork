@@ -110,11 +110,11 @@ describe("read aloud", () => {
     expect(useReadAloudStore.getState()).toMatchObject({ activeId: null, status: "idle" });
   });
 
-  test("voice is allowed at Off and Standard privacy, and not at High or Strict", () => {
+  test("voice is allowed at Off, Standard and High privacy, and not at Strict", () => {
     expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "off" } })).toBe(true);
     expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "standard" } })).toBe(true);
     expect(voiceAllowedForPrivacy({})).toBe(true);
-    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "high" } })).toBe(false);
+    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "high" } })).toBe(true);
     expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "strict" } })).toBe(false);
   });
 

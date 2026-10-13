@@ -28,7 +28,17 @@ async function temp(prefix: string) {
   return dir;
 }
 
-function serverConfig(workspace: string, dataDir: string): ServerConfig {
+/** The engine a level change is carried to (engine-privacy.ts): `PUT /api/privacy` is accepted, nothing else matters here. */
+function startStubEngine() {
+  const server = Bun.serve({
+    hostname: "127.0.0.1",
+    port: 0,
+    fetch: () => Response.json({ mode: "off" }),
+  });
+  return { baseUrl: `http://127.0.0.1:${server.port}`, stop: () => server.stop(true) };
+}
+
+function serverConfig(workspace: string, dataDir: string, engineBaseUrl: string): ServerConfig {
   return {
     host: "127.0.0.1",
     port: 0,
@@ -37,7 +47,7 @@ function serverConfig(workspace: string, dataDir: string): ServerConfig {
     configPath: join(dataDir, "config.json"),
     approval: { mode: "auto", timeoutMs: 1000 },
     corsOrigins: [],
-    workspaces: [{ id: "workspace", name: "workspace", path: workspace, preset: "default", workspaceType: "local" }],
+    workspaces: [{ id: "workspace", name: "workspace", path: workspace, preset: "default", workspaceType: "local", baseUrl: engineBaseUrl }],
     authorizedRoots: [workspace],
     readOnly: false,
     startedAt: Date.now(),
@@ -54,8 +64,10 @@ async function startTeamServer() {
   process.env.REDROB_DATA_DIR = dataDir;
   process.env.REDROB_RUNTIME_DB = join(dataDir, "runtime.sqlite");
   process.env.REDROB_DISABLE_SCHEDULER = "1";
-  const config = serverConfig(workspace, dataDir);
-  const server = (await startServer(config)) as { port: number; stop: (force?: boolean) => void };
+  const engine = startStubEngine();
+  const config = serverConfig(workspace, dataDir, engine.baseUrl);
+  const started = (await startServer(config)) as { port: number; stop: (force?: boolean) => void };
+  const server = { port: started.port, stop: (force?: boolean) => (started.stop(force), engine.stop()) };
   const base = `http://127.0.0.1:${server.port}`;
   // The desktop app holds an owner token like this one; a shared workspace hands out the collaborator one.
   const issued = await fetch(`${base}/tokens`, {

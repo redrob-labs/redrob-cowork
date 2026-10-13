@@ -141,6 +141,7 @@ import {
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
+import { deskPrivacyLevel, syncEnginePrivacy, syncEnginePrivacyQuietly } from "./engine-privacy.js";
 import {
   applyTeamPolicy,
   describeTeamPolicyState,
@@ -162,8 +163,6 @@ import {
   type TeamPolicySyncDeps,
 } from "./team-policy/index.js";
 import { readHarnessAvailability } from "./harness-availability.js";
-import { PrivacyGate } from "./privacy/gate.js";
-import { RouteLabelSource } from "./route/label-source.js";
 import { parseFact } from "./insights/facts.js";
 import { InsightsOutbox } from "./insights/outbox.js";
 import { InsightsRecorder } from "./insights/recorder.js";
@@ -2924,35 +2923,6 @@ function createRoutes(
   });
 
   /*
-   * The privacy gate's server half, called by the engine plugin redrob-privacy-gate for every model
-   * request (privacy/gate.ts). Collaborator scope, the engine's own: a collaborator can already read
-   * the chats whose labels this resolves, so restoring them reveals nothing new.
-   */
-  const privacyGate = new PrivacyGate(config);
-  addRoute(routes, "POST", "/privacy/gate", "client", async (ctx) => {
-    requireClientScope(ctx, "collaborator");
-    const body = await readJsonBody(ctx.request);
-    const directory = typeof body.directory === "string" && body.directory ? body.directory : null;
-    const sessionID = typeof body.sessionID === "string" ? body.sessionID : "";
-    switch (body.op) {
-      case "settings":
-        return jsonResponse({ level: (await privacyGate.rules(directory)).level, detector: privacyGate.detectorStatus() });
-      case "label": {
-        if (!sessionID || !Array.isArray(body.texts) || body.texts.some((text) => typeof text !== "string")) {
-          throw new ApiError(400, "invalid_payload", "sessionID and texts (strings) are required");
-        }
-        return jsonResponse(await privacyGate.label({ sessionID, directory, texts: body.texts as string[] }));
-      }
-      case "restore": {
-        if (!sessionID) throw new ApiError(400, "invalid_payload", "sessionID is required");
-        return jsonResponse(privacyGate.restore({ sessionID, value: body.value }));
-      }
-      default:
-        throw new ApiError(400, "invalid_payload", "op must be settings, label or restore");
-    }
-  });
-
-  /*
    * AI work insights (insights/). The engine plugin redrob-insights-recorder posts facts, never text;
    * finished sessions are labeled here and queued in the outbox, which the person can read in full.
    * Nothing is sent anywhere from these routes.
@@ -2977,32 +2947,6 @@ function createRoutes(
   addRoute(routes, "GET", "/insights/outbox", "client", async (ctx) => {
     requireClientScope(ctx, "collaborator");
     return jsonResponse({ entries: await insightsOutbox.list(), recording: insightsRecorder.liveCount() });
-  });
-
-  /** Whether names, organisations and addresses are found by the model or by patterns alone, and why. */
-  addRoute(routes, "GET", "/privacy/detector", "client", async (ctx) => {
-    requireClientScope(ctx, "collaborator");
-    return jsonResponse(privacyGate.detectorStatus());
-  });
-
-  /*
-   * The route labeller's server half, called by the engine plugin redrob-route-labels before every
-   * request to Redrob Auto (route/label-source.ts). Collaborator scope, the engine's own. The text is
-   * read here, on this machine; what goes back to the engine is a profession and a task.
-   */
-  const routeLabels = RouteLabelSource.fromEnvironment();
-  addRoute(routes, "POST", "/route/label", "client", async (ctx) => {
-    requireClientScope(ctx, "collaborator");
-    const body = await readJsonBody(ctx.request);
-    if (typeof body.text !== "string") throw new ApiError(400, "invalid_payload", "text (a string) is required");
-    const profession = typeof body.profession === "string" && body.profession ? body.profession : null;
-    return jsonResponse(await routeLabels.label(body.text, { profession, coding: body.coding === true }));
-  });
-
-  /** Whether requests are labelled with the embedding model or by words alone, and why. */
-  addRoute(routes, "GET", "/route/labeller", "client", async (ctx) => {
-    requireClientScope(ctx, "collaborator");
-    return jsonResponse(routeLabels.status());
   });
 
   addRoute(routes, "GET", "/workspace/:id/team-policy", "client", async (ctx) => {
@@ -3063,6 +3007,9 @@ function createRoutes(
       ...(typeof body.accountId === "string" ? { expectedAccountId: body.accountId } : {}),
     });
     if (result.status === "applied") {
+      await syncEnginePrivacyQuietly({ config }, await readRedrobWorkspaceConfig(config, workspace.id), (message) =>
+        logger.log("warn", message),
+      );
       emitReloadEvent(ctx.reloadEvents, workspace, "config");
       emitReloadEvent(ctx.reloadEvents, workspace, "skills");
       emitReloadEvent(ctx.reloadEvents, workspace, "commands");
@@ -3093,6 +3040,7 @@ function createRoutes(
     if (!opencode && !redrob) {
       throw new ApiError(400, "invalid_payload", "opencode or redrob updates required");
     }
+    let privacyLevelChanged = false;
     if (redrob) {
       const stored = await readRedrobWorkspaceConfig(config, workspace.id);
       const next = { ...stored, ...redrob };
@@ -3101,6 +3049,7 @@ function createRoutes(
         refuseNewPrivacyLock(stored, next);
         requireClientScope(ctx, "owner");
       }
+      privacyLevelChanged = deskPrivacyLevel(stored) !== deskPrivacyLevel(next);
     }
     if (opencode) await refuseBlockedConnectors(config, workspace.id, opencode.mcp);
 
@@ -3156,6 +3105,8 @@ function createRoutes(
       }
     }
     if (redrob) {
+      // The engine does the masking: a level it did not take is not stored (engine-privacy.ts).
+      if (privacyLevelChanged) await syncEnginePrivacy({ config }, redrob);
       await writeRedrobWorkspaceConfig(config, workspace.id, (current) => ({
         ...current,
         ...redrob,

@@ -58,7 +58,29 @@ describe("verifying a team policy", () => {
   });
 });
 
-function serverConfig(workspace: string, dataDir: string): ServerConfig {
+/**
+ * The engine the server carries the privacy level to (engine-privacy.ts). Only `PUT /api/privacy`
+ * is answered; the modes it saw are recorded so a test can read what the level became there.
+ */
+function startStubEngine() {
+  const modes: string[] = [];
+  const server = Bun.serve({
+    hostname: "127.0.0.1",
+    port: 0,
+    async fetch(request) {
+      const url = new URL(request.url);
+      if (url.pathname === "/api/privacy" && request.method === "PUT") {
+        const body = (await request.json().catch(() => null)) as { mode?: string } | null;
+        if (body?.mode) modes.push(body.mode);
+        return Response.json({ mode: body?.mode ?? "off" });
+      }
+      return Response.json({});
+    },
+  });
+  return { baseUrl: `http://127.0.0.1:${server.port}`, modes, stop: () => server.stop(true) };
+}
+
+function serverConfig(workspace: string, dataDir: string, engineBaseUrl: string): ServerConfig {
   return {
     host: "127.0.0.1",
     port: 0,
@@ -67,7 +89,7 @@ function serverConfig(workspace: string, dataDir: string): ServerConfig {
     configPath: join(dataDir, "config.json"),
     approval: { mode: "auto", timeoutMs: 1000 },
     corsOrigins: [],
-    workspaces: [{ id: "workspace", name: "workspace", path: workspace, preset: "default", workspaceType: "local" }],
+    workspaces: [{ id: "workspace", name: "workspace", path: workspace, preset: "default", workspaceType: "local", baseUrl: engineBaseUrl }],
     authorizedRoots: [workspace],
     readOnly: false,
     startedAt: Date.now(),
@@ -85,7 +107,9 @@ async function startPolicyServer() {
   process.env.REDROB_RUNTIME_DB = join(dataDir, "runtime.sqlite");
   process.env.REDROB_DISABLE_SCHEDULER = "1";
   process.env.REDROB_TEAM_POLICY_TEST_KEYS = "1";
-  const server = (await startServer(serverConfig(workspace, dataDir))) as { port: number; stop: (force?: boolean) => void };
+  const engine = startStubEngine();
+  const started = (await startServer(serverConfig(workspace, dataDir, engine.baseUrl))) as { port: number; stop: (force?: boolean) => void };
+  const server = { port: started.port, stop: (force?: boolean) => (started.stop(force), engine.stop()) };
   const base = `http://127.0.0.1:${server.port}`;
   const issued = await fetch(`${base}/tokens`, {
     method: "POST",
@@ -102,7 +126,7 @@ async function startPolicyServer() {
     const json = (await response.json().catch(() => null)) as Record<string, any> | null;
     return { status: response.status, body: json ?? {} };
   };
-  return { server, workspace, owner: as(ownerToken), collaborator: as("test-token") };
+  return { server, workspace, engine, owner: as(ownerToken), collaborator: as("test-token") };
 }
 
 const apply = (call: Awaited<ReturnType<typeof startPolicyServer>>["owner"], jws: string, accountId?: string) =>
@@ -262,14 +286,17 @@ describe("what a locked team policy holds", () => {
     }
   });
 
-  test("an unlocked policy leaves the setting to the owner, as the team file did", async () => {
-    const { server, owner } = await startPolicyServer();
+  test("an unlocked policy leaves the setting to the owner, as the team file did, and the engine gets each level", async () => {
+    const { server, engine, owner } = await startPolicyServer();
     try {
       await apply(owner, await signTestPolicy(samplePolicy({ privacy: { ...samplePolicy().privacy, locked: false } })));
       const patched = await owner("PATCH", "/workspace/workspace/config", {
         redrob: { deskPrivacy: { level: "strict", names: [], locked: false } },
       });
       expect(patched.status).toBe(200);
+      // The policy's level went to the engine when it was applied; the owner's change went after it.
+      expect(engine.modes.at(-1)).toBe("model");
+      expect(engine.modes.length).toBeGreaterThanOrEqual(2);
     } finally {
       server.stop(true);
     }

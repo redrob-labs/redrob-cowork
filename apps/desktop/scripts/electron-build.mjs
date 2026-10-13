@@ -50,14 +50,6 @@ function writeSentryBuildConfig() {
 run(nodeCmd, [resolve(__dirname, "prepare-sidecar.mjs"), "--force", "--outdir", electronSidecarDir], desktopRoot);
 run(nodeCmd, [resolve(__dirname, "prepare-computer-use-helper.mjs"), "--force", "--outdir", electronHelperDir], desktopRoot);
 run(nodeCmd, [resolve(__dirname, "prepare-runtime-node-modules.mjs"), "--outdir", packagedRuntimeRoot], desktopRoot);
-// The privacy detection model (about 104 MB), verified against the tracked manifest redrob-server pins.
-run(nodeCmd, [resolve(__dirname, "prepare-privacy-model.mjs")], desktopRoot);
-// @redrob-labs/route-labeller is a server dependency and is built with it. Its 140 MB ONNX model is
-// NOT bundled: electron-builder's binary sniff (isbinaryfile) reads the protobuf header of an .onnx
-// file as a length and dies with "RangeError: Invalid array length" while signing, which is what
-// broke the v0.3.0 macOS builds. Without the folder the labeller fails open and the Console labels
-// the request itself, with the same lexicon.
-run(packageManager.command, [...packageManager.args, ...["--filter", "@redrob-labs/route-labeller", "build"]], repoRoot);
 writeSentryBuildConfig();
 // Build the server TS → JS so Electron can import it in-process
 run(packageManager.command, [...packageManager.args, ...["--filter", "redrob-server", "build"]], repoRoot);
