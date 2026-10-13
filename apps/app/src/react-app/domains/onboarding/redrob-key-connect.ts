@@ -23,7 +23,7 @@ export type RedrobKeyConnectClient = Pick<
 export type RedrobKeyStatus = {
   connected: boolean;
   /** Which engine-side origin supplied the credential. Never the credential. */
-  source: "api" | "env" | "config" | "none";
+  source: "api" | "env" | "config" | "launcher" | "none";
 };
 
 /**

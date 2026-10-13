@@ -131,6 +131,12 @@ describe("account menu", () => {
     expect(loading).not.toContain("Connected");
     expect(loading).not.toContain("Not connected");
     expect(connectionLine(null)).toBeNull();
+    // The key Redrob Launcher signed this computer in with is named as such, not as "your key".
+    const launcher = renderToStaticMarkup(<AccountLabel connected link="launcher" />);
+    expect(launcher).toContain("Signed in with Redrob Launcher");
+    expect(launcher).not.toContain("Connected with your Redrob key");
+    expect(connectionLine(true, "own")).toBe("Connected with your Redrob key");
+    expect(connectionLine(false, "launcher")).toBe("Not connected");
   });
 
   test("Settings is in the account menu only, never in the Desk menu", () => {

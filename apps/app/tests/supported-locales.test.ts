@@ -190,6 +190,8 @@ describe("supported locales", () => {
       // absent: `no-hosted-cloud-product-copy.test.ts` keeps it out entirely.
       /Redrob Cowork( Connect| UI Control)?/g,
       /Redrob Code/g,
+      // The launcher that signs the computer in once; its key is what "Redrob Launcher로 로그인됨" names.
+      /Redrob Launcher(?=[로은는을를의와과에서]|(?!\p{L}))/gu,
       /**
        * Korean attaches its particles straight onto the brand name, with no space, which the
        * bare-brand rule below cannot see past: in "Redrob로 연결" the character after "Redrob" is a

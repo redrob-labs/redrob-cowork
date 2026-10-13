@@ -38,7 +38,8 @@ export const LEGACY_REDROB_API_KEY_ENV = "REDROB_API_KEY";
  */
 const ENGINE_PUBLIC_API_KEY_SENTINEL = "public";
 
-export type RedrobAuthSource = "api" | "env" | "config" | "none";
+/** `launcher` means the engine fell back to the Redrob Launcher shared account file (no key of this app's own). */
+export type RedrobAuthSource = "api" | "env" | "config" | "launcher" | "none";
 
 export type RedrobAuthStatus = {
   connected: boolean;
@@ -304,11 +305,11 @@ export function deriveRedrobAuthStatus(providerList: unknown): RedrobAuthStatus 
 
   const source = entry.source;
   const hasResolvedKey = typeof entry.key === "string" && entry.key.trim().length > 0;
-  const hasCredentialEvidence = source === "api" || source === "env" || hasResolvedKey;
+  const hasCredentialEvidence = source === "api" || source === "env" || source === "launcher" || hasResolvedKey;
   if (!hasCredentialEvidence) return disconnected;
 
   const reportedSource: RedrobAuthSource =
-    source === "api" || source === "env" || source === "config" ? source : "api";
+    source === "api" || source === "env" || source === "config" || source === "launcher" ? source : "api";
   return { connected: true, source: reportedSource };
 }
 
