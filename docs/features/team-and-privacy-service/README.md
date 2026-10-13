@@ -1,6 +1,16 @@
 # Team policy and privacy gate
 
-Status: plan. Step 1 is in review as #109. Nothing after it is built.
+Status: plan, partly superseded. Team policies (steps 1-3) are built. The privacy gate, the
+detection model and the on-device route labeller described below were built and then REMOVED:
+personal details are now masked in Redrob Code, the engine, in one place for every provider and
+every app that runs on it (`privacy.mask_pii`, off | regex | model). Cowork keeps only the
+workspace's level (`deskPrivacy.level`, lockable by a team policy) and carries it to the engine
+(`apps/server/src/engine-privacy.ts`: off -> off, standard -> regex, high and strict -> model).
+Strict additionally turns voice off (`voice-privacy.ts`), since speech cannot be masked. The
+`names` list a policy may carry is stored but not used by the engine's masker.
+
+Everything below about the gate (C4-C8), the detector and the route labeller is kept as history of
+what was tried, not as the plan.
 
 This replaces the hand-carried team file (#108) with signed team policies published from the
 console, and moves privacy protection (#102) from the renderer into `redrob-server`, so attached

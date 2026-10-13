@@ -19,9 +19,6 @@ import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
 import { toNote } from "@/react-app/desk/services/real-services";
-import { previewRedaction, privacySettingsFor, usePrivacyConfirmStore } from "@/react-app/desk/privacy/privacy-send";
-import { DEFAULT_PRIVACY_LEVEL, usePrivacyMapStore } from "@/react-app/desk/privacy/privacy-store";
-import { restore } from "@/react-app/desk/privacy/redact";
 import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
 import { useDeskCrossCheck } from "@/react-app/desk/thread/use-desk-cross-check";
 import type {
@@ -1031,22 +1028,8 @@ export function SessionRoute() {
         const sendVariant = sessionModelSelection ? sessionModelSelection.variant : modelVariantValue;
         if (!sessionModelSelection && selectedModelUnavailable) throw new Error(t("composer.selected_model_unavailable"));
 
-        // Privacy protection: in the desktop app, what the person typed leaves with private
-        // details swapped for placeholders. Settings that cannot be read fall back to the
-        // default level rather than to sending as written.
-        const privacySettings = inDeskFrame && isDesktopRuntime() && client && selectedWorkspaceId
-          ? await privacySettingsFor(client, selectedWorkspaceId).catch(() => ({ level: DEFAULT_PRIVACY_LEVEL, names: [] }))
-          : null;
-        const previousPlaceholders = usePrivacyMapStore.getState().maps[targetSessionId] ?? {};
-        if (privacySettings?.level === "strict" && draft.mode !== "shell") {
-          const hidden = previewRedaction(text, privacySettings, previousPlaceholders);
-          if (hidden.length && !(await usePrivacyConfirmStore.getState().ask(hidden))) {
-            return { outcome: "cancelled", reason: "context_changed" };
-          }
-        }
-        // Labelling happens in redrob-server's privacy gate, for everything the model reads (typed
-        // text, attachments, tool and connector results, these notes), on desktop and web alike. The
-        // app sends what the person wrote; the Strict confirm above is the only part left here.
+        // Personal details are masked in the engine (privacy.maskPii), for everything the model
+        // reads, and restored in what comes back. The app sends what the person wrote.
         const sendable = (value: string) => value;
 
         await sendWithRevertRollback({
@@ -1628,10 +1611,10 @@ export function SessionRoute() {
     */
     const writtenRequest =
       command.kind === "paraphrase" ? buildParaphrasePrompt(command.prompt) : command.prompt;
-    // The privacy gate in redrob-server labels the variants' requests too, and restores their answers.
+    // The engine masks the variants' requests too, and restores their answers.
     const requestText = writtenRequest;
     const keepPlaceholders: string | undefined = undefined;
-    const shown = (value: string) => restore(value, usePrivacyMapStore.getState().maps[sessionId] ?? {});
+    const shown = (value: string) => value;
     let run = startingRun({ kind: command.kind, prompt: command.prompt, slots });
     variantRunRef.current = run;
     setVariantRun(run);

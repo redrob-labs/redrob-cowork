@@ -1,6 +1,4 @@
 /** @jsxImportSource react */
-import { usePrivacyMapStore } from "@/react-app/desk/privacy/privacy-store";
-import { restore } from "@/react-app/desk/privacy/redact";
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { useQuery } from "@tanstack/react-query";
@@ -1158,8 +1156,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   const handleCopyTranscript = async () => {
     try {
-      // Copied as the person reads it: real details, not the placeholders that were sent.
-      await navigator.clipboard.writeText(restore(transcriptToText(renderedMessages), usePrivacyMapStore.getState().maps[props.sessionId] ?? {}));
+      await navigator.clipboard.writeText(transcriptToText(renderedMessages));
     } catch (nextError) {
       setError({ message: nextError instanceof Error ? nextError.message : t("session.error_copy_transcript_failed") });
     }

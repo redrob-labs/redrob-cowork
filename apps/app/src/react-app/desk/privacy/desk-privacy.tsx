@@ -1,12 +1,11 @@
 /** @jsxImportSource react */
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Badge, Button, EmptyState, ProtectionStatus, Skeleton, Textarea, icons } from "@redrob-labs/ui";
+import { Alert, Badge, Button, EmptyState, ProtectionStatus, Skeleton, icons } from "@redrob-labs/ui";
 
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { t } from "../../../i18n";
 import { createDeskServices } from "../services/real-services";
-import { clearPrivacySettings } from "./privacy-send";
 import type { PrivacyLevel, PrivacyState } from "../services/types";
 import { Group, Row } from "../settings/desk-settings";
 import { useDeskConnection } from "../shell/desk-connection";
@@ -21,11 +20,6 @@ export const PRIVACY_QUERY_KEY = "desk-privacy";
 /** The header meta: the level, in words. */
 export function privacyLevelMeta(level: PrivacyLevel): string {
   return privacyLevelLabel(level);
-}
-
-/** The names box: one per line, blanks and repeats dropped. */
-export function parseNames(text: string): string[] {
-  return [...new Set(text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean))];
 }
 
 const LEVELS: ReadonlyArray<{ id: PrivacyLevel; detail: () => string }> = [
@@ -65,7 +59,7 @@ function PrivacyStatus(props: { state: PrivacyState; desktop: boolean; preview: 
       title={`${t("desk.privacy_on_title")}: ${privacyLevelLabel(props.state.level)}`}
       live={t("desk.privacy_running")}
     >
-      {t("desk.privacy_page_kept", { count: props.state.detailsKeptThisWeek })}
+      {t("desk.privacy_page_engine")}
     </ProtectionStatus>
   );
 }
@@ -77,14 +71,11 @@ export type PrivacyViewProps = {
   preview: boolean;
   busy: boolean;
   onLevel: (level: PrivacyLevel) => void;
-  onNames: (names: string[]) => void;
 };
 
-/** Privacy protection: the status, what Send does, the levels and the names Strict keeps private. */
+/** Privacy protection: the status, what Send does and the levels. The masking itself is the engine's. */
 export function PrivacyView(props: PrivacyViewProps) {
-  const [names, setNames] = useState(props.state.names.join("\n"));
   const editable = props.desktop && !props.preview && !props.state.locked;
-  const changed = parseNames(names).join("\n") !== props.state.names.join("\n");
   return (
     <div className="desk-settings__main">
       {props.preview ? (
@@ -121,28 +112,6 @@ export function PrivacyView(props: PrivacyViewProps) {
             : t("desk.privacy_page_level_locked")}
         </p>
       ) : null}
-      {props.preview ? null : (
-        <Group title={t("desk.privacy_page_names_title")}>
-          <Row title={t("desk.privacy_page_names_title")} description={t("desk.privacy_page_names_text")}>
-            <div className="flex w-full flex-col gap-2">
-              <Textarea
-                aria-label={t("desk.privacy_page_names_title")}
-                value={names}
-                disabled={!editable}
-                rows={4}
-                onChange={(event) => setNames(event.currentTarget.value)}
-              />
-              {editable ? (
-                <div>
-                  <Button size="sm" variant="secondary" disabled={!changed} loading={props.busy} onClick={() => props.onNames(parseNames(names))}>
-                    {t("desk.privacy_page_names_save")}
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-          </Row>
-        </Group>
-      )}
       <Group title={t("desk.privacy_page_where_title")}>
         <Row title={t("desk.privacy_page_where_desktop_title")} description={t("desk.privacy_page_where_desktop_text")} />
         <Row title={t("desk.privacy_page_where_miss_title")} description={t("desk.privacy_page_where_miss_text")} />
@@ -162,14 +131,12 @@ export function DeskPrivacyScreen(props: { desktop?: boolean }) {
   const key = [PRIVACY_QUERY_KEY, workspaceId ?? "preview"];
   const privacy = useQuery({ queryKey: key, queryFn: () => services.privacy.get(), staleTime: 30_000 });
   const change = useMutation({
-    mutationFn: (patch: { level: PrivacyLevel } | { names: string[] }) =>
-      "level" in patch ? services.privacy.setLevel(patch.level) : services.privacy.setNames(patch.names),
-    onSuccess: (result, patch) => {
+    mutationFn: (patch: { level: PrivacyLevel }) => services.privacy.setLevel(patch.level),
+    onSuccess: (result) => {
       queryClient.setQueryData(key, result);
       // The menu and the composer read the level too.
       void queryClient.invalidateQueries({ queryKey: ["desk-nav"] });
       void queryClient.invalidateQueries({ queryKey: ["desk-composer"] });
-      if ("names" in patch) showToast(t("desk.privacy_page_names_saved"));
     },
     onError: () => showToast(t("desk.privacy_page_failed"), t("desk.settings_try_again"), "danger"),
   });
@@ -184,13 +151,11 @@ export function DeskPrivacyScreen(props: { desktop?: boolean }) {
         <EmptyState title={t("desk.privacy_page_error_title")} description={t("desk.settings_try_again")} />
       ) : (
         <PrivacyView
-          key={state.names.join("\n")}
           state={state}
           desktop={desktop}
           preview={result.preview}
           busy={change.isPending}
           onLevel={(level) => change.mutate({ level })}
-          onNames={(names) => change.mutate({ names })}
         />
       )}
     </DeskShell>

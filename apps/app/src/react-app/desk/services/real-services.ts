@@ -10,7 +10,7 @@ import { playbookFromCommand, playbookSlug, playbookTemplate } from "../playbook
 import { HISTORY_LIMIT, HISTORY_STEPS_LIMIT, historyEntryFrom } from "../history/history";
 import { boardFromState } from "../scheduled/schedules";
 import { useDeskComposerStore } from "../composer/composer-state";
-import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy, usePrivacyMapStore, type StoredPrivacy } from "../privacy/privacy-store";
+import { DESK_PRIVACY_CONFIG_KEY, readStoredPrivacy, type StoredPrivacy } from "../privacy/privacy-store";
 import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project } from "./types";
 
 /** The redrob-server calls Desk uses today. Tests pass a fake typed against this. */
@@ -126,7 +126,6 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
     await client.patchConfig(workspaceId, { redrob: { [DESK_PRIVACY_CONFIG_KEY]: next } });
     return next;
   };
-  const withKept = (stored: StoredPrivacy) => ({ ...stored, detailsKeptThisWeek: usePrivacyMapStore.getState().keptThisWeek() });
 
   return {
     ...fallback,
@@ -220,9 +219,9 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
       },
     },
     privacy: {
-      get: async () => real(withKept(await readPrivacy())),
-      setLevel: async (level) => real(withKept(await writePrivacy({ level }))),
-      setNames: async (names) => real(withKept(await writePrivacy({ names }))),
+      get: async () => real(await readPrivacy()),
+      setLevel: async (level) => real(await writePrivacy({ level })),
+      setNames: async (names) => real(await writePrivacy({ names })),
     },
     connectors: {
       list: async () => {

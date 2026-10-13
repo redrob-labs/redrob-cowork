@@ -143,9 +143,7 @@ import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
 import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
 import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
 import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
-import { usePlaceholderMap } from "@/react-app/desk/privacy/privacy-store"
 import { useFrameStore } from "@/react-app/desk/store/frame-store"
-import { restore } from "@/react-app/desk/privacy/redact"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
 
@@ -537,8 +535,6 @@ const AssistantMessage = React.memo(
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
     // Inside the Desk frame, Plan's and Cross-check's fenced blocks render as the design system's.
     const inDeskFrame = useInDeskFrame()
-    // Private details went to the AI as placeholders; the person reads the real ones.
-    const placeholders = usePlaceholderMap(sessionId)
     const assistantRenderGroups = React.useMemo(
       () => {
         const groups = getAssistantRenderGroups(message.parts, showThinking)
@@ -564,7 +560,7 @@ const AssistantMessage = React.memo(
                 While the marker is still streaming in, the raw text is shown and no chips appear. Chips
                 that pop in and then rewrite themselves under a reader's cursor are worse than late ones.
               */
-              const groupText = restore(group.text, placeholders)
+              const groupText = group.text
               const streamingMarker = isStreaming && hasIncompleteOptionsMarker(groupText)
               const parsed = streamingMarker
                 ? { body: groupText, options: [] as string[] }
@@ -751,9 +747,7 @@ function renderUserTextWithSkillChips(text: string, highlightQuery: string | und
 const UserMessage = React.memo(
   ({ message, isStreaming }: UserMessageProps) => {
     const { onRevertToUserMessage, onForkAtMessage, onEditUserMessage, highlightQuery, sessionId } = useMessageList()
-    // What the person wrote, with the real details where placeholders were sent.
-    const placeholders = usePlaceholderMap(sessionId)
-    const messageText = React.useMemo(() => restore(getMessagesText([message]), placeholders), [message, placeholders])
+    const messageText = React.useMemo(() => getMessagesText([message]), [message])
     // Inside the Desk frame a prompt worth repeating can become a playbook.
     const inDeskFrame = useInDeskFrame()
     const openModal = useFrameStore((state) => state.openModal)
@@ -789,7 +783,7 @@ const UserMessage = React.memo(
                       if (part.type === "text") {
                         return (
                           <span key={`text-${index}`} className="whitespace-pre-wrap">
-                            {renderUserTextWithSkillChips(restore(part.text, placeholders), highlightQuery)}
+                            {renderUserTextWithSkillChips(part.text, highlightQuery)}
                           </span>
                         )
                       }

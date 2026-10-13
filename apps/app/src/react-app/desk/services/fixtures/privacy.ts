@@ -5,5 +5,4 @@ export const PRIVACY: PrivacyState = {
   names: ["Seorin Partners"],
   setBy: null,
   locked: false,
-  detailsKeptThisWeek: 214,
 };

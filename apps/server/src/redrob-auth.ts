@@ -131,6 +131,27 @@ export async function putRedrobEngineAuth(input: RedrobAuthInput, key: string): 
   }
 }
 
+/**
+ * Set the engine's PII masking switch (`PUT /api/privacy`). The engine masks in one place for every
+ * provider; Cowork only carries the workspace's level there (engine-privacy.ts).
+ */
+export async function putRedrobEnginePrivacy(input: RedrobAuthInput, mode: "off" | "regex" | "model"): Promise<void> {
+  const target = resolveEngineTarget(input);
+  let response: Response;
+  try {
+    response = await target.fetchImpl(`${target.baseUrl}/api/privacy`, {
+      method: "PUT",
+      headers: target.headers,
+      body: JSON.stringify({ mode }),
+    });
+  } catch {
+    throw new ApiError(503, "engine_unavailable", "Redrob Code is not reachable yet");
+  }
+  if (!response.ok) {
+    throw new ApiError(502, "privacy_not_applied", `Redrob Code did not accept the privacy setting (${response.status})`);
+  }
+}
+
 /** Remove the Redrob Key from the engine's auth store. */
 export async function deleteRedrobEngineAuth(input: RedrobAuthInput): Promise<void> {
   const target = resolveEngineTarget(input);
