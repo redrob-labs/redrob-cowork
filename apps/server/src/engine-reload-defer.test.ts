@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
 import { shouldDeferInPlaceEngineReload } from "./engine-reload-defer.js";
-import { clearEnginePoolForConfig, setEnginePoolForConfig, type EnginePool } from "./engine-pool.js";
 import type { ServerConfig, WorkspaceInfo } from "./types.js";
 
 const first: WorkspaceInfo = {
@@ -19,9 +18,8 @@ const second: WorkspaceInfo = {
   path: "/tmp/second",
   baseUrl: "http://127.0.0.1:4096/",
 };
-function fixtureConfig(engineRollover = false): ServerConfig {
+function fixtureConfig(): ServerConfig {
   return {
-    engineRollover,
     workspaces: [first, second],
   } as ServerConfig;
 }
@@ -49,20 +47,5 @@ describe("shouldDeferInPlaceEngineReload", () => {
 
     expect(await shouldDeferInPlaceEngineReload(config, second, hasActiveSessions)).toBe(false);
     expect(probed).toEqual([second.id]);
-  });
-
-  test("does not probe or defer when a rollover pool exists", async () => {
-    const config = fixtureConfig(true);
-    setEnginePoolForConfig(config, { adoptPrimary: () => undefined } as unknown as EnginePool);
-    let probed = false;
-    try {
-      expect(await shouldDeferInPlaceEngineReload(config, second, async () => {
-        probed = true;
-        return true;
-      })).toBe(false);
-      expect(probed).toBe(false);
-    } finally {
-      clearEnginePoolForConfig(config);
-    }
   });
 });

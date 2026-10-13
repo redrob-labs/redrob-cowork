@@ -5,16 +5,7 @@ import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
 import { resolveGlobalEngineConfigPath } from "@redrob/paths";
 import type { ApprovalRequest, Capabilities, ServerConfig, WorkspaceInfo, Actor, ReloadReason, ReloadTrigger, TokenScope } from "./types.js";
 import { ApprovalService } from "./approvals.js";
-import {
-  EnginePool,
-  enginePoolForConfig,
-  isEngineConnectionFailure,
-  managedEnginePoolForConfig,
-  setEnginePoolForConfig,
-  type EnginePoolConnection,
-  type EngineEventProxyLease,
-  type EngineSpawnTemplate,
-} from "./engine-pool.js";
+import { isEngineConnectionFailure, reportEngineRequestFailure } from "./engine-connection.js";
 import { withEngineDirectoryFence } from "./engine-directory-fence.js";
 import { shouldDeferInPlaceEngineReload } from "./engine-reload-defer.js";
 import { LatestTrailingWorkQueue } from "./latest-trailing-work-queue.js";
@@ -1378,15 +1369,7 @@ export function createWorkspaceOpencodeClient(
   workspace: WorkspaceInfo,
   options?: { boundedDiagnosticsReads?: boolean; sessionId?: string },
 ) {
-  const poolRoute = workspace.workspaceType === "remote" || !options?.sessionId
-    ? null
-    : enginePoolForConfig(config)?.routeRequest("GET", `/session/${encodeURIComponent(options.sessionId)}`) ?? null;
-  const connection = poolRoute
-    ? {
-        baseUrl: poolRoute.target.baseUrl,
-        authHeader: buildEngineAuthProbeHeader(poolRoute.target.username, poolRoute.target.password),
-      }
-    : resolveWorkspaceOpencodeConnection(config, workspace);
+  const connection = resolveWorkspaceOpencodeConnection(config, workspace);
   const baseUrl = connection.baseUrl?.trim();
   if (!baseUrl) {
     throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace", {
@@ -1477,10 +1460,7 @@ export async function proxyOpencodeRequest(input: {
   const workspace = input.workspace;
   const proxyPath = input.proxyPath ?? input.url.pathname;
   const method = input.request.method.toUpperCase();
-  const pool = workspace?.workspaceType === "remote" ? null : enginePoolForConfig(input.config);
-  const route = pool?.routeRequest(method, proxyPath) ?? null;
-  const baseUrl = route?.target.baseUrl ??
-    (workspace ? resolveWorkspaceOpencodeConnection(input.config, workspace).baseUrl?.trim() ?? "" : "");
+  const baseUrl = workspace ? resolveWorkspaceOpencodeConnection(input.config, workspace).baseUrl?.trim() ?? "" : "";
   if (!baseUrl) {
     throw new ApiError(400, "opencode_unconfigured", "Redrob Code base URL is missing for this workspace");
   }
@@ -1500,9 +1480,7 @@ export async function proxyOpencodeRequest(input: {
     headers.set(ENGINE_DIRECTORY_HEADER, buildEngineDirectoryHeader(directory));
   }
 
-  const auth = route
-    ? buildEngineAuthProbeHeader(route.target.username, route.target.password)
-    : workspace ? resolveWorkspaceOpencodeConnection(input.config, workspace).authHeader ?? null : null;
+  const auth = workspace ? resolveWorkspaceOpencodeConnection(input.config, workspace).authHeader ?? null : null;
   if (auth) {
     headers.set("Authorization", auth);
   }
@@ -1513,26 +1491,6 @@ export async function proxyOpencodeRequest(input: {
   const body = method === "GET" || method === "HEAD"
     ? undefined
     : await input.request.arrayBuffer().then((buf) => (buf.byteLength > 0 ? buf : undefined));
-  if (pool && method === "GET" && isEngineEventPath(proxyPath)) {
-    return proxyEngineEventStreams({
-      pool,
-      connections: pool.connections(),
-      proxyPath,
-      search: input.url.search,
-      headers,
-      clientSignal: input.request.signal,
-    });
-  }
-  if (pool && method === "GET" && engineAggregateKind(proxyPath)) {
-    return proxyEngineAggregateRead({
-      pool,
-      connections: pool.connections(),
-      proxyPath,
-      search: input.url.search,
-      headers,
-      kind: engineAggregateKind(proxyPath) ?? "pending",
-    });
-  }
   const targetUrl = buildOpencodeProxyUrl(baseUrl, proxyPath, input.url.search);
   // Managed OpenCode proxy traffic is loopback/engine I/O; keep streaming on Node fetch.
   if (isSessionCommandProxyRequest(method, proxyPath)) {
@@ -1540,10 +1498,8 @@ export async function proxyOpencodeRequest(input: {
       method,
       headers,
       body,
-    }).then(() => {
-      managedEnginePoolForConfig(input.config)?.reportRequestSuccess(baseUrl);
     }).catch((error: unknown) => {
-      if (workspace) managedEnginePoolForConfig(input.config)?.reportRequestFailure(baseUrl, error, workspace);
+      void reportEngineRequestFailure(input.config, error);
       // Command failures are surfaced through the OpenCode event stream.
     });
     return jsonResponse({ ok: true, accepted: true });
@@ -1552,274 +1508,21 @@ export async function proxyOpencodeRequest(input: {
     let response: Response;
     try {
       response = await loopbackFetch(targetUrl, { method, headers, body });
-      managedEnginePoolForConfig(input.config)?.reportRequestSuccess(baseUrl);
     } catch (error) {
-      if (workspace) managedEnginePoolForConfig(input.config)?.reportRequestFailure(baseUrl, error, workspace);
+      void reportEngineRequestFailure(input.config, error);
       if (isEngineConnectionFailure(error)) throw opencodeUnreachableError(error, proxyPath);
       throw error;
-    }
-
-    if (response.status === 404 && route?.fallback) {
-      const fallbackHeaders = headersForEngineConnection(headers, route.fallback);
-      let fallbackResponse: Response;
-      try {
-        fallbackResponse = await loopbackFetch(
-          buildOpencodeProxyUrl(route.fallback.baseUrl, proxyPath, input.url.search),
-          { method, headers: fallbackHeaders, body },
-        );
-      } catch (error) {
-        if (workspace) managedEnginePoolForConfig(input.config)?.reportRequestFailure(route.fallback.baseUrl, error, workspace);
-        if (isEngineConnectionFailure(error)) throw opencodeUnreachableError(error, proxyPath);
-        throw error;
-      }
-      return sanitizeProxyResponse(fallbackResponse);
     }
 
     return sanitizeProxyResponse(response);
   };
 
-  if (workspace && workspace.workspaceType !== "remote" && !pool && isPromptAsyncProxyRequest(method, proxyPath)) {
+  if (workspace && workspace.workspaceType !== "remote" && isPromptAsyncProxyRequest(method, proxyPath)) {
     return withEngineDirectoryFence(input.config, workspace, forward);
   }
   return forward();
 }
 
-function isEngineEventPath(proxyPath: string): boolean {
-  const normalized = normalizeOpencodeProxyPath(proxyPath);
-  return normalized === "/event" || normalized === "/global/event" || normalized === "/api/event";
-}
-
-function engineAggregateKind(proxyPath: string): "status" | "pending" | null {
-  const normalized = normalizeOpencodeProxyPath(proxyPath);
-  if (normalized === "/session/status") return "status";
-  if (["/permission", "/question", "/api/permission/request", "/api/question/request"].includes(normalized)) {
-    return "pending";
-  }
-  return null;
-}
-
-function headersForEngineConnection(headers: Headers, connection: EnginePoolConnection): Headers {
-  const next = new Headers(headers);
-  next.set("Authorization", buildEngineAuthProbeHeader(connection.username, connection.password));
-  return next;
-}
-
-function pendingPayloadItems(payload: unknown): { key: string | null; items: unknown[] } {
-  if (Array.isArray(payload)) return { key: null, items: payload };
-  if (!isRecord(payload)) return { key: null, items: [] };
-  for (const key of ["items", "permissions", "questions", "requests"]) {
-    const value = payload[key];
-    if (Array.isArray(value)) return { key, items: value };
-  }
-  return { key: null, items: [] };
-}
-
-function pendingItemIdentity(value: unknown): string {
-  if (!isRecord(value)) return JSON.stringify(value) ?? String(value);
-  for (const key of ["id", "requestID", "requestId", "permissionID", "questionID"]) {
-    const candidate = value[key];
-    if (typeof candidate === "string" && candidate) return candidate;
-  }
-  return JSON.stringify(value) ?? String(value);
-}
-
-async function proxyEngineAggregateRead(input: {
-  pool: EnginePool;
-  connections: EnginePoolConnection[];
-  proxyPath: string;
-  search: string;
-  headers: Headers;
-  kind: "status" | "pending";
-}): Promise<Response> {
-  const settled = await Promise.allSettled(input.connections.map(async (connection) => {
-    const response = await loopbackFetch(buildOpencodeProxyUrl(connection.baseUrl, input.proxyPath, input.search), {
-      method: "GET",
-      headers: headersForEngineConnection(input.headers, connection),
-      signal: AbortSignal.timeout(5_000),
-    });
-    const payload = response.ok ? await response.json().catch(() => null) : null;
-    return { connection, response, payload };
-  }));
-  const results = settled.flatMap((entry) => entry.status === "fulfilled" ? [entry.value] : []);
-  const primary = results.find((entry) => entry.connection.role === "primary");
-  if (!primary) throw new ApiError(502, "opencode_unreachable", "No Redrob Code engine is available");
-  if (!primary.response.ok) return sanitizeProxyResponse(primary.response);
-
-  if (input.kind === "status") {
-    const merged: Record<string, unknown> = {};
-    for (const result of results.filter((entry) => entry.connection.role === "primary")) {
-      if (isRecord(result.payload)) Object.assign(merged, result.payload);
-    }
-    for (const result of results.filter((entry) => entry.connection.role === "draining")) {
-      if (isRecord(result.payload)) Object.assign(merged, result.payload);
-    }
-    return jsonResponse(merged);
-  }
-
-  for (const result of results) {
-    input.pool.observePendingRequests(result.connection.generationId, result.payload);
-  }
-  const seen = new Set<string>();
-  const items: unknown[] = [];
-  let containerKey: string | null = null;
-  for (const result of results) {
-    const pending = pendingPayloadItems(result.payload);
-    containerKey ??= pending.key;
-    for (const item of pending.items) {
-      const identity = pendingItemIdentity(item);
-      if (seen.has(identity)) continue;
-      seen.add(identity);
-      items.push(item);
-    }
-  }
-  if (containerKey && isRecord(primary.payload)) {
-    return jsonResponse({ ...primary.payload, [containerKey]: items });
-  }
-  return jsonResponse(items);
-}
-
-function parseSsePayload(frame: string): unknown {
-  const data = frame
-    .split(/\r?\n/)
-    .filter((line) => line.startsWith("data:"))
-    .map((line) => line.slice("data:".length).trimStart())
-    .join("\n");
-  if (!data) return null;
-  try {
-    return JSON.parse(data);
-  } catch {
-    return null;
-  }
-}
-
-function mergedEventBody(input: {
-  pool: EnginePool;
-  streams: Array<{ connection: EnginePoolConnection; body: ReadableStream<Uint8Array> }>;
-  lease: EngineEventProxyLease;
-}): ReadableStream<Uint8Array> {
-  const encoder = new TextEncoder();
-  const readers = input.streams.map((entry) => ({ connection: entry.connection, reader: entry.body.getReader() }));
-  let cancelled = false;
-  let pingTimer: ReturnType<typeof setInterval> | null = null;
-  return new ReadableStream<Uint8Array>({
-    start(controller) {
-      let active = readers.length;
-      let closed = false;
-      const close = () => {
-        if (closed) return;
-        closed = true;
-        if (pingTimer) clearInterval(pingTimer);
-        input.lease.signal.removeEventListener("abort", abort);
-        input.lease.release();
-        controller.close();
-      };
-      const abort = () => {
-        if (closed || cancelled) return;
-        cancelled = true;
-        for (const entry of readers) void entry.reader.cancel(input.lease.signal.reason).catch(() => undefined);
-        close();
-      };
-      const finish = () => {
-        active -= 1;
-        if (active > 0 || closed || cancelled) return;
-        close();
-      };
-      const pump = async (entry: typeof readers[number]) => {
-        const decoder = new TextDecoder();
-        let buffered = "";
-        try {
-          while (!cancelled) {
-            const chunk = await entry.reader.read();
-            if (chunk.done) break;
-            buffered += decoder.decode(chunk.value, { stream: true });
-            while (true) {
-              const delimiter = buffered.match(/\r?\n\r?\n/);
-              if (!delimiter || delimiter.index === undefined) break;
-              const frame = buffered.slice(0, delimiter.index);
-              buffered = buffered.slice(delimiter.index + delimiter[0].length);
-              if (input.pool.shouldForwardEvent(entry.connection.generationId, parseSsePayload(frame))) {
-                controller.enqueue(encoder.encode(`${frame}\n\n`));
-              }
-            }
-          }
-        } catch {
-          // A generation flip intentionally aborts these readers. The client
-          // reconnects and the next stream fans in every live generation.
-        } finally {
-          finish();
-        }
-      };
-      for (const entry of readers) void pump(entry);
-      pingTimer = setInterval(() => {
-        if (!closed && !cancelled) controller.enqueue(encoder.encode(": ping\n\n"));
-      }, 30_000);
-      pingTimer.unref?.();
-      input.lease.signal.addEventListener("abort", abort, { once: true });
-      if (input.lease.signal.aborted) abort();
-    },
-    async cancel(reason) {
-      cancelled = true;
-      if (pingTimer) clearInterval(pingTimer);
-      input.lease.release();
-      await Promise.all(readers.map((entry) => entry.reader.cancel(reason).catch(() => undefined)));
-    },
-  });
-}
-
-async function proxyEngineEventStreams(input: {
-  pool: EnginePool;
-  connections: EnginePoolConnection[];
-  proxyPath: string;
-  search: string;
-  headers: Headers;
-  clientSignal: AbortSignal;
-}): Promise<Response> {
-  const lease = input.pool.openEventProxy(input.clientSignal);
-  const settled = await Promise.allSettled(input.connections.map(async (connection) => {
-    const response = await loopbackFetch(buildOpencodeProxyUrl(connection.baseUrl, input.proxyPath, input.search), {
-      method: "GET",
-      headers: headersForEngineConnection(input.headers, connection),
-      signal: lease.signal,
-    });
-    return { connection, response };
-  }));
-  const successful = settled
-    .filter((entry): entry is PromiseFulfilledResult<{ connection: EnginePoolConnection; response: Response }> =>
-      entry.status === "fulfilled")
-    .map((entry) => entry.value);
-  const primary = successful.find((entry) => entry.connection.role === "primary");
-  if (!primary) {
-    lease.release();
-    throw new ApiError(502, "opencode_unreachable", "The primary Redrob Code event stream is unavailable");
-  }
-  if (!primary.response.ok || !primary.response.body) {
-    lease.release();
-    return sanitizeProxyResponse(primary.response);
-  }
-  const streams = successful
-    .flatMap((entry) => entry.response.ok && entry.response.body
-      ? [{ connection: entry.connection, body: entry.response.body }]
-      : []);
-  const headers = new Headers(primary.response.headers);
-  headers.delete("content-length");
-  headers.delete("content-encoding");
-  headers.delete("transfer-encoding");
-  headers.set("content-type", "text/event-stream");
-  headers.set("cache-control", "no-cache");
-  return new Response(mergedEventBody({ pool: input.pool, streams, lease }), {
-    status: primary.response.status,
-    statusText: primary.response.statusText,
-    headers,
-  });
-}
-
-/**
- * Strip hop-by-hop and transport-level headers that Bun's native fetch keeps
- * in the upstream response even after it has already decoded the body for us.
- * Without this the browser sees `content-encoding: gzip` on a plain-text
- * payload and bails out with ERR_CONTENT_DECODING_FAILED, breaking any UI
- * code that reaches through /opencode/* (including session.create).
- */
 function sanitizeProxyResponse(response: Response): Response {
   const headers = new Headers(response.headers);
   headers.delete("content-encoding");
@@ -1924,7 +1627,8 @@ function buildCapabilities(config: ServerConfig): Capabilities {
     mcp: { read: true, write: writeEnabled },
     commands: { read: true, write: writeEnabled },
     config: { read: true, write: writeEnabled },
-    engine: { rollover: config.engineRollover === true },
+    // One shared daemon, reloaded in place; kept so older clients can read it.
+    engine: { rollover: false },
 
     approvals: { mode: config.approval.mode, timeoutMs: config.approval.timeoutMs },
     sandbox: { enabled: sandboxEnabled, backend: sandboxBackend },
@@ -2764,9 +2468,7 @@ function createRoutes(
 
     const fileResult = await writeRedrobRuntimeConfigFile(config, workspace.id);
     const shouldReload = result.changed || fileResult.changed;
-    // A rollover-capable pool can apply this immediately without disposing
-    // the generation that owns live sessions. Legacy/external engines keep
-    // the established busy deferral.
+    // A busy engine defers the in-place dispose so live runs are not aborted.
     const reloadDeferred = shouldReload
       && (await shouldDeferInPlaceEngineReload(config, workspace, engineHasActiveSessions));
     if (shouldReload && !reloadDeferred) {
@@ -4474,9 +4176,8 @@ async function engineHasActiveSessions(config: ServerConfig, workspace: Workspac
 /**
  * Bring the engine onto current config.
  *
- * With engine rollover enabled the pool decides: an idle engine still reloads
- * in place, a busy one rolls over to a standby so live runs are not aborted.
- * Disabled (the default), this is the in-place dispose and callers keep their
+ * The shared daemon reloads in place: dispose the workspace's instance and let
+ * the next request rebuild it on the current config file. Callers keep their
  * own defer-while-busy handling.
  */
 async function reloadOpencodeEngine(
@@ -4485,18 +4186,6 @@ async function reloadOpencodeEngine(
   serverState?: EngineMcpServerState,
   options?: { awaitPostRefreshSync?: boolean; forceStandby?: boolean },
 ): Promise<void> {
-  const pool = options?.forceStandby
-    ? managedEnginePoolForConfig(config)
-    : enginePoolForConfig(config);
-  if (pool) {
-    await pool.requestRollover({
-      reason: "engine_reload",
-      workspace,
-      awaitPostRefreshSync: options?.awaitPostRefreshSync,
-      forceStandby: options?.forceStandby,
-    });
-    return;
-  }
   await reloadOpencodeEngineInPlace(config, workspace, serverState, options);
 }
 
@@ -4570,7 +4259,7 @@ async function reloadOpencodeEngineInPlace(
 /**
  * Re-attach engine state that a fresh instance cannot recover from disk.
  *
- * Runs after any engine refresh — an in-place dispose or a rollover flip —
+ * Runs after any engine refresh (an in-place dispose)
  * because both leave the serving engine without the runtime-DB MCPs that only
  * reach it through the dynamic push.
  */
@@ -4825,7 +4514,6 @@ async function postMcpEntryWithRetry(
         body: JSON.stringify({ name, config: mcpConfig }),
         signal: AbortSignal.timeout(15_000),
       });
-      managedEnginePoolForConfig(config)?.reportRequestSuccess(url.origin);
       if (response.ok) {
         // OpenCode's dynamic registration endpoint historically treats every
         // 2xx response as accepted delivery and Cloud readiness verifies the
@@ -4850,7 +4538,7 @@ async function postMcpEntryWithRetry(
       };
       if (response.status < 500) return { name, status: "failed", source: "transport_failure", errorSummary: null, failure };
     } catch (error) {
-      managedEnginePoolForConfig(config)?.reportRequestFailure(url.origin, error, workspace);
+      void reportEngineRequestFailure(config, error);
       failure = {
         name,
         registrationStatus: "failed",
@@ -5167,48 +4855,6 @@ export function registerTrustedOpencodeProcess(
   trustedOpencodeProcessByConfig.set(config, next);
 }
 
-/**
- * Build the engine pool for a config and register it.
- *
- * Lives here so the pool can reuse server-private helpers (in-place reload,
- * busy probe, post-refresh MCP sync) without exporting them; the startup path
- * only supplies what it already knows about the spawn.
- */
-export function createEnginePoolForConfig(input: {
-  config: ServerConfig;
-  template: EngineSpawnTemplate;
-  handle: Parameters<EnginePool["adoptPrimary"]>[0]["handle"];
-  fingerprint: string;
-  registryId: string | null;
-  trustedIdentity: string | null;
-}): EnginePool {
-  const { config } = input;
-  const pool = new EnginePool({
-    config,
-    template: input.template,
-    hooks: {
-      reloadInPlace: (poolConfig, workspace, options) =>
-        reloadOpencodeEngineInPlace(poolConfig, workspace, undefined, options),
-      engineBusy: (poolConfig, workspace) => engineHasActiveSessions(poolConfig, workspace),
-      postRefreshSync: async (poolConfig, workspace) => {
-        await postEngineRefreshSync(poolConfig, workspace, activeEngineMcpServerState(poolConfig));
-        await syncAllWorkspacesRuntimeMcpToEngine(poolConfig);
-      },
-      writeRuntimeConfigFile: (poolConfig, workspaceId) => writeRedrobRuntimeConfigFile(poolConfig, workspaceId),
-      registerTrusted: (poolConfig, generation) => registerTrustedOpencodeProcess(poolConfig, generation),
-      clearTrusted: (poolConfig, identity) => clearTrustedOpencodeProcess(poolConfig, identity),
-      logger: createServerLogger(config),
-    },
-  });
-  pool.adoptPrimary({
-    handle: input.handle,
-    fingerprint: input.fingerprint,
-    registryId: input.registryId,
-    trustedIdentity: input.trustedIdentity,
-  });
-  setEnginePoolForConfig(config, pool);
-  return pool;
-}
 
 export function clearTrustedOpencodeProcess(config: ServerConfig, expectedIdentity?: string): void {
   const current = trustedOpencodeProcessByConfig.get(config);

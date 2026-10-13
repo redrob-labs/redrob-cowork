@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { RedrobWorkCapabilitiesKnowledge } from "./redrob-capabilities-knowledge.js";
 
@@ -66,6 +67,28 @@ describe("Redrob Cowork capabilities knowledge plugin", () => {
 
     expect(search).not.toContain("\"cloud/");
     expect(search).not.toContain("Redrob Cowork Cloud");
+  });
+});
+
+describe("docs directory from the plugin options", () => {
+  test("the docsDir option wins over REDROB_DOCS_DIR", async () => {
+    const docsDir = resolve(import.meta.dir, "../../../../packages/docs");
+    const decoy = await mkdtemp(join(tmpdir(), "redrob-docs-decoy-"));
+    try {
+      await writeFile(join(decoy, "only-here.md"), "---\ntitle: Decoy page\n---\nConnect slack through the decoy.\n");
+      process.env.REDROB_DOCS_DIR = decoy;
+
+      const fromEnv = await RedrobWorkCapabilitiesKnowledge();
+      expect(await fromEnv.tool.redrob_docs_search.execute({ query: "decoy", limit: 3 })).toContain("only-here.md");
+
+      const fromOptions = await RedrobWorkCapabilitiesKnowledge({}, { docsDir });
+      const search = await fromOptions.tool.redrob_docs_search.execute({ query: "how can i connect slack", limit: 3 });
+      expect(search).toContain("start-here/connect-your-stack/connect-slack-mcp.mdx");
+      expect(search).not.toContain("only-here.md");
+    } finally {
+      delete process.env.REDROB_DOCS_DIR;
+      await rm(decoy, { recursive: true, force: true });
+    }
   });
 });
 

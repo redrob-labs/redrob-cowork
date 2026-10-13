@@ -1,19 +1,19 @@
 /**
- * Runtime engine configuration injected via a server-managed config file
- * passed to the Redrob Code engine as REDROB_CONFIG.
+ * Runtime engine configuration injected via a server-managed config file the
+ * Redrob Code engine reads for the workspace directory (see redrobRuntimeConfigFilePath).
  *
  * This is the single source of truth for the redrob agent definition,
  * plugins, and any other config that should be injected at runtime rather
  * than written to the user's own config files. Both cli.ts and embedded.ts
  * use this.
  *
- * The engine re-reads the REDROB_CONFIG file from disk on every instance
+ * The engine re-reads the file from disk on every instance
  * rebuild (e.g. /instance/dispose), so the file is synchronized on every
  * runtime-DB write — unlike the previous config-content env var, which was
  * frozen at spawn and reverted MCP state on each dispose.
  */
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   redrobExtensionsPreviewPluginPath,
@@ -26,7 +26,7 @@ import {
 } from "./redrob-extensions-plugin-path.js";
 import { blockedConnectorNames } from "./team-policy/connectors.js";
 import type { ServerConfig } from "./types.js";
-import { runtimeStorageDir } from "./runtime-db.js";
+import { redrobRuntimeConfigFilePath } from "./engine-config-path.js";
 import {
   onRuntimeOpencodeConfigWrite,
   isEngineGlobalRuntimeConfigId,
@@ -93,10 +93,43 @@ const REDROB_AGENT_PERMISSION = {
   },
 };
 
+/**
+ * What the Redrob Cowork engine plugins need from the server that wrote the
+ * config. The engine is a shared daemon per user, not a process this server
+ * spawns, so nothing in its environment is ours: every value a plugin reads
+ * travels as a `[pluginPath, options]` tuple in the config file instead.
+ */
+export interface RedrobPluginOptions {
+  serverUrl: string;
+  serverToken: string;
+  runtimeConfigPath: string;
+  docsDir?: string;
+}
+
+/**
+ * The options the plugins get when a caller has nothing more specific: the
+ * server this config belongs to, as `ServerConfig` records it. cli.ts and
+ * embedded.ts pass the URL of the port that actually bound; the rewrite paths
+ * in server.ts run after that port is stored on `config`, so both agree.
+ */
+export function redrobPluginOptions(config: ServerConfig): RedrobPluginOptions {
+  const docsDir = process.env.REDROB_DOCS_DIR?.trim();
+  return {
+    serverUrl: `http://${config.host === "0.0.0.0" ? "127.0.0.1" : config.host}:${config.port}`,
+    serverToken: config.token,
+    runtimeConfigPath: redrobRuntimeConfigFilePath(config),
+    ...(docsDir ? { docsDir } : {}),
+  };
+}
+
+const EMPTY_PLUGIN_OPTIONS: RedrobPluginOptions = { serverUrl: "", serverToken: "", runtimeConfigPath: "" };
+
 export async function buildRedrobRuntimeConfigObject(
   config?: ServerConfig,
   workspaceId?: string,
+  options?: RedrobPluginOptions,
 ): Promise<Record<string, unknown>> {
+  const pluginOptions = options ?? (config ? redrobPluginOptions(config) : EMPTY_PLUGIN_OPTIONS);
   const runtimeConfig = config && workspaceId ? await readEffectiveRuntimeOpencodeConfig(config, workspaceId) : {};
   // Connectors a team policy blocks never reach the engine from here. The engine plugin disables
   // them again at load, which also covers the ones declared in the project's own config.
@@ -106,15 +139,17 @@ export async function buildRedrobRuntimeConfigObject(
       return buildRedrobRuntimeConfigObjectFromSnapshot({
         ...runtimeConfig,
         mcp: Object.fromEntries(Object.entries(runtimeConfig.mcp).filter(([name]) => !blocked.has(name))),
-      });
+      }, pluginOptions);
     }
   }
-  return buildRedrobRuntimeConfigObjectFromSnapshot(runtimeConfig);
+  return buildRedrobRuntimeConfigObjectFromSnapshot(runtimeConfig, pluginOptions);
 }
 
 export function buildRedrobRuntimeConfigObjectFromSnapshot(
   runtimeConfig: RuntimeOpencodeConfig,
+  options: RedrobPluginOptions,
 ): Record<string, unknown> {
+  const server = { serverUrl: options.serverUrl, serverToken: options.serverToken };
   const disabledProviders = runtimeDisabledProviderList(runtimeConfig);
   // Workspace-configured providers win over the harness entries: a user who pinned a
   // provider by hand must not have it replaced by an auto-detected runtime.
@@ -132,17 +167,22 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
       },
       ...deskAgents({ prompt: REDROB_AGENT_PROMPT, permission: REDROB_AGENT_PERMISSION }),
     },
+    // A `[path, options]` tuple carries only what that plugin reads; the engine
+    // calls `plugin(input, options)` and the plugin falls back to its env var
+    // when the key is absent, so an older engine still works mid-transition.
     plugin: [
       "opencode-chrome-devtools",
-      redrobExtensionsPreviewPluginPath(),
-      redrobCapabilitiesKnowledgePluginPath(),
+      [redrobExtensionsPreviewPluginPath(), server],
+      options.docsDir
+        ? [redrobCapabilitiesKnowledgePluginPath(), { docsDir: options.docsDir }]
+        : redrobCapabilitiesKnowledgePluginPath(),
       redrobOfficeAttachmentsPluginPath(),
       redrobAnthropicAdaptiveThinkingPluginPath(),
       redrobAnthropicToolSchemaPluginPath(),
       // Enforces a team policy's connector allowlist on every MCP source; see the plugin.
-      redrobTeamConnectorsPluginPath(),
+      [redrobTeamConnectorsPluginPath(), { runtimeConfigPath: options.runtimeConfigPath }],
       // Records counts and flags about each session for insights, never text; see the plugin.
-      redrobInsightsRecorderPluginPath(),
+      [redrobInsightsRecorderPluginPath(), server],
       ...runtimePluginList(runtimeConfig),
     ],
     ...(disabledProviders.length ? { disabled_providers: disabledProviders } : {}),
@@ -170,13 +210,15 @@ function stableStringify(value: unknown): string {
   return JSON.stringify(stableJsonValue(value));
 }
 
-export async function buildRedrobRuntimeConfig(config?: ServerConfig, workspaceId?: string): Promise<string> {
-  return stableStringify(await buildRedrobRuntimeConfigObject(config, workspaceId));
+export async function buildRedrobRuntimeConfig(
+  config?: ServerConfig,
+  workspaceId?: string,
+  options?: RedrobPluginOptions,
+): Promise<string> {
+  return stableStringify(await buildRedrobRuntimeConfigObject(config, workspaceId, options));
 }
 
-export function redrobRuntimeConfigFilePath(config: ServerConfig): string {
-  return join(runtimeStorageDir(config), "runtime-opencode-config.json");
-}
+export { redrobRuntimeConfigFilePath };
 
 // Serialize file writes per path so a slow older write can never land after
 // (and clobber) a newer one. Content is built inside the queued job so each
@@ -196,13 +238,14 @@ const fileWriteQueue = new Map<string, Promise<RedrobRuntimeConfigWriteResult>>(
 export async function writeRedrobRuntimeConfigFile(
   config: ServerConfig,
   workspaceId: string,
+  options?: RedrobPluginOptions,
 ): Promise<RedrobRuntimeConfigWriteResult> {
   const path = redrobRuntimeConfigFilePath(config);
   const job = async () => {
-    const content = await buildRedrobRuntimeConfig(config, workspaceId);
+    const content = await buildRedrobRuntimeConfig(config, workspaceId, options);
     const current = await readFile(path, "utf8").catch(() => undefined);
     if (current === content) return { path, changed: false };
-    await mkdir(runtimeStorageDir(config), { recursive: true });
+    await mkdir(dirname(path), { recursive: true });
     const tmp = `${path}.${randomUUID()}.tmp`;
     await writeFile(tmp, content, "utf8");
     await rename(tmp, path);
@@ -219,9 +262,13 @@ export async function writeRedrobRuntimeConfigFile(
  * instance rebuild reads fresh state instead of a spawn-time snapshot.
  * Returns an unsubscribe function.
  */
-export function keepRedrobRuntimeConfigFileFresh(config: ServerConfig, workspaceId: string): () => void {
+export function keepRedrobRuntimeConfigFileFresh(
+  config: ServerConfig,
+  workspaceId: string,
+  options?: RedrobPluginOptions,
+): () => void {
   return onRuntimeOpencodeConfigWrite((writeConfig, writtenWorkspaceId) => {
     if (writtenWorkspaceId !== workspaceId && !isEngineGlobalRuntimeConfigId(writtenWorkspaceId)) return;
-    void writeRedrobRuntimeConfigFile(writeConfig, workspaceId).catch(() => undefined);
+    void writeRedrobRuntimeConfigFile(writeConfig, workspaceId, options).catch(() => undefined);
   });
 }

@@ -1,10 +1,10 @@
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
 import { ApiError } from "../errors.js";
 import { listLocalManagedMcpConnectionsSafe } from "../local-managed-mcp.js";
-import { runtimeStorageDir } from "../runtime-db.js";
+import { redrobRuntimeConfigFilePath } from "../engine-config-path.js";
 import type { ServerConfig } from "../types.js";
 import { activeTeamPolicy } from "./apply.js";
 import {
@@ -77,8 +77,9 @@ export async function blockedConnectorNames(
   return new Set(blockedConnectors(policy, mcp, managed).map((item) => item.name));
 }
 
+/** Next to the engine-read runtime config: the engine plugin finds it from that file's directory. */
 export function teamConnectorsFilePath(config: ServerConfig): string {
-  return join(runtimeStorageDir(config), TEAM_CONNECTORS_FILE);
+  return join(dirname(redrobRuntimeConfigFilePath(config)), TEAM_CONNECTORS_FILE);
 }
 
 let writeChain: Promise<unknown> = Promise.resolve();
@@ -107,7 +108,7 @@ export function writeTeamConnectorsFile(config: ServerConfig): Promise<void> {
       return;
     }
     const file: TeamConnectorsFile = { v: 1, workspaces };
-    await mkdir(runtimeStorageDir(config), { recursive: true });
+    await mkdir(dirname(path), { recursive: true });
     const tmp = `${path}.${randomUUID()}.tmp`;
     await writeFile(tmp, JSON.stringify(file, null, 2), "utf8");
     await rename(tmp, path);

@@ -1,33 +1,9 @@
 #!/usr/bin/env bun
 
-import { randomUUID } from "node:crypto";
-import { mkdir } from "node:fs/promises";
-
 import { parseCliArgs, printHelp, resolveServerConfig } from "./config.js";
-import {
-  buildEngineAuthProbeHeader,
-  registerEngineInstance,
-  removeEngineInstance,
-  reapOrphanEngineInstances,
-} from "./engine-registry.js";
-import { createManagedOpencodeServer, REDROB_CODE_BIN_NAME, resolveRedrobCodeBinEnv, type ManagedOpencodeServer } from "./managed-opencode.js";
-import { clearEnginePoolForConfig, computeEngineConfigFingerprint, type EnginePool, type EngineSpawnTemplate } from "./engine-pool.js";
-import {
-  clearTrustedOpencodeProcess,
-  createEnginePoolForConfig,
-  createServerLogger,
-  registerTrustedOpencodeProcess,
-  startServer,
-  syncAllWorkspacesRuntimeMcpToEngine,
-} from "./server.js";
+import { startSharedEngineForConfig, type SharedEngineStart } from "./engine-startup.js";
+import { createServerLogger, startServer, syncAllWorkspacesRuntimeMcpToEngine } from "./server.js";
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
-import { findManagedEngineWorkspace } from "./workspaces.js";
-import { keepRedrobRuntimeConfigFileFresh, writeRedrobRuntimeConfigFile } from "./redrob-runtime-config.js";
-import { startHarnessShim } from "./harness-shim.js";
-import { setActiveHarnessShim } from "./harness-provider.js";
-import { discoverCodexBinary } from "./codex-runtime.js";
-import { discoverClaudeBinary } from "./claude-runtime.js";
-import { sweepLegacyOpenCodeConfig } from "./legacy-config-sweep.js";
 import { startWorkerActivityHeartbeat } from "./worker-activity-heartbeat.js";
 import pkg from "../package.json" with { type: "json" };
 
@@ -45,138 +21,29 @@ if (args.version) {
 
 const config = await resolveServerConfig(args);
 const logger = createServerLogger(config);
-let managedOpencode: ManagedOpencodeServer | null = null;
-let managedOpencodeIdentity: string | null = null;
-let managedEngineRecordId: string | null = null;
-let enginePool: EnginePool | null = null;
+let engine: SharedEngineStart | null = null;
 
 if (!config.readOnly) {
   await ensureLocalWorkspaceFiles(config.workspaces);
 }
 
-// Bind the HTTP server before spawning the engine: serve-node may fall back
-// to an OS-assigned port on EADDRINUSE, and the engine's spawn-time env
-// (REDROB_SERVER_URL) must point at the port that actually bound, not the
-// requested one.
+// Bind the HTTP server before touching the engine: serve-node may fall back
+// to an OS-assigned port on EADDRINUSE, and the plugins' callback URL written
+// into the engine config must be the port that actually bound.
 const server = await startServer(config);
 config.port = server.port;
 const serverUrl = `http://${config.host === "0.0.0.0" ? "127.0.0.1" : config.host}:${server.port}`;
 const workerActivityHeartbeat = startWorkerActivityHeartbeat(config, logger);
 
 if (!config.opencodeBaseUrl && process.env.REDROB_MANAGE_OPENCODE === "1") {
-  const workspace = findManagedEngineWorkspace(config.workspaces);
-  if (workspace) {
-    // Reap engines recorded by servers that died without cleanup. Best
-    // effort: a failed reap must never block startup.
-    await reapOrphanEngineInstances(config, { logger }).catch(() => undefined);
-    // Start the harness shim BEFORE writing the runtime config: the config is what tells
-    // the engine which providers exist, so starting the shim afterwards would hand the
-    // engine a config with no harness providers in it and only fix itself on the next
-    // write. Best effort — a machine with neither runtime installed, or a shim that
-    // cannot bind, must not stop the server. The providers are simply absent then, which
-    // is the same state as before this feature existed.
-    const managedShimCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
-    await startHarnessShim({ workingDirectory: managedShimCwd })
-      .then((shim) => {
-        const codexAvailable = discoverCodexBinary() !== null;
-        const claudeAvailable = discoverClaudeBinary() !== null;
-        if (!codexAvailable && !claudeAvailable) {
-          // Nothing to serve, so do not advertise providers and do not keep a listener.
-          return shim.close();
-        }
-        setActiveHarnessShim({ baseUrl: shim.baseUrl, codexAvailable, claudeAvailable });
-        logger.log(
-          "info",
-          `harness shim listening on ${shim.baseUrl} (codex: ${codexAvailable}, claude: ${claudeAvailable})`,
-        );
-        return undefined;
-      })
-      .catch((error: unknown) => {
-        logger.log("warn", `harness shim did not start: ${error instanceof Error ? error.message : String(error)}`);
-      });
-    // Server-managed config file: the engine re-reads it from disk on every
-    // instance rebuild, and keepRedrobRuntimeConfigFileFresh synchronizes it
-    // on every runtime-DB write — so disposes always pick up current state.
-    const { path: runtimeConfigPath } = await writeRedrobRuntimeConfigFile(config, workspace.id);
-    keepRedrobRuntimeConfigFileFresh(config, workspace.id);
-    const managedOpencodeCwd = process.env.REDROB_MANAGED_OPENCODE_CWD?.trim() || workspace.path;
-    await mkdir(managedOpencodeCwd, { recursive: true });
-    await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
-    const engineEnv: Record<string, string | undefined> = {
-      ...(process.env.REDROB_DEV_MODE ? { REDROB_DEV_MODE: process.env.REDROB_DEV_MODE } : {}),
-      ...(process.env.REDROB_UI_CONTROL_DISCOVERY ? { REDROB_UI_CONTROL_DISCOVERY: process.env.REDROB_UI_CONTROL_DISCOVERY } : {}),
-      REDROB_SERVER_URL: serverUrl,
-      REDROB_SERVER_TOKEN: config.token,
-      REDROB_CONFIG: runtimeConfigPath,
-    };
-    const engineSpawnTemplate: EngineSpawnTemplate = {
-      bin: resolveRedrobCodeBinEnv(),
-      cwd: managedOpencodeCwd,
-      runtimeConfigPath,
-      env: engineEnv,
-      reservedPorts: () => {
-        const poolPorts = enginePool?.connections().map((connection) => Number(new URL(connection.baseUrl).port) || 0) ?? [];
-        return [...new Set([config.port, ...poolPorts].filter((port) => port > 0))];
-      },
-    };
-    managedOpencode = await createManagedOpencodeServer({
-      bin: resolveRedrobCodeBinEnv(),
-      cwd: managedOpencodeCwd,
-      excludedPorts: [config.port],
-      env: engineEnv,
-    });
-    config.opencodeBaseUrl = managedOpencode.url;
-    config.opencodeUsername = managedOpencode.username;
-    config.opencodePassword = managedOpencode.password;
-    for (const entry of config.workspaces) {
-      entry.baseUrl ??= managedOpencode.url;
-      entry.opencodeUsername ??= managedOpencode.username;
-      entry.opencodePassword ??= managedOpencode.password;
-      entry.directory ??= entry.path;
-    }
-    // The identity only needs to be unique per managed-process boot; a
-    // random nonce provides that without routing the engine credentials
-    // through the fast identity hash.
-    managedOpencodeIdentity = [
-      managedOpencode.pid ?? "unknown",
-      randomUUID(),
-    ].join(":");
-    registerTrustedOpencodeProcess(config, {
-      baseUrl: managedOpencode.url,
-      identity: managedOpencodeIdentity,
-      isAlive: managedOpencode.isAlive,
-    });
-    if (managedOpencode.pid) {
-      managedEngineRecordId = randomUUID();
-      await registerEngineInstance(config, {
-        id: managedEngineRecordId,
-        pid: managedOpencode.pid,
-        port: Number(new URL(managedOpencode.url).port) || 0,
-        url: managedOpencode.url,
-        startedAt: Date.now(),
-        role: "primary",
-        serverRunId: managedOpencodeIdentity,
-        ownerPid: process.pid,
-        authProbe: buildEngineAuthProbeHeader(managedOpencode.username, managedOpencode.password),
-        bin: resolveRedrobCodeBinEnv() ?? REDROB_CODE_BIN_NAME,
-      }).catch(() => undefined);
-    }
-    enginePool = createEnginePoolForConfig({
-      config,
-      template: engineSpawnTemplate,
-      handle: managedOpencode,
-      fingerprint: await computeEngineConfigFingerprint(engineSpawnTemplate),
-      registryId: managedEngineRecordId,
-      trustedIdentity: managedOpencodeIdentity,
-    });
-    logger.log("info", `Managed Redrob Code listening on ${managedOpencode.url}`);
-  }
+  engine = await startSharedEngineForConfig({ config, logger, serverUrl });
+  if (engine) logger.log("info", `Shared Redrob Code engine at ${engine.engine.url}`);
 }
 
-// The runtime config file above only covers workspaces[0]. Push every
+// The config file above only covers the managed workspace. Push every
 // workspace's runtime-DB MCPs into the engine so they aren't invisible
 // until a manual reload. Best-effort.
-if (managedOpencode) {
+if (engine) {
   void syncAllWorkspacesRuntimeMcpToEngine(config).catch((error) => {
     logger.log("error", "Startup MCP synchronization crashed.", {
       "mcp.trigger": "startup",
@@ -214,25 +81,9 @@ if (args.verbose) {
 
 const shutdown = async () => {
   workerActivityHeartbeat?.stop();
-  if (managedOpencodeIdentity && !enginePool) {
-    clearTrustedOpencodeProcess(config, managedOpencodeIdentity);
-  }
-  // Await the engine teardown (SIGTERM → 1s → SIGKILL, bounded ~1.5s): a
-  // synchronous process.exit here used to skip the escalation entirely and
-  // orphan the OpenCode child to init.
-  try {
-    if (enginePool) {
-      clearEnginePoolForConfig(config);
-      await enginePool.disposeAll();
-    } else {
-      await managedOpencode?.close();
-    }
-  } catch {
-    // Engine already exited.
-  }
-  if (managedEngineRecordId && !enginePool) {
-    await removeEngineInstance(config, managedEngineRecordId).catch(() => undefined);
-  }
+  // Detach from the shared daemon; it keeps serving other apps and exits on its own
+  // once nobody is attached.
+  await engine?.stop().catch(() => undefined);
   (server as { stop?: (closeActiveConnections?: boolean) => void }).stop?.(true);
 };
 
