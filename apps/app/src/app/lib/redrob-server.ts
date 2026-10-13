@@ -1947,7 +1947,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
     getRedrobAuthStatus: () =>
       requestJson<{
         connected: boolean;
-        source: "api" | "env" | "config" | "none";
+        source: "api" | "env" | "config" | "launcher" | "none";
         legacyMigration: "none" | "migrated" | "failed";
       }>(baseUrl, "/redrob-auth", {
         token,
@@ -1958,14 +1958,14 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
       }),
 
     connectRedrobAuth: (key: string) =>
-      requestJson<{ ok: true; connected: boolean; source: "api" | "env" | "config" | "none" }>(
+      requestJson<{ ok: true; connected: boolean; source: "api" | "env" | "config" | "launcher" | "none" }>(
         baseUrl,
         "/redrob-auth",
         { token, hostToken, method: "PUT", body: { key }, timeoutMs: ENGINE_RELOAD_TIMEOUT_MS },
       ),
 
     disconnectRedrobAuth: () =>
-      requestJson<{ ok: true; connected: boolean; source: "api" | "env" | "config" | "none" }>(
+      requestJson<{ ok: true; connected: boolean; source: "api" | "env" | "config" | "launcher" | "none" }>(
         baseUrl,
         "/redrob-auth",
         { token, hostToken, method: "DELETE", timeoutMs: ENGINE_RELOAD_TIMEOUT_MS },
@@ -1999,7 +1999,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         | { status: "denied" }
         | { status: "expired" }
         | { status: "failed"; code: string }
-        | { status: "connected"; connected: boolean; source: "api" | "env" | "config" | "none" }
+        | { status: "connected"; connected: boolean; source: "api" | "env" | "config" | "launcher" | "none" }
       >(baseUrl, "/redrob-auth/device/poll", {
         token,
         hostToken,

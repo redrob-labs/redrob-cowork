@@ -22,7 +22,7 @@ import {
 type ConnectedProvider = {
   id: string;
   name: string;
-  source?: "env" | "api" | "config" | "custom";
+  source?: "env" | "api" | "config" | "custom" | "launcher";
 };
 
 export type AiSettingsViewProps = {
@@ -49,6 +49,7 @@ function providerSourceLabel(source?: ConnectedProvider["source"]) {
   if (source === "api") return t("settings.provider_source_api");
   if (source === "config") return t("settings.provider_source_config");
   if (source === "custom") return t("settings.provider_source_config");
+  if (source === "launcher") return t("settings.provider_source_launcher");
   return null;
 }
 

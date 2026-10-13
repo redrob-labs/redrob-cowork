@@ -1982,7 +1982,8 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
               }
             }}
             canDisconnectProvider={(provider) =>
-              provider.id.trim().toLowerCase() === "opencode" || provider.source !== "env"
+              provider.id.trim().toLowerCase() === "opencode" ||
+              (provider.source !== "env" && provider.source !== "launcher")
             }
             canAddProviders
           />
