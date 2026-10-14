@@ -38,7 +38,7 @@ export type DeskShellProps = Pick<
   headless?: boolean;
 };
 
-const MARK_SRC = resolveExtensionIconSrc("/redrob-mark.svg");
+const MARK_SRC = resolveExtensionIconSrc("/brand/redrob/redrob-mark-blue.svg");
 
 /**
  * The skip link targets `#rr-shell-main`. Under the HashRouter that hash is a route, so
