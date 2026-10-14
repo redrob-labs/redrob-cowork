@@ -216,18 +216,51 @@ test("the dlib metadata excludes every credential a runner cannot satisfy", () =
   assert.ok(!("ClientSecret" in metadata));
 });
 
+/**
+ * The Microsoft.ArtifactSigning.Client package as it extracts: the dlib sits at
+ * bin\x64 beside an x86 build and the package metadata.
+ */
+function layOutClientPackage(root) {
+  for (const arch of ["x86", "x64"]) {
+    mkdirSync(join(root, "bin", arch), { recursive: true });
+    writeFileSync(join(root, "bin", arch, "Azure.CodeSigning.Dlib.dll"), arch);
+    writeFileSync(join(root, "bin", arch, "Azure.CodeSigning.Client.dll"), arch);
+  }
+  writeFileSync(join(root, "Microsoft.ArtifactSigning.Client.nuspec"), "<package/>");
+  writeFileSync(join(root, "[Content_Types].xml"), "<Types/>");
+}
+
+test("finds the x64 dlib in an extracted client package, not the x86 one", () => {
+  const root = scratch();
+  layOutClientPackage(root);
+  const dlib = hook.findDlib(root);
+  assert.equal(dlib, join(root, "bin", "x64", "Azure.CodeSigning.Dlib.dll"));
+  assert.equal(readFileSync(dlib, "utf8"), "x64");
+
+  const empty = scratch();
+  mkdirSync(join(empty, "bin", "x86"), { recursive: true });
+  writeFileSync(join(empty, "bin", "x86", "Azure.CodeSigning.Dlib.dll"), "x86");
+  assert.throws(() => hook.findDlib(empty), /Azure\.CodeSigning\.Dlib\.dll \(x64\) not found/);
+});
+
+test("a failed extraction is an error, not an empty directory searched in vain", () => {
+  const dir = scratch();
+  const run = (command, args) => {
+    assert.equal(command, "pwsh");
+    assert.match(args.at(-1), /Expand-Archive/);
+    return { status: 1, stdout: "", stderr: "Expand-Archive: not a zip" };
+  };
+  assert.throws(() => hook.extractZip(join(dir, "a.zip"), join(dir, "out"), run, {}), /PowerShell failed \(1\): Expand-Archive: not a zip/);
+});
+
 test("the client comes from the Microsoft.ArtifactSigning.Client NuGet package", async () => {
   assert.equal(hook.CLIENT_PACKAGE_URL, "https://www.nuget.org/api/v2/package/Microsoft.ArtifactSigning.Client");
 
   const dir = scratch();
   const run = fakeRunner();
-  // The fake tar "extracts" by laying down the dll where a real extraction would.
+  // The fake Expand-Archive lays the package out the way the real one does.
   const extracting = (command, args) => {
-    if (command === "tar") {
-      const target = join(args[3], "bin", "x64", "Azure.CodeSigning.Dlib.dll");
-      mkdirSync(join(args[3], "bin", "x64"), { recursive: true });
-      writeFileSync(target, "dll");
-    }
+    if (command === "pwsh" && /Expand-Archive/.test(args.at(-1))) layOutClientPackage(join(dir, "client"));
     return run(command, args);
   };
   let fetched = null;
@@ -237,8 +270,12 @@ test("the client comes from the Microsoft.ArtifactSigning.Client NuGet package",
   };
   const client = await hook.prepareClient(hook.signingConfig(CONFIGURED_ENV), { env: {}, dir, fetchImpl, run: extracting });
   assert.equal(fetched, hook.CLIENT_PACKAGE_URL);
-  assert.deepEqual(run.calls[0], ["tar", "-xf", join(dir, "artifact-signing-client.zip"), "-C", join(dir, "client")]);
-  assert.match(client.dlib, /[\\/]x64[\\/]Azure\.CodeSigning\.Dlib\.dll$/);
+  // Saved under a .zip name (Expand-Archive refuses .nupkg) and unpacked with
+  // PowerShell, not tar: in a Git-bash step the tar on PATH is GNU tar, which
+  // cannot read a zip, and the first dry run died on exactly that.
+  assert.equal(run.calls[0][0], "pwsh");
+  assert.match(run.calls[0].at(-1), /Expand-Archive -LiteralPath '.*artifact-signing-client\.zip' -DestinationPath '.*client' -Force/);
+  assert.equal(client.dlib, join(dir, "client", "bin", "x64", "Azure.CodeSigning.Dlib.dll"));
   assert.deepEqual(JSON.parse(readFileSync(client.metadata, "utf8")).ExcludeCredentials, hook.EXCLUDE_CREDENTIALS);
 });
 

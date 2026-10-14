@@ -243,8 +243,11 @@ async function prepareClient(config, { env = process.env, dir, fetchImpl = fetch
     fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
     const clientDir = path.join(workDir, "client");
     fs.mkdirSync(clientDir, { recursive: true });
-    // A .nupkg is a zip; the tar that ships with Windows extracts it.
-    run("tar", ["-xf", archive, "-C", clientDir]);
+    // A .nupkg is a zip, saved under a .zip name because Expand-Archive insists
+    // on the extension. PowerShell rather than `tar`: inside a Git-bash step the
+    // tar on PATH is GNU tar, which does not read zip archives and failed here
+    // silently once.
+    extractZip(archive, clientDir, run, env);
     dlib = findDlib(clientDir);
   }
 
@@ -268,7 +271,7 @@ function runCommand(command, args, options = {}) {
   return { status: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
 }
 
-function powerShellJson(script, run, env = process.env) {
+function runPowerShell(script, run, env = process.env) {
   const args = ["-NoProfile", "-NonInteractive", "-Command", script];
   let result;
   try {
@@ -280,7 +283,24 @@ function powerShellJson(script, run, env = process.env) {
   if (result.status !== 0) {
     throw new Error(`PowerShell failed (${result.status}): ${result.stderr || result.stdout}`);
   }
-  return JSON.parse(result.stdout.trim());
+  return result;
+}
+
+function powerShellJson(script, run, env = process.env) {
+  return JSON.parse(runPowerShell(script, run, env).stdout.trim());
+}
+
+function psLiteral(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+/** Unpack a zip with Expand-Archive; throws when the extraction fails. */
+function extractZip(archive, destination, run = runCommand, env = process.env) {
+  runPowerShell(
+    `$ErrorActionPreference = 'Stop'; Expand-Archive -LiteralPath ${psLiteral(archive)} -DestinationPath ${psLiteral(destination)} -Force`,
+    run,
+    env,
+  );
 }
 
 /**
@@ -491,6 +511,7 @@ module.exports.signingConfig = signingConfig;
 module.exports.metadataFor = metadataFor;
 module.exports.findSignTool = findSignTool;
 module.exports.findDlib = findDlib;
+module.exports.extractZip = extractZip;
 module.exports.prepareClient = prepareClient;
 module.exports.signToolArgs = signToolArgs;
 module.exports.verifySignature = verifySignature;
