@@ -106,6 +106,7 @@ const ALBUM_ART_ALIAS: Record<string, string> = {
   engineer: "for-engineers", marketer: "for-marketers", pm: "for-pms", designer: "for-designers",
   founder: "for-founders", sales: "for-salespeople", analyst: "for-analysts", consultant: "for-consultants",
   lawyer: "for-lawyers", accountant: "for-accountants", investor: "for-investors", hr: "for-hr-teams",
+  recruiter: "for-recruiters", "small-team": "for-small-teams",
   // skills: the ids whose slug differs from the code id
   "seeking-information": "answers-and-facts", "practical-howto": "how-to-advice", "knowledge-qa": "ask-your-docs",
   editing: "editing-and-proofreading",
@@ -124,6 +125,7 @@ const ALBUM_ART_ALIAS: Record<string, string> = {
 const ALBUM_ART_PROFESSIONS = new Set([
   "engineer", "marketer", "pm", "designer", "founder", "sales",
   "analyst", "consultant", "lawyer", "accountant", "investor", "hr",
+  "recruiter", "small-team",
 ]);
 
 /** Base `/brand/album-art/<section>/<slug>` path for a tile, or null when no art exists for that id. */
