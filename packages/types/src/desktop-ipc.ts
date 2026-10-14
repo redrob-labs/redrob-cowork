@@ -550,6 +550,18 @@ export type DesktopCommandMap = {
     args: [hidden: boolean];
     result: { applied: boolean; hidden?: boolean; needsRestart?: boolean; reason?: string };
   };
+  /**
+   * The renderer-drawn title bar's window buttons (Windows and Linux, where the native frame is
+   * hidden). `toggleMaximize` restores a maximised window and maximises a normal one. Resolves `true`
+   * when a window was found to act on. A macOS renderer never calls this: it keeps the traffic lights.
+   */
+  __windowControl: { args: [action: "minimize" | "toggleMaximize" | "close"]; result: boolean };
+  /**
+   * Whether the calling window is maximised or full screen, so the title bar can show Maximise or
+   * Restore. Changes are also pushed as `redrob:window:state` so the bar follows the OS (double-click,
+   * snap, F11) without polling.
+   */
+  __windowState: { args: []; result: { maximized: boolean; fullScreen: boolean } | undefined };
 };
 
 export type DesktopCommandName = keyof DesktopCommandMap;

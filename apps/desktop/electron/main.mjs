@@ -97,6 +97,8 @@ const {
 } = require("electron");
 const pty = require(["node", "pty"].join("-"));
 const NATIVE_DEEP_LINK_EVENT = "redrob:deep-link-native";
+/** Window maximised / full-screen changes, pushed to the renderer-drawn title bar. */
+const WINDOW_STATE_EVENT = "redrob:window:state";
 const isDevMode = process.env.REDROB_DEV_MODE === "1";
 const DESKTOP_DISTRIBUTION = resolveDesktopDistribution();
 const TAURI_APP_IDENTIFIER = DESKTOP_DISTRIBUTION.appIdentifier;
@@ -2196,7 +2198,57 @@ const desktopCommandHandlers = {
         return { applied: false, reason: String(error) };
       }
   },
+  /*
+    The renderer-drawn title bar (Windows and Linux, where the native frame is hidden) has its own
+    minimise / maximise / close buttons. They can only act through here: a frameless BrowserWindow
+    gives the page no window controls of its own, and before this handler existed the buttons called
+    into the bridge and were answered with "not implemented", so they did nothing.
+  */
+  "__windowControl": async (event, ...args) => {
+      const win = activeWindowFromEvent(event);
+      if (!win || win.isDestroyed()) return false;
+      switch (args[0]) {
+        case "minimize":
+          win.minimize();
+          return true;
+        case "toggleMaximize":
+          if (win.isFullScreen()) win.setFullScreen(false);
+          else if (win.isMaximized()) win.unmaximize();
+          else win.maximize();
+          return true;
+        case "close":
+          win.close();
+          return true;
+        default:
+          return false;
+      }
+  },
+  "__windowState": async (event) => {
+      const win = activeWindowFromEvent(event);
+      if (!win || win.isDestroyed()) return undefined;
+      return windowStateOf(win);
+  },
 };
+
+/** The shape the title bar reads: maximised (Restore button) or full screen (no Restore at all). */
+function windowStateOf(win) {
+  return { maximized: win.isMaximized(), fullScreen: win.isFullScreen() };
+}
+
+/**
+ * Push the window state to the renderer whenever the OS changes it (double-click on the bar, a snap,
+ * F11), so the title bar's Maximise / Restore button follows without polling. The preload turns the
+ * message into a `redrob:window:state` CustomEvent on `window`.
+ */
+function forwardWindowStateChanges(win) {
+  const send = () => {
+    if (win.isDestroyed() || win.webContents.isDestroyed()) return;
+    win.webContents.send(WINDOW_STATE_EVENT, windowStateOf(win));
+  };
+  for (const name of ["maximize", "unmaximize", "enter-full-screen", "leave-full-screen"]) {
+    win.on(name, send);
+  }
+}
 
 if (isDevMode) {
   desktopCommandHandlers.__evalRelaunch = async () => {
@@ -2504,6 +2556,7 @@ async function createMainWindow() {
     await applyCachedBrandIcon(cachedBrandImage, bootSourceUrl);
   }
   applicationMenu.applyVisibility(mainWindow);
+  forwardWindowStateChanges(mainWindow);
 
   mainWindow.on("page-title-updated", (event) => {
     event.preventDefault();
