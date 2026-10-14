@@ -20,10 +20,13 @@ import {
   currentDaemon,
   daemonHealthy,
   DAEMON_USERNAME,
+  engineSupportsSharedDaemon,
+  MIN_SHARED_ENGINE_VERSION,
   resolveSharedRedrobBin,
   type Attachment,
   type DaemonConnection,
   type DaemonRecord,
+  type VersionProbe,
 } from "./engine-daemon.js";
 
 export const REDROB_CODE_BIN_NAME = "redrob";
@@ -85,15 +88,31 @@ export function resolveRedrobCodeBinEnv(env: NodeJS.ProcessEnv = process.env): s
 /**
  * The `redrob` that starts the daemon when none runs: an explicit choice first, then the
  * user's own install (`~/.redrob/bin`, PATH), then Cowork's bundled copy. A user-installed
- * engine wins over the bundle so one daemon serves every app at one version.
+ * engine wins over the bundle so one daemon serves every app at one version -- but only
+ * when it is new enough to know `service start`; an older install is skipped for the
+ * bundled engine, otherwise Cowork cannot start at all.
  */
-export async function resolveEngineBin(options: { explicit?: string; bundledBin?: string; env?: NodeJS.ProcessEnv }): Promise<string> {
+export async function resolveEngineBin(options: {
+  explicit?: string;
+  bundledBin?: string;
+  env?: NodeJS.ProcessEnv;
+  probe?: VersionProbe;
+  homedir?: string;
+  logger?: SharedEngineOptions["logger"];
+}): Promise<string> {
   const env = options.env ?? process.env;
   const explicit = options.explicit?.trim() || resolveRedrobCodeBinEnv(env);
   if (explicit) return explicit;
-  const shared = await resolveSharedRedrobBin(env);
-  if (shared) return shared;
-  return options.bundledBin?.trim() || REDROB_CODE_BIN_NAME;
+  const bundled = options.bundledBin?.trim();
+  const shared = await resolveSharedRedrobBin(env, options.homedir);
+  if (shared) {
+    if (!bundled || (await engineSupportsSharedDaemon(shared, options.probe))) return shared;
+    options.logger?.log("warn", `The installed Redrob Code at ${shared} predates ${MIN_SHARED_ENGINE_VERSION}; using the bundled engine instead.`, {
+      installed: shared,
+      bundled,
+    });
+  }
+  return bundled || REDROB_CODE_BIN_NAME;
 }
 
 function snapshot(connection: DaemonConnection, bin: string): EngineExecutionSnapshot {

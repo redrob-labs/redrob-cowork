@@ -125,7 +125,7 @@ export async function startSharedEngineForConfig(options: StartSharedEngineOptio
   const stopRefresh = keepRedrobRuntimeConfigFileFresh(config, workspace.id, pluginOptions);
   await sweepLegacyOpenCodeConfig(config).catch(() => undefined);
 
-  const bin = await resolveEngineBin({ explicit: options.explicitBin, bundledBin: options.bundledBin, env });
+  const bin = await resolveEngineBin({ explicit: options.explicitBin, bundledBin: options.bundledBin, env, logger });
   let engine: SharedEngineHandle;
   try {
     engine = await attachSharedEngine(bin, { env, logger });
