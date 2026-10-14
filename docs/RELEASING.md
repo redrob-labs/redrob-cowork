@@ -132,6 +132,42 @@ npm deprecate redrob-server@<bad-version> "rolled back — use <next>"
 Revert the offending PR on `main` through the normal reviewed-PR flow. That
 cleanup is not in the critical path of user recovery.
 
+## Windows code signing
+
+Windows installers are Authenticode-signed with **Azure Artifact Signing over
+OpenID Connect**; the signer is the organization's Public Trust certificate
+(`CN=McKinley Rice, Inc.`). There is no certificate file, no password and no
+client secret anywhere in the repository or its secrets.
+
+- **Credential.** The `publish-electron-windows` job declares
+  `environment: release` and `permissions: id-token: write`. `azure/login`
+  exchanges the job's OIDC token against the organization's app registration,
+  whose federated credential names that environment. Secrets (all plain IDs,
+  redrob-labs **organization** secrets -- do not recreate them per repository):
+  `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`,
+  `ARTIFACT_SIGNING_ENDPOINT`, `ARTIFACT_SIGNING_ACCOUNT`,
+  `ARTIFACT_SIGNING_CERT_PROFILE`.
+- **Order.** The OIDC token lives minutes and electron-builder signs *during*
+  packaging, so the job runs `electron-builder --dir` (unpacked, unsigned),
+  then logs in, then `apps/desktop/build/sign-windows.cjs --app-dir` signs the
+  unpacked executables at once, then `electron-builder --prepackaged` builds
+  the installer and zip, signing the uninstaller and installer through the same
+  hook. The hook runs signtool with the `Azure.CodeSigning` dlib from the
+  `Microsoft.ArtifactSigning.Client` NuGet package; its metadata excludes every
+  credential a runner cannot satisfy, so a missing login fails in seconds
+  instead of waiting on a browser prompt.
+- **Verification.** Every signature is checked twice: by the hook as it is
+  written and by the `Verify Windows signatures` step afterwards -- `signtool
+  verify /pa /v` and `Get-AuthenticodeSignature` Status `Valid`, signed by
+  `McKinley Rice, Inc.`, with the line `<file> signed by <Subject>` in the log.
+  There is no untrusted-root allowance and no test-build escape hatch: an
+  unsigned Windows build fails the job. `win.signtoolOptions.publisherName` in
+  `apps/desktop/electron-builder.base.yml` names the same publisher, which is
+  what electron-updater checks before installing an update.
+- **Dry run.** Dispatch `Release App` with `benchmark_only=true`: the matrix
+  builds and signs, nothing is tagged or published, and the Windows job log
+  carries the `signed by` lines.
+
 ## What blocks publishing (and what doesn't)
 
 `Publish GitHub Release` requires the electron matrix, electron assets, and
@@ -177,9 +213,17 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 | Release run red only on AUR / Daytona | external channel failure | release still publishes; rerun with the same tag when the channel recovers |
 | All `electron-linux-*` fail compiling a native module | a raw-V8 native addon meeting new Electron headers under GCC | keep native deps converged on one N-API-based major across the whole workspace (see #3561/#3563) |
 | Windows legs fail in afterPack with `Missing staged MCP runtime package` | asar path-separator mismatch | fixed — `normalizeAsarEntryPath` in `electron-after-pack.cjs` |
+| Windows leg fails in `Sign the unpacked Windows app` or `Verify Windows signatures` | `az login` missing or expired (OIDC token lives minutes), Artifact Signing secrets unset, or a signer other than `McKinley Rice, Inc.` | check the `Log in to Azure (OIDC)` step ran right before signing, the six organization secrets exist, and the `release` environment's federated credential; a Windows build never ships unsigned |
 
 ## History
 
+- **2026-10-14**: Windows signing moved to Azure Artifact Signing over OpenID
+  Connect (job `environment: release` + `id-token: write`, login right before
+  signing, Public Trust certificate `CN=McKinley Rice, Inc.`). The `.pfx`
+  organization certificate (`WIN_CSC_LINK`/`WIN_CSC_KEY_PASSWORD`), the
+  untrusted-root allowance and the `allow_untrusted_windows` dispatch input
+  were removed; so was the post-hoc installer re-sign and blockmap refresh,
+  since signing now happens inside packaging.
 - **2026-08**: releases became commit-free (tags are the only version source;
   CI stamps the workspace; the updater reads published releases at runtime; AUR
   renders a committed template). Previously every release required a version
