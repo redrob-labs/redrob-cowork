@@ -1,4 +1,5 @@
 import { memo, useCallback } from "react";
+import { ChevronDown } from "lucide-react";
 
 import {
   selectSessionIsStickyBottom,
@@ -45,12 +46,19 @@ const JumpToLatestButton = memo(function JumpToLatestButton({
     onJumpToLatest("smooth");
   }, [onJumpToLatest]);
 
+  // Round 32: an icon-only down chevron rather than the "Jump to latest" text pill.
+  // The label is kept as aria-label (and the global tooltip layer upgrades title=
+  // controls, so hover still names it) for a11y.
   return (
     <button
       type="button"
-      className="rounded-full px-3 py-1.5 text-xs text-dls-text transition-colors hover:bg-dls-hover"
+      className="flex size-7 items-center justify-center rounded-full text-dls-text transition-colors hover:bg-dls-hover"
       onClick={handleClick}
-    >{t("session.jump_to_latest")}</button>
+      aria-label={t("session.jump_to_latest")}
+      title={t("session.jump_to_latest")}
+    >
+      <ChevronDown size={16} strokeWidth={2.25} aria-hidden="true" />
+    </button>
   );
 });
 

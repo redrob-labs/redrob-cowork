@@ -727,7 +727,7 @@ const en = {
   "dashboard.sandbox_checking_docker": "Checking Docker...",
   "dashboard.sandbox_get_ready_title": "Sandboxes need Docker",
   "dashboard.skills": "Skills",
-  "desk.account_connected": "Connected with your Redrob key",
+  "desk.account_connected": "Successfully connected",
   "desk.account_launcher": "Signed in with Redrob Launcher",
   "desk.account_feedback": "Send feedback",
   "desk.account_menu_label": "Settings and help",

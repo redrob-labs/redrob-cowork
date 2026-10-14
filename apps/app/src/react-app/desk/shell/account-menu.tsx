@@ -3,14 +3,11 @@ import { useRef } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
-import { Avatar, Menu, icons, type MenuItem } from "@redrob-labs/ui";
+import { Menu, icons, type MenuItem } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
-import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import { recheckRedrobKeyStatus } from "../../domains/billing/redrob-pay-sheet";
 import { useFrameStore } from "../store/frame-store";
-
-const MARK_SRC = resolveExtensionIconSrc("/brand/redrob/redrob-mark-blue.svg");
 
 /** The build's version, the same one the feedback link reports. Empty in a bare test run. */
 export const APP_VERSION = String(import.meta.env.VITE_REDROB_APP_VERSION ?? "").trim();
@@ -102,14 +99,14 @@ export function AccountLabel(props: { connected: boolean | null; link?: RedrobKe
   const title = connected ? t("desk.account_name") : t("desk.account_login");
   return (
     <span className="desk-account__label">
-      {connected ? (
-        <Avatar name={t("desk.account_name")} src={MARK_SRC} size="sm" />
-      ) : (
-        // Not connected: a neutral person-glyph placeholder (there is no account yet).
-        <span className="desk-account__avatar-placeholder" aria-hidden="true">
-          <User size={16} strokeWidth={2} />
-        </span>
-      )}
+      {/*
+        Round 32: the avatar is always a neutral person glyph -- there is no personal
+        account, so a brand mark here read as "this is you". The empty-profile icon
+        reads correctly as a placeholder whether or not a Redrob key is connected.
+      */}
+      <span className="desk-account__avatar-placeholder" aria-hidden="true">
+        <User size={16} strokeWidth={2} />
+      </span>
       <span className="desk-account__text">
         <b>{title}</b>
         {line ? <span>{line}</span> : null}

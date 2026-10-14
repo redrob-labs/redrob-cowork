@@ -124,7 +124,7 @@ describe("account menu", () => {
   test("the trigger shows Redrob and whether the key is connected", () => {
     const connected = renderToStaticMarkup(<AccountLabel connected />);
     expect(connected).toContain("<b>Redrob</b>");
-    expect(connected).toContain("Connected with your Redrob key");
+    expect(connected).toContain("Successfully connected");
     const disconnected = renderToStaticMarkup(<AccountLabel connected={false} />);
     expect(disconnected).toContain("Not connected");
     const loading = renderToStaticMarkup(<AccountLabel connected={null} />);
@@ -134,8 +134,8 @@ describe("account menu", () => {
     // The key Redrob Launcher signed this computer in with is named as such, not as "your key".
     const launcher = renderToStaticMarkup(<AccountLabel connected link="launcher" />);
     expect(launcher).toContain("Signed in with Redrob Launcher");
-    expect(launcher).not.toContain("Connected with your Redrob key");
-    expect(connectionLine(true, "own")).toBe("Connected with your Redrob key");
+    expect(launcher).not.toContain("Successfully connected");
+    expect(connectionLine(true, "own")).toBe("Successfully connected");
     expect(connectionLine(false, "launcher")).toBe("Not connected");
   });
 
