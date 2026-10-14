@@ -3,6 +3,17 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { t, type Language } from "../../../i18n";
+import {
+  CHART_OUTPUT_ORDER,
+  COUNTRY_LABEL_KEY,
+  FEATURE_KEYS,
+  OUTPUT_LABEL_KEY,
+  SKILL_IDS,
+  SKILL_LABEL_KEY,
+  type CountryId,
+  type FeatureId,
+  type SkillId,
+} from "./chart-keys";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import type { GuideResearch } from "../guide/model-guide";
 import { guideProfessions } from "../guide/model-guide";
@@ -67,9 +78,8 @@ function orderByRank<T>(items: readonly T[], idOf: (item: T) => string, order: r
  * professional AI use), then documents and graphics, then the newer modalities. Each tile still opens
  * the output view like the others.
  */
-const CHART_OUTPUT_ORDER = ["code", "documents", "chatbots", "graphics", "voice", "data", "web", "spreadsheets", "audio", "video", "diagrams", "presentations"] as const;
 function chartOutputs(): Array<{ value: string; label: string }> {
-  return CHART_OUTPUT_ORDER.map((value) => ({ value, label: t(`desk.guide_output_${value}`) }));
+  return CHART_OUTPUT_ORDER.map((value) => ({ value, label: t(OUTPUT_LABEL_KEY[value]) }));
 }
 
 /**
@@ -155,18 +165,12 @@ function AlbumArt({ section, id, alt }: { section: ArtSection; id: string; alt: 
  * used for" shelf. Each tile drills into the leading profession's ranking for now (the model ranking
  * is a later session); the label and blurb are localized `chart_skill_*` / `chart_blurb_skill_*` keys.
  */
-const SKILL_IDS = [
-  "seeking-information", "writing", "practical-howto", "summarizing", "editing",
-  "research", "brainstorming", "coding", "image-generation", "data-analysis",
-  "translation", "email", "planning", "tutoring", "meeting-notes",
-  "transcription", "knowledge-qa", "social-content", "document-processing", "code-review",
-] as const;
-function skillTiles(research: GuideResearch, locale: Language): Array<{ id: string; pick: ChartPick }> {
+function skillTiles(research: GuideResearch, locale: Language): Array<{ id: SkillId; pick: ChartPick }> {
   const professions = guideProfessions(research, locale);
   const top = professions[0];
   return SKILL_IDS.map((id) => ({
     id,
-    pick: { kind: "profession", id: top?.id ?? "", label: t(`desk.chart_skill_${id}`), section: "skills-in-heavy-rotation", tileId: id },
+    pick: { kind: "profession", id: top?.id ?? "", label: t(SKILL_LABEL_KEY[id]), section: "skills-in-heavy-rotation", tileId: id },
   }));
 }
 
@@ -178,7 +182,7 @@ function skillTiles(research: GuideResearch, locale: Language): Array<{ id: stri
  * language of their own map to English as the lingua-franca ranking. Blurbs are about who builds the
  * models, not how work is done there.
  */
-type CountryTile = { id: string; language: string };
+type CountryTile = { id: CountryId; language: string };
 const COUNTRY_TILES: readonly CountryTile[] = [
   { id: "us", language: "en" },
   { id: "china", language: "en" },
@@ -275,12 +279,12 @@ function professionBlurb(id: string): string {
  * ranking. Deliberately 3 (not 5), so the rail reads as a curated spotlight.
  */
 function buildBanners(_research: GuideResearch, _locale: Language): Banner[] {
-  const feature = (id: string, output: string, tone: number, art: string): Banner => ({
+  const feature = (id: FeatureId, output: string, tone: number, art: string): Banner => ({
     id: `feature-${id}`,
     eyebrow: t("desk.chart_feature_eyebrow"),
-    title: t(`desk.chart_feature_${id}_title`),
-    sub: t(`desk.chart_feature_${id}_sub`),
-    pick: { kind: "output", value: output, label: t(`desk.chart_feature_${id}_title`), section: "made-to-ship", tileId: output },
+    title: t(FEATURE_KEYS[id].title),
+    sub: t(FEATURE_KEYS[id].sub),
+    pick: { kind: "output", value: output, label: t(FEATURE_KEYS[id].title), section: "made-to-ship", tileId: output },
     tone,
     art,
   });
@@ -466,10 +470,10 @@ export function ModelChartHome(props: { research: GuideResearch; locale: Languag
             >
               <span className="model-chart__card">
                 <span className="model-chart__glass" style={glassStyle(`skill-${id}`)} aria-hidden="true" />
-                <AlbumArt section="skills-in-heavy-rotation" id={id} alt={t(`desk.chart_skill_${id}`)} />
+                <AlbumArt section="skills-in-heavy-rotation" id={id} alt={t(SKILL_LABEL_KEY[id])} />
               </span>
               <span className="model-chart__caption">
-                <span className="model-chart__tile-label">{t(`desk.chart_skill_${id}`)}</span>
+                <span className="model-chart__tile-label">{t(SKILL_LABEL_KEY[id])}</span>
                 <span className="model-chart__tile-summary">
                   {tileBlurb("skill", id, t("desk.chart_blurb_skill_generic"))}
                 </span>
@@ -510,7 +514,7 @@ export function ModelChartHome(props: { research: GuideResearch; locale: Languag
                 props.onOpen({
                   kind: "language",
                   value: country.language,
-                  label: t(`desk.chart_country_${country.id}`),
+                  label: t(COUNTRY_LABEL_KEY[country.id]),
                   section: "homegrown-heroes",
                   tileId: country.id,
                 })
@@ -518,10 +522,10 @@ export function ModelChartHome(props: { research: GuideResearch; locale: Languag
             >
               <span className="model-chart__card">
                 <span className="model-chart__glass" style={glassStyle(`country-${country.id}`)} aria-hidden="true" />
-                <AlbumArt section="homegrown-heroes" id={country.id} alt={t(`desk.chart_country_${country.id}`)} />
+                <AlbumArt section="homegrown-heroes" id={country.id} alt={t(COUNTRY_LABEL_KEY[country.id])} />
               </span>
               <span className="model-chart__caption">
-                <span className="model-chart__tile-label">{t(`desk.chart_country_${country.id}`)}</span>
+                <span className="model-chart__tile-label">{t(COUNTRY_LABEL_KEY[country.id])}</span>
                 <span className="model-chart__tile-summary">
                   {tileBlurb("country", country.id, t("desk.chart_blurb_country_generic"))}
                 </span>

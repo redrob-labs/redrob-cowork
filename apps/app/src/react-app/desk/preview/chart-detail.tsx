@@ -47,7 +47,7 @@ function ModelRow(props: { id: string; rank: number; top?: boolean; onUse: (id: 
       <span className="chart-detail__meta">
         <span className="chart-detail__name">{model.name}</span>
         <span className="chart-detail__maker">{model.maker}</span>
-        <span className="chart-detail__good">{t(`desk.chart_model_blurb_${props.id}`)}</span>
+        <span className="chart-detail__good">{t(model.blurbKey)}</span>
       </span>
       <span className="chart-detail__score" title={t("desk.chart_detail_needle_tip")}>
         <span className="chart-detail__score-ring" data-grade={gradeFor(model.needleScore)} aria-hidden="true">
@@ -157,13 +157,13 @@ export function ChartDetail(props: {
           <div className="chart-detail__rerank">
             <Select value={task} onValueChange={(v) => { if (v) setTask(v); }}>
               <SelectTrigger className="chart-detail__rerank-trigger" aria-label={t("desk.chart_detail_rerank_label")}>
-                <SelectValue>{task === "overall" ? t("desk.chart_task_overall") : t(`desk.chart_task_${task}`)}</SelectValue>
+                <SelectValue>{task === "overall" ? t("desk.chart_task_overall") : t(tasks.find((tk) => tk.id === task)?.labelKey ?? "desk.chart_task_overall")}</SelectValue>
               </SelectTrigger>
               <SelectContent align="start">
                 <SelectItem value="overall">{t("desk.chart_task_overall")}</SelectItem>
                 {tasks.map((tk) => (
                   <SelectItem key={tk.id} value={tk.id}>
-                    {t(`desk.chart_task_${tk.id}`)}
+                    {t(tk.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
