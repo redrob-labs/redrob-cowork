@@ -50,6 +50,19 @@ describe("Redrob Cowork is the Desk product", () => {
     expect(page).not.toContain("rgba(15,23,42");
   });
 
+  test("hiding the left sidebar collapses the grid to ONE column, not a 0px track", () => {
+    // Regression: `desk-shell--side-hidden .rr-shell--norail` must drop to a single `minmax(0,1fr)`
+    // column. With a two-track `0 minmax(0,1fr)` and the sidebar `display:none`, the lone
+    // #rr-shell-main auto-flows into the collapsed 0px FIRST track and the whole page measured 0 wide
+    // ("shelves the entire page"). One column has nowhere else to flow.
+    const rule = /\.desk-shell--side-hidden \.rr-shell--norail \{\s*grid-template-columns:\s*([^;]+);/.exec(INDEX_CSS);
+    expect(rule, "the side-hidden grid rule must exist").not.toBeNull();
+    const cols = rule![1].trim();
+    expect(cols).toBe("minmax(0, 1fr)");
+    // And explicitly NOT the old two-track form that caused the collapse.
+    expect(cols).not.toMatch(/^0\s/);
+  });
+
   test("the window keeps every drag region, including the macOS traffic-light offsets", () => {
     const sidebar = read("src/react-app/domains/session/sidebar/app-sidebar.tsx");
     expect(sidebar).toContain("mac:titlebar-drag");

@@ -123,6 +123,13 @@ describe("DeskShell with the side panel", () => {
     expect(html).toContain("Screen rail");
     expect(deskShellClassName(true, false)).toBe("desk-shell desk-shell--fill");
     expect(deskShellClassName(true, true)).toBe("desk-shell desk-shell--fill desk-shell--panel");
+    // Round 19: `headless` hides the top strip WITHOUT the chat-home's overflow:visible override, so a
+    // tall scrolling screen (Trending AI) keeps its scroll container. It must be its own class, never
+    // reuse `--bare-top`, or the lower shelves get clipped (the "missing scrollbar" regression).
+    expect(deskShellClassName(false, false, false, true)).toBe("desk-shell desk-shell--headless");
+    expect(deskShellClassName(false, false, true, false)).toBe("desk-shell desk-shell--bare-top");
+    expect(deskShellClassName(false, false, true, false)).not.toContain("desk-shell--headless");
+    expect(deskShellClassName(false, false, false, true)).not.toContain("desk-shell--bare-top");
   });
 
   test("the toggle reopens whatever the panel showed last, Files the first time", () => {
@@ -185,8 +192,7 @@ describe("the session page defers its side panel to the frame", () => {
     expect(routeSidePanelRequest("panel", true, { tab: "files", toggle: true })).toEqual({ kind: "toggle", tab: "files" });
   });
 
-  test("voice, extensions and closing stay with the session page, and nothing moves outside the frame", () => {
-    expect(routeSidePanelRequest("voice", true)).toBeNull();
+  test("extensions and closing stay with the session page, and nothing moves outside the frame", () => {
     expect(routeSidePanelRequest("extensions", true)).toBeNull();
     expect(routeSidePanelRequest(null, true)).toBeNull();
     expect(routeSidePanelRequest("panel", false)).toBeNull();

@@ -47,7 +47,9 @@ function actions(patch: Partial<AccountMenuActions> = {}): AccountMenuActions {
   return {
     version: "1.2.3",
     developerMode: false,
+    connected: true,
     onSettings: () => {},
+    onConnect: () => {},
     onShortcuts: () => {},
     onFeedback: () => {},
     onDeveloperMode: () => {},
@@ -121,13 +123,16 @@ describe("account menu", () => {
     expect(items.find((item) => item.id === "version")?.label).toBe("Redrob Cowork");
   });
 
-  test("the trigger shows Redrob and whether the key is connected", () => {
-    const connected = renderToStaticMarkup(<AccountLabel connected />);
-    expect(connected).toContain("<b>Redrob</b>");
+  test("the trigger shows the display name when connected, and a log-in prompt when not", () => {
+    const connected = renderToStaticMarkup(<AccountLabel connected displayName="Felix" />);
+    expect(connected).toContain("<b>Felix</b>");
     expect(connected).toContain("Connected with your Redrob key");
-    const disconnected = renderToStaticMarkup(<AccountLabel connected={false} />);
+    const connectedNoName = renderToStaticMarkup(<AccountLabel connected displayName={null} />);
+    expect(connectedNoName).toContain("<b>Log in or sign up</b>");
+    const disconnected = renderToStaticMarkup(<AccountLabel connected={false} displayName={null} />);
+    expect(disconnected).toContain("<b>Log in or sign up</b>");
     expect(disconnected).toContain("Not connected");
-    const loading = renderToStaticMarkup(<AccountLabel connected={null} />);
+    const loading = renderToStaticMarkup(<AccountLabel connected={null} displayName={null} />);
     expect(loading).not.toContain("Connected");
     expect(loading).not.toContain("Not connected");
     expect(connectionLine(null)).toBeNull();
@@ -155,7 +160,10 @@ describe("DeskShell", () => {
     expect(aside.indexOf('class="desk-account"')).toBeGreaterThan(aside.indexOf("Screen aside"));
     expect(aside).toContain('aria-haspopup="menu"');
     expect(aside).toContain('aria-label="Settings and help"');
-    expect(aside).toContain("<b>Redrob</b>");
+    // The account label is no longer a fixed brand name: with no connected key / display name it
+    // shows the log-in prompt (round 6, item 9), and the DS default avatar placeholder.
+    expect(aside).toContain("<b>Log in or sign up</b>");
+    expect(aside).toContain('class="desk-account__avatar-placeholder"');
   });
 
   test("every screen has it, without an aside of its own too", () => {
@@ -171,7 +179,7 @@ describe("keyboard shortcuts dialog", () => {
       ["Send", "Enter"],
       ["New line", "Shift Enter"],
       ["Open or close the browser", "Ctrl Shift B"],
-      ["New chat", "Ctrl N"],
+      ["Conversations", "Ctrl N"],
       ["Close a dialog", "Esc"],
     ]);
     const html = renderToStaticMarkup(<ShortcutsDialog mac={false} onClose={() => {}} />);
@@ -307,7 +315,8 @@ describe("feedback dialog", () => {
 });
 
 describe("toast", () => {
-  const timers: DeskTimers = { setTimeout: () => 0, clearTimeout: () => {} };
+  // A real handle that never runs the toast's callback, so no toast dismisses itself.
+  const timers: DeskTimers = { setTimeout: () => globalThis.setTimeout(() => {}, 0), clearTimeout: () => {} };
 
   test("shows the title and the text in a status region with a close button", () => {
     const html = renderToStaticMarkup(

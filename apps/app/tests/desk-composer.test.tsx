@@ -22,17 +22,35 @@ import {
   modeFor,
   NEW_CHAT_KEY,
   resolvePromptAgent,
+  talkFor,
   transcriptHandler,
 } from "../src/react-app/desk/composer/composer-state";
+import { replyToRead, voiceReplyStep } from "../src/react-app/domains/session/voice/voice-conversation";
 import {
   crossCheckStatusValue,
+  deliverTranscript,
   deskStatusItems,
   DeskComposerStatusView,
   DeskComposerToolsView,
+  micFailureText,
   micUnavailableReason,
+  secondsLeft,
+  voiceOffered,
   type DeskStatusInput,
 } from "../src/react-app/desk/composer/desk-composer";
-import { transcriptFromRealtimeEvent } from "../src/react-app/domains/session/voice/voice-dictation";
+import { RedrobServerError } from "../src/app/lib/redrob-server";
+import {
+  base64Of,
+  HOLD_MS,
+  MAX_RECORDING_MS,
+  micPress,
+  micRelease,
+  pickRecorderType,
+  recordingFormat,
+  spokenText,
+  transcribeClip,
+  type MicPhase,
+} from "../src/react-app/domains/session/voice/voice-dictation";
 
 const SRC = join(import.meta.dir, "..", "src");
 const read = (path: string) => readFileSync(join(SRC, path), "utf8").replaceAll("\r\n", "\n");
@@ -149,59 +167,257 @@ describe("the mic", () => {
     expect(draft).toBe("Note: first second");
     expect(setDraft).toHaveBeenCalledTimes(2);
     expect(send).not.toHaveBeenCalled();
-    // The wired tools are given the draft and its setter, and nothing that sends.
+    // Outside a voice conversation the transcript only joins the draft, even where sending is offered.
+    expect(deliverTranscript({ talk: false, draft: "Note:", text: "first", send: () => true })).toBe("drafted");
+    // The wired tools send only through the one callback a voice conversation uses.
     const tools = read("react-app/desk/composer/desk-composer.tsx");
     const wired = tools.slice(tools.indexOf("export function DeskComposerTools("), tools.indexOf("function crossCheckLevels"));
-    expect(wired).not.toMatch(/onSend|promptAsync|onSubmit/);
+    expect(wired).not.toMatch(/onSend\b|onSend\(|promptAsync|onSubmit/);
     expect(read("react-app/domains/session/voice/voice-dictation.ts")).not.toContain("response.create");
   });
 
-  test("reads only finished transcripts from the realtime channel", () => {
-    const done = JSON.stringify({ type: "conversation.item.input_audio_transcription.completed", transcript: " Hi there " });
-    expect(transcriptFromRealtimeEvent(done)).toBe("Hi there");
-    expect(transcriptFromRealtimeEvent(JSON.stringify({ type: "response.output_text.delta", delta: "x" }))).toBeNull();
-    expect(transcriptFromRealtimeEvent(JSON.stringify({ type: "conversation.item.input_audio_transcription.completed", transcript: "..." }))).toBeNull();
-    expect(transcriptFromRealtimeEvent("not json")).toBeNull();
+  test("a hold stops on release; a tap keeps recording until the next press", () => {
+    const idle: MicPhase = { kind: "idle" };
+    const held = micPress(idle, 1_000);
+    expect(held.action).toBe("start");
+    expect(micRelease(held.phase, 1_000 + HOLD_MS)).toEqual({ phase: { kind: "transcribing" }, action: "stop" });
+
+    const tapped = micRelease(held.phase, 1_000 + HOLD_MS - 1);
+    expect(tapped).toEqual({ phase: { kind: "recording", pressedAt: 1_000, latched: true }, action: null });
+    // The release of the second tap does nothing more: the press already stopped it.
+    const second = micPress(tapped.phase, 5_000);
+    expect(second).toEqual({ phase: { kind: "transcribing" }, action: "stop" });
+    expect(micRelease(second.phase, 5_100).action).toBeNull();
+
+    // While the last clip is being written down, the mic does nothing.
+    expect(micPress({ kind: "transcribing" }, 6_000).action).toBeNull();
+    expect(micRelease(idle, 6_000).action).toBeNull();
+  });
+
+  test("counts down the minute a recording may last", () => {
+    expect(MAX_RECORDING_MS).toBe(60_000);
+    expect(secondsLeft(0, 0)).toBe(60);
+    expect(secondsLeft(0, 500)).toBe(60);
+    expect(secondsLeft(0, 59_001)).toBe(1);
+    expect(secondsLeft(0, 61_000)).toBe(0);
+  });
+
+  test("records in a container the gateway takes", () => {
+    expect(pickRecorderType(() => true)).toBe("audio/webm;codecs=opus");
+    expect(pickRecorderType((type) => type === "audio/mp4")).toBe("audio/mp4");
+    expect(pickRecorderType(() => false)).toBeUndefined();
+    expect(recordingFormat("audio/webm;codecs=opus")).toBe("webm");
+    expect(recordingFormat("audio/ogg; codecs=opus")).toBe("ogg");
+    expect(recordingFormat("audio/mp4")).toBe("m4a");
+    expect(recordingFormat("audio/wav")).toBeNull();
+  });
+
+  test("sends the clip once, in the app's language, and keeps only words", async () => {
+    setLocale("ko");
+    const calls: unknown[] = [];
+    const client = {
+      transcribeAudio: async (workspaceId: string, recording: { audio: string; format: string; language?: string }) => {
+        calls.push({ workspaceId, ...recording });
+        return { text: "  회의 요약해 줘  " };
+      },
+    };
+    const audio = base64Of(new Uint8Array([1, 2, 3, 250]));
+    expect(audio).toBe(Buffer.from([1, 2, 3, 250]).toString("base64"));
+    expect(await transcribeClip(client, "ws", { audio, format: "webm" })).toBe("회의 요약해 줘");
+    expect(calls).toEqual([{ workspaceId: "ws", audio, format: "webm", language: "ko" }]);
+    expect(spokenText(" ... ")).toBeNull();
+    // A minute of audio is far past the argument limit of one fromCharCode call.
+    const long = new Uint8Array(200_000).fill(65);
+    expect(base64Of(long)).toBe(Buffer.from(long).toString("base64"));
   });
 
   test("says why it cannot listen", () => {
-    expect(micUnavailableReason({ desktop: false, media: true, connected: true })).toBe(en["desk.mic_reason_web"]);
-    expect(micUnavailableReason({ desktop: true, media: false, connected: true })).toBe(en["desk.mic_reason_device"]);
-    expect(micUnavailableReason({ desktop: true, media: true, connected: false })).toBe(en["desk.mic_reason_connecting"]);
-    expect(micUnavailableReason({ desktop: true, media: true, connected: true })).toBeNull();
+    expect(micUnavailableReason({ media: false, connected: true, access: "on" })).toBe(en["desk.mic_reason_device"]);
+    expect(micUnavailableReason({ media: true, connected: false, access: "on" })).toBe(en["desk.mic_reason_connecting"]);
+    expect(micUnavailableReason({ media: true, connected: true, access: undefined })).toBe(en["desk.mic_reason_connecting"]);
+    expect(micUnavailableReason({ media: true, connected: true, access: "privacy" })).toBe(en["desk.mic_reason_privacy"]);
+    expect(micUnavailableReason({ media: true, connected: true, access: "on" })).toBeNull();
+  });
+
+  test("a collaborator is not offered the mic or the voice conversation at all", () => {
+    expect(voiceOffered("not_owner")).toBe(false);
+    expect(voiceOffered("on")).toBe(true);
+    expect(voiceOffered("privacy")).toBe(true);
+    expect(voiceOffered(undefined)).toBe(true);
+    const html = renderToStaticMarkup(
+      <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={null} voice={false} onMicPress={noop} onMicRelease={noop} talk={false} onTalkChange={noop} mode="run" onModeChange={noop} />,
+    );
+    expect(html).not.toContain(en["desk.mic_start"]);
+    expect(html).not.toContain(en["desk.voice_chat_start"]);
+    expect(html).toContain(`aria-label="${en["desk.mode_plan"]}"`);
+  });
+
+  test("a privacy refusal reads in the app's language; other failures keep their message", () => {
+    setLocale("ko");
+    expect(micFailureText(new RedrobServerError(403, "voice_off_for_privacy", "Voice is off"))).toBe(ko["desk.mic_reason_privacy"]);
+    expect(micFailureText(new RedrobServerError(502, "transcription_failed", "Out of credit."))).toBe("Out of credit.");
+    expect(micFailureText("nope")).toBeUndefined();
+  });
+
+  test("works on the web too: the recording goes through Work, not to a vendor from the window", () => {
+    const tools = read("react-app/desk/composer/desk-composer.tsx");
+    const reason = tools.slice(tools.indexOf("export function micUnavailableReason"), tools.indexOf("export function secondsLeft"));
+    expect(reason).not.toContain("desktop");
+    const dictation = read("react-app/domains/session/voice/voice-dictation.ts");
+    expect(dictation).not.toMatch(/api\.openai\.com|desktopFetch|createVoiceRealtimeSession/);
+  });
+});
+
+describe("a voice conversation", () => {
+  test("sends what was said with what was typed, and falls back to the draft when the chat is busy", () => {
+    const sent: string[] = [];
+    const send = (message: string) => {
+      sent.push(message);
+      return true;
+    };
+    expect(deliverTranscript({ talk: true, draft: "Re: Q3.", text: " 요약해 줘 ", send })).toBe("sent");
+    expect(sent).toEqual(["Re: Q3. 요약해 줘"]);
+    expect(deliverTranscript({ talk: true, draft: "", text: "Hi", send: () => false })).toBe("drafted");
+    expect(deliverTranscript({ talk: true, draft: "", text: "Hi" })).toBe("drafted");
+  });
+
+  test("is off by default, per chat, and moves from the new chat screen to the chat it starts", () => {
+    const store = createDeskComposerStore();
+    expect(talkFor(store.getState().chats, NEW_CHAT_KEY)).toBe(false);
+    store.getState().setTalk(NEW_CHAT_KEY, true);
+    store.getState().awaitReply(NEW_CHAT_KEY);
+    store.getState().claimNewChat("s1");
+    expect(talkFor(store.getState().chats, "s1")).toBe(true);
+    expect(talkFor(store.getState().chats, "s2")).toBe(false);
+    // The answer is awaited by the chat that was started, once.
+    expect(store.getState().takeReply("s2")).toBe(false);
+    expect(store.getState().takeReply("s1")).toBe(true);
+    expect(store.getState().takeReply("s1")).toBe(false);
+  });
+
+  test("the toggle is kept across a restart, a pending answer is not", () => {
+    const memory = new Map<string, string>();
+    const storage = () => ({
+      getItem: (key: string) => memory.get(key) ?? null,
+      setItem: (key: string, value: string) => void memory.set(key, value),
+      removeItem: (key: string) => void memory.delete(key),
+    });
+    const store = createDeskComposerStore({ storage });
+    store.getState().setTalk("s1", true);
+    store.getState().awaitReply("s1");
+    const saved = memory.get(DESK_COMPOSER_STORE_KEY) ?? "";
+    expect(JSON.parse(saved).state).toEqual({ chats: { s1: { talk: true } } });
+  });
+
+  test("reads the whole answer to the last thing said, and nothing before it has one", () => {
+    const message = (id: string, role: "user" | "assistant", text?: string) => ({
+      id,
+      role,
+      parts: text === undefined ? [] : [{ type: "text" as const, text }],
+    });
+    expect(replyToRead([message("u1", "user", "Hi")])).toBeNull();
+    expect(replyToRead([message("u1", "user", "Hi"), message("a1", "assistant")])).toBeNull();
+    expect(
+      replyToRead([
+        message("u0", "user", "Earlier"),
+        message("a0", "assistant", "Old answer"),
+        message("u1", "user", "Summarise"),
+        message("a1", "assistant", "Revenue is up."),
+        message("a2", "assistant", "Costs are flat."),
+      ]),
+    ).toEqual({ id: "a2", text: "Revenue is up.\n\nCosts are flat." });
+  });
+
+  test("the toggle shows only where a spoken message can be sent, and says whether it is on", () => {
+    const view = (talk: boolean | null, micUnavailable: string | null = null) =>
+      renderToStaticMarkup(
+        <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={micUnavailable} onMicPress={noop} onMicRelease={noop} talk={talk} onTalkChange={noop} mode="run" onModeChange={noop} />,
+      );
+    expect(view(null)).not.toContain(en["desk.voice_chat_start"]);
+    expect(view(false)).toMatch(new RegExp(`aria-label="${en["desk.voice_chat_start"]}"[^>]*aria-pressed="false"|aria-pressed="false"[^>]*aria-label="${en["desk.voice_chat_start"]}"`));
+    expect(view(true)).toContain(`aria-label="${en["desk.voice_chat_stop"]}"`);
+    const off = view(false, en["desk.mic_reason_privacy"]);
+    expect(off).toMatch(new RegExp(`aria-label="${en["desk.voice_chat_start"]}. ${en["desk.mic_reason_privacy"]}"[^>]*disabled=""`));
+  });
+
+  test("the answer is read once, after the spoken turn ends and its words have arrived", () => {
+    const user = { id: "u1", role: "user" as const, parts: [{ type: "text" as const, text: "Summarise" }] };
+    const answer = { id: "a1", role: "assistant" as const, parts: [{ type: "text" as const, text: "Revenue is up." }] };
+    let awaited = true;
+    const takeReply = () => {
+      const was = awaited;
+      awaited = false;
+      return was;
+    };
+    // Running: nothing is read, and nobody is asked yet.
+    let step = voiceReplyStep({ streaming: false, due: false }, { streaming: true, messages: [user], takeReply });
+    expect(step.read).toBeNull();
+    expect(awaited).toBe(true);
+    // The turn ends before the answer's words have arrived: the wait goes on.
+    step = voiceReplyStep(step.wait, { streaming: false, messages: [user], takeReply });
+    expect(step).toEqual({ wait: { streaming: false, due: true }, read: null });
+    // They arrive: read once.
+    step = voiceReplyStep(step.wait, { streaming: false, messages: [user, answer], takeReply });
+    expect(step.read).toEqual({ id: "a1", text: "Revenue is up." });
+    step = voiceReplyStep(step.wait, { streaming: false, messages: [user, answer], takeReply });
+    expect(step.read).toBeNull();
+    // A typed message's turn is not read: nobody was waiting for it.
+    step = voiceReplyStep({ streaming: true, due: false }, { streaming: false, messages: [user, answer], takeReply });
+    expect(step.read).toBeNull();
+  });
+
+  test("the session sends a spoken message itself, and runs the wait on every look", () => {
+    const surface = read("react-app/domains/session/surface/session-surface.tsx");
+    expect(surface).toContain("onSendText={handleSendText}");
+    expect(surface).toContain("useDeskComposerStore.getState().takeReply(props.sessionId)");
+    expect(surface).toContain("voiceReplyStep(replyWaitRef.current");
+    expect(read("react-app/domains/session/chat/new-task-composer.tsx")).toContain("onSendText={handleSendText}");
   });
 });
 
 const markupOf = (html: string, pattern: string) => html.search(new RegExp(pattern));
 
 describe("the tools row", () => {
-  test("is Mic, then Plan or Run, then the model", () => {
+  test("is Plan or Run, then the model, then the voice-chat toggle — no dictation mic", () => {
     const html = renderToStaticMarkup(
-      <DeskComposerToolsView listening={false} micUnavailable={null} onMic={noop} mode="run" onModeChange={noop}>
+      <DeskComposerToolsView mic="idle" secondsLeft={null} micUnavailable={null} onMicPress={noop} onMicRelease={noop} talk={false} onTalkChange={noop} mode="run" onModeChange={noop}>
         <button type="button" data-model="1">Redrob Auto</button>
       </DeskComposerToolsView>,
     );
-    const mic = markupOf(html, `aria-label="${en["desk.mic_start"]}"`);
     const plan = markupOf(html, `aria-label="${en["desk.mode_plan"]}"`);
     const run = markupOf(html, `aria-label="${en["desk.mode_run"]}"`);
     const model = markupOf(html, 'data-model="1"');
-    expect(mic).toBeGreaterThan(-1);
-    expect(plan).toBeGreaterThan(mic);
+    const voice = markupOf(html, `aria-label="${en["desk.voice_chat_start"]}"`);
+    // Round 8, item 12: the dictation mic button is removed from the composer entirely.
+    expect(html).not.toContain(`aria-label="${en["desk.mic_start"]}"`);
+    expect(plan).toBeGreaterThan(-1);
     expect(run).toBeGreaterThan(plan);
     expect(model).toBeGreaterThan(run);
+    expect(voice).toBeGreaterThan(model);
     expect(html).toMatch(new RegExp(`aria-checked="true"[^>]*aria-label="${en["desk.mode_run"]}"`));
   });
 
-  test("the mic says Stop talking while listening, and why it is off when it cannot listen", () => {
-    const listening = renderToStaticMarkup(
-      <DeskComposerToolsView listening micUnavailable={null} onMic={noop} mode="plan" onModeChange={noop} />,
-    );
-    expect(listening).toContain(`aria-label="${en["desk.mic_stop"]}"`);
-    expect(listening).toContain('aria-pressed="true"');
-    const off = renderToStaticMarkup(
-      <DeskComposerToolsView listening={false} micUnavailable={en["desk.mic_reason_web"]} onMic={noop} mode="plan" onModeChange={noop} />,
-    );
-    expect(off).toMatch(new RegExp(`aria-label="Talk to Desk. ${en["desk.mic_reason_web"]}"[^>]*disabled=""`));
+  test("the dictation mic is gone even while the mic phase is recording or transcribing", () => {
+    const view = (props: { mic: "idle" | "recording" | "transcribing"; secondsLeft?: number }) =>
+      renderToStaticMarkup(
+        <DeskComposerToolsView
+          mic={props.mic}
+          secondsLeft={props.secondsLeft ?? null}
+          micUnavailable={null}
+          onMicPress={noop}
+          onMicRelease={noop}
+          talk={false}
+          onTalkChange={noop}
+          mode="plan"
+          onModeChange={noop}
+        />,
+      );
+    for (const mic of ["idle", "recording", "transcribing"] as const) {
+      const html = view({ mic, secondsLeft: 42 });
+      expect(html).not.toContain(`aria-label="${en["desk.mic_start"]}"`);
+      expect(html).not.toContain(`aria-label="${en["desk.mic_stop"]}"`);
+      expect(html).not.toContain(en["desk.mic_seconds_left"].replace("{seconds}", "42"));
+    }
   });
 });
 
@@ -298,7 +514,7 @@ function Providers(props: { children: ReactNode }) {
 }
 
 describe("the new chat screen", () => {
-  test("renders the serif line, the Desk placeholder and the tools in order inside the frame", () => {
+  test("renders the greeting, the starter-hint sub-line, the placeholder and the tools in order inside the frame", () => {
     const html = renderToStaticMarkup(
       <Providers>
         <DeskFrameContext value={true}>
@@ -306,14 +522,19 @@ describe("the new chat screen", () => {
         </DeskFrameContext>
       </Providers>,
     );
-    expect(html).toContain(`<h2 class="desk-new__line">${en["desk.new_chat_line"]}</h2>`);
-    expect(html).toContain(en["desk.composer_placeholder"]);
+    // The greeting and the starter hint are both time/random-dependent, so assert structure, not
+    // exact text: the greeting line, and a rotating prompt-starter hint sub-line beneath it.
+    expect(html).toContain('class="desk-new__line"');
+    expect(html).toContain('class="desk-new__hint"');
+    // The placeholder rotates per mount; whichever variant renders is one of the five.
+    const placeholders = [1, 2, 3, 4, 5].map((n) => en[`desk.composer_placeholder_${n}`]);
+    expect(placeholders.some((p) => html.includes(p))).toBe(true);
     expect(html).not.toContain(en["hero.title"]);
-    const mic = markupOf(html, `aria-label="Talk to Desk`);
     const plan = markupOf(html, `aria-label="${en["desk.mode_plan"]}"`);
     const send = markupOf(html, `aria-label="${en["composer.run_task"]}"`);
-    expect(mic).toBeGreaterThan(-1);
-    expect(plan).toBeGreaterThan(mic);
+    // Round 8, item 12: no dictation mic in the composer anymore.
+    expect(html).not.toContain(`aria-label="${en["desk.mic_start"]}"`);
+    expect(plan).toBeGreaterThan(-1);
     expect(send).toBeGreaterThan(plan);
     expect(html).toContain(`aria-label="${en["desk.status_label"]}"`);
   });
@@ -329,12 +550,21 @@ describe("the new chat screen", () => {
     expect(html).not.toContain(en["desk.mode_plan"]);
   });
 
-  test("shows the serif line and the Desk placeholder inside the frame", () => {
+  test("shows the greeting, the starter-hint sub-line and an on-voice placeholder inside the frame", () => {
     const hero = read("react-app/domains/session/chat/session-empty-hero.tsx");
-    expect(hero).toContain('<h2 className="desk-new__line">{t("desk.new_chat_line")}</h2>');
+    // The static line is replaced by the dynamic greeting component, which now carries a rotating
+    // starter-hint sub-line (the brand beat was retired).
+    expect(hero).toContain("<DeskGreeting />");
+    const greeting = read("react-app/desk/room/desk-greeting.tsx");
+    expect(greeting).toContain('<h2 className="desk-new__line">{greeting}</h2>');
+    expect(greeting).toContain('<p className="desk-new__hint">{hint}</p>');
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
-    expect(composer).toContain('placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}');
-    expect(en["desk.composer_placeholder"]).toBe("Ask Desk to do something, or type / to run a playbook");
+    // The placeholder rotates per mount inside the frame.
+    expect(composer).toContain("placeholder={inDeskFrame ? deskPlaceholder : t(\"composer.placeholder\")}");
+    // The copy drops "skill" and follows the brand voice; the placeholder is capability-oriented
+    // (what Cowork and the Model Guide do), round 4 item 7.
+    expect(en["desk.composer_placeholder"]).toBe("Research, build, automate. Cowork picks the model");
+    expect(en["desk.composer_placeholder"]).not.toContain("skill");
     const css = read("app/index.css");
     const line = css.slice(css.indexOf(".desk-new__line {"), css.indexOf("}", css.indexOf(".desk-new__line {")));
     expect(line).toContain("font-family: var(--font-serif)");
@@ -343,8 +573,26 @@ describe("the new chat screen", () => {
   test("the composer puts the Desk tools before Send and the status under the field, only in the frame", () => {
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain("{inDeskFrame ? null : modelControls}");
-    expect(composer).toContain("<DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>\n                    {modelControls}");
+    expect(composer).toMatch(/<DeskComposerTools\s+chatKey=\{deskChatKey\}\s+draft=\{props.draft\}\s+onDraftChange=\{props.onDraftChange\}\s+onSendText=\{props.onSendText\}\s*>\s+\{modelControls\}/);
     expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}");
     expect(composer).toContain("const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;");
+  });
+});
+
+describe("skills in the composer", () => {
+  test("/ lists skills, MCP prompts and compact, and the tool menu has no Commands section", () => {
+    const composer = read("react-app/domains/session/surface/composer/composer.tsx");
+    expect(composer).toContain("commands.filter(isComposerSlashOption)");
+    expect(composer).not.toContain('["commands", t("dashboard.commands")]');
+    expect(composer).not.toContain('toolMenuSection === "commands"');
+  });
+
+  test("a skill chip is sent as a plain instruction to use that skill", () => {
+    const route = read("react-app/shell/session-route.tsx");
+    expect(route).toContain("parts.push({ type: \"text\", text: skillRunPrompt(part.name) });");
+    expect(route).not.toContain("Load [skill");
+    // The sent message shows the skill as a chip again.
+    const list = read("components/chat/message-list.tsx");
+    expect(list).toContain("Use the `[^`]+` skill\\.");
   });
 });

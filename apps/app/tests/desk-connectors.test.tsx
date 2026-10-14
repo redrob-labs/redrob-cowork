@@ -23,7 +23,8 @@ import {
 } from "../src/react-app/desk/connectors/connectors";
 import { ConnectorsView } from "../src/react-app/desk/connectors/desk-connectors";
 import { CONNECTORS } from "../src/react-app/desk/services/fixtures/connectors";
-import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 import type { Connector } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 
@@ -123,20 +124,7 @@ describe("connectorFromMcp", () => {
 describe("real connectors.list", () => {
   test("maps every configured server with the engine status, connected first", async () => {
     const calls: string[] = [];
-    const unused = async (): Promise<never> => {
-      throw new Error("not used");
-    };
-    const client: DeskServerClient = {
-      listWorkspaces: unused,
-      listSessions: unused,
-      getSession: unused,
-      listMemories: unused,
-      saveMemory: unused,
-      updateMemory: unused,
-      deleteMemory: unused,
-      listArtifacts: unused,
-      getConfig: unused,
-      patchConfig: unused,
+    const client = deskClient({
       listMcp: async (workspaceId) => {
         calls.push(workspaceId);
         return {
@@ -149,7 +137,7 @@ describe("real connectors.list", () => {
           ],
         };
       },
-    };
+    });
     const services = createRealDeskServices({
       client,
       workspaceId: "ws_1",

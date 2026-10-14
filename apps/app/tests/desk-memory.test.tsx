@@ -25,7 +25,8 @@ import {
 import { createFixtureDeskServices } from "../src/react-app/desk/services/fixture-services";
 import { NOTES } from "../src/react-app/desk/services/fixtures/notes";
 import { PROJECTS } from "../src/react-app/desk/services/fixtures/projects";
-import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { createRealDeskServices } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 import type { MemoryNote } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 import type { ToastAction } from "../src/react-app/desk/store/frame-store";
@@ -60,17 +61,7 @@ function fakeBank() {
     memory("m3", "Numbered clauses", ["desk-scope:team"]),
   ];
   let next = 4;
-  const unused = async (): Promise<never> => {
-    throw new Error("not used");
-  };
-  const client: DeskServerClient = {
-    listWorkspaces: unused,
-    listSessions: unused,
-    getSession: unused,
-    listArtifacts: unused,
-    listMcp: unused,
-    getConfig: unused,
-    patchConfig: unused,
+  const client = deskClient({
     listMemories: async () => {
       calls.push("list");
       return memories;
@@ -93,7 +84,7 @@ function fakeBank() {
       calls.push(`delete:${id}`);
       memories = memories.filter((entry) => entry.id !== id);
     },
-  };
+  });
   return { client, calls, contents: () => memories.map((entry) => entry.content) };
 }
 
