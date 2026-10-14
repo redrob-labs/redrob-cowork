@@ -98,12 +98,18 @@ win:
     # update -- cannot run this Electron version anyway.
     signingHashAlgorithms:
       - sha256
-    # electron-builder signs every .exe in the package, including vendor binaries
-    # we ship but do not build (elevate.exe, Microsoft's OpenConsole.exe). Cloud
-    # signing services bill per signature, so this hook skips a vendor binary
-    # that already carries one and delegates everything else to the built-in
-    # signer. See build/sign-windows.cjs for the measurement and the tradeoff.
+    # Azure Artifact Signing over OpenID Connect: the hook runs signtool with the
+    # Azure.CodeSigning dlib, authenticated by the `az login` the release job
+    # performs right before packaging. No certificate file or secret exists. The
+    # hook also skips a vendor binary (elevate.exe, Microsoft's OpenConsole.exe)
+    # that already carries its own signature, since cloud signing bills per
+    # signature. See build/sign-windows.cjs.
     sign: build/sign-windows.cjs
+    # electron-updater installs an update only when the installer's signer
+    # matches this name (written into app-update.yml). electron-builder reads it
+    # from the certificate file when there is one; with Artifact Signing there
+    # is none, so the organization's Public Trust certificate is named here.
+    publisherName: 'CN="McKinley Rice, Inc."'
   extraResources:
     - from: resources/icons/icon.png
       to: icons/icon.png
