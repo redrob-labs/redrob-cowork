@@ -74,15 +74,17 @@ const plan = [
 describe("the thread inside the Desk frame", () => {
   test("an assistant turn sits on the AI surface, with a receipt", () => {
     const markup = render([user, assistant("a1", "The notice must go by registered mail.")], true);
-    expect(markup).toContain("bg-surface-ai");
-    expect(markup).toContain("border-border-ai");
+    // Round 32 (Claude-style): the assistant reply is plain prose, no AI bubble.
+    expect(markup).not.toContain("bg-surface-ai");
+    expect(markup).not.toContain("border-border-ai");
+    expect(markup).toContain('data-surface="ai"');
     expect(markup).toContain("Redrob Auto");
     expect(markup).toContain("Not checked");
   });
 
   test("outside the frame the turn is unchanged: no receipt, blocks stay as written", () => {
     const markup = render([user, assistant("a1", plan)], false);
-    expect(markup).toContain("bg-surface-ai");
+    expect(markup).not.toContain("bg-surface-ai");
     expect(markup).not.toContain("Not checked");
     expect(markup).not.toContain("Run this plan");
     expect(markup).toContain("redrob-plan");

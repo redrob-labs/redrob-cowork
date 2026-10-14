@@ -121,9 +121,15 @@ describe("a tool row is the design system's AgentAction", () => {
   });
 });
 
-describe("generated text sits on the AI surface", () => {
-  test("assistant prose takes surface-ai and border-ai, which the design system reserves for machine output", () => {
+describe("generated text is plain prose, not a bubble", () => {
+  test("assistant prose keeps data-surface=\"ai\" as a semantic hook but carries NO bubble (Claude-style, round 32)", () => {
     const list = readFileSync(join(import.meta.dir, "..", "..", "src/components/chat/message-list.tsx"), "utf8");
-    expect(list).toMatch(/data-surface="ai"[\s\S]{0,80}className="[^"]*border-border-ai[^"]*bg-surface-ai/);
+    // data-surface="ai" stays (a semantic marker machine-output tooling reads).
+    expect(list).toContain('data-surface="ai"');
+    // The visual AI bubble (border-border-ai / bg-surface-ai) is deliberately gone:
+    // the right-aligned, darker USER bubble now carries the human-vs-machine distinction,
+    // so the reply reads as a clean document like Claude's.
+    expect(list).not.toContain("border-border-ai");
+    expect(list).not.toContain("bg-surface-ai");
   });
 });
