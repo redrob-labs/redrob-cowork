@@ -1,13 +1,15 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { isValidElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Routes, createRoutesFromElements, matchRoutes } from "react-router";
+import { MemoryRouter, Navigate, Routes, createRoutesFromElements, matchRoutes } from "react-router";
 
 import { CHATS } from "../src/react-app/desk/services/fixtures/chats";
 import { at } from "../src/react-app/desk/services/fixtures/sample-day";
 import { useInDeskFrame } from "../src/react-app/desk/shell/desk-frame";
-import { RedirectToChat, chatPath, deskRoutes } from "../src/react-app/desk/shell/desk-routes";
+import { RedirectToChat, RedirectToGuide, chatPath, deskRoutes } from "../src/react-app/desk/shell/desk-routes";
 import { DeskShell, panelToggleLabel } from "../src/react-app/desk/shell/desk-shell";
 import { buildDeskNav, formatNavTime, type DeskNavInput } from "../src/react-app/desk/shell/nav";
 import { counted } from "../src/react-app/desk/shell/use-desk-nav-data";
@@ -47,9 +49,10 @@ describe("buildDeskNav", () => {
   test("lists the places, headings and recents in the handoff's order", () => {
     const nav = buildDeskNav(input());
     expect(nav.map((item) => item.heading ?? item.label)).toEqual([
-      "New chat",
+      "Trending AI",
+      "Conversations",
+      "Skills",
       "Projects",
-      "Playbooks",
       "Scheduled",
       "History",
       "Recent",
@@ -57,18 +60,18 @@ describe("buildDeskNav", () => {
       "Seorin indemnity cap",
       "Draft v3 against our standard",
       "Hanbit exhibit list",
-      "How Desk works for you",
-      "Model Guide",
-      "Connectors",
+      "Your Cowork",
       "Privacy protection",
       "Memory",
+      "Connectors",
     ]);
   });
 
   test("shows each count as the row's meta", () => {
     const meta = Object.fromEntries(buildDeskNav(input()).map((item) => [String(item.id), item.meta]));
     expect(meta.scheduled).toBe("2");
-    expect(meta.guide).toBe("Auto");
+    // Round 17: the Trending AI (guide) row no longer carries an "Auto" trailing badge.
+    expect(meta.guide).toBeUndefined();
     expect(meta.connectors).toBe("6");
     expect(meta.privacy).toBe("High");
     expect(meta.memory).toBe("22");
@@ -105,22 +108,22 @@ describe("buildDeskNav", () => {
   test("hrefs are hash routes by default, and follow the router when it says otherwise", () => {
     const hrefs = buildDeskNav(input()).filter((item) => !item.heading).map((item) => item.href);
     expect(hrefs).toEqual([
+      "#/guide",
       "#/chat",
+      "#/skills",
       "#/projects",
-      "#/playbooks",
       "#/scheduled",
       "#/history",
       "#/chat/notice",
       "#/chat/indemnity",
       "#/chat/s-draft3",
       "#/chat/hanbit-exh",
-      "#/guide",
-      "#/connectors",
       "#/privacy",
       "#/memory",
+      "#/connectors",
     ]);
     const plain = buildDeskNav(input({ toHref: (path) => path }));
-    expect(plain[0]?.href).toBe("/chat");
+    expect(plain[0]?.href).toBe("/guide");
   });
 
   test("marks only the current place, and the open chat in Recent", () => {
@@ -163,17 +166,23 @@ describe("formatNavTime", () => {
 });
 
 describe("DeskShell", () => {
-  test("puts the side panel button last in the header, named for opening it", () => {
-    const html = withProviders(
-      <DeskShell title="Projects" actions={<button type="button">First action</button>}>
-        <p>Work</p>
-      </DeskShell>,
+  test("inside a chat, the side panel button is rendered — gated on the chat header (round 14, item C)", () => {
+    // The off-chat render test below proves it hides with no chat header. Here we assert the gate
+    // itself in source: the panel IconButton is wrapped in `chatHeader ? (…) : null`, so it appears
+    // only inside a chat. (A static renderToStaticMarkup does not reliably reflect the frame-store
+    // chatHeader set from a test, so the structural guarantee is checked at the source, as the other
+    // source-level suites in this app do.)
+    const src = readFileSync(
+      fileURLToPath(new URL("../src/react-app/desk/shell/desk-shell.tsx", import.meta.url)),
+      "utf8",
     );
-    const actions = actionsOf(html);
-    expect(actions.indexOf("First action")).toBeGreaterThan(-1);
-    const lastButton = actions.slice(actions.lastIndexOf("<button"));
-    expect(lastButton).toContain('aria-label="Open the side panel"');
-    expect(actions.indexOf("First action")).toBeLessThan(actions.lastIndexOf("<button"));
+    expect(src).toContain("{chatHeader ? (");
+    expect(src).toContain("icons.panelRight");
+    // The panel IconButton must sit inside the chatHeader gate, before the gate closes.
+    const gate = src.indexOf("{chatHeader ? (");
+    const panel = src.indexOf("icons.panelRight");
+    expect(gate).toBeGreaterThan(-1);
+    expect(panel).toBeGreaterThan(gate);
   });
 
   test("names the button for what it does: open when closed, close when open", () => {
@@ -187,10 +196,12 @@ describe("DeskShell", () => {
     expect(useFrameStore.getState().panel.open).toBe(false);
   });
 
-  test("the panel button is there with no screen actions too", () => {
+  test("the side panel button is HIDDEN off a chat (Trending AI, Skills, Projects, History…)", () => {
+    // Round 14, item C: no chat header -> no panel button, with or without screen actions.
+    useFrameStore.getState().setChatHeader(null);
     const actions = actionsOf(withProviders(<DeskShell title="History" />));
-    expect(actions.match(/<button/g)?.length).toBe(1);
-    expect(actions).toContain('aria-label="Open the side panel"');
+    expect(actions).not.toContain('aria-label="Open the side panel"');
+    expect(actions.match(/<button/g)?.length ?? 0).toBe(0);
   });
 
   test("renders the menu, the theme switch and the account slot, without the Desk wash", () => {
@@ -222,10 +233,14 @@ describe("Desk routes", () => {
   const routes = createRoutesFromElements(deskRoutes(<span>chat screen</span>));
   const leaf = (path: string) => matchRoutes(routes, path)?.at(-1);
 
-  test("legacy session paths, the root and unknown paths redirect to the chat", () => {
-    for (const path of ["/", "/session", "/session/abc", "/nowhere/at/all"]) {
+  test("session paths redirect to the chat; the root and unknown paths to Trending AI", () => {
+    for (const path of ["/session", "/session/abc"]) {
       const element = leaf(path)?.route.element;
       expect(isValidElement(element) && element.type === RedirectToChat).toBe(true);
+    }
+    for (const path of ["/", "/nowhere/at/all"]) {
+      const element = leaf(path)?.route.element;
+      expect(isValidElement(element) && element.type === RedirectToGuide).toBe(true);
     }
     expect(leaf("/session/abc")?.params.sessionId).toBe("abc");
     expect(chatPath("abc")).toBe("/chat/abc");
@@ -242,11 +257,18 @@ describe("Desk routes", () => {
     expect(leaf("/workspace/w1/session/abc")?.params).toMatchObject({ workspaceId: "w1", sessionId: "abc" });
   });
 
+  test("the old Playbooks paths land on Skills", () => {
+    for (const path of ["/playbooks", "/playbook/weekly-update", "/run"]) {
+      const element = leaf(path)?.route.element;
+      expect(isValidElement(element) && element.type === Navigate).toBe(true);
+      expect(isValidElement<{ to: string }>(element) ? element.props.to : null).toBe("/skills");
+    }
+  });
+
   test("the Preview screens render their own screen inside the shell, with no placeholder left", () => {
     const screens: Array<[string, string, string, string]> = [
-      ["/playbooks", "Playbooks", "playbooks", "Preview: sample playbooks."],
-      ["/playbook/notice", "Playbook", "playbooks", "Preview: sample playbooks."],
-      ["/run", "Playbook run", "playbooks", "Preview: a sample run."],
+      ["/skills", "Skills", "skills", "Preview: sample skills."],
+      ["/skill/notice", "notice", "skills", "Preview: sample skills."],
       ["/scheduled", "Scheduled", "scheduled", "Preview: sample schedules."],
       ["/history", "History", "history", "Preview: sample history."],
     ];

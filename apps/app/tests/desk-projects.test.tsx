@@ -260,7 +260,7 @@ describe("one project", () => {
   test("the folder ask, the alert after Allow, and nothing after Not now", () => {
     const ask = view();
     expect(ask).toContain("rr-approval");
-    expect(ask).toContain("Let Desk use a folder for Acme?");
+    expect(ask).toContain("Let Cowork use a folder for Acme?");
     expect(ask).toContain("in a folder called acme on this computer");
     expect(ask).toContain("asks before deleting any");
     expect(ask).toContain(">Allow<");
@@ -270,7 +270,7 @@ describe("one project", () => {
     const allowed = view({}, { kind: "allowed", folder: "Contracts" });
     expect(allowed).not.toContain("rr-approval");
     expect(allowed).toContain("rr-alert");
-    expect(allowed).toContain("Desk can use the Contracts folder");
+    expect(allowed).toContain("Cowork can use the Contracts folder");
 
     const hidden = view({}, { kind: "none" });
     expect(hidden).not.toContain("rr-approval");
@@ -422,11 +422,11 @@ describe("new project and save as a project", () => {
     const { client } = fakeClient({ failCreate: true });
     const { deps: input, events } = deps(client);
     expect(await createProject(input, { name: "Acme", from: null })).toEqual({ status: "failed" });
-    expect(events).toEqual(["toast:danger:Desk could not create the project:Try again in a moment."]);
+    expect(events).toEqual(["toast:danger:Cowork could not create the project:Try again in a moment."]);
 
     const offline = deps(null);
     expect(await createProject(offline.deps, { name: "Acme", from: null })).toEqual({ status: "failed" });
-    expect(offline.events).toEqual(["toast:danger:Desk is not connected yet:Open a chat first, then try again."]);
+    expect(offline.events).toEqual(["toast:danger:Cowork is not connected yet:Open a chat first, then try again."]);
   });
 
   test("the chat's title fills in the name, without a trailing ...", () => {

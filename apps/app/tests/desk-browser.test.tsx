@@ -137,7 +137,7 @@ describe("the bar under the address", () => {
   test("reading with Take over, yours with Hand back, done with no button", () => {
     expect(agentBarFor("reading")).toEqual({
       state: "running",
-      label: "Desk is reading this page",
+      label: "Cowork is reading this page",
       action: { kind: "take-over", label: "Take over" },
     });
     expect(agentBarFor("you")).toEqual({
@@ -145,7 +145,7 @@ describe("the bar under the address", () => {
       label: "You have this tab",
       action: { kind: "hand-back", label: "Hand back" },
     });
-    expect(agentBarFor("done")).toEqual({ state: "done", label: "Desk is done with this page", action: null });
+    expect(agentBarFor("done")).toEqual({ state: "done", label: "Cowork is done with this page", action: null });
   });
 
   test("Take over hands the tab to the person with a toast; Hand back gives it to Desk", () => {
@@ -158,7 +158,7 @@ describe("the bar under the address", () => {
     frame.getState().setDesk("reading");
     takeOver(frame.getState());
     expect(frame.getState().browser.desk).toBe("you");
-    expect(frame.getState().toast).toMatchObject({ title: "You have the tab", text: "Desk waits until you hand it back." });
+    expect(frame.getState().toast).toMatchObject({ title: "You have the tab", text: "Cowork waits until you hand it back." });
     handBack(frame.getState());
     expect(frame.getState().browser.desk).toBe("reading");
   });
@@ -197,9 +197,9 @@ describe("DeskBrowserView markup", () => {
   });
 
   test("the live dot is on Desk's tab only while Desk reads", () => {
-    expect(view().match(/aria-label="Desk is using this tab"/g)).toHaveLength(1);
-    expect(view({ desk: "you" })).not.toContain("Desk is using this tab");
-    expect(view({ desk: "done" })).not.toContain("Desk is using this tab");
+    expect(view().match(/aria-label="Cowork is using this tab"/g)).toHaveLength(1);
+    expect(view({ desk: "you" })).not.toContain("Cowork is using this tab");
+    expect(view({ desk: "done" })).not.toContain("Cowork is using this tab");
   });
 
   test("the address shows the host, never the full address", () => {
@@ -223,16 +223,16 @@ describe("DeskBrowserView markup", () => {
   });
 
   test("the bar: reading with Take over, yours with Hand back, done without a button, none on another tab", () => {
-    expect(view()).toContain("Desk is reading this page");
+    expect(view()).toContain("Cowork is reading this page");
     expect(view()).toContain(">Take over<");
     expect(view({ desk: "you" })).toContain("You have this tab");
     expect(view({ desk: "you" })).toContain(">Hand back<");
     const done = view({ desk: "done" });
-    expect(done).toContain("Desk is done with this page");
+    expect(done).toContain("Cowork is done with this page");
     expect(done).not.toContain("Take over");
     expect(done).not.toContain("Hand back");
-    expect(view({ deskTabId: null })).not.toContain("Desk is reading this page");
-    expect(view({ activeId: "new" })).not.toContain("Desk is reading this page");
+    expect(view({ deskTabId: null })).not.toContain("Cowork is reading this page");
+    expect(view({ activeId: "new" })).not.toContain("Cowork is reading this page");
   });
 
   test("the page is Electron's: an empty area, with no new tab page over it", () => {
@@ -247,13 +247,13 @@ describe("DeskBrowserView markup", () => {
       { url: "https://scourt.go.kr/y", host: "scourt.go.kr", chatId: "chat-2", chatTitle: null, at: 2 },
     ];
     const html = view({ activeId: "new", pages });
-    expect(html).toContain("Sites you sign in to here stay signed in for Desk, on this computer only.");
-    expect(html).toContain("Pages Desk read today");
+    expect(html).toContain("Sites you sign in to here stay signed in for Cowork, on this computer only.");
+    expect(html).toContain("Pages Cowork read today");
     expect(html).toContain("<b>law.go.kr</b><span>for Notice by email - valid?</span>");
     expect(html).toContain("<b>scourt.go.kr</b><span>for Untitled chat</span>");
     expect(html).not.toContain("desk-browser__page--native");
     expect(html).not.toContain("law.go.kr/x");
-    expect(view({ activeId: "new" })).toContain("Pages Desk reads for your chats appear here.");
+    expect(view({ activeId: "new" })).toContain("Pages Cowork reads for your chats appear here.");
   });
 
   test("with no tab at all it is still the new tab page", () => {

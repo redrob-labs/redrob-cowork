@@ -17,8 +17,7 @@ type TimerCallback = () => void;
 
 function setup(widths: { viewport: number; text: number }, reducedMotion = false) {
   const states: SessionTitleMarqueeState[] = [];
-  const timers = new Map<number, TimerCallback>();
-  let timerId = 0;
+  const timers = new Map<ReturnType<typeof setTimeout>, TimerCallback>();
   let motionReduced = reducedMotion;
   const viewport = { clientWidth: widths.viewport, scrollWidth: widths.viewport };
   const text = { clientWidth: widths.text, scrollWidth: widths.text };
@@ -29,9 +28,11 @@ function setup(widths: { viewport: number; text: number }, reducedMotion = false
     onChange: (state) => states.push(state),
     setTimer: (callback, delayMs) => {
       expect(delayMs).toBe(SESSION_TITLE_HOVER_DELAY_MS);
-      timerId += 1;
-      timers.set(timerId, callback);
-      return timerId;
+      // A real handle, cleared at once, gives each fake timer a unique key of the platform's timer type.
+      const handle = setTimeout(() => {}, 0);
+      clearTimeout(handle);
+      timers.set(handle, callback);
+      return handle;
     },
     clearTimer: (id) => timers.delete(id),
   });

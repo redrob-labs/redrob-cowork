@@ -8,7 +8,6 @@ import { curateModelOptions } from "../src/app/lib/featured-models";
 import { inferModelVendor } from "../src/app/lib/model-vendor";
 import { parseRedrobPricing } from "../src/app/lib/redrob-pricing";
 import { t } from "../src/i18n";
-import { AiSettingsView } from "../src/react-app/domains/settings/pages/ai-view";
 import { ModelMenu } from "../src/components/model-select";
 
 function option(providerID: string, modelID: string, title = modelID): ModelOption {
@@ -173,37 +172,11 @@ describe("the model menu", () => {
     expect(html).not.toContain("Aion 2.0");
   });
 
-  test("the Model Guide reads its tab from the URL, so the link wins even when By price is open", () => {
+  test("the Model Guide is profession-only now; the By-price tab and URL tab-switch were removed", () => {
+    // Round 11 (Trending AI): the "By price" view and the header/tab strip were dropped, so the guide
+    // no longer reads a `?tab=` from the URL — it is the profession chart only.
     const source = readFileSync(fileURLToPath(new URL("../src/react-app/desk/preview/desk-guide.tsx", import.meta.url)), "utf8");
-    expect(source).toContain('params.get("tab") === "price" ? "price" : "profession"');
+    expect(source).not.toContain('params.get("tab") === "price"');
     expect(source).not.toContain('useState<GuideTab>("profession")');
-  });
-});
-
-describe("Settings, AI", () => {
-  test("is where the full model list now lives, beside connecting providers", () => {
-    const html = renderToStaticMarkup(
-      <AiSettingsView
-        busy={false}
-        providerAuthBusy={false}
-        providerStatusLabel="Connected"
-        providerStatusStyle=""
-        providerSummary="1 provider"
-        connectedProviders={[{ id: "redrob", name: "Redrob" }]}
-        disconnectingProviderId={null}
-        providerConnectError={null}
-        providerDisconnectStatus={null}
-        providerDisconnectError={null}
-        onOpenProviderAuth={() => undefined}
-        onOpenAllModels={() => undefined}
-        onDisconnectProvider={() => undefined}
-        canDisconnectProvider={() => true}
-        canAddProviders
-      />,
-    );
-    expect(html).toContain(t("settings.models_title"));
-    expect(html).toContain(t("settings.models_open"));
-    expect(html).toContain('data-testid="ai-settings-all-models"');
-    expect(html).toContain(t("settings.manage_providers"));
   });
 });

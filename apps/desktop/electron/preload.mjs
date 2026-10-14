@@ -5,6 +5,7 @@ const NATIVE_MENU_OPEN_SETTINGS_EVENT = "redrob:native-menu:open-settings";
 const NATIVE_MENU_TOGGLE_SIDEBAR_EVENT = "redrob:native-menu:toggle-sidebar";
 const NATIVE_MENU_CHECK_UPDATES_EVENT = "redrob:native-menu:check-updates";
 const NATIVE_MENU_ZOOM_EVENT = "redrob:native-menu:zoom";
+const WINDOW_STATE_EVENT = "redrob:window:state";
 const AUTOMATION_RUNNER_CREDENTIAL_REJECTED_EVENT = "redrob:automation-runner:credential-rejected";
 
 function normalizePlatform(value) {
@@ -256,6 +257,13 @@ ipcRenderer.on(NATIVE_MENU_CHECK_UPDATES_EVENT, () => {
 ipcRenderer.on(NATIVE_MENU_ZOOM_EVENT, (_event, action) => {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(NATIVE_MENU_ZOOM_EVENT, { detail: action }));
+});
+
+// The main process pushes { maximized, fullScreen } when the OS changes the window; the
+// renderer-drawn title bar listens for this to switch its Maximise / Restore button.
+ipcRenderer.on(WINDOW_STATE_EVENT, (_event, state) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(WINDOW_STATE_EVENT, { detail: state }));
 });
 
 if (!applyShellDocumentMarkers() && typeof document !== "undefined") {

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "bun:test";
 
 import type { ModelOption } from "../src/app/types";
 import { mergeModelOptions } from "../src/react-app/domains/connections/provider-auth/assigned-model-options";
@@ -13,7 +13,7 @@ function option(providerID: string, modelID: string, title: string): ModelOption
     behaviorDescription: "",
     behaviorValue: null,
     isFree: false,
-    source: "local",
+    source: "cloud",
   };
 }
 

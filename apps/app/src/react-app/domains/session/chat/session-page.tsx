@@ -883,6 +883,16 @@ export function SessionPage(props: SessionPageProps) {
       props.surface,
   );
   const canRenderSplitSurface = Boolean(!isMobile && canRenderReactSurface && splitSessionId && splitSessionId !== props.selectedSessionId);
+  // The empty new-chat home inside the Cowork frame: no session open, nothing taking over the main
+  // area, and no workspace-setup prompt. There the hero (greeting + composer) owns the screen, so the
+  // header's "New session" title and its hints are dropped to give the hero the full height (Q5:
+  // home-screen only). The header bar itself stays for the window-drag region and its controls.
+  const isEmptyHome =
+    inDeskFrame &&
+    !props.selectedSessionId &&
+    !props.primarySlot &&
+    !hasMainContentTakeover &&
+    !showWorkspaceSetupEmptyState;
   // Route-level refreshes must only gate the very first paint of a session.
   // Once the surface can mount it owns its own data stream, so replacing a
   // rendered chat with a loading pane (and leaving it there when a refresh
@@ -899,6 +909,27 @@ export function SessionPage(props: SessionPageProps) {
     (workspace) => workspace.id === props.selectedWorkspaceId && workspace.workspaceType === "remote",
   );
   const findButtonSessionId = props.selectedSessionId;
+  // Item 6 (round 7): in the Desk frame the chat header is rendered ONCE, by the Desk shell's top
+  // bar, so the title sits on the same row as Invite + the side panel. Publish the title + find
+  // target to the frame store for the shell to read; the local <header> below is suppressed in the
+  // frame. Clear it when this chat screen is not the one owning the frame header.
+  const setChatHeader = useFrameStore((state) => state.setChatHeader);
+  const deskHeaderTitle = props.primaryTitle
+    ? props.primaryTitle
+    : props.mainContentTitle
+    ? props.mainContentTitle
+    : showWorkspaceSetupEmptyState
+    ? t("session.create_or_connect_workspace")
+    : selectedSessionTitle || t("session.default_title");
+  const deskHeaderFindId = !props.primarySlot && findButtonSessionId && !hasMainContentTakeover ? findButtonSessionId : null;
+  useEffect(() => {
+    if (!inDeskFrame || isEmptyHome) {
+      setChatHeader(null);
+      return;
+    }
+    setChatHeader({ title: deskHeaderTitle, findSessionId: deskHeaderFindId });
+    return () => setChatHeader(null);
+  }, [inDeskFrame, isEmptyHome, deskHeaderTitle, deskHeaderFindId, setChatHeader]);
   const canGoBackInConversationHistory = !pendingConversationHistoryNavigation && canNavigateSelectedConversationHistory(
     conversationHistory,
     props.selectedWorkspaceId,
@@ -1116,14 +1147,25 @@ export function SessionPage(props: SessionPageProps) {
           }}
         />
         <SidebarInset className="min-h-0 overflow-hidden bg-sidebar mac:bg-transparent mac:[&_header]:transition-[padding-left] mac:[&_header]:duration-200 mac:[&_header]:ease-linear mac:peer-data-[state=collapsed]:[&_header]:pl-34 mac:max-md:[&_header]:pl-34">
-          <div className="flex min-h-0 flex-1 max-lg:p-0 lg:py-2 lg:pl-2">
+          <div className={`flex min-h-0 flex-1 max-lg:p-0 ${isEmptyHome ? "" : "lg:py-2 lg:pl-2"}`}>
           <ResizablePanelGroup
             orientation="horizontal"
             onLayoutChanged={sidePanelOpen ? commitBrowserPanelWidth : undefined}
-            className="min-h-0 flex-1 max-lg:rounded-none lg:rounded-(--card-radius)"
+            className={`min-h-0 flex-1 max-lg:rounded-none ${isEmptyHome || inDeskFrame ? "" : "lg:rounded-(--card-radius)"}`}
           >
             <ResizablePanel minSize={isMobile ? "0px" : "360px"} className="min-w-0">
-              <main className="flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+              {/* Round 11, item 5: inside the Cowork/Desk frame the chat column sits flush in the
+                  shell content area, so drop the card's rounded border + shadow there (it read as a
+                  stray border near the top-left). The standalone web/mac layout keeps its card. */}
+              <main className={`relative flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150 ${isEmptyHome || inDeskFrame ? "" : "lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card"}`}>
+          {isEmptyHome || inDeskFrame ? (
+            // Full-screen the new-chat hero: drop the "New session" header row. On the desktop app the
+            // OS window-title-bar (window-title-bar.tsx) stays and keeps the drag region and controls;
+            // a minimal drag strip stands in only where that bar is absent (web/mac titlebar-drag).
+            // In the Desk frame the chat header is rendered once by the shell's top bar (round 7, item
+            // 6) so the title shares a row with Invite + the side panel — drop the local header too.
+            <div className="mac:titlebar-drag h-0 shrink-0" aria-hidden="true" />
+          ) : (
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
             <div className="flex min-w-0 items-center gap-3">
               {showSidebar ? <SidebarTrigger className="mac:hidden" /> : null}
@@ -1253,6 +1295,7 @@ export function SessionPage(props: SessionPageProps) {
               ) : null}
             </div>
           </header>
+          )}
 
           <ResizablePanelGroup orientation="vertical" className="min-h-0 flex-1 overflow-hidden">
             <ResizablePanel minSize="180px" className="min-h-0">
@@ -1389,7 +1432,10 @@ export function SessionPage(props: SessionPageProps) {
               ) : null}
 
               {!props.primarySlot && !hasMainContentTakeover && !showDelayedSessionLoadingState && !canRenderReactSurface && !showStartupSkeleton ? (
-                <div className={`mx-auto max-w-[800px] px-6 ${showWorkspaceSetupEmptyState ? "pt-20" : "pt-10"}`}>
+                // The content area scrolls here (the parent is overflow-hidden). It is a full-height
+                // flex column so the empty-home hero can vertically center (round 5, items 1+2); the
+                // old pt-10 top bias is dropped for that reason (workspace-setup keeps its pt-20).
+                <div className={`flex h-full flex-col overflow-y-auto mx-auto w-full max-w-[800px] px-6 ${showWorkspaceSetupEmptyState ? "pt-20" : ""}`}>
                   {props.notFoundMessage ? (
                     <div className="px-6 py-16 text-center">
                       <div className="mx-auto max-w-md rounded-2xl border border-dls-border bg-dls-card px-5 py-6 shadow-[var(--dls-card-shadow)]">
@@ -1495,7 +1541,7 @@ export function SessionPage(props: SessionPageProps) {
                       </div>
                     )
                   ) : (
-                    <div className="flex flex-1 items-center justify-center py-16">
+                    <div className="flex flex-1 flex-col">
                       <SessionEmptyHero
                         providerCount={providerCount}
                         onRunTask={(prompt, attachments) =>

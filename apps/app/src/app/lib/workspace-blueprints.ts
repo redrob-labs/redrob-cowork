@@ -33,7 +33,7 @@ export function defaultBlueprintSessionsForPreset(_preset: string): WorkspaceBlu
       openOnFirstLoad: true,
     },
     {
-      id: "csv-playbook",
+      id: "csv-workflow-ideas",
       title: t("blueprint.csv_session_title"),
       messages: [
         {

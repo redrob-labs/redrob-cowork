@@ -81,14 +81,13 @@ describe("new session and library localization", () => {
     setLocale("ko");
     try {
       const destinations = getPanelDestinations(
-        { onOpenBrowser: () => {}, onOpenExtensions: () => {}, onOpenVoice: () => {} },
+        { onOpenBrowser: () => {}, onOpenExtensions: () => {} },
         () => {},
       );
       expect(destinations.map((destination) => destination.id)).toEqual([
         "browser",
         "files",
         "extensions",
-        "voice",
       ]);
       for (const destination of destinations) {
         expect(isKorean(destination.label)).toBe(true);

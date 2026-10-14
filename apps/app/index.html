@@ -6,16 +6,11 @@
     <!-- The design system's surface-base in each theme: Redrob White and Redrob Black. -->
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0a0b0c" media="(prefers-color-scheme: dark)" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Redrob Cowork" />
     <title>Redrob Cowork</title>
 
-    <link rel="manifest" href="/manifest.webmanifest" />
     <!-- Redrob Design System 2026 product icon. favicon.svg switches to the dark tile itself. -->
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/splash/redrob-splash.css" />
     <script>
       (function () {
@@ -44,9 +39,23 @@
     <script>
       (function () {
         if (!window.showRedrobSplash) return;
-        var ready = new Promise(function (resolve) {
+        // Minimum time the splash stays up, from first paint. The app can become
+        // ready in well under a second on a warm start (and HMR reuses the session,
+        // so the once-per-session gate does not re-show it) — a floor keeps the
+        // launch moment legible instead of a sub-second flash. The reduced-motion
+        // path keeps its own still minimum inside the splash.
+        var MIN_SPLASH_MS = 1600;
+        var startedAt = Date.now();
+        var appReady = new Promise(function (resolve) {
           if (window.__redrobAppReady) return resolve();
           window.addEventListener("redrob:app-ready", resolve, { once: true });
+        });
+        // ready settles only once the app is up AND the floor has elapsed.
+        var ready = appReady.then(function () {
+          var remaining = MIN_SPLASH_MS - (Date.now() - startedAt);
+          return remaining > 0
+            ? new Promise(function (resolve) { setTimeout(resolve, remaining); })
+            : undefined;
         });
         window.showRedrobSplash({
           logoLight: "/splash/redrob-logo-primary.png",

@@ -61,6 +61,7 @@ function renderList(messages: UIMessage[]) {
       onRevertToUserMessage={() => {}}
       onForkAtMessage={() => {}}
       onEditUserMessage={() => {}}
+      onRetryMessage={() => {}}
     >
       <MessageList messages={messages} status="ready" />
     </MessageListProvider>
