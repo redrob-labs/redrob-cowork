@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { useState, useSyncExternalStore } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Badge, Button, EmptyState, Input, Select, Skeleton, Switch, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
@@ -10,9 +10,12 @@ import { PreviewPage } from "../preview/preview-note";
 import { previewKey, usePreviewServices } from "../preview/preview";
 import type { SkillFilters, SkillOrigin, SkillTaxonomy, TeamSkillsState } from "../services/types";
 import { DeskShell } from "../shell/desk-shell";
+import { useDeskConnection } from "../shell/desk-connection";
 import { useFrameStore } from "../store/frame-store";
 import { canRemoveSkill, CONSOLE_SKILLS_URL, skillRows, tagLabels, type SkillRow } from "./skills";
 import { installSkill, removeSkill } from "./use-skills";
+import { runSkill } from "./desk-skill";
+import { useDeskStartStore } from "./start-chat";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
 const ALL = "all";
@@ -138,6 +141,8 @@ export type SkillsViewProps = {
   hrefFor: (name: string) => string;
   onAdd: (name: string) => void;
   onRemove: (name: string) => void;
+  /** Round 32: "Use" an installed skill (start a Plan chat). Absent on sample data. */
+  onUse?: (name: string) => void;
 };
 
 /** The skills, each a link to its page, with what it is filed under and where it came from. */
@@ -182,17 +187,35 @@ export function SkillsView(props: SkillsViewProps) {
                 >
                   {t("desk.skill_add")}
                 </Button>
-              ) : canRemoveSkill(row.installed) ? (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  loading={props.busy === row.name}
-                  aria-label={t("desk.skill_remove_label", { name: row.name })}
-                  onClick={() => props.onRemove(row.name)}
-                >
-                  {t("desk.skill_remove")}
-                </Button>
-              ) : null}
+              ) : (
+                <>
+                  {/* Round 32: an installed skill leads with "Use" (run it now). Remove is
+                      demoted to a quieter secondary action, and only when it can be removed
+                      (team / out-of-project skills keep their guard). */}
+                  {props.onUse ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      iconLeft={icons.play(ICON)}
+                      aria-label={t("desk.skills_use_label", { name: row.name })}
+                      onClick={() => props.onUse?.(row.name)}
+                    >
+                      {t("desk.skills_use")}
+                    </Button>
+                  ) : null}
+                  {canRemoveSkill(row.installed) ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={props.busy === row.name}
+                      aria-label={t("desk.skill_remove_label", { name: row.name })}
+                      onClick={() => props.onRemove(row.name)}
+                    >
+                      {t("desk.skill_remove")}
+                    </Button>
+                  ) : null}
+                </>
+              )}
             </span>
           </li>
         );
@@ -211,6 +234,11 @@ export function SkillsScreen() {
   const [filters, setFilters] = useState<SkillFilters>({});
   const [installedOnly, setInstalledOnly] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  // Round 32: an installed skill's primary action is "Use" (start a Plan chat),
+  // wired the same way the skill detail page's Run does.
+  const navigate = useNavigate();
+  const useWorkspaceId = useDeskConnection((state) => state.workspaceId);
+  const requestChat = useDeskStartStore((state) => state.request);
   // The library is asked without the search, which is matched here as it is typed.
   const { q, ...tags } = filters;
   /*
@@ -257,7 +285,15 @@ export function SkillsScreen() {
       }
     >
       <PreviewPage note={t("desk.skills_preview_note")} preview={preview}>
-        <p className="desk-settings__lede">{t("desk.skills_lede")}</p>
+        {/*
+          Round 32: a warm "What's a skill?" explainer for non-technical users, in place
+          of the bare one-line lede. Plain language + a concrete example so the page does
+          not assume the reader already knows what a skill is.
+        */}
+        <div className="desk-skills__explainer">
+          <h2 className="desk-skills__explainer-title">{t("desk.skills_explainer_title")}</h2>
+          <p className="desk-skills__explainer-body">{t("desk.skills_explainer_body")}</p>
+        </div>
         {teamText ? (
           <p className="desk-settings__description">
             {teamText}{" "}
@@ -309,6 +345,7 @@ export function SkillsScreen() {
             hrefFor={skillPath}
             onAdd={act(installSkill)}
             onRemove={act(removeSkill)}
+            onUse={!preview && useWorkspaceId ? (name) => void runSkill({ workspaceId: useWorkspaceId, request: requestChat, navigate }, name) : undefined}
           />
         )}
       </PreviewPage>
