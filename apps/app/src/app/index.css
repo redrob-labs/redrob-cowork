@@ -371,6 +371,18 @@
   overflow-y: auto;
 }
 
+/*
+  Round 32: the main work area is painted --surface-raised, the SAME tone as the
+  floating sidebar card above. The DS leaves #rr-shell-main transparent, so it fell
+  through to the body's --surface-base (pure white): on a content-light screen like
+  Conversations that left a visible seam between the raised sidebar card (#f8f9fb)
+  and the whiter page. Content-heavy screens (Trending AI) masked it, so it only
+  read as "Conversations doesn't match". Both surfaces are now one tone.
+*/
+.desk-shell #rr-shell-main {
+  background-color: var(--surface-raised);
+}
+
 .desk-shell--fill #rr-shell-main {
   overflow: hidden;
 }
@@ -1487,6 +1499,14 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  /*
+    Round 32: center the hero (line + composer) in the available height rather
+    than pinning it to the top. The hero is content-light so it fits; justify
+    stays safe-start if it ever grows past the viewport (center + auto overflow
+    keeps a tall hero scrollable from the top instead of clipping its head).
+  */
+  justify-content: center;
+  overflow-y: auto;
   width: 100%;
   height: 100%;
   min-height: 0;
