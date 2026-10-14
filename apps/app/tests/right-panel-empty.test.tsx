@@ -24,7 +24,6 @@ describe("right panel empty state", () => {
       <PanelEmpty
         onOpenBrowser={() => undefined}
         onOpenExtensions={() => undefined}
-        onOpenVoice={() => undefined}
       />,
     );
 
@@ -32,9 +31,8 @@ describe("right panel empty state", () => {
     expect(html).toContain("Browser");
     expect(html).toContain("Files &amp; artifacts");
     expect(html).toContain("Library");
-    expect(html).toContain("Voice Mode");
     expect(html).toContain('aria-label="Panel destinations"');
-    expect(html.match(/<button/g)).toHaveLength(4);
+    expect(html.match(/<button/g)).toHaveLength(3);
     expect(html).toContain("min-h-16");
     expect(html).toContain("w-full");
     expect(html).toContain("overflow-y-auto");
@@ -46,7 +44,6 @@ describe("right panel empty state", () => {
     expect(html).toContain("Files &amp; artifacts");
     expect(html).not.toContain("Browser");
     expect(html).not.toContain("Library");
-    expect(html).not.toContain("Voice Mode");
     expect(html.match(/<button/g)).toHaveLength(1);
   });
 
@@ -56,14 +53,13 @@ describe("right panel empty state", () => {
       {
         onOpenBrowser: () => activated.push("browser"),
         onOpenExtensions: () => activated.push("extensions"),
-        onOpenVoice: () => activated.push("voice"),
       },
       () => activated.push("files"),
     );
 
     for (const destination of destinations) destination.activate();
 
-    expect(activated).toEqual(["browser", "files", "extensions", "voice"]);
+    expect(activated).toEqual(["browser", "files", "extensions"]);
   });
 
   test("closes on Escape without consuming unrelated keys", () => {

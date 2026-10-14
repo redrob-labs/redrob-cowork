@@ -229,6 +229,7 @@ describe("redrob pay sheet", () => {
         onRevertToUserMessage={() => undefined}
         onForkAtMessage={() => undefined}
         onEditUserMessage={() => undefined}
+        onRetryMessage={() => undefined}
       >
         <MessageList messages={[message]} status="ready" />
       </MessageListProvider>,
@@ -256,6 +257,7 @@ describe("redrob pay sheet", () => {
         onRevertToUserMessage={() => undefined}
         onForkAtMessage={() => undefined}
         onEditUserMessage={() => undefined}
+        onRetryMessage={() => undefined}
       >
         <MessageList messages={[message]} status="ready" />
       </MessageListProvider>,

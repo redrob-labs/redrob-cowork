@@ -97,6 +97,8 @@ const {
 } = require("electron");
 const pty = require(["node", "pty"].join("-"));
 const NATIVE_DEEP_LINK_EVENT = "redrob:deep-link-native";
+/** Window maximised / full-screen changes, pushed to the renderer-drawn title bar. */
+const WINDOW_STATE_EVENT = "redrob:window:state";
 const isDevMode = process.env.REDROB_DEV_MODE === "1";
 const DESKTOP_DISTRIBUTION = resolveDesktopDistribution();
 const TAURI_APP_IDENTIFIER = DESKTOP_DISTRIBUTION.appIdentifier;
@@ -2196,7 +2198,57 @@ const desktopCommandHandlers = {
         return { applied: false, reason: String(error) };
       }
   },
+  /*
+    The renderer-drawn title bar (Windows and Linux, where the native frame is hidden) has its own
+    minimise / maximise / close buttons. They can only act through here: a frameless BrowserWindow
+    gives the page no window controls of its own, and before this handler existed the buttons called
+    into the bridge and were answered with "not implemented", so they did nothing.
+  */
+  "__windowControl": async (event, ...args) => {
+      const win = activeWindowFromEvent(event);
+      if (!win || win.isDestroyed()) return false;
+      switch (args[0]) {
+        case "minimize":
+          win.minimize();
+          return true;
+        case "toggleMaximize":
+          if (win.isFullScreen()) win.setFullScreen(false);
+          else if (win.isMaximized()) win.unmaximize();
+          else win.maximize();
+          return true;
+        case "close":
+          win.close();
+          return true;
+        default:
+          return false;
+      }
+  },
+  "__windowState": async (event) => {
+      const win = activeWindowFromEvent(event);
+      if (!win || win.isDestroyed()) return undefined;
+      return windowStateOf(win);
+  },
 };
+
+/** The shape the title bar reads: maximised (Restore button) or full screen (no Restore at all). */
+function windowStateOf(win) {
+  return { maximized: win.isMaximized(), fullScreen: win.isFullScreen() };
+}
+
+/**
+ * Push the window state to the renderer whenever the OS changes it (double-click on the bar, a snap,
+ * F11), so the title bar's Maximise / Restore button follows without polling. The preload turns the
+ * message into a `redrob:window:state` CustomEvent on `window`.
+ */
+function forwardWindowStateChanges(win) {
+  const send = () => {
+    if (win.isDestroyed() || win.webContents.isDestroyed()) return;
+    win.webContents.send(WINDOW_STATE_EVENT, windowStateOf(win));
+  };
+  for (const name of ["maximize", "unmaximize", "enter-full-screen", "leave-full-screen"]) {
+    win.on(name, send);
+  }
+}
 
 if (isDevMode) {
   desktopCommandHandlers.__evalRelaunch = async () => {
@@ -2301,9 +2353,14 @@ function titleBarPreferencePath() {
 async function readTitleBarPreference() {
   try {
     const raw = await readFile(titleBarPreferencePath(), "utf8");
-    return JSON.parse(raw)?.hideTitleBar === true;
+    // The custom in-app title bar is the DEFAULT (round 3, item 4): it carries
+    // back / forward / search and owns the top chrome, so the OS native frame is
+    // hidden. Only an explicit `hideTitleBar: false` opts back into the native
+    // frame; a missing key defaults to hidden.
+    return JSON.parse(raw)?.hideTitleBar !== false;
   } catch {
-    return false;
+    // No preference written yet => default to the custom bar.
+    return true;
   }
 }
 
@@ -2311,6 +2368,106 @@ async function writeTitleBarPreference(hidden) {
   const file = titleBarPreferencePath();
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, `${JSON.stringify({ hideTitleBar: hidden === true }, null, 2)}\n`, "utf8");
+}
+
+/*
+  Round 14, item E: a short, tasteful launch splash. A separate frameless, transparent window with an
+  inline data: document (the pattern showShutdownScreen already uses), shown before the renderer index
+  loads and closed when the main window is ready. The sequence: the Redrob GROUP mark fades/scales in,
+  then the Redrob COWORK mark, then the "Redrob Cowork" wordmark — ~1.6s total, reduced-motion safe.
+  The two marks are read from resources/brand and inlined as data URIs so this needs no renderer.
+*/
+let splashWindow = null;
+let splashShownAt = 0;
+let splashCloseTimer = null;
+const SPLASH_MIN_VISIBLE_MS = 1600;
+function readSplashMarkDataUri(name) {
+  try {
+    const svg = readFileSync(path.resolve(__dirname, "../resources/brand", name), "utf8");
+    return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
+  } catch {
+    return "";
+  }
+}
+function splashHtml() {
+  const group = readSplashMarkDataUri("redrob-group.svg");
+  const cowork = readSplashMarkDataUri("redrob-cowork.svg");
+  const dark = nativeTheme.shouldUseDarkColors;
+  const bg = dark ? "#0a0b0c" : "#f8f9fb";
+  const ink = dark ? "#f8f9fb" : "#14161a";
+  return `data:text/html;charset=utf-8,${encodeURIComponent(`<!doctype html>
+<html><head><meta charset="utf-8" /><style>
+  html,body{height:100%;margin:0;background:transparent;overflow:hidden;}
+  body{display:grid;place-items:center;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${ink};-webkit-user-select:none;user-select:none;}
+  .card{display:grid;place-items:center;gap:18px;padding:40px 56px;border-radius:28px;background:${bg};box-shadow:0 24px 70px -28px rgba(0,0,0,.5);}
+  .marks{position:relative;width:96px;height:96px;}
+  .mark{position:absolute;inset:0;width:96px;height:96px;border-radius:22px;opacity:0;transform:scale(.82);}
+  .group{animation:pop .5s cubic-bezier(.2,.8,.25,1) .1s forwards, fade .35s ease .95s forwards;}
+  .cowork{animation:pop .55s cubic-bezier(.2,.8,.25,1) .95s forwards;}
+  .word{font-size:20px;font-weight:650;letter-spacing:-.01em;opacity:0;transform:translateY(6px);animation:rise .5s ease 1.25s forwards;}
+  @keyframes pop{to{opacity:1;transform:scale(1);}}
+  @keyframes fade{to{opacity:0;transform:scale(1.06);}}
+  @keyframes rise{to{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){
+    .group{display:none;}
+    .cowork{opacity:1;transform:none;animation:none;}
+    .word{opacity:1;transform:none;animation:none;}
+  }
+</style></head><body>
+  <div class="card">
+    <div class="marks" aria-hidden="true">
+      <img class="mark group" src="${group}" alt="" />
+      <img class="mark cowork" src="${cowork}" alt="" />
+    </div>
+    <div class="word">Redrob Cowork</div>
+  </div>
+</body></html>`)}`;
+}
+function showSplashWindow(iconImage) {
+  if (splashWindow) return;
+  try {
+    splashWindow = new BrowserWindow({
+      width: 320,
+      height: 300,
+      frame: false,
+      transparent: true,
+      resizable: false,
+      movable: false,
+      // Show on the splash's OWN ready-to-show, not immediately: a transparent frameless
+      // window shown before its first paint flashes an empty rectangle.
+      show: false,
+      skipTaskbar: true,
+      alwaysOnTop: true,
+      center: true,
+      backgroundColor: "#00000000",
+      ...(iconImage && !iconImage.isEmpty() ? { icon: iconImage } : {}),
+      webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
+    });
+    splashWindow.once("ready-to-show", () => {
+      if (!splashWindow || splashWindow.isDestroyed()) return;
+      splashWindow.show();
+      splashShownAt = Date.now();
+    });
+    void splashWindow.loadURL(splashHtml());
+    splashWindow.on("closed", () => { splashWindow = null; });
+  } catch {
+    splashWindow = null;
+  }
+}
+function closeSplashWindow() {
+  if (!splashWindow) return;
+  if (splashCloseTimer) return;
+  // Keep the splash up for its full animation even when the renderer paints
+  // almost instantly (the dev server does): close only once the minimum
+  // visible time has elapsed since it was actually shown.
+  const shownFor = splashShownAt ? Date.now() - splashShownAt : 0;
+  const remaining = Math.max(0, SPLASH_MIN_VISIBLE_MS - shownFor);
+  splashCloseTimer = setTimeout(() => {
+    splashCloseTimer = null;
+    if (!splashWindow) return;
+    try { splashWindow.close(); } catch { /* already gone */ }
+    splashWindow = null;
+  }, remaining);
 }
 
 async function createMainWindow() {
@@ -2347,7 +2504,7 @@ async function createMainWindow() {
             titleBarStyle: "hidden",
             // Gray 5, the design system's neutral for icons on either ground; the
             // overlay cannot read the renderer's tokens, so the value is written out.
-            titleBarOverlay: { color: "#00000000", symbolColor: "#aab0bb", height: 40 },
+            titleBarOverlay: { color: "#00000000", symbolColor: "#aab0bb", height: 48 },
           }
         : { frame: false },
     );
@@ -2370,6 +2527,9 @@ async function createMainWindow() {
   if (process.platform === "darwin" && windowIconImage && !windowIconImage.isEmpty() && app.dock) {
     app.dock.setIcon(windowIconImage);
   }
+
+  // Round 14, item E: show the launch splash before the (hidden) main window loads its renderer.
+  showSplashWindow(windowIconImage);
 
   mainWindow = new BrowserWindow({
     width: 1180,
@@ -2396,6 +2556,7 @@ async function createMainWindow() {
     await applyCachedBrandIcon(cachedBrandImage, bootSourceUrl);
   }
   applicationMenu.applyVisibility(mainWindow);
+  forwardWindowStateChanges(mainWindow);
 
   mainWindow.on("page-title-updated", (event) => {
     event.preventDefault();
@@ -2407,6 +2568,8 @@ async function createMainWindow() {
     mainWindow?.setTitle(currentDisplayAppName);
     if (process.platform === "win32") mainWindow?.setSkipTaskbar(false);
     mainWindow?.show();
+    // Round 14, item E: the launch splash hands off to the real window once it is painted.
+    closeSplashWindow();
     flushPendingDeepLinks();
   });
 

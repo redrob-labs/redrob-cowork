@@ -29,7 +29,7 @@ describe("localized module constants are lazy", () => {
     },
     {
       name: "first extension manifest setup instructions",
-      read: () => BUILT_IN_REDROB_EXTENSION_MANIFESTS[0]!.setup.instructions,
+      read: () => BUILT_IN_REDROB_EXTENSION_MANIFESTS[0]!.setup?.instructions ?? "",
     },
   ];
 

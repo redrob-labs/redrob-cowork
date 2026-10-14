@@ -3,6 +3,7 @@ import type { UIMessage } from "ai";
 import type { PermissionRequest, PermissionV2Request, QuestionRequest } from "@redrob-labs/sdk/v2/client";
 
 import type { RedrobSessionSnapshot } from "../src/app/lib/redrob-server";
+import type { PendingPermission, PendingQuestion } from "../src/app/types";
 import { getReactQueryClient } from "../src/react-app/infra/query-client";
 import {
   __applySessionSyncEventForTest,
@@ -154,7 +155,7 @@ describe("session permission sync", () => {
 
     seedPermissionState("workspace-a", "session-a", [], { snapshotStartedAt: 200 });
 
-    expect(getReactQueryClient().getQueryData(permissionKey("workspace-a", "session-a"))).toEqual([]);
+    expect(getReactQueryClient().getQueryData<PendingPermission[]>(permissionKey("workspace-a", "session-a"))).toEqual([]);
   });
 
   test("seeds v2 permissions for the selected session", () => {
@@ -194,7 +195,7 @@ describe("session permission sync", () => {
         properties: { sessionID: "session-a", requestID: "perm-v2-live", reply: "once" },
       });
 
-      expect(getReactQueryClient().getQueryData(permissionKey("workspace-a", "session-a"))).toEqual([]);
+      expect(getReactQueryClient().getQueryData<PendingPermission[]>(permissionKey("workspace-a", "session-a"))).toEqual([]);
     } finally {
       releaseSession();
       cleanup();
@@ -223,7 +224,7 @@ describe("session question sync", () => {
       __applySessionSyncEventForTest(syncInput, {
         type: "question.asked",
         properties: question("question-live", "session-a"),
-      } as any);
+      });
 
       expect(getReactQueryClient().getQueryData(questionKey("workspace-a", "session-a"))).toMatchObject([
         { id: "question-live", sessionID: "session-a" },
@@ -232,9 +233,9 @@ describe("session question sync", () => {
       __applySessionSyncEventForTest(syncInput, {
         type: "question.replied",
         properties: { sessionID: "session-a", requestID: "question-live", answers: [["Yes"]] },
-      } as any);
+      });
 
-      expect(getReactQueryClient().getQueryData(questionKey("workspace-a", "session-a"))).toEqual([]);
+      expect(getReactQueryClient().getQueryData<PendingQuestion[]>(questionKey("workspace-a", "session-a"))).toEqual([]);
     } finally {
       releaseSession();
       cleanup();
@@ -299,7 +300,7 @@ describe("session transcript sync", () => {
       __applySessionSyncEventForTest(syncInput, {
         type: "message.updated",
         properties: { info: { id: "msg-assistant", role: "assistant", sessionID: "session-a" } },
-      } as any);
+      });
       __applySessionSyncEventForTest(syncInput, {
         type: "message.part.updated",
         properties: {
@@ -311,7 +312,7 @@ describe("session transcript sync", () => {
             messageID: "msg-assistant",
           },
         },
-      } as any);
+      });
       __applySessionSyncEventForTest(syncInput, {
         type: "message.part.delta",
         properties: {
@@ -320,7 +321,7 @@ describe("session transcript sync", () => {
           partID: "part-assistant",
           delta: "still streaming after switch",
         },
-      } as any);
+      });
 
       await Promise.resolve();
 
@@ -347,7 +348,7 @@ describe("session transcript sync", () => {
       __applySessionSyncEventForTest(syncInput, {
         type: "message.updated",
         properties: { info: { id: "msg-route-leave", role: "assistant", sessionID: "session-a" } },
-      } as any);
+      });
       __applySessionSyncEventForTest(syncInput, {
         type: "message.part.updated",
         properties: {
@@ -359,7 +360,7 @@ describe("session transcript sync", () => {
             messageID: "msg-route-leave",
           },
         },
-      } as any);
+      });
       __applySessionSyncEventForTest(syncInput, {
         type: "message.part.delta",
         properties: {
@@ -368,7 +369,7 @@ describe("session transcript sync", () => {
           partID: "part-route-leave",
           delta: "stream survived settings route",
         },
-      } as any);
+      });
 
       await Promise.resolve();
 

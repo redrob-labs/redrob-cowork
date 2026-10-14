@@ -1,46 +1,85 @@
+/**
+ * Desk frame store (Zustand).
+ *
+ * Holds the UI state that wraps every Desk screen but belongs to none of them: the right-hand side
+ * panel, the in-app browser tab state, the active modal, the transient toast, the dictation flag, the
+ * published chat header, and the developer-mode flag. Screens read and drive this store; the shell
+ * chrome (top bar, panel, overlay) renders from it. Only developer mode is persisted — everything
+ * else is session-lived by design.
+ *
+ * The store is created by {@link createFrameStore} so tests can inject fake timers and storage; the
+ * app uses the shared {@link useFrameStore} singleton.
+ */
 import { create } from "zustand";
 
 import { systemTimers, type DeskTimers, type TimerHandle } from "../timers";
 
+/** Which tab the side panel shows: the in-app browser, or the workspace file list. */
 export type PanelTab = "browser" | "files";
+/** The in-app browser's hand-off state: Desk is reading, the person has taken over, or finished. */
 export type BrowserDesk = "reading" | "you" | "done";
 export type FrameModal =
   | null
   | { kind: "project"; chatId: string | null }
   | { kind: "feedback" }
   | { kind: "keys" }
-  /** A playbook to write: a new one, maybe from a prompt, or one to change. */
-  | { kind: "playbook"; playbookId?: string; prompt?: string };
+  /** A skill to write: a new one, maybe from a message, or one of the person's own to change. */
+  | { kind: "skill"; name?: string; instructions?: string }
+  /** Search places and chats (title bar search box, Ctrl+K on Desk screens). */
+  | { kind: "search" };
 export type ToastTone = "success" | "danger";
 /** The one thing a toast offers, usually Undo. */
 export type ToastAction = { label: string; run: () => void };
 export type FrameToast = { id: number; title: string; text?: string; tone?: ToastTone; action?: ToastAction } | null;
 
+/**
+ * The open chat's header content, published by the session page so the Desk shell's top bar can
+ * render it on ONE row with the chat actions (Invite, side panel). Null while no chat is open or
+ * the session page is not inside the Desk frame — then the shell top bar shows nothing for it.
+ */
+export type ChatHeader = { title: string; findSessionId: string | null } | null;
+
 export type FrameState = {
+  /** The side panel: whether it is open, which tab, the file it shows (Files tab), and the tab to reopen on. */
   panel: { open: boolean; tab: PanelTab; file: string | null; lastTab: PanelTab };
+  /** The in-app browser: the active provider tab id and the Desk/you hand-off state. */
   browser: { tab: string | null; desk: BrowserDesk };
+  /** The modal currently open over the frame, or null. */
   modal: FrameModal;
+  /** The transient toast currently shown, or null. Auto-hides after {@link TOAST_MS}. */
   toast: FrameToast;
   voice: boolean;
+  /** Developer mode: reveals the full model list, debug panels and advanced settings. Persisted. */
   developerMode: boolean;
+  /** The open chat's header, published by the session page; see {@link ChatHeader}. */
+  chatHeader: ChatHeader;
 
   /** Opens on `tab`; without one, on whatever was last there (Files the first time). */
   openPanel(tab?: PanelTab): void;
+  /** Closes the side panel, remembering its tab so {@link openPanel} can reopen there. */
   closePanel(): void;
+  /** Toggles the side panel open/closed, reopening on its last tab. */
   togglePanel(): void;
   /** Ctrl+Shift+B: closes the panel when it shows the browser, otherwise opens it there. */
   toggleBrowser(): void;
   /** Opens a file in the panel; null goes back to the list. */
   openFile(id: string | null): void;
+  /** Selects the active in-app browser tab (null = none). */
   setBrowserTab(tab: string | null): void;
+  /** Sets the in-app browser hand-off state (Desk reading / person / done). */
   setDesk(desk: BrowserDesk): void;
+  /** Opens a modal over the frame, replacing any current one. */
   openModal(modal: Exclude<FrameModal, null>): void;
+  /** Closes the active modal. */
   closeModal(): void;
   /** Replaces any toast and hides it after TOAST_MS. A confirmation unless `tone` says otherwise. */
   showToast(title: string, text?: string, tone?: ToastTone, action?: ToastAction): void;
+  /** Hides the current toast immediately and cancels its auto-hide timer. */
   hideToast(): void;
   setVoice(voice: boolean): void;
   setDeveloperMode(on: boolean): void;
+  /** Publish (or clear with null) the open chat's header for the Desk top bar to render. */
+  setChatHeader(header: ChatHeader): void;
 };
 
 export const TOAST_MS = 3600;
@@ -87,6 +126,7 @@ export function createFrameStore(options: { timers?: DeskTimers; storage?: Stora
       toast: null,
       voice: false,
       developerMode: readDeveloperMode(storage),
+      chatHeader: null,
 
       openPanel: (tab) => openOn(tab ?? get().panel.lastTab),
       closePanel: () => set((state) => ({ panel: { ...state.panel, open: false } })),
@@ -127,6 +167,7 @@ export function createFrameStore(options: { timers?: DeskTimers; storage?: Stora
         writeDeveloperMode(storage, on);
         set({ developerMode: on });
       },
+      setChatHeader: (header) => set({ chatHeader: header }),
     };
   });
 }

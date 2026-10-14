@@ -93,21 +93,18 @@ describe("compaction threshold", () => {
 });
 
 describe("manual compaction", () => {
-  test("there is a button, not only a command name to memorize", () => {
+  test("the summarise button was removed from the meter (round 11, item 8)", () => {
+    // Round 11, item 8: the "Summarize now" button under the prompt was removed at the user's request.
+    // The /compact command and the onCompact plumbing stay, but the meter no longer renders a button.
     const meter = read("src/components/chat/context-meter.tsx");
-    expect(meter).toContain("usage.compact_now");
-    expect(meter).toContain("props.onCompact");
+    expect(meter).not.toContain("usage.compact_now");
+    expect(meter).not.toContain("{props.onCompact ? (");
   });
 
-  test("it is offered at any fullness, since a gate is what hid the feature", () => {
-    /*
-      This asserted `props.usedPercent >= 50`, and that gate is why "add manual compaction" came back as
-      a request for something already built: at 19% full the button is absent, so the feature does not
-      exist as far as a reader is concerned. The only condition now is having something to call.
-    */
+  test("the context-fullness reading still renders", () => {
     const meter = read("src/components/chat/context-meter.tsx");
+    expect(meter).toContain("usage.context_used");
     expect(meter).not.toContain("props.usedPercent >= 50");
-    expect(meter).toContain("{props.onCompact ? (");
   });
 });
 

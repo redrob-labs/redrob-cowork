@@ -41,13 +41,6 @@ const DESIGN_SYSTEM_RESOLVED = new Map(
   ).tokens.map((token) => [`--${token.name}`, token]),
 );
 const INDEX_HTML = readText(join(APP_ROOT, "index.html"));
-const MANIFEST = JSON.parse(readText(join(APP_ROOT, "public/manifest.webmanifest"))) as {
-  name: string;
-  short_name: string;
-  background_color: string;
-  theme_color: string;
-  icons: Array<{ src: string }>;
-};
 
 /** The brand's confirmed values, as the design system declares them. */
 const BRAND_PRIMITIVES: Record<string, string> = {
@@ -602,14 +595,12 @@ describe("Redrob branding surfaces", () => {
     expect(INDEX_HTML).toContain('<body class="bg-background text-foreground mac:bg-transparent">');
   });
 
-  test("the installable app is Redrob Cowork, on the brand page colour", () => {
-    expect(MANIFEST.name).toBe("Redrob Cowork");
-    expect(MANIFEST.short_name).toBe("Redrob Cowork");
-    expect(MANIFEST.theme_color).toBe(DESIGN_SYSTEM_RESOLVED.get("--surface-base")!.light);
-    expect(MANIFEST.background_color).toBe(DESIGN_SYSTEM_RESOLVED.get("--surface-base")!.light);
-    for (const icon of MANIFEST.icons) {
-      expect(existsSync(join(APP_ROOT, "public", icon.src.replace(/^\//, "")))).toBe(true);
-    }
+  test("the app is not offered as an installable web app", () => {
+    // Cowork ships as a desktop app; the phone-browser PWA scenario is not one we ship.
+    expect(existsSync(join(APP_ROOT, "public/manifest.webmanifest"))).toBe(false);
+    expect(existsSync(join(APP_ROOT, "public/apple-touch-icon.png"))).toBe(false);
+    expect(INDEX_HTML).not.toContain('rel="manifest"');
+    expect(INDEX_HTML).not.toContain("apple-mobile-web-app");
   });
 
   test("MCP App cards read the host's semantic roles", () => {
@@ -664,23 +655,11 @@ describe("Redrob branding surfaces", () => {
 const VENDOR_STYLESHEETS = ["katex", "shadcn", "tw-animate-css"];
 
 async function compileAppStylesheet(): Promise<string> {
-  const { compile } = (await import("tailwindcss")) as {
-    compile: (
-      css: string,
-      options: {
-        base: string;
-        loadStylesheet: (
-          id: string,
-          base: string,
-        ) => { path: string; base: string; content: string };
-        loadModule: () => Promise<{ module: unknown; base: string }>;
-      },
-    ) => Promise<{ build: (candidates: string[]) => string }>;
-  };
+  const { compile } = await import("tailwindcss");
   const tailwindRoot = join(APP_ROOT, "node_modules/tailwindcss");
   const appBase = join(APP_ROOT, "src/app");
 
-  const loadStylesheet = (id: string, base: string) => {
+  const loadStylesheet = async (id: string, base: string) => {
     if (id === "tailwindcss" || id.startsWith("tailwindcss/")) {
       const path =
         id === "tailwindcss"
@@ -710,7 +689,7 @@ async function compileAppStylesheet(): Promise<string> {
   const compiler = await compile(readText(join(appBase, "index.css")), {
     base: appBase,
     loadStylesheet,
-    loadModule: async () => ({ module: {}, base: appBase }),
+    loadModule: async () => ({ path: appBase, module: {}, base: appBase }),
   });
 
   const candidates = new Set<string>();

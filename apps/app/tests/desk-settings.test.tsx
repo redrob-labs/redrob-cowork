@@ -254,7 +254,7 @@ describe("General", () => {
 
   test("renders the three groups with their controls", () => {
     const html = render(<GeneralView values={{ ...VALUES, notify: true }} actions={generalActions(fakeGeneral().deps)} />);
-    for (const text of ["Starting", "Looks", "While Desk works", "New chats start in", "Language", "Theme", "Text size"]) {
+    for (const text of ["Starting", "Looks", "While Cowork works", "New chats start in", "Language", "Theme", "Text size"]) {
       expect(html).toContain(text);
     }
     expect(html).toContain('role="radiogroup"');
@@ -292,7 +292,7 @@ describe("Folders", () => {
     expect(text).toContain("in Documents");
     expect(text).toContain("on drive D");
     expect(text).toContain("Remove Seorin MSA");
-    expect(text).toContain("Desk always asks before it deletes a file, or sends, posts, signs or pays for anything.");
+    expect(text).toContain("Cowork always asks before it deletes a file, or sends, posts, signs or pays for anything.");
   });
 
   test("Remove keeps the rest and says Desk will ask again", async () => {
@@ -314,7 +314,7 @@ describe("Folders", () => {
     );
     expect(rest).toEqual(["/a/Keep", "/c/Also"]);
     expect(calls).toEqual(["w1:/a/Keep|/c/Also"]);
-    expect(toasts).toEqual(["Access removed / Desk will ask again if it needs Seorin MSA."]);
+    expect(toasts).toEqual(["Access removed / Cowork will ask again if it needs Seorin MSA."]);
   });
 
   test("a failed save says nothing was removed", async () => {
@@ -335,7 +335,7 @@ describe("Folders", () => {
   test("no folders: the empty state", () => {
     const html = render(<FoldersView rows={[]} removing={null} onRemove={() => {}} />);
     expect(html).toContain("No folders yet");
-    expect(html).toContain("Desk asks the first time a chat or a project needs one.");
+    expect(html).toContain("Cowork asks the first time a chat or a project needs one.");
   });
 });
 

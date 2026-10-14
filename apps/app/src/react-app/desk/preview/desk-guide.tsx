@@ -1,14 +1,17 @@
 /** @jsxImportSource react */
 import { useQuery } from "@tanstack/react-query";
-import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, Tabs, icons, type TableColumn } from "@redrob-labs/ui";
-import { useState, useSyncExternalStore } from "react";
-import { useSearchParams } from "react-router";
+import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, icons, type TableColumn } from "@redrob-labs/ui";
+import { useSyncExternalStore, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
+import type { ModelRef } from "../../../app/types";
 import { currentLocale, subscribeToLocale, t, type Language } from "../../../i18n";
+import { useLocalOptional } from "../../kernel/local-provider";
+import { markNewChatUsesDefault } from "../../kernel/model-config";
 import { desktopFetchViaMain } from "../../../app/lib/desktop";
 import {
   estimatedCostFor,
-  fetchRedrobPricing,
   formatModelPriceRange,
   formatTokenCount,
   formatUsdAmount,
@@ -16,88 +19,76 @@ import {
   type RedrobPricing,
 } from "../../../app/lib/redrob-pricing";
 import { isDesktopRuntime } from "../../../app/lib/runtime-env";
-import { autoModel, guideGroups, guideModelCount, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
-import { guideLanguages, guideOutputs, guideProfessions, loadGuideResearch, type GuideResearch } from "../guide/model-guide";
+import { autoModel, guideGroups, guideProfile, modelLabel, type GuideGroup } from "../guide/guide";
+import {
+  guideLanguages,
+  guideOutputs,
+  guideProfessions,
+  guideUse,
+  loadGuideResearch,
+  type GuideResearch,
+  type GuideUse,
+} from "../guide/model-guide";
 import { DeskShell } from "../shell/desk-shell";
+import { ModelChartHome, type ChartPick } from "./model-chart-home";
+import { ChartDetail } from "./chart-detail";
+import { CHART_MODELS } from "./chart-models";
 
-/** "Use this" in the guide: Auto picks, so it explains that instead of switching anything. */
-function AutoPicksNote() {
-  return (
-    <ProtectionStatus
-      tone="safe"
-      icon={icons.sparkle({ width: 20, height: 20, "aria-hidden": true })}
-      title={t("desk.preview_guide_use_title")}
-    >
-      {t("desk.preview_guide_use_text")}
-    </ProtectionStatus>
-  );
+/**
+ * Says what "Use this" did, as a toast beside where the person is looking rather than a note at the foot of a
+ * long page: new chats start on the pick (with a way to start one), or why this pick cannot be used here.
+ */
+export function announceUse(use: GuideUse, startChat?: () => void): void {
+  if (!use.ok) {
+    toast.warning(t("desk.guide_use_unavailable_title", { model: use.name }), {
+      description: use.reason === "elsewhere" ? t("desk.guide_use_elsewhere", { harness: use.harness }) : t("desk.guide_use_not_on_redrob"),
+    });
+    return;
+  }
+  toast.success(t("desk.guide_use_done_title", { model: use.name }), {
+    description: [use.effort ? t("desk.guide_use_done_effort", { effort: use.effort }) : null, t("desk.guide_use_done_text")]
+      .filter(Boolean)
+      .join(" "),
+    ...(startChat ? { action: { label: t("desk.guide_use_new_chat"), onClick: startChat } } : {}),
+  });
 }
 
 /**
- * "By profession": the researched top five for each task, in the language the work is done in. In Redrob Cowork
- * every message goes to Redrob Auto, so the guide shows what Auto chooses from; there is no model to pick here.
+ * "By profession": the researched top five for each task, in the language the work is done in. "Use this"
+ * starts new chats on the pick (`onChoose`); chats that exist keep their model. Without `onChoose` (a screen
+ * rendered on its own) it only says what it would do.
  */
-export function ProfessionGuideView(props: { research: GuideResearch; locale: Language }) {
-  const [explained, setExplained] = useState(false);
+export function ProfessionGuideView(props: {
+  research: GuideResearch;
+  locale: Language;
+  onChoose?: (model: ModelRef, variant: string | null) => void;
+  onStartChat?: () => void;
+}) {
+  // Round 8, item 10: the chart-style browse layer. Null = the Spotify/Apple-Music home (banners +
+  // tiles); a pick drills into the existing ModelGuide ranking for that profession or output.
+  const [pick, setPick] = useState<ChartPick | null>(null);
+  if (!pick) {
+    return <ModelChartHome research={props.research} locale={props.locale} onOpen={setPick} />;
+  }
   return (
-    <>
-      <p className="desk-settings__note">
-        {icons.sparkle({ width: 14, height: 14, "aria-hidden": true })}
-        {t("desk.preview_guide_auto")}
-      </p>
-      <ModelGuide
-        professions={guideProfessions(props.research, props.locale)}
-        weights={props.research.weights}
-        locale={props.locale}
-        defaultProfession="lawyer"
-        languages={guideLanguages()}
-        defaultLanguage={props.locale}
-        title={t("desk.nav_guide")}
-        lede={t("desk.guide_profession_lede")}
-        method={t("desk.guide_method")}
-        methodLabel={t("desk.guide_method_label")}
-        simpleLabel={t("desk.preview_guide_simple")}
-        advancedLabel={t("desk.preview_guide_advanced")}
-        professionLabel={t("desk.preview_guide_profession")}
-        taskLabel={t("desk.preview_guide_task")}
-        languageLabel={t("desk.guide_language_label")}
-        outputs={guideOutputs()}
-        deliverableLabel={t("desk.guide_output_label")}
-        anyOutputLabel={t("desk.guide_output_any")}
-        benchmarkLabel={t("desk.guide_benchmark")}
-        benchmarkNote={t("desk.guide_benchmark_note")}
-        harnessLabel={(harness) => t("desk.guide_on_harness", { harness })}
-        rankLabel={(place, task) => t("desk.guide_rank", { place, task })}
-        effortUnit=""
-        topLabel={t("desk.guide_top")}
-        rangeLabel={t("desk.guide_range")}
-        effortLabel={t("desk.preview_guide_effort")}
-        effortHint={t("desk.guide_effort_hint")}
-        perLabel={t("desk.guide_per_month")}
-        effortNote={(note) => [
-          t(note.custom ? "desk.guide_effort_note_custom" : "desk.guide_effort_note_ranked", { effort: note.level.label ?? "" }),
-          " ",
-          note.price,
-          note.price ? note.per : null,
-        ]}
-        rankedLabel={t("desk.preview_guide_ranked")}
-        kindLabels={{
-          measured: t("desk.guide_kind_measured"),
-          published: t("desk.guide_kind_published"),
-          derived: t("desk.guide_kind_derived"),
-          estimate: t("desk.guide_kind_estimate"),
-        }}
-        comingSoonLabel={t("desk.guide_coming_soon")}
-        missingLabel={t("desk.guide_missing")}
-        toolsLabel={t("desk.guide_tools")}
-        sourcesLabel={t("desk.guide_sources")}
-        emptyTitle={t("desk.preview_guide_empty_title")}
-        emptyText={t("desk.preview_guide_empty_text")}
-        useLabel={t("desk.preview_guide_use")}
-        onUse={() => setExplained(true)}
-      />
-      {explained ? <AutoPicksNote /> : null}
-    </>
+    <ChartDetail
+      section={pick.section ?? "picked-for-your-profession"}
+      tileId={pick.tileId ?? (pick.kind === "profession" ? pick.id : pick.kind === "output" ? pick.value : pick.value)}
+      title={pick.label}
+      onBack={() => setPick(null)}
+      onUse={(modelId) => {
+        // The chart ids are editorial slugs, not live model refs (model-ranking wiring is a later
+        // session), so Use starts a fresh chat and tells the user which model it picked. The special
+        // "__auto__" id is the Redrob Auto router Featured card, which picks per budget rather than
+        // naming a fixed model.
+        toast.success(
+          modelId === "__auto__"
+            ? t("desk.chart_detail_auto_done")
+            : t("desk.chart_detail_use_done", { model: CHART_MODELS[modelId]?.name ?? modelId }),
+        );
+        props.onStartChat?.();
+      }}
+    />
   );
 }
 
@@ -204,6 +195,11 @@ export const GUIDE_RESEARCH_KEY = ["desk-guide", "research"];
 
 export type GuideTab = "profession" | "price";
 
+/** "October 2026" from the research's `asOf` day: an edition is monthly, so the day says nothing to a reader. */
+export function guideEdition(asOf: string, locale: Language): string {
+  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${asOf}T00:00:00Z`));
+}
+
 /**
  * `/guide`: by profession, the researched top five per task; by price, Auto and the models it chooses from.
  *
@@ -212,58 +208,34 @@ export type GuideTab = "profession" | "price";
  * local state could not do, because the screen stays mounted.
  */
 export function GuideScreen() {
-  const [params, setParams] = useSearchParams();
-  const tab: GuideTab = params.get("tab") === "price" ? "price" : "profession";
-  const setTab = (next: GuideTab) => setParams({ tab: next }, { replace: true });
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const pricing = useQuery({
-    queryKey: GUIDE_QUERY_KEY,
-    queryFn: () => fetchRedrobPricing(guideFetch(isDesktopRuntime())),
-    staleTime: 60 * 60 * 1000,
-    retry: 1,
-    enabled: tab === "price",
-  });
+  const local = useLocalOptional();
+  const navigate = useNavigate();
+  // New chats start on the default model; chats that exist keep theirs.
+  const chooseForNewChats = local
+    ? (model: ModelRef, variant: string | null) => {
+        local.setPrefs((current) => ({ ...current, defaultModel: model, modelVariant: variant }));
+        markNewChatUsesDefault();
+      }
+    : undefined;
+  // Round 11 (Trending AI): the "By price" view was dropped and the header + tab strip removed, so
+  // the screen is the profession chart only. The pricing query and tab state are gone with them.
   const research = useQuery({
     queryKey: GUIDE_RESEARCH_KEY,
     queryFn: () => loadGuideResearch(guideFetch(isDesktopRuntime())),
     // An edition changes monthly; an hour keeps a long-open window from showing last month's.
     staleTime: 60 * 60 * 1000,
   });
-  const count = pricing.data ? guideModelCount(pricing.data) : undefined;
-  const meta =
-    tab === "profession"
-      ? research.data && t("desk.guide_profession_meta", { date: research.data.asOf })
-      : count === undefined
-        ? undefined
-        : t("desk.guide_meta", { count });
   return (
-    <DeskShell current="guide" title={t("desk.nav_guide")} meta={meta} measure={false}>
+    <DeskShell current="guide" measure={false} headless>
       <div className="desk-settings__main desk-preview--wide">
-        <Tabs
-          label={t("desk.guide_tabs")}
-          value={tab}
-          onChange={(id) => setTab(id === "price" ? "price" : "profession")}
-          items={[
-            { id: "profession", label: t("desk.guide_tab_profession") },
-            { id: "price", label: t("desk.guide_tab_price") },
-          ]}
-        >
-          {tab === "profession" ? (
-          research.isLoading ? (
-            <Skeleton variant="text" lines={6} />
-          ) : !research.data ? (
-            <EmptyState title={t("desk.guide_profession_error")} description={t("desk.settings_try_again")} />
-          ) : (
-            <ProfessionGuideView research={research.data} locale={locale} />
-          )
-        ) : pricing.isLoading ? (
+        {research.isLoading ? (
           <Skeleton variant="text" lines={6} />
-        ) : !pricing.data ? (
-          <EmptyState title={t("desk.guide_error_title")} description={t("desk.settings_try_again")} />
+        ) : !research.data ? (
+          <EmptyState title={t("desk.guide_profession_error")} description={t("desk.settings_try_again")} />
         ) : (
-          <PricingGuideView pricing={pricing.data} />
+          <ProfessionGuideView research={research.data} locale={locale} onChoose={chooseForNewChats} onStartChat={() => navigate("/chat")} />
         )}
-        </Tabs>
       </div>
     </DeskShell>
   );

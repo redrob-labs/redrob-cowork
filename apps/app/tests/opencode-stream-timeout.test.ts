@@ -77,9 +77,16 @@ function installControllableFetch() {
 function createCapturedFetch() {
   capturedFetch = null;
   createClient("https://web.example/workspace/ws_test/opencode");
-  if (!capturedFetch) {
+  // Read through a function: TS keeps `capturedFetch` narrowed to `null` from the reset above because it
+  // cannot see the mock assigning it inside createClient.
+  const fetchImpl = readCapturedFetch();
+  if (!fetchImpl) {
     throw new Error("SDK mock did not receive an OpenCode fetch implementation");
   }
+  return fetchImpl;
+}
+
+function readCapturedFetch(): typeof globalThis.fetch | null {
   return capturedFetch;
 }
 

@@ -252,6 +252,11 @@ export function LocalProvider({ children }: LocalProviderProps) {
   return <LocalContext.Provider value={value}>{children}</LocalContext.Provider>;
 }
 
+/** The local context where there is one; null in a screen rendered on its own (a test, a preview). */
+export function useLocalOptional(): LocalContextValue | null {
+  return use(LocalContext) ?? null;
+}
+
 export function useLocal(): LocalContextValue {
   const context = use(LocalContext);
   if (!context) {

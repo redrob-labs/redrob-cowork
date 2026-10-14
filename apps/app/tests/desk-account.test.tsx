@@ -161,7 +161,8 @@ describe("DeskShell", () => {
     expect(aside.indexOf('class="desk-account"')).toBeGreaterThan(aside.indexOf("Screen aside"));
     expect(aside).toContain('aria-haspopup="menu"');
     expect(aside).toContain('aria-label="Settings and help"');
-    expect(aside).toContain("<b>Redrob</b>");
+    // No key is connected in this render, so the trigger offers the way to connect one.
+    expect(aside).toContain("<b>Log in or sign up</b>");
   });
 
   test("every screen has it, without an aside of its own too", () => {
@@ -177,7 +178,7 @@ describe("keyboard shortcuts dialog", () => {
       ["Send", "Enter"],
       ["New line", "Shift Enter"],
       ["Open or close the browser", "Ctrl Shift B"],
-      ["New chat", "Ctrl N"],
+      ["Conversations", "Ctrl N"],
       ["Close a dialog", "Esc"],
     ]);
     const html = renderToStaticMarkup(<ShortcutsDialog mac={false} onClose={() => {}} />);

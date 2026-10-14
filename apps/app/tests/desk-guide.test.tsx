@@ -154,7 +154,7 @@ describe("the guide by profession", () => {
     expect(sources.filter((source) => source.label === "monthly").every((source) => source.kind === "estimate")).toBe(true);
   });
 
-  test("labels in the app's language; planned tools say soon; efforts sit on the model's own scale", async () => {
+  test("labels in the app's language; no pick or tool says coming soon; efforts sit on the model's own scale", async () => {
     const research = await loadGuideResearch();
     const ko = guideProfessions(research, "ko");
     expect(ko.find((p) => p.id === "lawyer")?.label).toBe("변호사");
@@ -162,8 +162,9 @@ describe("the guide by profession", () => {
     const task = en.find((p) => p.id === "designer")?.tasks?.find((entry) => entry.id === "design-screens");
     const first = task?.picksByLanguage?.en?.[0];
     expect(first?.harness).toBe("Redrob Cowork");
-    expect(first?.tools?.find((tool) => tool.label === "UI design")?.soon).toBe(true);
-    expect(first?.tools?.find((tool) => tool.label === "Reads files")?.soon).toBe(false);
+    const shown = en.flatMap((p) => (p.tasks ?? []).flatMap((entry) => Object.values(entry.picksByLanguage ?? {}).flat()));
+    expect(shown.filter((pick) => pick.comingSoon || pick.tools?.some((tool) => tool.soon))).toEqual([]);
+    expect(first?.tools?.map((tool) => tool.label)).toContain("UI design");
     const levels = first?.efforts ?? [];
     expect(levels.length).toBeGreaterThan(1);
     expect(levels.map((level) => level.level)).toEqual(levels.map((_, i) => i + 1));
@@ -186,30 +187,22 @@ describe("the guide by profession", () => {
     expect(ranked?.monthly).toBe(shown?.monthly);
   });
 
-  test("renders the language select, figure kinds and sources, and no model switch", async () => {
+  test("renders the Trending AI chart home: featured banners and the profession shelf, with no Auto notice", async () => {
     const research = await loadGuideResearch();
     const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="en" />);
-    expect(html).toContain("Work in");
-    expect(html).toContain("Hindi");
-    expect(html).toContain("Estimate");
-    expect(html).toContain("Sources");
-    expect(html).toContain("Redrob Cowork");
-    expect(html).toContain("every message goes to Redrob Auto");
-    expect(html).toContain("I need");
-    expect(html).toContain("Anything");
-    expect(html).toContain("Benchmark");
-    expect(html).toContain("is-benchmark");
+    expect(html).toContain("Featured");
+    expect(html).toContain("Picked for your profession");
+    expect(html).toContain("For Engineers");
+    expect(html).not.toContain("every message goes to Redrob Auto");
   });
 
-  test("in Korean, the harness, rank and effort read as Korean, not as English left in the component", async () => {
+  test("in Korean, the chart home reads as Korean, not as English left in the component", async () => {
     const research = await loadGuideResearch();
     setLocale("ko");
     const html = renderToStaticMarkup(<ProfessionGuideView research={research} locale="ko" />);
     setLocale("en");
-    expect(html).toContain("· 레드롭 코워크");
-    expect(html).toMatch(/1위/);
-    expect(html).not.toContain(" effort<");
-    expect(html).not.toContain("on 레드롭 코워크");
+    expect(html).toContain("당신의 직업을 위한 추천");
+    expect(html).not.toContain("Picked for your profession");
     expect(html).not.toMatch(/#1 for /);
   });
 });

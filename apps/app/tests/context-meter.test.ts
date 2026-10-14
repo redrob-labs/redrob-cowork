@@ -15,15 +15,16 @@ const source = readFileSync(
 );
 
 describe("context meter", () => {
-  it("hides the reading but not the summarise button when there is no reading", () => {
+  it("the summarise button was removed; the row shows only the reading (round 11, item 8)", () => {
     /*
-      A gauge with no reading is worse than no gauge, because it looks like 0%. But the row used to vanish
-      whole, taking the summarise button with it, and whether a percentage can be computed has nothing to do
-      with whether the session can be summarised. In the dev build the pricing fetch fails on CORS, the
-      percentage is unknown, and the only entry point to compaction disappeared with it.
+      Round 11, item 8: the "Summarize now" button was removed from under the prompt at the user's
+      request. The onCompact/compacting props stay in the signature (so /compact and the plumbing are
+      intact and the control can be restored), but nothing renders it, and with no button the row has
+      only the fullness reading — so it hides entirely when the percentage is unknown.
     */
-    expect(source).toContain("props.usedPercent === null && !props.onCompact");
-    expect(source).toContain("props.usedPercent === null ? null : (");
+    expect(source).not.toContain("usage.compact_now");
+    expect(source).not.toContain("props.onCompact ? (");
+    expect(source).toContain("if (props.usedPercent === null) return null;");
   });
 
   it("shows context only - cost belongs on the turn that incurred it", () => {
