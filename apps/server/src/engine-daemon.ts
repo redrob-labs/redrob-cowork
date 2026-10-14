@@ -103,6 +103,65 @@ export async function resolveSharedRedrobBin(
   return undefined;
 }
 
+/** First Redrob Code release with `redrob service start`. Older engines print help and exit 1. */
+export const MIN_SHARED_ENGINE_VERSION = "0.6.0";
+
+export function parseEngineVersion(output: string): [number, number, number] | undefined {
+  const match = output.match(/(\d+)\.(\d+)\.(\d+)/);
+  if (!match) return undefined;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function versionAtLeast(version: [number, number, number], minimum: string): boolean {
+  const min = parseEngineVersion(minimum);
+  if (!min) return false;
+  for (let i = 0; i < 3; i += 1) {
+    if (version[i] !== min[i]) return version[i] > min[i];
+  }
+  return true;
+}
+
+export type VersionProbe = (bin: string) => Promise<string | undefined>;
+
+function runVersionProbe(bin: string): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    let out = "";
+    let child: ReturnType<typeof spawn>;
+    try {
+      child = spawn(bin, ["--version"], { stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+    } catch {
+      resolve(undefined);
+      return;
+    }
+    const timer = setTimeout(() => {
+      child.kill();
+      resolve(undefined);
+    }, 5_000);
+    child.stdout?.on("data", (chunk) => (out += String(chunk)));
+    child.on("error", () => {
+      clearTimeout(timer);
+      resolve(undefined);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      resolve(code === 0 ? out : undefined);
+    });
+  });
+}
+
+/**
+ * Whether a `redrob` binary is new enough to run `service start`. A user's own install
+ * that predates the shared daemon (v0.6.0) must not be chosen over Cowork's bundled engine:
+ * on 2026-10-14 a 0.5.x `~/.redrob/bin/redrob` printed the CLI help and Cowork 0.5.0 could
+ * not start. Unknown (probe failed, no version in output) counts as too old.
+ */
+export async function engineSupportsSharedDaemon(bin: string, probe: VersionProbe = runVersionProbe): Promise<boolean> {
+  const output = await probe(bin);
+  if (!output) return false;
+  const version = parseEngineVersion(output);
+  return version !== undefined && versionAtLeast(version, MIN_SHARED_ENGINE_VERSION);
+}
+
 function isRecord(value: unknown): value is DaemonRecord {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
