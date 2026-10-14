@@ -435,7 +435,7 @@ const ko = {
   "dashboard.sandbox_checking_docker": "Docker 확인 중…",
   "dashboard.sandbox_get_ready_title": "샌드박스에는 Docker가 필요합니다",
   "dashboard.skills": "스킬",
-  "desk.account_connected": "내 Redrob 키로 연결됨",
+  "desk.account_connected": "성공적으로 연결됨",
   "desk.account_launcher": "Redrob Launcher로 로그인됨",
   "desk.account_feedback": "의견 보내기",
   "desk.account_menu_label": "설정과 도움말",
