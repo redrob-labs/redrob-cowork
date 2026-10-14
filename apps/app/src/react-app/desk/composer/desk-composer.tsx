@@ -490,6 +490,16 @@ export function DeskComposerStatus(props: { chatKey: string }) {
   const memory = useDeskComposerStore((state) => memoryFor(state.chats, props.chatKey, inProject));
   const setMemory = useDeskComposerStore((state) => state.setMemory);
 
+  // Round 33: on a real workspace, the whole status row paints its default values
+  // (Privacy Off, etc.) for one frame while the connection + privacy query resolve,
+  // then flips to the true values -- the "blink" on the Conversations home. Hold a
+  // fixed-height placeholder until the privacy answer is in, so nothing flips. Gated
+  // on a bound workspace: with no workspace (sample/static render) there is nothing
+  // to resolve, so the row renders immediately as before (keeps the SSR test green).
+  if (workspaceId && privacy.isPending) {
+    return <div className="desk-composer-status desk-composer-status--loading" aria-hidden="true" />;
+  }
+
   return (
     <DeskComposerStatusView
       desktop={isDesktopRuntime()}

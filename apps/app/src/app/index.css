@@ -1616,6 +1616,17 @@
   padding: 0 var(--space-2);
 }
 
+/*
+  Round 33: a fixed-height stand-in while the status row's data resolves on a real
+  workspace, so the hero does not shift and no default values (Privacy Off, etc.)
+  flash before the true ones. Height matches one chip line.
+*/
+.desk-composer-status--loading {
+  margin-top: var(--space-2);
+  padding: 0 var(--space-2);
+  height: 22px;
+}
+
 /**
  * Settings (`desk/settings/desk-settings.tsx`): the section list beside the section, each
  * section a run of groups, each group rows of a title, a line about it and its control on
