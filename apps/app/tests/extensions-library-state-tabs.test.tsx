@@ -31,9 +31,9 @@ describe("Library state tabs", () => {
   test("renders the Ready to use count without a connected-app chip", () => {
     const counts = countInventoryCardGroups([
       "ready",
-      "needs_signin",
+      "available",
       "ready",
-      "needs_admin_setup",
+      "disabled",
       "ready",
     ]);
     const html = renderToStaticMarkup(
@@ -49,9 +49,8 @@ describe("Library state tabs", () => {
         mcpView={() => (
           <ExtensionStateTabs
             state="all"
-            needsSigninCount={counts.needs_signin}
-            needsAdminSetupCount={counts.needs_admin_setup}
             readyCount={counts.ready}
+            availableCount={counts.available}
             onChange={() => {}}
           />
         )}
@@ -68,7 +67,7 @@ describe("Library state tabs", () => {
   test("selecting Ready filters the assembled cards to ready rows", () => {
     const cards: Array<{ name: string; group: ExtensionInventoryGroup }> = [
       { name: "Local skill", group: "ready" },
-      { name: "Calendar", group: "needs_signin" },
+      { name: "Calendar", group: "available" },
       { name: "Installed plugin", group: "ready" },
     ];
 

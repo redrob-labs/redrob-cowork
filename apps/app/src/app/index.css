@@ -353,7 +353,7 @@
   background-image: none;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, transparent);
   box-shadow:
-    0 12px 32px -16px rgba(31, 41, 63, 0.3),
+    0 12px 32px -16px color-mix(in srgb, var(--redrob-black) 30%, transparent),
     inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent);
 }
 [data-theme="dark"] .desk-shell .rr-shell__side {
@@ -489,7 +489,7 @@
 }
 .desk-shell__side-resizer:hover::before,
 .desk-shell__side-resizer[data-resizing="true"]::before {
-  background: color-mix(in srgb, var(--spectrum-sky, #3b82f6) 22%, transparent);
+  background: color-mix(in srgb, var(--spectrum-sky) 22%, transparent);
 }
 
 /*
@@ -605,13 +605,13 @@
   */
   scrollbar-gutter: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--border-strong, rgb(128 128 128 / 0.4)) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 .rr-cstatus__panel::-webkit-scrollbar {
   width: 8px;
 }
 .rr-cstatus__panel::-webkit-scrollbar-thumb {
-  background: var(--border-strong, rgb(128 128 128 / 0.4));
+  background: var(--border-strong);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -1543,7 +1543,7 @@
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: color-mix(in srgb, var(--spectrum-sky, #3b82f6) 10%, transparent);
+  background: color-mix(in srgb, var(--spectrum-sky) 10%, transparent);
   filter: blur(10px);
   transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease);
   z-index: -1;
@@ -1981,6 +1981,7 @@
   --spectrum-teal: var(--accent-teal-5);
   --spectrum-sky: var(--accent-sky-4);
   --spectrum-violet: var(--accent-violet-4);
+  --spectrum-indigo: var(--accent-violet-3);
   --spectrum-pink: var(--accent-pink-4);
   --spectrum-red: var(--accent-red-4);
   --spectrum-orange: var(--accent-orange-4);
@@ -2270,6 +2271,7 @@ select:disabled {
   --spectrum-teal: var(--accent-teal-3);
   --spectrum-sky: var(--accent-sky-3);
   --spectrum-violet: var(--accent-violet-3);
+  --spectrum-indigo: var(--accent-violet-2);
   --spectrum-pink: var(--accent-pink-3);
   --spectrum-red: var(--accent-red-3);
   --spectrum-orange: var(--accent-orange-3);
@@ -2683,22 +2685,22 @@ select:disabled {
   text-align: start;
   cursor: pointer;
   color: #fff;
-  background: linear-gradient(120deg, var(--spectrum-sky, #3b82f6), var(--spectrum-indigo, #6366f1));
-  box-shadow: 0 10px 30px -12px rgba(31, 41, 63, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: linear-gradient(120deg, var(--spectrum-sky), var(--spectrum-indigo));
+  box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--redrob-black) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 .model-chart__banner:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px -12px rgba(31, 41, 63, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 40px -12px color-mix(in srgb, var(--redrob-black) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 .model-chart__banner > * {
   position: relative;
   z-index: 1;
 }
-.model-chart__banner[data-tone="1"] { background: linear-gradient(120deg, var(--spectrum-indigo, #6366f1), var(--spectrum-violet, #8b5cf6)); }
-.model-chart__banner[data-tone="2"] { background: linear-gradient(120deg, var(--spectrum-teal, #14b8a6), var(--spectrum-sky, #3b82f6)); }
-.model-chart__banner[data-tone="3"] { background: linear-gradient(120deg, var(--spectrum-violet, #8b5cf6), var(--spectrum-sky, #3b82f6)); }
-.model-chart__banner[data-tone="4"] { background: linear-gradient(120deg, var(--spectrum-sky, #3b82f6), var(--spectrum-teal, #14b8a6)); }
+.model-chart__banner[data-tone="1"] { background: linear-gradient(120deg, var(--spectrum-indigo), var(--spectrum-violet)); }
+.model-chart__banner[data-tone="2"] { background: linear-gradient(120deg, var(--spectrum-teal), var(--spectrum-sky)); }
+.model-chart__banner[data-tone="3"] { background: linear-gradient(120deg, var(--spectrum-violet), var(--spectrum-sky)); }
+.model-chart__banner[data-tone="4"] { background: linear-gradient(120deg, var(--spectrum-sky), var(--spectrum-teal)); }
 /*
   Round 27: real banner artwork as a clean backdrop. The art is a full cover (z-index 0, behind the
   gradient fallback + glass); the eyebrow/title/sub render on top of it. A scrim gradient keeps the
@@ -2719,7 +2721,7 @@ select:disabled {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(10, 14, 25, 0) 35%, rgba(10, 14, 25, 0.55) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--redrob-black) 0%, transparent) 35%, color-mix(in srgb, var(--redrob-black) 55%, transparent) 100%);
 }
 .model-chart__banner-eyebrow {
   font: var(--text-caption, 12px/1.4 sans-serif);
@@ -2750,13 +2752,13 @@ select:disabled {
   padding: 0;
   border: none;
   border-radius: 999px;
-  background: var(--border-strong, #cbd5e1);
+  background: var(--border-strong);
   cursor: pointer;
   transition: background var(--duration-fast, 150ms) var(--easing-standard, ease), width var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 .model-chart__dot[data-on="true"] {
   width: 18px;
-  background: var(--spectrum-sky, #3b82f6);
+  background: var(--spectrum-sky);
 }
 .model-chart__section {
   display: flex;
@@ -2828,7 +2830,7 @@ select:disabled {
   background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   backdrop-filter: blur(10px) saturate(1.2);
-  box-shadow: 0 6px 18px -8px rgba(31, 41, 63, 0.45);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--redrob-black) 45%, transparent);
   color: var(--ink-primary);
   cursor: pointer;
   opacity: 0;
@@ -2848,7 +2850,7 @@ select:disabled {
   transform: translateY(-50%) scale(1.06);
 }
 .model-chart__chevron:focus-visible {
-  outline: var(--focus-ring-width, 2px) solid var(--focus-ring, var(--spectrum-sky, #3b82f6));
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring, var(--spectrum-sky));
   outline-offset: 2px;
   opacity: 1;
   pointer-events: auto;
@@ -2889,7 +2891,7 @@ select:disabled {
   background: color-mix(in srgb, var(--surface-base) 62%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(1.3);
   backdrop-filter: blur(16px) saturate(1.3);
-  box-shadow: 0 8px 24px -14px rgba(31, 41, 63, 0.4), inset 0 1px 0 rgba(255, 255, 255, var(--g-highlight, 0.5));
+  box-shadow: 0 8px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, var(--g-highlight, 0.5));
   transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), border-color var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 .model-chart__caption {
@@ -2917,8 +2919,8 @@ select:disabled {
 .model-chart__tile:hover .model-chart__card {
   /* Round 22: subtler hover — a 2px lift (was 3), a lighter shadow, same accent border. */
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--spectrum-sky, #3b82f6) 45%, transparent);
-  box-shadow: 0 12px 28px -16px rgba(31, 41, 63, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 .model-chart__tile:hover .model-chart__art {
   transform: scale(1.015);
@@ -2933,33 +2935,33 @@ select:disabled {
   filter: blur(var(--g-blur, 30px)) saturate(1.25) hue-rotate(var(--g-hue, 0deg));
   opacity: 0.68;
   background:
-    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 22%) var(--g-y1, 20%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 85%, transparent), transparent 70%),
-    radial-gradient(var(--g-s2, 46%) var(--g-s2, 52%) at var(--g-x2, 82%) var(--g-y2, 32%), color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 72%, transparent), transparent 72%),
-    radial-gradient(55% 60% at 60% 95%, color-mix(in srgb, var(--spectrum-teal, #14b8a6) 60%, transparent), transparent 75%);
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 22%) var(--g-y1, 20%), color-mix(in srgb, var(--spectrum-sky) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 46%) var(--g-s2, 52%) at var(--g-x2, 82%) var(--g-y2, 32%), color-mix(in srgb, var(--spectrum-violet) 72%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 60% 95%, color-mix(in srgb, var(--spectrum-teal) 60%, transparent), transparent 75%);
 }
 .model-chart__tile[data-tone="1"] .model-chart__glass {
   background:
-    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 24%) var(--g-y1, 22%), color-mix(in srgb, var(--spectrum-indigo, #6366f1) 85%, transparent), transparent 70%),
-    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 84%) var(--g-y2, 30%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 70%, transparent), transparent 72%),
-    radial-gradient(55% 60% at 58% 96%, color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 58%, transparent), transparent 75%);
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 24%) var(--g-y1, 22%), color-mix(in srgb, var(--spectrum-indigo) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 84%) var(--g-y2, 30%), color-mix(in srgb, var(--spectrum-sky) 70%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 58% 96%, color-mix(in srgb, var(--spectrum-violet) 58%, transparent), transparent 75%);
 }
 .model-chart__tile[data-tone="2"] .model-chart__glass {
   background:
-    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 22%) var(--g-y1, 24%), color-mix(in srgb, var(--spectrum-teal, #14b8a6) 85%, transparent), transparent 70%),
-    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 82%) var(--g-y2, 28%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 70%, transparent), transparent 72%),
-    radial-gradient(55% 62% at 62% 95%, color-mix(in srgb, var(--spectrum-indigo, #6366f1) 55%, transparent), transparent 75%);
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 22%) var(--g-y1, 24%), color-mix(in srgb, var(--spectrum-teal) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 82%) var(--g-y2, 28%), color-mix(in srgb, var(--spectrum-sky) 70%, transparent), transparent 72%),
+    radial-gradient(55% 62% at 62% 95%, color-mix(in srgb, var(--spectrum-indigo) 55%, transparent), transparent 75%);
 }
 .model-chart__tile[data-tone="3"] .model-chart__glass {
   background:
-    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 24%) var(--g-y1, 20%), color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 85%, transparent), transparent 70%),
-    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 82%) var(--g-y2, 34%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 68%, transparent), transparent 72%),
-    radial-gradient(55% 60% at 60% 96%, color-mix(in srgb, var(--spectrum-teal, #14b8a6) 55%, transparent), transparent 75%);
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 24%) var(--g-y1, 20%), color-mix(in srgb, var(--spectrum-violet) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 82%) var(--g-y2, 34%), color-mix(in srgb, var(--spectrum-sky) 68%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 60% 96%, color-mix(in srgb, var(--spectrum-teal) 55%, transparent), transparent 75%);
 }
 .model-chart__tile[data-tone="4"] .model-chart__glass {
   background:
-    radial-gradient(var(--g-s1, 44%) var(--g-s1, 50%) at var(--g-x1, 22%) var(--g-y1, 22%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 90%, transparent), transparent 70%),
-    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 84%) var(--g-y2, 30%), color-mix(in srgb, var(--spectrum-teal, #14b8a6) 68%, transparent), transparent 72%),
-    radial-gradient(55% 60% at 58% 95%, color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 55%, transparent), transparent 75%);
+    radial-gradient(var(--g-s1, 44%) var(--g-s1, 50%) at var(--g-x1, 22%) var(--g-y1, 22%), color-mix(in srgb, var(--spectrum-sky) 90%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 84%) var(--g-y2, 30%), color-mix(in srgb, var(--spectrum-teal) 68%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 58% 95%, color-mix(in srgb, var(--spectrum-violet) 55%, transparent), transparent 75%);
 }
 .model-chart__tile-label {
   font-size: 14px;
@@ -3037,7 +3039,7 @@ select:disabled {
   border-radius: 18px;
   object-fit: cover;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
-  box-shadow: 0 12px 32px -16px rgba(31, 41, 63, 0.4);
+  box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent);
 }
 .chart-detail__cover--blank {
   background: var(--surface-raised);
@@ -3089,7 +3091,7 @@ select:disabled {
   background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
 }
 .chart-detail__row[data-top="true"] .chart-detail__rank {
-  color: var(--spectrum-sky, #3b82f6);
+  color: var(--spectrum-sky);
 }
 .chart-detail__rank {
   font-size: 16px;
@@ -3110,10 +3112,10 @@ select:disabled {
      colored marks read cleanly; white-on-transparent marks flip to the dark chip below. */
   background: #fff;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
-  box-shadow: 0 1px 2px rgba(31, 41, 63, 0.08);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--redrob-black) 8%, transparent);
 }
 .chart-detail__logo[data-on-dark="true"] {
-  background: #15181f;
+  background: var(--redrob-black);
   border-color: rgba(255, 255, 255, 0.14);
 }
 .chart-detail__logo-img {
@@ -3182,24 +3184,24 @@ select:disabled {
   font-size: 14px;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
-  color: var(--grade-ink, #0f172a);
-  background: var(--grade-bg, #e8faf0);
-  border: 1.5px solid var(--grade-color, #22c55e);
+  color: var(--grade-ink, var(--ink-primary));
+  background: var(--grade-bg, color-mix(in srgb, var(--status-success) 16%, transparent));
+  border: 1.5px solid var(--grade-color, var(--status-success));
 }
 /* Apple-Music-clear grades: saturated ring + soft matching fill + dark readable number. */
-.chart-detail__score-ring[data-grade="ace"]    { --grade-color: #22c55e; --grade-bg: color-mix(in srgb, #22c55e 16%, transparent); }
-.chart-detail__score-ring[data-grade="strong"] { --grade-color: #0ea5e9; --grade-bg: color-mix(in srgb, #0ea5e9 16%, transparent); }
-.chart-detail__score-ring[data-grade="good"]   { --grade-color: #f59e0b; --grade-bg: color-mix(in srgb, #f59e0b 18%, transparent); }
-.chart-detail__score-ring[data-grade="fair"]   { --grade-color: #94a3b8; --grade-bg: color-mix(in srgb, #94a3b8 18%, transparent); }
+.chart-detail__score-ring[data-grade="ace"]    { --grade-color: var(--status-success); --grade-bg: color-mix(in srgb, var(--status-success) 16%, transparent); }
+.chart-detail__score-ring[data-grade="strong"] { --grade-color: var(--status-info); --grade-bg: color-mix(in srgb, var(--status-info) 16%, transparent); }
+.chart-detail__score-ring[data-grade="good"]   { --grade-color: var(--status-warning); --grade-bg: color-mix(in srgb, var(--status-warning) 18%, transparent); }
+.chart-detail__score-ring[data-grade="fair"]   { --grade-color: var(--gray-5); --grade-bg: color-mix(in srgb, var(--gray-5) 18%, transparent); }
 /* Redrob Auto's circle: brand indigo with "Best" inside (text, so a touch smaller than the numerals). */
 .chart-detail__score-ring[data-grade="auto"] {
-  --grade-color: var(--spectrum-indigo, #6366f1);
-  --grade-bg: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 15%, transparent);
+  --grade-color: var(--spectrum-indigo);
+  --grade-bg: color-mix(in srgb, var(--spectrum-indigo) 15%, transparent);
   font-size: 11px;
   font-weight: 700;
-  color: var(--spectrum-indigo, #6366f1);
+  color: var(--spectrum-indigo);
 }
-[data-theme="dark"] .chart-detail__score-ring[data-grade="auto"] { color: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 60%, #fff); }
+[data-theme="dark"] .chart-detail__score-ring[data-grade="auto"] { color: color-mix(in srgb, var(--spectrum-indigo) 60%, #fff); }
 [data-theme="dark"] .chart-detail__score-ring { color: #fff; }
 .chart-detail__score-label {
   font-size: 10px;
@@ -3231,23 +3233,23 @@ select:disabled {
   brand tint is the only thing that sets it apart.
 */
 .chart-detail__row--auto {
-  background: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 5%, transparent);
+  background: color-mix(in srgb, var(--spectrum-indigo) 5%, transparent);
 }
 .chart-detail__row--auto:hover {
-  background: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 9%, transparent);
+  background: color-mix(in srgb, var(--spectrum-indigo) 9%, transparent);
 }
 .chart-detail__maker--featured {
   font-weight: 650;
-  color: var(--spectrum-indigo, #6366f1);
+  color: var(--spectrum-indigo);
 }
 .chart-detail__logo--auto {
-  border-color: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 28%, transparent);
+  border-color: color-mix(in srgb, var(--spectrum-indigo) 28%, transparent);
 }
 /* The star in Auto's rank slot: brand indigo, sized to sit in the same optical column as the numbers. */
 .chart-detail__rank--star {
   font-size: 17px;
   line-height: 1;
-  color: var(--spectrum-indigo, #6366f1);
+  color: var(--spectrum-indigo);
   text-align: center;
 }
 .chart-detail__use {
@@ -3255,7 +3257,7 @@ select:disabled {
   padding: 7px 16px;
   border-radius: 999px;
   border: 1px solid transparent;
-  background: var(--spectrum-sky, #3b82f6);
+  background: var(--spectrum-sky);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -3291,7 +3293,9 @@ select:disabled {
 }
 @media (prefers-reduced-motion: reduce) {
   .model-chart__banner,
-  .model-chart__tile {
+  .model-chart__tile,
+  .desk-shell__side-resizer::before,
+  .desk-composer-field::before {
     transition: none;
   }
 }

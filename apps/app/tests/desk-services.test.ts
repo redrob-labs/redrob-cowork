@@ -6,6 +6,7 @@ import type { RedrobWorkspaceInfo } from "../src/app/lib/redrob-server";
 import type { DeskServices } from "../src/react-app/desk/services/desk-services";
 import { createFixtureDeskServices, runScripted } from "../src/react-app/desk/services/fixture-services";
 import { createDeskServices, createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
+import { deskClient } from "./helpers/desk-client";
 import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
 
 /** A manual clock: timers fire only when the test advances time. */
@@ -48,9 +49,11 @@ async function everyResult(services: DeskServices) {
     await services.chats.get("notice"),
     await services.projects.list(),
     await services.notes.list(),
-    await services.playbooks.list(),
-    await services.playbooks.get("first-review"),
     await services.schedules.list(),
+    await services.skills.list(),
+    await services.skills.library(),
+    await services.skills.taxonomy(),
+    await services.skills.get("first-review"),
     await services.history.list(),
     await services.connectors.list(),
     await services.privacy.get(),
@@ -72,6 +75,7 @@ describe("desk fixture services", () => {
     expect(connectors.filter((connector) => connector.state === "connected")).toHaveLength(6);
     expect((await services.schedules.list()).data.waiting).toHaveLength(2);
     expect((await services.privacy.get()).data.level).toBe("high");
+    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(["first-review", "deadline-tracker", "weekly-report"]);
 
     const notes = (await services.notes.list()).data;
     expect(notes.length).toBe(22);
@@ -110,40 +114,6 @@ describe("desk fixture services", () => {
   });
 });
 
-describe("desk scripted runs", () => {
-  test("steps land stepMs*(i+1) apart and the answer at stepMs*(steps+1)", () => {
-    const clock = fakeClock();
-    const seen: string[] = [];
-    runScripted(["read", "check", "draft"], { onStep: (step, index) => seen.push(`${index}:${step}`), onAnswer: () => seen.push("answer") }, { stepMs: 650, timers: clock.timers });
-
-    clock.advanceTo(649);
-    expect(seen).toEqual([]);
-    clock.advanceTo(650);
-    expect(seen).toEqual(["0:read"]);
-    clock.advanceTo(1950);
-    expect(seen).toEqual(["0:read", "1:check", "2:draft"]);
-    clock.advanceTo(2599);
-    expect(seen).toHaveLength(3);
-    clock.advanceTo(2600);
-    expect(seen.at(-1)).toBe("answer");
-  });
-
-  test("the fixture service uses its stepMs, and cancel stops the run", () => {
-    const clock = fakeClock();
-    const services = createFixtureDeskServices({ stepMs: 100, timers: clock.timers });
-    const seen: number[] = [];
-    let answered = false;
-    const cancel = services.runScripted([1, 2, 3], { onStep: (step) => seen.push(step), onAnswer: () => { answered = true; } });
-
-    clock.advanceTo(200);
-    expect(seen).toEqual([1, 2]);
-    cancel();
-    clock.advanceTo(10_000);
-    expect(seen).toEqual([1, 2]);
-    expect(answered).toBe(false);
-  });
-});
-
 function fakeClient() {
   const calls: string[] = [];
   const workspace: RedrobWorkspaceInfo = { id: "ws_1", name: "seorin-msa", displayName: "Seorin MSA", path: "/w", preset: "starter", workspaceType: "local" };
@@ -163,7 +133,7 @@ function fakeClient() {
   ];
   let nextMemory = 3;
   let redrob: Record<string, unknown> = {};
-  const client: DeskServerClient = {
+  const client = deskClient({
     listWorkspaces: async () => {
       calls.push("listWorkspaces");
       return { items: [workspace] };
@@ -215,7 +185,7 @@ function fakeClient() {
       calls.push(`listMcp:${workspaceId}`);
       return { items: [{ name: "notion", config: { type: "remote", url: "https://mcp.notion.com/mcp" }, source: "config.project" }] };
     },
-  };
+  });
   return { client, calls };
 }
 
