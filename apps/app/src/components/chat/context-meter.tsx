@@ -14,12 +14,12 @@ import { t } from "@/i18n";
  */
 export function ContextMeter(props: { usedPercent: number | null; onCompact?: () => void; compacting?: boolean }) {
   /*
-    The BUTTON does not depend on the percentage. Returning null for the whole row when the fullness is
-    unknown hid the summarise control too, which is the same invisible-feature mistake the comment below
-    describes, made one line higher: whether we can compute a percentage has nothing to do with whether the
-    session can be summarised. The reading is what goes missing; the action stays.
+    Round 11, item 8: the "Summarize now" button was removed from under the prompt. The onCompact /
+    compacting props stay in the signature (the composer still passes them, and `/compact` still works)
+    so the control can be restored, but nothing renders it here now. With the button gone, the row shows
+    only the context-fullness reading, so there is nothing to show when the percentage is unknown.
   */
-  if (props.usedPercent === null && !props.onCompact) return null;
+  if (props.usedPercent === null) return null;
   // Amber past 75% and red past 90%: past that the next long turn is what triggers a summarisation, and
   // a reader who is about to paste a large file should be able to see it coming.
   const tone =
@@ -33,36 +33,9 @@ export function ContextMeter(props: { usedPercent: number | null; onCompact?: ()
     // px-4 lines up on a wide window and is 8px out on a narrow one, which is the worst kind of
     // misalignment because it only appears at sizes nobody screenshots.
     <div className="flex items-center justify-end gap-2 px-2 pb-1 pt-1 text-2xs tabular-nums md:px-4">
-      {/*
-        Summarise now.
-
-        The engine has had this since before the app shipped - `session.summarize`, with a `/compact`
-        command fallback - and the app already wired both. What it never had was anything to CLICK: the
-        only way in was typing `/compact`, which a user has to know exists. This is that entry point, put
-        beside the fullness reading because that number is what makes someone want it.
-
-        Shown whenever a session can be summarised, NOT only past a threshold. It was gated at 50% on the
-        theory that offering it earlier is noise, and the result was a feature nobody could find: at 19%
-        full the button is absent, so "add manual compaction" came back as a request for something already
-        built. A quiet dotted-underline label costs a reader nothing; an invisible feature costs them the
-        whole feature.
-      */}
-      {props.onCompact ? (
-        <button
-          className="rounded px-1.5 py-0.5 text-subtle-foreground underline decoration-dotted underline-offset-2 transition-colors hover:bg-dls-bg-hover hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={props.compacting === true}
-          onClick={props.onCompact}
-          title={t("usage.compact_now_hint")}
-          type="button"
-        >
-          {props.compacting === true ? t("usage.compacting") : t("usage.compact_now")}
-        </button>
-      ) : null}
-      {props.usedPercent === null ? null : (
-        <span className={tone} title={t("usage.context_hint")}>
-          {t("usage.context_used").replace("{percent}", String(props.usedPercent))}
-        </span>
-      )}
+      <span className={tone} title={t("usage.context_hint")}>
+        {t("usage.context_used").replace("{percent}", String(props.usedPercent))}
+      </span>
     </div>
   );
 }

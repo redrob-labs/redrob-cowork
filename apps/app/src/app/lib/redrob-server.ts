@@ -1,4 +1,4 @@
-import type { Message, Part, Session, Todo } from "@redrob-labs/sdk/v2/client";
+import type { Message, Part, Session, SessionStatus, Todo } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 import { normalizeBaseUrl } from "@redrob/types/url";
 import { t } from "../../i18n";
@@ -101,7 +101,7 @@ export type RedrobSessionMessage = {
   parts: Part[];
 };
 
-/** When a scheduled playbook runs (apps/server/src/desk-schedules.ts). */
+/** When a scheduled run happens (apps/server/src/desk-schedules.ts). */
 export type RedrobScheduleRule = {
   mode: "once" | "repeat";
   date?: string;
@@ -115,17 +115,20 @@ export type RedrobScheduleRule = {
 
 export type RedrobScheduleRunState = "running" | "waiting" | "done" | "missed" | "failed";
 
+/** What a schedule runs: a prompt as written, or a skill with optional extra instructions. */
+export type RedrobScheduleTarget = { kind: "prompt"; text: string } | { kind: "skill"; name: string; instructions?: string };
+
 export type RedrobScheduleState = {
   schedules: Array<{
     id: string;
-    playbookId: string;
+    target: RedrobScheduleTarget;
     label: string;
     rule: RedrobScheduleRule;
     nextRunAt: number | null;
     enabled: boolean;
-    lastRun: { state: RedrobScheduleRunState; at: number; sessionId?: string } | null;
+    lastRun: { state: RedrobScheduleRunState; at: number; sessionId?: string; reason?: string } | null;
   }>;
-  runs: Array<{ id: string; scheduleId: string; sessionId: string | null; at: number; state: RedrobScheduleRunState }>;
+  runs: Array<{ id: string; scheduleId: string; sessionId: string | null; at: number; state: RedrobScheduleRunState; reason?: string }>;
   waiting: Array<{
     id: string;
     scheduleId: string;
@@ -141,10 +144,8 @@ export type RedrobSessionSnapshot = {
   session: Session;
   messages: RedrobSessionMessage[];
   todos: Todo[];
-  status:
-    | { type: "idle" }
-    | { type: "busy" }
-    | { type: "retry"; attempt: number; message: string; next: number };
+  /** The engine's status, `blocked` included: a turn the console refused with an action to take. */
+  status: SessionStatus;
 };
 
 export type RedrobPluginItem = {
@@ -154,6 +155,16 @@ export type RedrobPluginItem = {
   path?: string;
 };
 
+/** A SKILL.md's `metadata`, as redrob-server lists it. */
+export type RedrobSkillMetadata = {
+  profession?: string;
+  task?: string;
+  language?: string;
+  family?: string;
+  version?: number;
+  source?: "team" | "library";
+};
+
 export type RedrobSkillItem = {
   name: string;
   path: string;
@@ -161,6 +172,41 @@ export type RedrobSkillItem = {
   scope: "project" | "global";
   trigger?: string;
   error?: string;
+  metadata?: RedrobSkillMetadata;
+};
+
+/** Where a library answer came from: the Console, or the copy bundled with redrob-server. */
+export type RedrobLibrarySource = "console" | "snapshot";
+
+export type RedrobLibrarySkillSummary = {
+  name: string;
+  description: string;
+  profession: string;
+  task: string;
+  language: string;
+  family: string;
+  version: number;
+};
+
+export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; source: RedrobLibrarySource };
+
+export type RedrobLibraryFilter = { profession?: string; task?: string; language?: string; q?: string };
+
+export type RedrobSkillLabel = { en: string; ko: string };
+
+export type RedrobSkillTaxonomy = {
+  professions: Array<{ id: string; label: RedrobSkillLabel; tasks: Array<{ id: string; label: RedrobSkillLabel }> }>;
+  languages: Array<{ id: string; label: RedrobSkillLabel }>;
+  source: RedrobLibrarySource;
+};
+
+/** GET /workspace/:id/skills/team: what the last check of the Console installed. */
+export type RedrobTeamSkillsState = {
+  etag: string | null;
+  installed: string[];
+  conflicts: string[];
+  lastSyncAt: number | null;
+  status: "synced" | "not_connected" | "not_member" | "unreachable" | null;
 };
 
 export type RedrobSkillContent = {
@@ -332,6 +378,18 @@ export type RedrobMcpAppSandbox = {
   expectedOrigin: string;
 };
 
+/**
+ * A sandbox document on this server, at an origin that differs from the host's. When the app itself
+ * is served from the same server, the loopback name is swapped so the two still differ.
+ */
+function sandboxUrl(baseUrl: string, path: string, hostOrigin: string): URL {
+  const url = new URL(`${baseUrl}${path}`);
+  if (url.origin === hostOrigin && url.hostname === "localhost") url.hostname = "127.0.0.1";
+  else if (url.origin === hostOrigin && url.hostname === "127.0.0.1") url.hostname = "localhost";
+  url.searchParams.set("hostOrigin", normalizeMcpAppHostOrigin(hostOrigin));
+  return url;
+}
+
 export function normalizeMcpAppHostOrigin(hostOrigin: string): string {
   return hostOrigin === "file://" ? "null" : hostOrigin;
 }
@@ -392,6 +450,244 @@ export type RedrobWorkspaceImportPreview = {
 };
 
 export type RedrobWorkspaceExportSensitiveMode = "auto" | "include" | "exclude";
+
+/** Mirrors apps/server/src/review-store.ts. */
+export type RedrobReviewAnchor =
+  | { kind: "message"; messageId: string }
+  | { kind: "plan-step" | "claim"; messageId: string; itemId: string };
+export type RedrobReviewAuthor = { participantId: string; displayName: string };
+export type RedrobReviewComment = {
+  id: string;
+  anchor: RedrobReviewAnchor;
+  author: RedrobReviewAuthor;
+  text: string;
+  createdAt: number;
+  resolvedAt?: number;
+  resolvedBy?: RedrobReviewAuthor;
+  origin: "local" | "handoff" | "reply" | "room";
+};
+export type RedrobReviewStatus = "open" | "approved" | "changes_requested";
+export type RedrobReviewState = { status: RedrobReviewStatus; by: RedrobReviewAuthor | null; at: number; note?: string };
+export type RedrobSessionReview = { comments: RedrobReviewComment[]; state: RedrobReviewState };
+
+function reviewPath(workspaceId: string, sessionId: string): string {
+  return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/review`;
+}
+
+/** Mirrors apps/server/src/routes/handoff.ts. */
+export type RedrobHandoffAsk = "review" | "continue" | "approve";
+export type RedrobHandoffEntryKind = "engine" | "transcript" | "desk" | "review" | "produced" | "read" | "skill";
+export type RedrobHandoffFinding = {
+  id: string;
+  path: string;
+  kind: "bearer" | "token" | "jwt" | "private-key" | "assignment";
+  masked: string;
+  line: number;
+};
+export type RedrobHandoffPreview = {
+  session: { id: string; title: string };
+  from: RedrobReviewAuthor;
+  entries: Array<{ path: string; kind: RedrobHandoffEntryKind; bytes: number; scannable: boolean }>;
+  readCandidates: string[];
+  missing: string[];
+  findings: RedrobHandoffFinding[];
+  unscanned: string[];
+  fingerprint: string;
+};
+export type RedrobHandoffRequest = {
+  ask: RedrobHandoffAsk;
+  to?: string;
+  note?: string;
+  includeRead: string[];
+  keep: string[];
+  exclude: string[];
+  fingerprint: string;
+};
+
+/** A handoff file as the app has it: its bytes, or a path the desktop shell was asked to open. */
+export type RedrobHandoffFile = { bytes: ArrayBuffer } | { path: string };
+
+function handoffFileBody(file: RedrobHandoffFile): { bytes: ArrayBuffer } | { body: { path: string } } {
+  return "bytes" in file ? { bytes: file.bytes } : { body: { path: file.path } };
+}
+
+export type RedrobHandoffInspection = {
+  handoff: {
+    id: string;
+    createdAt: string;
+    from: RedrobReviewAuthor;
+    to?: string;
+    ask: RedrobHandoffAsk;
+    note?: string;
+    workspaceName: string;
+    session: { id: string; title: string; messages: number };
+    engine: { redrobCodeVersion: string };
+    files: Array<{ path: string; kind: "produced" | "read"; bytes: number }>;
+    skills: string[];
+    comments: number;
+    state: RedrobReviewStatus;
+  };
+  digest: string;
+  compatibility: "same" | "different" | "unknown";
+  alreadyOpened: { workspaceId: string; sessionId: string } | null;
+};
+
+export type RedrobReplyInspection = {
+  reply: {
+    replyTo: string;
+    from: RedrobReviewAuthor;
+    createdAt: string;
+    state: RedrobReviewState;
+    comments: number;
+    continued: { messages: number } | null;
+  };
+  digest: string;
+  target: { workspaceId: string; sessionId: string };
+};
+
+export type RedrobReceivedHandoff = {
+  id: string;
+  direction: "received";
+  workspaceId: string;
+  sessionId: string;
+  originSessionId: string;
+  createdAt: number;
+  fromName: string;
+  fromParticipantId: string;
+  ask: RedrobHandoffAsk;
+  note?: string;
+  continuedAt?: number;
+  fallback?: boolean;
+};
+
+/** A handoff exports the session through the engine and reads its files; give it longer than a request. */
+const HANDOFF_TIMEOUT_MS = 180_000;
+
+function handoffPath(workspaceId: string, sessionId: string): string {
+  return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/handoff`;
+}
+
+/** This install as teammates see it: a stable id and a name the person chose. Neither is verified. */
+export type RedrobParticipantProfile = {
+  participantId: string;
+  displayName: string;
+  updatedAt: number;
+};
+
+/* ---------- Live co-working (apps/server/src/routes/room.ts) ---------- */
+
+export type RedrobGuestCapability = "send" | "approve" | "stop" | "attach";
+
+/** A file sent to a live room: where the host's server put it, for the sender to attach. */
+export type RedrobRoomAttachment = { filename: string; mime: string; bytes: number; url: string; workspacePath: string };
+
+export type RedrobRoomParticipant = {
+  participantId: string;
+  displayName: string;
+  role: "host" | "guest";
+  present: boolean;
+  typing: boolean;
+  capabilities?: RedrobGuestCapability[];
+  /** Guests whose turns run only in the read-only Plan agent. */
+  planOnly?: boolean;
+  /** Only the host sees these. */
+  tokenId?: string;
+  expiresAt?: number;
+};
+
+export type RedrobRoomAuthorship = { messageId: string; participantId: string; displayName: string; at: number };
+
+export type RedrobRoomCosts = {
+  total: number;
+  authors: Array<{ participantId: string; displayName: string; cost: number; messages: number }>;
+};
+
+export type RedrobRoomView = {
+  room: { roomId: string; workspaceId: string; sessionId: string; host: { participantId: string; displayName: string }; createdAt: number };
+  me: { participantId: string; displayName: string };
+  participants: RedrobRoomParticipant[];
+  authorship: RedrobRoomAuthorship[];
+  /** Only when asked for: it reads the whole chat from the engine. */
+  costs?: RedrobRoomCosts;
+};
+
+/** What the room's event stream says. Mirrors `RoomEvent` in apps/server/src/cowork-room.ts. */
+export type RedrobRoomEvent =
+  | { type: "room.presence"; present: Array<{ participantId: string; displayName: string; role: "host" | "guest"; typing: boolean }> }
+  | { type: "room.authorship"; entry: RedrobRoomAuthorship }
+  | { type: "room.participants" }
+  | { type: "room.knocks" }
+  | { type: "review.updated" }
+  | { type: "room.queue"; queue: unknown[] }
+  | { type: "room.ask_answered"; requestId: string; by: { participantId: string; displayName: string } }
+  | { type: "room.stopped"; by: { participantId: string; displayName: string } }
+  | { type: "room.ended" };
+
+const ROOM_EVENT_TYPES = new Set([
+  "room.presence",
+  "room.authorship",
+  "room.participants",
+  "room.knocks",
+  "review.updated",
+  "room.queue",
+  "room.ask_answered",
+  "room.stopped",
+  "room.ended",
+]);
+
+function isRoomEvent(value: unknown): value is RedrobRoomEvent {
+  return typeof value === "object" && value !== null && "type" in value && typeof value.type === "string" && ROOM_EVENT_TYPES.has(value.type);
+}
+
+/**
+ * Splits a server-sent event stream into events. Keeps what a chunk ends in for the next one;
+ * comment lines (`: keep-alive`) and anything that is not a room event are dropped.
+ */
+export function createRoomEventParser(onEvent: (event: RedrobRoomEvent) => void): (chunk: string) => void {
+  let buffer = "";
+  return (chunk) => {
+    buffer += chunk.replace(/\r\n/g, "\n");
+    let end = buffer.indexOf("\n\n");
+    while (end !== -1) {
+      const block = buffer.slice(0, end);
+      buffer = buffer.slice(end + 2);
+      const data = block
+        .split("\n")
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trimStart())
+        .join("\n");
+      if (data) {
+        try {
+          const parsed: unknown = JSON.parse(data);
+          if (isRoomEvent(parsed)) onEvent(parsed);
+        } catch {
+          // not JSON: not ours
+        }
+      }
+      end = buffer.indexOf("\n\n");
+    }
+  };
+}
+
+/** A message waiting in the room's shared queue, as everyone sees it (no prompt body). */
+export type RedrobRoomQueueItem = {
+  id: string;
+  author: { participantId: string; displayName: string };
+  preview: string;
+  createdAt: number;
+  /** False when the message has a file or more text than the preview shows: remove and requeue instead. */
+  editable?: boolean;
+};
+
+export type RedrobRoomKnock = { knockId: string; participant: { participantId: string; displayName: string }; endpointId: string; createdAt: number };
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function roomPath(workspaceId: string, sessionId: string): string {
+  return `/workspace/${encodeURIComponent(workspaceId)}/sessions/${encodeURIComponent(sessionId)}/room`;
+}
 
 export type RedrobWorkspaceExportWarning = {
   id: string;
@@ -493,6 +789,8 @@ export type RedrobActor = {
   type: "remote" | "host";
   clientId?: string;
   tokenHash?: string;
+  /** What the token may do. Voice and other host routes take only "owner". */
+  scope?: "owner" | "collaborator" | "viewer";
 };
 
 export type RedrobAuditEntry = {
@@ -856,7 +1154,6 @@ export type RedrobTeamPolicyStatus = {
   signedWithTestKey?: boolean;
   privacy?: { level: "off" | "standard" | "high" | "strict"; locked: boolean };
   notes?: number;
-  playbooks?: string[];
   skills?: string[];
   sync: {
     checkedAt: number | null;
@@ -991,7 +1288,7 @@ async function fetchWithTimeout(
 async function requestJson<T>(
   baseUrl: string,
   path: string,
-  options: { method?: string; token?: string; hostToken?: string; body?: unknown; timeoutMs?: number } = {},
+  options: { method?: string; token?: string; hostToken?: string; body?: unknown; bytes?: ArrayBuffer; timeoutMs?: number } = {},
 ): Promise<T> {
   const url = `${baseUrl}${path}`;
   const fetchImpl = resolveFetch(url);
@@ -1000,8 +1297,11 @@ async function requestJson<T>(
     url,
     {
       method: options.method ?? "GET",
-      headers: buildHeaders(options.token, options.hostToken),
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      // A file's bytes go as they are; everything else is JSON.
+      headers: options.bytes
+        ? { ...buildHeaders(options.token, options.hostToken), "Content-Type": "application/zip" }
+        : buildHeaders(options.token, options.hostToken),
+      body: options.bytes ? options.bytes : options.body ? JSON.stringify(options.body) : undefined,
     },
     options.timeoutMs ?? DEFAULT_REDROB_SERVER_TIMEOUT_MS,
   );
@@ -1042,7 +1342,7 @@ async function requestMultipartRaw(
 async function requestBinary(
   baseUrl: string,
   path: string,
-  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number } = {},
+  options: { method?: string; token?: string; hostToken?: string; timeoutMs?: number; body?: unknown } = {},
 ): Promise<{ data: ArrayBuffer; contentType: string | null; filename: string | null }>{
   const url = `${baseUrl}${path}`;
   const fetchImpl = resolveFetch(url);
@@ -1051,7 +1351,12 @@ async function requestBinary(
     url,
     {
       method: options.method ?? "GET",
-      headers: buildAuthHeaders(options.token, options.hostToken),
+      headers: buildAuthHeaders(
+        options.token,
+        options.hostToken,
+        options.body === undefined ? undefined : { "Content-Type": "application/json" },
+      ),
+      ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     },
     options.timeoutMs ?? DEFAULT_REDROB_SERVER_TIMEOUT_MS,
   );
@@ -1106,7 +1411,285 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
     runtimeVersions: () =>
       requestJson<RedrobRuntimeSnapshot>(baseUrl, "/runtime/versions", { token, hostToken, timeoutMs: timeouts.status }),
     status: () => requestJson<RedrobServerDiagnostics>(baseUrl, "/status", { token, hostToken, timeoutMs: timeouts.status }),
+    /** Who this connection is to the server, including its token's scope. */
+    whoami: () => requestJson<{ ok: boolean; actor: RedrobActor | null }>(baseUrl, "/whoami", { token, hostToken, timeoutMs: timeouts.status }),
     capabilities: () => requestJson<RedrobServerCapabilities>(baseUrl, "/capabilities", { token, hostToken, timeoutMs: timeouts.capabilities }),
+    getSessionReview: async (workspaceId: string, sessionId: string): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(baseUrl, reviewPath(workspaceId, sessionId), {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      });
+      return payload.review;
+    },
+    addReviewComment: async (
+      workspaceId: string,
+      sessionId: string,
+      input: { anchor: RedrobReviewAnchor; text: string },
+    ): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(baseUrl, `${reviewPath(workspaceId, sessionId)}/comments`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: timeouts.config,
+      });
+      return payload.review;
+    },
+    resolveReviewComment: async (workspaceId: string, sessionId: string, commentId: string, resolved: boolean): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(
+        baseUrl,
+        `${reviewPath(workspaceId, sessionId)}/comments/${encodeURIComponent(commentId)}/resolve`,
+        { token, hostToken, method: "POST", body: { resolved }, timeoutMs: timeouts.config },
+      );
+      return payload.review;
+    },
+    deleteReviewComment: async (workspaceId: string, sessionId: string, commentId: string): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(
+        baseUrl,
+        `${reviewPath(workspaceId, sessionId)}/comments/${encodeURIComponent(commentId)}`,
+        { token, hostToken, method: "DELETE", timeoutMs: timeouts.config },
+      );
+      return payload.review;
+    },
+    setReviewState: async (
+      workspaceId: string,
+      sessionId: string,
+      input: { status: RedrobReviewStatus; note?: string },
+    ): Promise<RedrobSessionReview> => {
+      const payload = await requestJson<{ review: RedrobSessionReview }>(baseUrl, `${reviewPath(workspaceId, sessionId)}/state`, {
+        token,
+        hostToken,
+        method: "PUT",
+        body: input,
+        timeoutMs: timeouts.config,
+      });
+      return payload.review;
+    },
+    previewHandoff: (workspaceId: string, sessionId: string, input: { includeRead?: string[] } = {}) =>
+      requestJson<RedrobHandoffPreview>(baseUrl, `${handoffPath(workspaceId, sessionId)}/preview`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    createHandoff: (workspaceId: string, sessionId: string, input: RedrobHandoffRequest) =>
+      requestBinary(baseUrl, handoffPath(workspaceId, sessionId), {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    /** A handoff file, by its bytes or (desktop) its path: what it is, before anything is written. */
+    inspectHandoff: (file: RedrobHandoffFile) =>
+      requestJson<RedrobHandoffInspection>(baseUrl, "/handoff/inspect", {
+        token,
+        hostToken,
+        method: "POST",
+        ...handoffFileBody(file),
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    openHandoff: (workspaceId: string, file: RedrobHandoffFile, digest: string) =>
+      requestJson<{ sessionId: string; workspaceId: string; fallback: boolean; handoff: RedrobReceivedHandoff }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/handoff/open?digest=${encodeURIComponent(digest)}`,
+        { token, hostToken, method: "POST", ...handoffFileBody(file), timeoutMs: HANDOFF_TIMEOUT_MS },
+      ),
+    getSessionHandoff: async (workspaceId: string, sessionId: string): Promise<RedrobReceivedHandoff | null> =>
+      (await requestJson<{ handoff: RedrobReceivedHandoff | null }>(baseUrl, handoffPath(workspaceId, sessionId), { token, hostToken })).handoff,
+    continueHandoff: async (workspaceId: string, sessionId: string): Promise<RedrobReceivedHandoff> =>
+      (
+        await requestJson<{ handoff: RedrobReceivedHandoff }>(baseUrl, `${handoffPath(workspaceId, sessionId)}/continue`, {
+          token,
+          hostToken,
+          method: "POST",
+          body: {},
+        })
+      ).handoff,
+    createHandoffReply: (workspaceId: string, sessionId: string, input: { includeContinuation: boolean }) =>
+      requestBinary(baseUrl, `${handoffPath(workspaceId, sessionId)}/reply`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: input,
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    inspectHandoffReply: (file: RedrobHandoffFile) =>
+      requestJson<RedrobReplyInspection>(baseUrl, "/handoff/reply/inspect", {
+        token,
+        hostToken,
+        method: "POST",
+        ...handoffFileBody(file),
+        timeoutMs: HANDOFF_TIMEOUT_MS,
+      }),
+    applyHandoffReply: (file: RedrobHandoffFile, digest: string) =>
+      requestJson<{ workspaceId: string; sessionId: string; added: number; state: RedrobReviewState; continuationSessionId: string | null }>(
+        baseUrl,
+        `/handoff/reply/apply?digest=${encodeURIComponent(digest)}`,
+        { token, hostToken, method: "POST", ...handoffFileBody(file), timeoutMs: HANDOFF_TIMEOUT_MS },
+      ),
+    getProfile: async (): Promise<RedrobParticipantProfile> => {
+      const payload = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
+        token,
+        hostToken,
+        timeoutMs: timeouts.config,
+      });
+      return payload.profile;
+    },
+    updateProfile: async (payload: { displayName: string }): Promise<RedrobParticipantProfile> => {
+      const response = await requestJson<{ profile: RedrobParticipantProfile }>(baseUrl, "/profile", {
+        token,
+        hostToken,
+        method: "PUT",
+        body: payload,
+        timeoutMs: timeouts.config,
+      });
+      return response.profile;
+    },
+    /** The chat's live room, or null when none is open. */
+    getRoom: async (workspaceId: string, sessionId: string, options: { costs?: boolean } = {}): Promise<RedrobRoomView | null> => {
+      const query = options.costs ? "?costs=1" : "";
+      const payload = await requestJson<RedrobRoomView | { room: null }>(baseUrl, `${roomPath(workspaceId, sessionId)}${query}`, { token, hostToken, timeoutMs: timeouts.config });
+      return payload.room ? payload : null;
+    },
+    /**
+     * Follows the room's event stream until `signal` aborts or the stream ends. Resolves when it
+     * ends, so the caller decides whether to reconnect. A fetch body reader, not EventSource,
+     * because EventSource cannot send the token.
+     */
+    followRoomEvents: async (workspaceId: string, sessionId: string, onEvent: (event: RedrobRoomEvent) => void, signal: AbortSignal): Promise<void> => {
+      const url = `${baseUrl}${roomPath(workspaceId, sessionId)}/events`;
+      const response = await resolveFetch(url)(url, { headers: buildAuthHeaders(token, hostToken, { Accept: "text/event-stream" }), signal });
+      if (!response.ok || !response.body) throw new RedrobServerError(response.status, "room_events_failed", response.statusText);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      const feed = createRoomEventParser(onEvent);
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) return;
+          feed(decoder.decode(value, { stream: true }));
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    },
+    endRoom: (workspaceId: string, sessionId: string): Promise<{ ok: boolean }> =>
+      requestJson(baseUrl, roomPath(workspaceId, sessionId), { token, hostToken, method: "DELETE", timeoutMs: timeouts.config }),
+    roomHeartbeat: (workspaceId: string, sessionId: string, state: { typing?: boolean } = {}): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/heartbeat`, { token, hostToken, method: "POST", body: state, timeoutMs: timeouts.config }),
+    leaveRoom: (workspaceId: string, sessionId: string): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/leave`, { token, hostToken, method: "POST", timeoutMs: timeouts.config }),
+    listRoomKnocks: async (workspaceId: string, sessionId: string): Promise<RedrobRoomKnock[]> =>
+      (await requestJson<{ knocks: RedrobRoomKnock[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/knocks`, { token, hostToken, timeoutMs: timeouts.config })).knocks,
+    answerRoomKnock: (
+      workspaceId: string,
+      sessionId: string,
+      knockId: string,
+      answer: { allow: boolean; capabilities?: RedrobGuestCapability[] },
+    ): Promise<{ ok: boolean; status: "allowed" | "denied" }> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/knocks/${encodeURIComponent(knockId)}`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: answer,
+        timeoutMs: timeouts.config,
+      }),
+    getRoomQueue: async (workspaceId: string, sessionId: string): Promise<RedrobRoomQueueItem[]> =>
+      (await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue`, { token, hostToken, timeoutMs: timeouts.config })).queue,
+    /** Queues a text message under this person's name; the host's server sends it when the agent is free. */
+    enqueueRoomMessage: async (workspaceId: string, sessionId: string, message: string | ReadonlyArray<Record<string, unknown>>): Promise<RedrobRoomQueueItem[]> =>
+      (
+        await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue`, {
+          token,
+          hostToken,
+          method: "POST",
+          body: { body: { parts: typeof message === "string" ? [{ type: "text", text: message }] : message } },
+          timeoutMs: timeouts.config,
+        })
+      ).queue,
+    /** Sends a file to the room's chat folder on the host. A guest needs the `attach` right. */
+    uploadRoomAttachment: async (workspaceId: string, sessionId: string, file: File): Promise<RedrobRoomAttachment> => {
+      const form = new FormData();
+      form.append("file", file);
+      const result = await requestMultipartRaw(baseUrl, `${roomPath(workspaceId, sessionId)}/attachments`, {
+        token,
+        hostToken,
+        method: "POST",
+        body: form,
+        timeoutMs: timeouts.binary,
+      });
+      let json: unknown = null;
+      try {
+        json = result.text ? JSON.parse(result.text) : null;
+      } catch {
+        json = null;
+      }
+      const record: Record<string, unknown> = isJsonObject(json) ? json : {};
+      if (!result.ok) {
+        throw new RedrobServerError(
+          result.status,
+          typeof record.code === "string" ? record.code : "request_failed",
+          typeof record.message === "string" ? record.message : "Upload failed",
+        );
+      }
+      if (typeof record.url !== "string" || typeof record.workspacePath !== "string" || typeof record.filename !== "string") {
+        throw new RedrobServerError(502, "request_failed", "The host's answer was not an attachment");
+      }
+      return {
+        filename: record.filename,
+        mime: typeof record.mime === "string" ? record.mime : "application/octet-stream",
+        bytes: typeof record.bytes === "number" ? record.bytes : file.size,
+        url: record.url,
+        workspacePath: record.workspacePath,
+      };
+    },
+    editRoomQueued: async (workspaceId: string, sessionId: string, itemId: string, text: string): Promise<RedrobRoomQueueItem[]> =>
+      (
+        await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue/${encodeURIComponent(itemId)}`, {
+          token,
+          hostToken,
+          method: "PATCH",
+          body: { text },
+          timeoutMs: timeouts.config,
+        })
+      ).queue,
+    removeRoomQueued: async (workspaceId: string, sessionId: string, itemId: string): Promise<RedrobRoomQueueItem[]> =>
+      (
+        await requestJson<{ queue: RedrobRoomQueueItem[] }>(baseUrl, `${roomPath(workspaceId, sessionId)}/queue/${encodeURIComponent(itemId)}`, {
+          token,
+          hostToken,
+          method: "DELETE",
+          timeoutMs: timeouts.config,
+        })
+      ).queue,
+    revokeRoomInvites: (workspaceId: string, sessionId: string): Promise<{ ok: boolean }> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/invites`, { token, hostToken, method: "DELETE", timeoutMs: timeouts.config }),
+    setGuestCapabilities: (workspaceId: string, sessionId: string, tokenId: string, capabilities: RedrobGuestCapability[]): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/guests/${encodeURIComponent(tokenId)}`, {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: { capabilities },
+        timeoutMs: timeouts.config,
+      }),
+    setGuestPlanOnly: (workspaceId: string, sessionId: string, tokenId: string, planOnly: boolean): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/guests/${encodeURIComponent(tokenId)}`, {
+        token,
+        hostToken,
+        method: "PATCH",
+        body: { planOnly },
+        timeoutMs: timeouts.config,
+      }),
+    removeGuest: (workspaceId: string, sessionId: string, tokenId: string): Promise<unknown> =>
+      requestJson(baseUrl, `${roomPath(workspaceId, sessionId)}/guests/${encodeURIComponent(tokenId)}`, {
+        token,
+        hostToken,
+        method: "DELETE",
+        timeoutMs: timeouts.config,
+      }),
     // The memory bank is global, not workspace-scoped: it replaced an
     // organization-scoped hosted store that followed the user across projects.
     listMemories: async (): Promise<Memory[]> => {
@@ -1387,7 +1970,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         hostToken,
         timeoutMs: timeouts.config,
       }),
-    addSchedule: (workspaceId: string, payload: { playbookId: string; label: string; rule: RedrobScheduleRule }) =>
+    addSchedule: (workspaceId: string, payload: { target: RedrobScheduleTarget; label: string; rule: RedrobScheduleRule }) =>
       requestJson<RedrobScheduleState>(baseUrl, `/workspace/${encodeURIComponent(workspaceId)}/schedules`, {
         token,
         hostToken,
@@ -1395,11 +1978,21 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         body: payload,
         timeoutMs: timeouts.config,
       }),
-    updateSchedule: (workspaceId: string, scheduleId: string, payload: { enabled: boolean }) =>
+    updateSchedule: (
+      workspaceId: string,
+      scheduleId: string,
+      payload: { enabled?: boolean; target?: RedrobScheduleTarget; label?: string; rule?: RedrobScheduleRule },
+    ) =>
       requestJson<RedrobScheduleState>(
         baseUrl,
         `/workspace/${encodeURIComponent(workspaceId)}/schedules/${encodeURIComponent(scheduleId)}`,
         { token, hostToken, method: "PATCH", body: payload, timeoutMs: timeouts.config },
+      ),
+    deleteSchedule: (workspaceId: string, scheduleId: string) =>
+      requestJson<RedrobScheduleState>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/schedules/${encodeURIComponent(scheduleId)}`,
+        { token, hostToken, method: "DELETE", timeoutMs: timeouts.config },
       ),
     answerScheduleWaiting: (workspaceId: string, waitingId: string, approve: boolean) =>
       requestJson<RedrobScheduleState>(
@@ -1568,6 +2161,35 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken },
       );
     },
+    listLibrarySkills: (workspaceId: string, filter: RedrobLibraryFilter = {}) => {
+      const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => Boolean(value))).toString();
+      return requestJson<{ version: string; skills: RedrobLibrarySkillSummary[]; source: RedrobLibrarySource }>(
+        baseUrl,
+        `/workspace/${workspaceId}/skills/library${query ? `?${query}` : ""}`,
+        { token, hostToken },
+      );
+    },
+    getSkillTaxonomy: (workspaceId: string) =>
+      requestJson<RedrobSkillTaxonomy>(baseUrl, `/workspace/${workspaceId}/skills/library/taxonomy`, { token, hostToken }),
+    getLibrarySkill: (workspaceId: string, name: string) =>
+      requestJson<RedrobLibrarySkill>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}`, {
+        token,
+        hostToken,
+      }),
+    installLibrarySkill: (workspaceId: string, name: string) =>
+      requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}/install`, {
+        token,
+        hostToken,
+        method: "POST",
+      }),
+    getTeamSkills: (workspaceId: string) =>
+      requestJson<RedrobTeamSkillsState>(baseUrl, `/workspace/${workspaceId}/skills/team`, { token, hostToken }),
+    syncTeamSkills: (workspaceId: string) =>
+      requestJson<RedrobTeamSkillsState>(baseUrl, `/workspace/${workspaceId}/skills/team/sync`, {
+        token,
+        hostToken,
+        method: "POST",
+      }),
     upsertSkill: (workspaceId: string, payload: { name: string; content: string; description?: string }) =>
       requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills`, {
         token,
@@ -1612,12 +2234,23 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         },
       ),
     mcpAppSandbox: (app: RedrobMcpAppResource, hostOrigin: string): RedrobMcpAppSandbox => {
-      const messageOrigin = normalizeMcpAppHostOrigin(hostOrigin);
-      const url = new URL(`${baseUrl}/mcp-apps/sandbox.html`);
-      if (url.origin === hostOrigin && url.hostname === "localhost") url.hostname = "127.0.0.1";
-      else if (url.origin === hostOrigin && url.hostname === "127.0.0.1") url.hostname = "localhost";
+      const url = sandboxUrl(baseUrl, "/mcp-apps/sandbox.html", hostOrigin);
       url.searchParams.set("csp", JSON.stringify(app.csp));
-      url.searchParams.set("hostOrigin", messageOrigin);
+      return { url: url.toString(), expectedOrigin: url.origin };
+    },
+    /**
+     * Read access for a previewed page to the folder it sits in, so its relative stylesheets, scripts
+     * and images load. The `basePath` is a path on the sandbox origin.
+     */
+    grantArtifactPreview: (workspaceId: string, path: string) =>
+      requestJson<{ ok: true; basePath: string }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/artifact-preview/grant`,
+        { token, hostToken, method: "POST", body: { path }, timeoutMs: timeouts.config },
+      ),
+    /** Where a model-written HTML page is previewed: this server's origin, never the app's. */
+    artifactPreviewSandbox: (hostOrigin: string): RedrobMcpAppSandbox => {
+      const url = sandboxUrl(baseUrl, "/artifact-preview/sandbox.html", hostOrigin);
       return { url: url.toString(), expectedOrigin: url.origin };
     },
     callMcpAppTool: (
@@ -2072,21 +2705,24 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         timeoutMs: timeouts.config,
       }),
 
-    createVoiceRealtimeSession: (payload?: { model?: string; sessionContext?: string }) =>
-      requestJson<{
-        ok: true;
-        clientSecret: string;
-        expiresAt: number | null;
-        model: string;
-        transcriptionModel: string;
-        tools: string[];
-        source?: string;
-      }>(baseUrl, "/voice/realtime/session", {
+    /** Read-aloud: mp3 of `text`, spoken by the engine on its own Redrob credential. */
+    speakText: (workspaceId: string, text: string) =>
+      requestBinary(baseUrl, "/voice/speech", {
         token,
         hostToken,
         method: "POST",
-        body: payload ?? {},
-        timeoutMs: timeouts.config,
+        body: { workspaceId, text },
+        timeoutMs: timeouts.binary,
+      }),
+
+    /** Push-to-talk: the text of a recording, transcribed by the engine on its own Redrob credential. */
+    transcribeAudio: (workspaceId: string, recording: { audio: string; format: string; language?: string }) =>
+      requestJson<{ text: string; seconds?: number; costUsd?: number }>(baseUrl, "/voice/transcribe", {
+        token,
+        hostToken,
+        method: "POST",
+        body: { workspaceId, ...recording },
+        timeoutMs: timeouts.binary,
       }),
   };
 }

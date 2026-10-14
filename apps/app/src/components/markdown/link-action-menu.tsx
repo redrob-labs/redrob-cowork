@@ -28,7 +28,7 @@ export function LinkActionMenu({ target, anchorRect, onOpenTarget, onClose }: Li
 
   useEffect(() => {
     function handleOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (event.target instanceof Node && menuRef.current && !menuRef.current.contains(event.target)) {
         onClose();
       }
     }
@@ -152,7 +152,7 @@ export function LinkActionMenu({ target, anchorRect, onOpenTarget, onClose }: Li
           <div className="my-1 h-px bg-foreground/5" />
           <div className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground">
             <Loader2 className="size-3.5 shrink-0 animate-spin" />
-            Loading apps…
+            {t("link_menu.loading_apps")}
           </div>
         </>
       ) : null}

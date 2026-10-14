@@ -28,10 +28,14 @@ import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
 import { DsStory } from "../desk/ds-story";
 import { SaveAsProjectAction } from "../desk/projects/project-dialog";
+import { HandoffAction } from "../desk/handoff/handoff-dialog";
+import { CoworkAction } from "../desk/room/cowork";
 import { DeskShell } from "../desk/shell/desk-shell";
 import { DeskLayer } from "../desk/shell/desk-layer";
 import { deskRoutes } from "../desk/shell/desk-routes";
 import { DeskSettingsGate } from "../desk/settings/desk-settings";
+import { WindowTitleBar } from "./window-title-bar";
+import { GlobalTooltipLayer } from "./global-tooltip-layer";
 
 /**
  * The working chat (the session page) inside the Desk frame, with the old sidebar left to
@@ -43,7 +47,14 @@ function ChatRoute() {
     <DeskShell
       current={sessionId ? null : "chat"}
       chatId={sessionId ?? null}
-      actions={<SaveAsProjectAction chatId={sessionId ?? null} />}
+      bareTop={!sessionId}
+      actions={
+        <>
+          <CoworkAction chatId={sessionId ?? null} />
+          <HandoffAction chatId={sessionId ?? null} />
+          <SaveAsProjectAction chatId={sessionId ?? null} />
+        </>
+      }
       measure={false}
       fill
     >
@@ -97,6 +108,7 @@ export function AppRoot() {
     <>
       <DevProfiler id="AppRoot">
         <ShellConfigProvider>
+        <WindowTitleBar />
         <AppMenuProvider>
         <RedrobControlProvider>
           <RedrobRouteControlActions />
@@ -171,6 +183,7 @@ export function AppRoot() {
         true app-level signal.
       */}
       <NewProvidersListener />
+      <GlobalTooltipLayer />
       <DevProfilerOverlay />
       <ReactRenderWatchdogOverlay />
     </>

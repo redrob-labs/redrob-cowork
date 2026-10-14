@@ -455,7 +455,14 @@ export function ModelSelect({
         </TooltipContent>
       </Tooltip>
       <PopoverContent
-        className="flex max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible bg-transparent p-0 shadow-none ring-0"
+        // border-0 rounded-none: the DS PopoverContent defaults to `rounded-lg border`,
+        // which drew a second rounded border around the ModelMenu's own rounded-2xl
+        // container (round 5, item 7). The menu supplies the only frame now.
+        // Round 14, item G: the base PopoverContent also sets `backdrop-blur-xl
+        // backdrop-saturate-150`, which tailwind-merge does NOT override here — a backdrop-filter on
+        // a rounded-none box paints a HARD GREY SQUARE pane behind the rounded menu. Cancel it so the
+        // only painted/filtered surface is the ModelMenu's own rounded card.
+        className="flex max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible border-0 rounded-none bg-transparent p-0 shadow-none ring-0 backdrop-blur-none backdrop-saturate-100"
         align="start"
         // Inside the Desk frame the menu stays in the work column; it used to run over the side panel.
         collisionBoundary={open ? deskWorkColumn() : undefined}

@@ -61,6 +61,24 @@
   app-region: no-drag;
 }
 
+/* A full-height surface that stops at the title bar (`WindowTitleBar`) rather than running under it.
+   `--app-titlebar-height` is 0 everywhere the bar is not drawn, so these are plain 100dvh/100svh there. */
+@utility h-app {
+  height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility min-h-app {
+  min-height: calc(100dvh - var(--app-titlebar-height));
+}
+@utility h-app-svh {
+  height: calc(100svh - var(--app-titlebar-height));
+}
+@utility min-h-app-svh {
+  min-height: calc(100svh - var(--app-titlebar-height));
+}
+@utility top-app {
+  top: var(--app-titlebar-height);
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
@@ -310,6 +328,43 @@
   height: 100%;
 }
 
+/*
+  Round 12 (revised): the Desk sidebar as an Apple-Music-style FLOATING POPUP CARD. Per the
+  reference it is not a flush rail — it is a rounded rectangle inset from the window on all sides,
+  with a soft shadow and a more vibrant translucent gradient tint.
+
+  How it floats inside a CSS-grid column: the DS lays `.rr-shell__side` as the first grid column, so
+  we inset the panel WITHIN that column with margin + border-radius + a drop shadow, letting the
+  window ground show in the gap around it. backdrop-filter is progressive enhancement (true blur only
+  where the window is vibrant, e.g. macOS; a richer translucent tint otherwise). The inner scroll
+  area (#rr-shell-side) keeps its own overflow, so the rounded corners read without clipping scroll.
+*/
+.desk-shell .rr-shell__side {
+  margin: var(--space-2);
+  border-radius: 16px;
+  overflow: hidden;
+  /* Round 15: the floating card must match the MAIN WORK SECTION, which the DS paints
+     --surface-raised (#f8f9fb light / #141719 dark), NOT the body's --surface-base.
+     Round 14 matched it to the body instead, and the leading `#fff 22%` wash in the old
+     gradient lightened it further — both read as a seam against the main section. Solid
+     --surface-raised, no wash: the card is now the SAME surface as the work area, and the
+     border + shadow + radius alone make it float. */
+  background-color: var(--surface-raised);
+  background-image: none;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, transparent);
+  box-shadow:
+    0 12px 32px -16px rgba(31, 41, 63, 0.3),
+    inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent);
+}
+[data-theme="dark"] .desk-shell .rr-shell__side {
+  background-color: var(--surface-raised);
+  background-image: none;
+  border-color: color-mix(in srgb, #fff 7%, transparent);
+  box-shadow:
+    0 14px 36px -16px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 color-mix(in srgb, #fff 7%, transparent);
+}
+
 .desk-shell #rr-shell-side,
 .desk-shell #rr-shell-main {
   min-height: 0;
@@ -329,6 +384,267 @@
 .desk-shell--fill #rr-shell-main > div:first-of-type > * {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/*
+  The empty new-chat home has no title and nothing to put in the shell's top header,
+  so that header rendered as an empty 57px strip with only the (inert here) side-panel
+  toggle in it (round 3, item 1). Hide it on the home; the work flexes to fill. On the
+  desktop app the custom window title bar (window-title-bar.tsx) owns the drag region,
+  so no drag strip is lost here.
+*/
+.desk-shell--bare-top .rr-shell__top {
+  display: none;
+}
+
+/*
+  Round 19: `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
+  work subtree's overflow. `--bare-top` is the EMPTY CHAT HOME, which has no scrolling transcript and
+  needs overflow:visible so an upward status popover isn't clipped (see the rule further down). A tall
+  SCROLLING screen that merely has no header — Trending AI — must keep its scroll container, so it uses
+  this instead. Reusing `--bare-top` there turned #rr-shell-main to overflow:visible and clipped the
+  lower shelves (the "missing scrollbar"). Same header-hide, different overflow contract.
+*/
+.desk-shell--headless .rr-shell__top {
+  display: none;
+}
+
+/*
+  Sidebar brand lockup (round 4, item 6). DeskShell now passes product="Redrob
+  Cowork", so the wordmark renders beside the mark. Make the mark a touch larger
+  with rounded corners, and set the wordmark in the design system's own sans at a
+  sidebar-appropriate size. Scoped to the Desk shell brand row.
+*/
+.desk-shell .rr-shell__brand .rr-mark,
+.desk-shell .rr-shell__brand .rr-mark img,
+.desk-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px; /* less rounded than before (round 5, item 6) */
+  overflow: hidden;
+}
+.desk-shell .rr-shell__product {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-primary);
+}
+/*
+  Round 7, item 2: the DS brand row leaves too much space between the mark and the
+  "Redrob Cowork" wordmark. Tighten the gap so the lockup reads as one unit.
+*/
+.desk-shell .rr-shell__brand {
+  gap: 8px;
+}
+
+/*
+  Round 5, item 4: the brand row's own fold toggle (.rr-shell__fold, right of the
+  "Redrob Cowork" wordmark) is redundant now that the window title bar carries the
+  sidebar toggle (round 4, item 5) -- both flip the same sidebarOpen store. Hide it.
+*/
+.desk-shell .rr-shell__fold {
+  display: none;
+}
+
+/*
+  Round 8, item 6: the sidebar brand lockup keeps only the "Redrob Cowork" wordmark; drop the
+  square mark image (the title bar now carries the Cowork mark). Scoped to the Desk shell.
+*/
+.desk-shell .rr-shell__brand .rr-mark,
+.desk-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
+  display: none;
+}
+
+/*
+  Round 8, item 5: the left sidebar is draggable. The DeskShell has no right rail, so the DS grid is
+  `232px minmax(0,1fr)`; drive that first column from --app-side-width (set from the UI store, clamped
+  220-420 to match the store), and lay a thin drag handle on the sidebar's right edge.
+*/
+.desk-shell .rr-shell--norail {
+  grid-template-columns: var(--app-side-width, 260px) minmax(0, 1fr);
+}
+.desk-shell__side-resizer {
+  position: absolute;
+  top: var(--app-titlebar-height, 0px);
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 40;
+  background: transparent;
+}
+/*
+  Round 11, item 4: the handle keeps its 8px hit area, but on hover/drag it draws only a thin
+  2px line centred in that area (via ::before) instead of filling the whole 8px with colour — the
+  old full-width 35% fill read as a border that thickened too much. Lower opacity too.
+*/
+.desk-shell__side-resizer::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: transparent;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.desk-shell__side-resizer:hover::before,
+.desk-shell__side-resizer[data-resizing="true"]::before {
+  background: color-mix(in srgb, var(--spectrum-sky, #3b82f6) 22%, transparent);
+}
+
+/*
+  Round 8, item 7: the title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS
+  64px mini-rail. When the shell carries desk-shell--side-hidden, drop to a SINGLE 1fr column so the
+  work fills the whole width. (A two-track `0 minmax(0,1fr)` left the sidebar's `display:none` grid
+  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track — the whole
+  page measured 0 wide. One column has nowhere else to flow.)
+*/
+.desk-shell--side-hidden .rr-shell--norail {
+  grid-template-columns: minmax(0, 1fr);
+}
+.desk-shell--side-hidden .rr-shell__side,
+.desk-shell--side-hidden .desk-shell__side-resizer {
+  display: none;
+}
+
+/*
+  Round 9, item 3: the account block (the "Log in or sign up" / profile row) is the VERY
+  bottom section, with the theme switch directly ABOVE it. DOM order in the DS foot is
+  aside (account) then theme, and the DS pins theme to the bottom with `margin-top:auto`.
+  To make account last we flip the visual order with `order` (the foot is a flex column —
+  `margin-top:auto` already works on it) and move the auto margin onto the theme row so the
+  free space collapses above the pair, dropping theme + account to the bottom together.
+  Result top-to-bottom: [free space] -> theme -> account.
+*/
+.desk-shell .rr-shell__theme {
+  order: 0;
+  margin-top: auto;
+  /* Round 11, item 12: pull the account block closer to the theme row — trim the DS theme row's
+     own bottom padding so the gap above "Log in or sign up" is smaller. */
+  padding-bottom: var(--space-1);
+}
+.desk-shell .rr-shell__aside {
+  order: 1;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: var(--space-3);
+}
+
+/*
+  Round 11, item 6: the chat-session header (the DS shell top bar carrying the "New session" title +
+  Invite + panel button) was taller than the app chrome. Match the 48px chrome height — the DS default
+  is padding var(--space-3) top+bottom with no fixed height, which read as too thick. Fix the strip to
+  48px with tighter vertical padding (border-box so the 1px bottom border is included).
+*/
+.desk-shell .rr-shell__top {
+  box-sizing: border-box;
+  height: var(--app-titlebar-height, 48px);
+  min-height: var(--app-titlebar-height, 48px);
+  padding-block: 0;
+}
+
+/* Round 6, item 3: the not-connected account placeholder avatar (neutral person glyph). */
+.desk-account__avatar-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+
+/*
+  Status popovers (Privacy / Memory / Cross-check), round 3 items 2 + 5.
+
+  Item 2 -- clipping. The panel (.rr-cstatus__panel) is position:absolute and opens
+  UPWARD (bottom: 100% + space-2), so the nested overflow:hidden / overflow:auto
+  containers between the composer and the shell main cut it off, and the home felt
+  stuck. On the EMPTY HOME ONLY (.desk-shell--bare-top) the hero owns the screen and
+  there is no transcript that needs its own clipping, so let that work subtree show
+  overflow -- the panel then opens into free space above the composer. Real sessions
+  (no bare-top) keep their overflow so the transcript scrolls normally.
+*/
+.desk-shell--bare-top #rr-shell-main,
+.desk-shell--bare-top #rr-shell-main > div,
+.desk-shell--bare-top #rr-shell-main [class*="overflow-hidden"],
+.desk-shell--bare-top #rr-shell-main [class*="overflow-y-auto"] {
+  overflow: visible;
+}
+
+/*
+  Item 5 -- the panel read large next to the compact composer. Size it down to the
+  app's own scale: tighter padding and radius, smaller gaps, smaller level cards and
+  type, a narrower max width, and a shorter max height. A deliberate, local override of
+  the design system's default panel scale, scoped to the composer status panel only.
+*/
+/* Center the Privacy / Memory / Cross-check chips under the prompt box (round 6, items 1 + 8d). */
+.rr-cstatus__row {
+  justify-content: center;
+}
+.rr-cstatus__panel {
+  max-width: 420px;
+  padding: var(--space-4);
+  border-radius: 12px; /* --radius-lg literal: avoid reading a Tailwind/DS-shared var() */
+  /*
+    Item 3 (round 5): Cross-check is the tallest panel; at the old 460px/64vh cap it
+    scrolled and the last row sat flush at the clipped edge. Raise the usable height
+    (it opens upward, so this uses the room above the composer) and add bottom
+    scroll padding so the final row is never cut off.
+  */
+  max-height: min(600px, 78vh);
+  scroll-padding-block-end: var(--space-4);
+  font-size: 13px;
+  /*
+    Item 8: the panel showed a persistent ("sticky") scrollbar track even when the
+    content fit. Only reserve/stabilise the gutter when it actually scrolls, and
+    render a thin overlay scrollbar so a track never sits there on short content.
+  */
+  scrollbar-gutter: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong, rgb(128 128 128 / 0.4)) transparent;
+}
+.rr-cstatus__panel::-webkit-scrollbar {
+  width: 8px;
+}
+.rr-cstatus__panel::-webkit-scrollbar-thumb {
+  background: var(--border-strong, rgb(128 128 128 / 0.4));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.rr-cstatus__panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.rr-cstatus__panel .rr-privacy,
+.rr-cstatus__panel .rr-memscope {
+  gap: var(--space-3);
+}
+.rr-cstatus__panel .rr-privacy__levels {
+  gap: var(--space-1);
+}
+.rr-cstatus__panel .rr-privacy__level {
+  padding: var(--space-2);
+  border-radius: 8px; /* --radius-md literal: avoid reading a Tailwind/DS-shared var() */
+}
+.rr-cstatus__panel .rr-privacy__levelhead {
+  font-size: 12.5px;
+  line-height: 18px;
+}
+.rr-cstatus__panel .rr-privacy__level p {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 16px;
+}
+.rr-cstatus__panel .rr-privacy__last {
+  font-size: 12px;
+  line-height: 18px;
+}
+.rr-cstatus__panel .rr-memscope__options {
+  gap: var(--space-2);
 }
 
 /**
@@ -353,7 +669,9 @@
   min-width: 0;
   min-height: 0;
   border-left: 1px solid var(--border-subtle);
-  background: var(--surface-base);
+  /* Round 15: match the MAIN WORK SECTION (--surface-raised), not the body (--surface-base),
+     so the panel beside the work reads as one continuous surface. */
+  background: var(--surface-raised);
   animation: desk-panel-in var(--duration-base) var(--easing-entrance);
 }
 
@@ -423,7 +741,7 @@
 
   .desk-panel {
     position: fixed;
-    top: 0;
+    top: var(--app-titlebar-height);
     right: 0;
     bottom: 0;
     z-index: 50;
@@ -823,8 +1141,10 @@
  * the design system's class names.
  */
 .desk-account {
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
+  /* Round 12, item 3: the "Log in or sign up" block took too much vertical space. Trim its own
+     top margin + padding (space-2 -> space-1) so the row sits closer under the theme switch. */
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -835,7 +1155,9 @@
 .desk-account > div > button {
   width: 100%;
   height: auto;
-  padding: var(--space-2);
+  /* Round 12, item 3: shorter button — trim vertical padding (space-2 -> space-1), keep the
+     horizontal padding so the avatar + label still breathe. */
+  padding: var(--space-1) var(--space-2);
   justify-content: space-between;
 }
 
@@ -906,6 +1228,65 @@
   line-height: 22px;
   text-align: center;
   color: var(--ink-secondary);
+}
+
+/* Search (desk/shell/search-dialog.tsx): a field and the places and chats it matches. */
+.desk-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-search__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--field-radius);
+  color: var(--ink-muted);
+}
+.desk-search__field:focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.desk-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink-primary);
+  font: var(--text-body);
+}
+.desk-search__results {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-search__result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--control-radius);
+  font: var(--text-body);
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.desk-search__result[aria-selected="true"] {
+  background: var(--surface-sunken);
+}
+.desk-search__meta,
+.desk-search__empty {
+  font: var(--text-body-sm);
+  color: var(--ink-muted);
+}
+.desk-search__empty {
+  padding: var(--space-2) var(--space-3);
 }
 
 .desk-hint {
@@ -1104,12 +1485,161 @@
  */
 .desk-new {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0 var(--space-4);
+}
+
+/*
+  The hero (greeting + composer + status chips) is vertically centered in the
+  available height (round 4, item 2). It keeps the old 720px measure and the
+  gap between its own rows.
+*/
+.desk-new__center {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   gap: var(--space-5);
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  min-height: 0;
+}
+
+/* A quiet one-line disclaimer pinned at the bottom of the home (round 4, item 3). */
+.desk-new__disclaimer {
+  flex: none;
+  margin: 0;
+  padding: var(--space-3) 0 var(--space-4);
+  text-align: center;
+  font: var(--text-body-sm);
+  color: var(--ink-muted);
+}
+
+/* Round 7, item 7: the same quiet disclaimer under the IN-CHAT composer (the home one lives in SessionEmptyHero and only shows on the new-chat screen). Lighter top padding since it sits under the status chips, not a tall hero. */
+.desk-chat__disclaimer {
+  margin: 0;
+  padding: var(--space-2) 0 0;
+  text-align: center;
+  font: var(--text-body-sm);
+  color: var(--ink-muted);
+}
+
+/*
+  Round 11, item 13: when the prompt box holds the caret, show a very subtle Redrob-blue glow
+  OUTSIDE the field (like Kiro), not a wash inside it. The ::before sits BEHIND the field (negative
+  inset + z-index:-1) and is blurred, so the colour blooms around the box rather than tinting its
+  surface. Light and subtle: ~10% sky, fades in on focus-within, pointer-transparent, reduced-motion
+  safe. Replaces the round-8 inner-wash overlay.
+*/
+.desk-composer-field::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: color-mix(in srgb, var(--spectrum-sky, #3b82f6) 10%, transparent);
+  filter: blur(10px);
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease);
+  z-index: -1;
+}
+.desk-composer-field:focus-within::before {
+  opacity: 1;
+}
+/* Keep the field's own content above the overlay. */
+.desk-composer-field > * {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+  Round 8, item 11: the voice-mode orb. A faint Redrob-blue sphere whose gradient hues (blue ->
+  indigo -> teal) rotate slowly in a circle inside it. The pulse (set by phase in the component)
+  swells the whole orb; the swirl turns independently. Both honour reduced-motion.
+*/
+/* Round 14, item F: the orb is a clickable button (start/stop talking). Bare reset so the orb's own
+   visuals show through, a pointer cursor, and a round focus ring for keyboard use. */
+.voice-orb__button {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+.voice-orb__button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 6px;
+}
+.voice-orb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 9999px;
+  /* A soft outer glow in Redrob blue so even the still orb reads as lit. */
+  box-shadow: 0 0 48px 8px color-mix(in srgb, var(--spectrum-sky, #3b82f6) 28%, transparent);
+}
+.voice-orb__swirl {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* The blue-led wheel of hues that turns inside the orb. */
+  background: conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--spectrum-sky, #3b82f6) 85%, transparent),
+    color-mix(in srgb, var(--spectrum-indigo, #6366f1) 70%, transparent),
+    color-mix(in srgb, var(--spectrum-teal, #14b8a6) 55%, transparent),
+    color-mix(in srgb, var(--spectrum-sky, #3b82f6) 85%, transparent)
+  );
+  filter: blur(10px);
+  opacity: 0.85;
+  animation: voice-orb-spin 9s linear infinite;
+}
+/*
+  Round 11, item 11: while listening (mic tapped), whirl the hue wheel noticeably faster and brighten
+  the orb's glow so the tap registers. Kept tasteful — 5s spin (vs 9s), a modest glow bump.
+*/
+.voice-orb--listening .voice-orb__swirl {
+  animation-duration: 5s;
+  opacity: 0.95;
+}
+.voice-orb--listening {
+  box-shadow: 0 0 56px 10px color-mix(in srgb, var(--spectrum-sky, #3b82f6) 38%, transparent);
+}
+.voice-orb__core {
+  position: absolute;
+  width: 62%;
+  height: 62%;
+  border-radius: inherit;
+  background: radial-gradient(circle at 38% 34%, color-mix(in srgb, var(--surface-base, #fff) 70%, transparent), transparent 68%);
+  filter: blur(2px);
+}
+@keyframes voice-orb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes voice-orb-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.11);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .voice-orb,
+  .voice-orb__swirl {
+    animation: none !important;
+  }
 }
 
 .desk-new__line {
@@ -1117,6 +1647,19 @@
   font: var(--text-voice-2);
   font-family: var(--font-serif);
   color: var(--ink-primary);
+}
+
+/* The greeting block: the rotating warm line, then a rotating prompt-starter hint sub-line. */
+.desk-new__greeting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.desk-new__hint {
+  margin: 0;
+  font: var(--text-body-sm);
+  color: var(--ink-secondary);
 }
 
 .desk-composer-tools {
@@ -1303,6 +1846,200 @@
   color: var(--ink-muted);
 }
 
+/* Handoff: what goes with a chat a teammate takes over. */
+.desk-handoff,
+.desk-handoff__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.desk-handoff__group {
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.desk-handoff__group legend,
+.desk-handoff__group > b {
+  margin-bottom: var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+/* Live co-working (desk/room/cowork.tsx). */
+.desk-cowork {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.desk-cowork__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.desk-cowork__row,
+.desk-cowork__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-cowork__person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.desk-cowork__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.desk-cowork__controls {
+  flex-basis: 100%;
+  padding-left: var(--space-6);
+}
+.desk-cowork__queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+.desk-cowork__author {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-end;
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.desk-handoff__facts > div {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: var(--space-3);
+}
+
+.desk-handoff__facts dt {
+  color: var(--ink-secondary);
+}
+
+.desk-handoff__facts dd {
+  margin: 0;
+  color: var(--ink-primary);
+}
+
+.desk-handoff__findings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Review: comments on a chat, its steps and claims, and the verdict above it. */
+.desk-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--border-subtle, var(--ink-muted));
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.desk-review__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.desk-review__comment {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.desk-review__comment[data-resolved] .desk-review__text {
+  color: var(--ink-muted);
+}
+
+.desk-review__body,
+.desk-review__form,
+.desk-review__group {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.desk-review__form {
+  gap: var(--space-2);
+}
+
+.desk-review__meta,
+.desk-review__item,
+.desk-review__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink-secondary);
+}
+
+.desk-review__meta b,
+.desk-review__item {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.desk-review__text,
+.desk-review__note {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink-primary);
+}
+
+.desk-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.desk-review__bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: --theme(--radius-md);
+  background: var(--surface-sunken);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .desk-settings__auto {
   display: flex;
   flex-direction: column;
@@ -1353,23 +2090,18 @@
   list-style: none;
 }
 
-/* Preview screens (Playbooks, a run, Scheduled, History, Model Guide) on sample data. */
+/* Desk screens that can show sample data: Skills, Scheduled, History, Model Guide. */
 .desk-preview--wide {
   max-width: none;
 }
 
-.desk-preview__list,
-.desk-preview__sources {
+.desk-preview__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.desk-preview__sources {
-  gap: var(--space-2);
 }
 
 .desk-preview__wait {
@@ -1387,38 +2119,6 @@
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
-}
-
-.desk-preview__worth {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-radius: --theme(--radius-lg);
-  background: var(--surface-raised);
-}
-
-.desk-preview__impact {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: 0;
-  color: var(--ink-secondary);
-}
-
-.desk-preview__impact b {
-  font-size: 24px;
-  line-height: 32px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-primary);
-}
-
-.desk-preview__status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
 }
 
 .desk-preview__figure {
@@ -1439,6 +2139,40 @@
 .desk-preview__what span {
   font-size: 13px;
   color: var(--ink-muted);
+}
+
+/* Skills: the filters above the list, and each row's name, tags and actions. */
+.desk-skills__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.desk-skills__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.desk-skills__name {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.desk-skills__name:hover {
+  text-decoration: underline;
+}
+
+.desk-skills__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
 }
 
 @media (max-width: 900px) {
@@ -1574,6 +2308,11 @@ html[lang="ko"] {
  * unlayered `font-family` would beat the `:lang(ko)` rule and put Hangul back in
  * the Latin face. Smoothing is left to the platform, as the preflight asks.
  */
+
+/* A Preview button only where there is a sandbox to preview in; see MarkdownBlock. */
+.markdown-content[data-redrob-code-preview-available="false"] [data-redrob-code-preview] {
+  display: none;
+}
 
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
@@ -2027,6 +2766,816 @@ select:disabled {
   }
   #root {
     min-height: 100%;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--app-titlebar-height));
+  }
+
+  /* Windows and Linux draw their title bar in the renderer (WindowTitleBar); the page starts below it. */
+  :root {
+    --app-titlebar-height: 0px;
+  }
+  html.redrob-electron.redrob-platform-windows,
+  html.redrob-electron.redrob-platform-linux {
+    --app-titlebar-height: 48px;
+  }
+  body {
+    padding-top: var(--app-titlebar-height);
+  }
+}
+
+/* The title bar (react-app/shell/window-title-bar.tsx), on design-system tokens. 48px
+   is the height main.mjs gives the Windows caption buttons (round 3, item 4 thickened it
+   from 40px). It sits above
+   dialogs so the window can always be moved, minimised and closed. The ground is the sidebar's
+   (sunken on light, raised on dark), so the chrome reads as one band with the menu, as Slack's does. */
+.window-titlebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  height: var(--app-titlebar-height);
+  padding-inline-start: var(--space-2);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+}
+[data-theme="dark"] .window-titlebar {
+  background: var(--surface-raised);
+}
+.window-titlebar__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-self: start;
+}
+/* Round 8, item 1: the brand lockup + search + window buttons, docked to the right edge. */
+.window-titlebar__right {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: end;
+}
+.window-titlebar__brand-mark {
+  height: 28px;
+  width: 28px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+/* Round 13, item 2: the brand marks are buttons now — a bare wrapper with a subtle hover affordance
+   so they read as clickable, and a focus ring for keyboard use. */
+.window-titlebar__brand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.window-titlebar__brand-btn:hover {
+  background: color-mix(in srgb, var(--ink-primary) 8%, transparent);
+  transform: translateY(-1px);
+}
+.window-titlebar__brand-btn:active {
+  transform: translateY(0);
+}
+.window-titlebar__brand-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 1px;
+}
+/* Round 14, item B: an in-app tooltip BELOW the button (not the native OS title, which drew outside
+   the frameless window near the top edge). Shows on hover/focus, pointer-transparent, inside the app. */
+.window-titlebar__brand-btn {
+  position: relative;
+}
+.window-titlebar__brand-btn::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+  z-index: 70;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface-inverse, #1c1f26);
+  color: var(--ink-on-inverse, #fff);
+  font: var(--text-caption, 12px/1.4 sans-serif);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+  box-shadow: var(--shadow-card, 0 4px 12px rgba(0,0,0,0.18));
+}
+.window-titlebar__brand-btn:hover::after,
+.window-titlebar__brand-btn:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.window-titlebar__navbtn:disabled {
+  opacity: 0.4;
+}
+.window-titlebar__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: clamp(260px, 29vw, 416px);
+  height: 32px;
+  padding-inline: var(--space-3) var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--control-radius);
+  background: var(--surface-base);
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard);
+}
+.window-titlebar__search:hover {
+  border-color: var(--border-strong);
+}
+.window-titlebar__search:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.window-titlebar__search-label {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.window-titlebar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: end;
+  padding-inline-end: var(--space-3);
+}
+/* GNOME-style window buttons: 24px circles on a quiet fill. */
+.window-titlebar__winbtn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  background: var(--surface-base);
+  color: var(--ink-primary);
+}
+[data-theme="dark"] .window-titlebar__winbtn {
+  background: var(--surface-sunken);
+}
+.window-titlebar__winbtn.window-titlebar__close:hover {
+  background: var(--status-danger);
+  color: var(--ink-on-brand);
+}
+/* Room for the three caption buttons Windows draws over the bar (46px each). */
+.window-titlebar__caption-space {
+  justify-self: end;
+  width: 138px;
+}
+
+/*
+  Round 8, item 10: the Model Chart browse layer, laid out like a music-chart app. All colour comes
+  from the theme's spectrum tokens so it reads in light and dark; the five tones cycle the banners
+  and tiles through the brand's hues.
+*/
+.model-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 24px);
+}
+.model-chart__banners {
+  position: relative;
+}
+.model-chart__banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  /* Round 24: a taller featured banner (was 172px) — more vertical presence, like a storefront hero.
+     The title + sub sit centered in the extra height via margin-top:auto on the eyebrow block. */
+  min-height: 210px;
+  justify-content: flex-end;
+  padding: var(--space-6, 24px) var(--space-6, 24px) var(--space-5, 20px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  text-align: start;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(120deg, var(--spectrum-sky, #3b82f6), var(--spectrum-indigo, #6366f1));
+  box-shadow: 0 10px 30px -12px rgba(31, 41, 63, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px -12px rgba(31, 41, 63, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.model-chart__banner > * {
+  position: relative;
+  z-index: 1;
+}
+.model-chart__banner[data-tone="1"] { background: linear-gradient(120deg, var(--spectrum-indigo, #6366f1), var(--spectrum-violet, #8b5cf6)); }
+.model-chart__banner[data-tone="2"] { background: linear-gradient(120deg, var(--spectrum-teal, #14b8a6), var(--spectrum-sky, #3b82f6)); }
+.model-chart__banner[data-tone="3"] { background: linear-gradient(120deg, var(--spectrum-violet, #8b5cf6), var(--spectrum-sky, #3b82f6)); }
+.model-chart__banner[data-tone="4"] { background: linear-gradient(120deg, var(--spectrum-sky, #3b82f6), var(--spectrum-teal, #14b8a6)); }
+/*
+  Round 27: real banner artwork as a clean backdrop. The art is a full cover (z-index 0, behind the
+  gradient fallback + glass); the eyebrow/title/sub render on top of it. A scrim gradient keeps the
+  white copy legible over bright or busy art. The scrim and the copy are both default-stacked by the
+  generic `.model-chart__banner > *` rule (z-index 1), so DOM order puts the copy above the scrim.
+*/
+.model-chart__banner-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+.model-chart__banner-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(10, 14, 25, 0) 35%, rgba(10, 14, 25, 0.55) 100%);
+}
+.model-chart__banner-eyebrow {
+  font: var(--text-caption, 12px/1.4 sans-serif);
+  /* Round 17: normal capitalization, not ALL CAPS. The eyebrow strings are already written in
+     sentence case (e.g. "This month", "By output"); the old text-transform:uppercase + wide
+     caps-tracking shouted them. */
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+}
+.model-chart__banner-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.model-chart__banner-sub {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.model-chart__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: var(--space-3, 12px);
+}
+.model-chart__dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--border-strong, #cbd5e1);
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease), width var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__dot[data-on="true"] {
+  width: 18px;
+  background: var(--spectrum-sky, #3b82f6);
+}
+.model-chart__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
+.model-chart__heading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-primary);
+}
+/*
+  Round 20: each shelf is ONE horizontal scroll-snap row (not a wrapping grid), like a music-app
+  shelf. `.model-chart__shelf` is the positioning context for the two overlay chevrons; `.model-chart__row`
+  is the scroller. The native scrollbar is hidden — the row scrolls by chevron, wheel, trackpad, touch
+  and keyboard. Tiles are a fixed ~121px basis (round-19 was 151px; this is ~20% smaller) and snap to
+  the row's start edge.
+*/
+.model-chart__shelf {
+  position: relative;
+}
+.model-chart__row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  /* Round 23: more horizontal air between cards, closer to an Apple Music / Spotify shelf. */
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 2px;
+  /* chevrons overlay the edges; a little inline padding keeps the first/last card off the very edge.
+     Round 22: the TOP padding is 8px (not 2px) so the hover lift (translateY) has room inside this
+     overflow-y:hidden scroller — at 2px the lifted card's top border was clipped. */
+  padding: 8px 2px 4px;
+  /* Hide the native scrollbar — the shelf scrolls by chevrons / wheel / trackpad / touch. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.model-chart__row::-webkit-scrollbar {
+  display: none;
+}
+.model-chart__row > .model-chart__tile {
+  flex: 0 0 121px;
+  width: 121px;
+  scroll-snap-align: start;
+}
+/*
+  The swipe chevrons: circular frosted buttons centered on the ART row (not the whole shelf, so they
+  sit over the squares, not the captions). Hidden by default; they fade in only when the shelf
+  overflows AND is hovered/focus-within, and each is removed from the layout at its scroll extreme
+  (data-show unset). They are an affordance over the native scroll, never the only way to move.
+*/
+.model-chart__chevron {
+  position: absolute;
+  /* centre on the square art, which is ~121px tall at the top of the tile */
+  top: 60px;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 6px 18px -8px rgba(31, 41, 63, 0.45);
+  color: var(--ink-primary);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), background var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__chevron--prev { left: -6px; }
+.model-chart__chevron--next { right: -6px; }
+/* Shown only when this direction can scroll AND the shelf is hovered or focused within. */
+.model-chart__section:hover .model-chart__chevron[data-show],
+.model-chart__section:focus-within .model-chart__chevron[data-show] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.model-chart__chevron:hover {
+  background: var(--surface-raised);
+  transform: translateY(-50%) scale(1.06);
+}
+.model-chart__chevron:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring, var(--spectrum-sky, #3b82f6));
+  outline-offset: 2px;
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-theme="dark"] .model-chart__chevron {
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+}
+/*
+  Apple-style "liquid glass" tiles. Each tile is a frosted translucent panel over a soft colour
+  "image" (`.model-chart__glass`, a blurred multi-stop gradient per tone). backdrop-filter frosts
+  whatever is behind it; an inner top highlight + layered shadow give the panel depth. The label and
+  the 2-line summary sit above the glass. Theme-safe (spectrum tokens), with a dark variant and a
+  no-backdrop-filter fallback below.
+*/
+.model-chart__tile {
+  /* Round 17: an album card — a SQUARE art panel (.model-chart__card) with the caption BELOW it,
+     like a track in a music app. The button itself is just the stack; the card carries the look. */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: start;
+  cursor: pointer;
+  color: var(--ink-primary);
+}
+.model-chart__card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: block;
+  /* The art panel is COMPLETELY SQUARE; the caption lives outside it. */
+  aspect-ratio: 1 / 1;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-base) 62%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 8px 24px -14px rgba(31, 41, 63, 0.4), inset 0 1px 0 rgba(255, 255, 255, var(--g-highlight, 0.5));
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), border-color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 2px;
+}
+/*
+  Round 25: the album art is now a REAL per-tile IMAGE (user's hand-built set), filling the square and
+  sitting above the glass backdrop. Decorative (aria-hidden) — the caption below carries the meaning.
+  object-fit:cover so the square crop is always full-bleed; it keeps the card's rounded corners via
+  the card's overflow:hidden.
+*/
+.model-chart__art {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+.model-chart__tile:hover .model-chart__card {
+  /* Round 22: subtler hover — a 2px lift (was 3), a lighter shadow, same accent border. */
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--spectrum-sky, #3b82f6) 45%, transparent);
+  box-shadow: 0 12px 28px -16px rgba(31, 41, 63, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.model-chart__tile:hover .model-chart__art {
+  transform: scale(1.015);
+}
+/* The colour "image" behind the glass: a blurred multi-stop blob, tinted per tone. Its blob
+   positions/sizes, blur, hue shift and highlight come from per-tile seeded CSS vars (set inline in
+   the component) so every tile varies a little; each var has a round-11 fallback. */
+.model-chart__glass {
+  position: absolute;
+  inset: -30%;
+  z-index: -1;
+  filter: blur(var(--g-blur, 30px)) saturate(1.25) hue-rotate(var(--g-hue, 0deg));
+  opacity: 0.68;
+  background:
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 22%) var(--g-y1, 20%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 46%) var(--g-s2, 52%) at var(--g-x2, 82%) var(--g-y2, 32%), color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 72%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 60% 95%, color-mix(in srgb, var(--spectrum-teal, #14b8a6) 60%, transparent), transparent 75%);
+}
+.model-chart__tile[data-tone="1"] .model-chart__glass {
+  background:
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 24%) var(--g-y1, 22%), color-mix(in srgb, var(--spectrum-indigo, #6366f1) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 84%) var(--g-y2, 30%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 70%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 58% 96%, color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 58%, transparent), transparent 75%);
+}
+.model-chart__tile[data-tone="2"] .model-chart__glass {
+  background:
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 22%) var(--g-y1, 24%), color-mix(in srgb, var(--spectrum-teal, #14b8a6) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 82%) var(--g-y2, 28%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 70%, transparent), transparent 72%),
+    radial-gradient(55% 62% at 62% 95%, color-mix(in srgb, var(--spectrum-indigo, #6366f1) 55%, transparent), transparent 75%);
+}
+.model-chart__tile[data-tone="3"] .model-chart__glass {
+  background:
+    radial-gradient(var(--g-s1, 42%) var(--g-s1, 48%) at var(--g-x1, 24%) var(--g-y1, 20%), color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 85%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 82%) var(--g-y2, 34%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 68%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 60% 96%, color-mix(in srgb, var(--spectrum-teal, #14b8a6) 55%, transparent), transparent 75%);
+}
+.model-chart__tile[data-tone="4"] .model-chart__glass {
+  background:
+    radial-gradient(var(--g-s1, 44%) var(--g-s1, 50%) at var(--g-x1, 22%) var(--g-y1, 22%), color-mix(in srgb, var(--spectrum-sky, #3b82f6) 90%, transparent), transparent 70%),
+    radial-gradient(var(--g-s2, 48%) var(--g-s2, 54%) at var(--g-x2, 84%) var(--g-y2, 30%), color-mix(in srgb, var(--spectrum-teal, #14b8a6) 68%, transparent), transparent 72%),
+    radial-gradient(55% 60% at 58% 95%, color-mix(in srgb, var(--spectrum-violet, #8b5cf6) 55%, transparent), transparent 75%);
+}
+.model-chart__tile-label {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  /* Round 22: a title that wraps to 2-3 lines ("Financial Statement Review") was too loose at the
+     default line-height; pull the lines together. Single-line titles are unaffected. */
+  line-height: 1.15;
+  color: var(--ink-primary);
+}
+.model-chart__tile-summary {
+  /* Round 17: the blurb is hand-written and short, and sits in the caption BELOW the square. */
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-secondary);
+}
+[data-theme="dark"] .model-chart__card {
+  background: color-mix(in srgb, var(--surface-base) 46%, transparent);
+  border-color: color-mix(in srgb, var(--border-subtle) 90%, transparent);
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+[data-theme="dark"] .model-chart__glass { opacity: 0.58; }
+/* No backdrop-filter (older engines): keep the frosted look with a solid translucent surface. */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .model-chart__card { background: var(--surface-raised, var(--surface-base)); }
+  .model-chart__glass { opacity: 0.55; filter: blur(30px); }
+}
+.model-chart__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 7px 14px 7px 11px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-raised, var(--surface-base));
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: color var(--duration-fast, 150ms) var(--easing-standard, ease),
+    border-color var(--duration-fast, 150ms) var(--easing-standard, ease),
+    background var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__back svg {
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__back:hover {
+  color: var(--ink-primary);
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--surface-raised, var(--surface-base)) 70%, var(--ink-primary) 6%);
+}
+.model-chart__back:hover svg {
+  transform: translateX(-2px);
+}
+
+/*
+  Round 26: the inner chart-detail page — a Spotify / Apple-Music style top-10 model list. A header
+  (album-art cover + title + lede) over a ranked list of rows. One layout for every chart.
+*/
+.chart-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 20px);
+}
+.chart-detail__head {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5, 20px);
+}
+.chart-detail__cover {
+  width: 128px;
+  height: 128px;
+  flex: none;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  box-shadow: 0 12px 32px -16px rgba(31, 41, 63, 0.4);
+}
+.chart-detail__cover--blank {
+  background: var(--surface-raised);
+}
+.chart-detail__headtext {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.chart-detail__eyebrow {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: var(--ink-muted);
+}
+.chart-detail__title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 760;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink-primary);
+}
+.chart-detail__lede {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+.chart-detail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.chart-detail__row {
+  display: grid;
+  grid-template-columns: 28px 36px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: var(--space-4, 16px);
+  padding: 12px 10px;
+  border-radius: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 45%, transparent);
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.chart-detail__row:hover {
+  background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
+}
+.chart-detail__row[data-top="true"] .chart-detail__rank {
+  color: var(--spectrum-sky, #3b82f6);
+}
+.chart-detail__rank {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  text-align: center;
+}
+.chart-detail__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  border-radius: 9px;
+  /* A light chip so black currentColor marks (OpenAI, Grok, GLM) stay visible in dark mode and
+     colored marks read cleanly; white-on-transparent marks flip to the dark chip below. */
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  box-shadow: 0 1px 2px rgba(31, 41, 63, 0.08);
+}
+.chart-detail__logo[data-on-dark="true"] {
+  background: #15181f;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.chart-detail__logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.chart-detail__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.chart-detail__name {
+  font-size: 15px;
+  font-weight: 640;
+  color: var(--ink-primary);
+}
+.chart-detail__maker {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.chart-detail__good {
+  font-size: 12.5px;
+  color: var(--ink-secondary);
+  margin-top: 2px;
+}
+.chart-detail__cost {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: end;
+}
+.chart-detail__cost-amount {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+.chart-detail__cost-note {
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+/*
+  Round 31: the Needle Test badge — a graded ring with clearer, Apple-Music-style grade colors
+  (green ace, blue strong, amber good, grey fair) so a strong result reads instantly. The caption
+  sits beneath; the full explanation is in the on-hover tooltip.
+*/
+.chart-detail__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 60px;
+  cursor: help;
+}
+.chart-detail__score-ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  color: var(--grade-ink, #0f172a);
+  background: var(--grade-bg, #e8faf0);
+  border: 1.5px solid var(--grade-color, #22c55e);
+}
+/* Apple-Music-clear grades: saturated ring + soft matching fill + dark readable number. */
+.chart-detail__score-ring[data-grade="ace"]    { --grade-color: #22c55e; --grade-bg: color-mix(in srgb, #22c55e 16%, transparent); }
+.chart-detail__score-ring[data-grade="strong"] { --grade-color: #0ea5e9; --grade-bg: color-mix(in srgb, #0ea5e9 16%, transparent); }
+.chart-detail__score-ring[data-grade="good"]   { --grade-color: #f59e0b; --grade-bg: color-mix(in srgb, #f59e0b 18%, transparent); }
+.chart-detail__score-ring[data-grade="fair"]   { --grade-color: #94a3b8; --grade-bg: color-mix(in srgb, #94a3b8 18%, transparent); }
+/* Redrob Auto's circle: brand indigo with "Best" inside (text, so a touch smaller than the numerals). */
+.chart-detail__score-ring[data-grade="auto"] {
+  --grade-color: var(--spectrum-indigo, #6366f1);
+  --grade-bg: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 15%, transparent);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--spectrum-indigo, #6366f1);
+}
+[data-theme="dark"] .chart-detail__score-ring[data-grade="auto"] { color: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 60%, #fff); }
+[data-theme="dark"] .chart-detail__score-ring { color: #fff; }
+.chart-detail__score-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+/*
+  The task-rerank dropdown (professions only), right-aligned in the header and restyled to the glass
+  tokens: a rounded field with a drawn caret, not the raw native select.
+*/
+.chart-detail__rerank {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  align-self: flex-end;
+  flex: none;
+  min-width: 210px;
+}
+/* Size the design-system Select trigger to the header; its popover list carries the DS styling. */
+.chart-detail__rerank-trigger {
+  width: 100%;
+}
+/*
+  Round 34: Redrob Auto — the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
+  the same height as and visually seamless with the ten models: "Featured" sits on the maker line,
+  "Always the best" fills the Needle column, and the budget copy fills the cost column. A whisper of
+  brand tint is the only thing that sets it apart.
+*/
+.chart-detail__row--auto {
+  background: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 5%, transparent);
+}
+.chart-detail__row--auto:hover {
+  background: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 9%, transparent);
+}
+.chart-detail__maker--featured {
+  font-weight: 650;
+  color: var(--spectrum-indigo, #6366f1);
+}
+.chart-detail__logo--auto {
+  border-color: color-mix(in srgb, var(--spectrum-indigo, #6366f1) 28%, transparent);
+}
+/* The star in Auto's rank slot: brand indigo, sized to sit in the same optical column as the numbers. */
+.chart-detail__rank--star {
+  font-size: 17px;
+  line-height: 1;
+  color: var(--spectrum-indigo, #6366f1);
+  text-align: center;
+}
+.chart-detail__use {
+  flex: none;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--spectrum-sky, #3b82f6);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.chart-detail__use:hover {
+  filter: brightness(1.08);
+}
+.chart-detail__disclaimer {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+/* Narrow: keep rank, logo, meta, score and Use; drop the cost column to save width. */
+@media (max-width: 720px) {
+  .chart-detail__row {
+    grid-template-columns: 24px 32px minmax(0, 1fr) auto auto;
+  }
+  .chart-detail__cost { display: none; }
+}
+
+.model-chart__banner .model-chart__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: none;
+  opacity: 1;
+  background:
+    radial-gradient(60% 120% at var(--g-x2, 85%) -10%, rgba(255, 255, 255, var(--g-highlight, 0.35)), transparent 60%),
+    linear-gradient(var(--g-angle, 135deg), rgba(255, 255, 255, 0.14), transparent 55%),
+    radial-gradient(50% 100% at var(--g-x1, 10%) 110%, rgba(255, 255, 255, 0.12), transparent 60%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-chart__banner,
+  .model-chart__tile {
+    transition: none;
   }
 }
