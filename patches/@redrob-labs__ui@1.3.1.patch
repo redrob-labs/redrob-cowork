@@ -1,0 +1,84 @@
+diff --git a/dist/esm/internal/useFloating.js b/dist/esm/internal/useFloating.js
+index 55edd45e85e5ccb53b662f6bc54e55d2166cf943..c9d8300809411a31bc947fe30c64cbff143924b8 100644
+--- a/dist/esm/internal/useFloating.js
++++ b/dist/esm/internal/useFloating.js
+@@ -166,9 +166,27 @@ export function useFloating(open, find, options) {
+             cancelAnimationFrame(frame);
+             frame = requestAnimationFrame(run);
+         }
++        // A floating element can ALSO be its own scroll container (an overflow-y:auto
++        // panel capped by fitHeight, e.g. .rr-cstatus__panel). The capture-phase
++        // 'scroll' listener below fires on that interior scroll too, re-running
++        // placeFloating mid-scroll — which rewrites inline top/max-height and resets
++        // scrollTop to 0 ("clips to the top"). Skip repositioning when the scroll
++        // originated inside the floating element; a real page/ancestor scroll still
++        // reaches here and repositions as before.
++        function scrollIsInside(target) {
++            const [, el] = findRef.current();
++            if (!el || !(target instanceof Node))
++                return false;
++            return el === target || el.contains(target);
++        }
++        function onScroll(event) {
++            if (scrollIsInside(event.target))
++                return;
++            schedule();
++        }
+         run();
+         window.addEventListener('resize', schedule);
+-        window.addEventListener('scroll', schedule, true);
++        window.addEventListener('scroll', onScroll, true);
+         const [anchor, el] = findRef.current();
+         const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
+         if (observer && el)
+@@ -178,7 +196,7 @@ export function useFloating(open, find, options) {
+         return () => {
+             cancelAnimationFrame(frame);
+             window.removeEventListener('resize', schedule);
+-            window.removeEventListener('scroll', schedule, true);
++            window.removeEventListener('scroll', onScroll, true);
+             if (observer)
+                 observer.disconnect();
+             if (placed)
+diff --git a/dist/internal/useFloating.js b/dist/internal/useFloating.js
+index 10f0725af591d8bb9ac1173988fcc9210d369038..66ec869bfe4bc9ae2df9548929d70ae022780e4d 100644
+--- a/dist/internal/useFloating.js
++++ b/dist/internal/useFloating.js
+@@ -204,9 +204,27 @@ function useFloating(open, find, options) {
+             cancelAnimationFrame(frame);
+             frame = requestAnimationFrame(run);
+         }
++        // A floating element can ALSO be its own scroll container (an overflow-y:auto
++        // panel capped by fitHeight, e.g. .rr-cstatus__panel). The capture-phase
++        // 'scroll' listener below fires on that interior scroll too, re-running
++        // placeFloating mid-scroll — which rewrites inline top/max-height and resets
++        // scrollTop to 0 ("clips to the top"). Skip repositioning when the scroll
++        // originated inside the floating element; a real page/ancestor scroll still
++        // reaches here and repositions as before.
++        function scrollIsInside(target) {
++            const [, el] = findRef.current();
++            if (!el || !(target instanceof Node))
++                return false;
++            return el === target || el.contains(target);
++        }
++        function onScroll(event) {
++            if (scrollIsInside(event.target))
++                return;
++            schedule();
++        }
+         run();
+         window.addEventListener('resize', schedule);
+-        window.addEventListener('scroll', schedule, true);
++        window.addEventListener('scroll', onScroll, true);
+         const [anchor, el] = findRef.current();
+         const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
+         if (observer && el)
+@@ -216,7 +234,7 @@ function useFloating(open, find, options) {
+         return () => {
+             cancelAnimationFrame(frame);
+             window.removeEventListener('resize', schedule);
+-            window.removeEventListener('scroll', schedule, true);
++            window.removeEventListener('scroll', onScroll, true);
+             if (observer)
+                 observer.disconnect();
+             if (placed)
