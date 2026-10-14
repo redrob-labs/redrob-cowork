@@ -33,19 +33,11 @@ on:
         description: "Existing tag to re-run for recovery (e.g., v0.1.2). Skips tag creation."
         required: false
         type: string
-      release_name:
-        description: "Release title (defaults to Redrob Cowork <tag>)"
-        required: false
-        type: string
-      release_body:
-        description: "Release notes body in Markdown (defaults to a short placeholder)"
-        required: false
-        type: string
       draft:
-        description: "Create the GitHub Release as a draft until assets are ready (publish-release flips it public)"
+        description: "Leave the GitHub Release as a draft for a person to publish (default: publish as latest once every asset is attached)"
         required: false
         type: boolean
-        default: true
+        default: false
       prerelease:
         description: "Mark the GitHub Release as a prerelease"
         required: false
@@ -86,8 +78,6 @@ jobs:
       release_tag: ${{ steps.resolve.outputs.release_tag }}
       release_version: ${{ steps.resolve.outputs.release_version }}
       release_mode: ${{ steps.tag.outputs.release_mode }}
-      release_name: ${{ steps.resolve.outputs.release_name }}
-      release_body: ${{ steps.resolve.outputs.release_body }}
       draft: ${{ steps.resolve.outputs.draft }}
       prerelease: ${{ steps.resolve.outputs.prerelease }}
       notarize: ${{ steps.resolve.outputs.notarize }}
@@ -224,8 +214,6 @@ jobs:
         shell: bash
         env:
           RESOLVED_TAG: ${{ steps.tag.outputs.release_tag }}
-          INPUT_RELEASE_NAME: ${{ github.event.inputs.release_name }}
-          INPUT_RELEASE_BODY: ${{ github.event.inputs.release_body }}
           INPUT_DRAFT: ${{ github.event.inputs.draft }}
           INPUT_PRERELEASE: ${{ github.event.inputs.prerelease }}
           INPUT_NOTARIZE: ${{ github.event.inputs.notarize }}
@@ -243,27 +231,11 @@ jobs:
             exit 1
           fi
 
-          RELEASE_NAME_INPUT="${INPUT_RELEASE_NAME:-}"
-          if [ -n "$RELEASE_NAME_INPUT" ]; then
-            RELEASE_NAME="$RELEASE_NAME_INPUT"
-          else
-            RELEASE_NAME="Redrob Cowork $TAG"
-          fi
-
-          RELEASE_BODY_INPUT="${INPUT_RELEASE_BODY:-}"
-          if [ -n "$RELEASE_BODY_INPUT" ]; then
-            RELEASE_BODY="$RELEASE_BODY_INPUT"
-          else
-            printf -v RELEASE_BODY '%s\n\nRedrob Cowork %s desktop release.\n\n%s' \
-              "## What's new" \
-              "$TAG" \
-              "- Artifacts use the redrob-* naming convention."
-          fi
-
-          # A release must never be public while its artifacts are still
-          # building: default to draft for every entry path (tag push AND
-          # fresh dispatch). publish-release flips it public at the end.
-          draft="${INPUT_DRAFT:-true}"
+          # The GitHub Release itself is created by the shared publish job
+          # (redrob-labs/.github release-publish.yml) as the LAST job, once every
+          # asset is built, so nothing is public while artifacts are still
+          # building. `draft` keeps it a draft for a person to publish.
+          draft="${INPUT_DRAFT:-false}"
           prerelease="${INPUT_PRERELEASE:-false}"
           notarize="${INPUT_NOTARIZE:-}"
           if [ -z "$notarize" ]; then
@@ -275,9 +247,6 @@ jobs:
             build_electron="${DEFAULT_BUILD_ELECTRON:-true}"
           fi
 
-          WINDOWS_SIGNED_NOTE='*Windows installers are Authenticode-signed by McKinley Rice, Inc. through Azure Artifact Signing.*'
-          printf -v RELEASE_BODY '%s\n\n%s' "$RELEASE_BODY" "$WINDOWS_SIGNED_NOTE"
-
           publish_npm="${INPUT_PUBLISH_NPM:-}"
           if [ -z "$publish_npm" ]; then
             publish_npm="${DEFAULT_PUBLISH_NPM:-true}"
@@ -285,51 +254,14 @@ jobs:
 
           TAG="${TAG//$'\n'/}"
           TAG="${TAG//$'\r'/}"
-          RELEASE_NAME="${RELEASE_NAME//$'\n'/ }"
-          RELEASE_NAME="${RELEASE_NAME//$'\r'/ }"
 
           echo "release_tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "release_version=${TAG#v}" >> "$GITHUB_OUTPUT"
-          echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
           echo "draft=$draft" >> "$GITHUB_OUTPUT"
           echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
           echo "notarize=$notarize" >> "$GITHUB_OUTPUT"
           echo "build_electron=$build_electron" >> "$GITHUB_OUTPUT"
           echo "publish_npm=$publish_npm" >> "$GITHUB_OUTPUT"
-          {
-            echo "release_body<<__REDROB_RELEASE_BODY_EOF__"
-            printf '%s\n' "$RELEASE_BODY"
-            echo "__REDROB_RELEASE_BODY_EOF__"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Create release if missing
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          BODY_FILE="$RUNNER_TEMP/release_body.md"
-          printf '%s\n' "${{ steps.resolve.outputs.release_body }}" > "$BODY_FILE"
-
-          if gh release view "${{ steps.resolve.outputs.release_tag }}" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release ${{ steps.resolve.outputs.release_tag }} already exists; skipping create."
-            exit 0
-          fi
-
-          PRERELEASE_FLAG=""
-          if [ "${{ steps.resolve.outputs.prerelease }}" = "true" ]; then
-            PRERELEASE_FLAG="--prerelease"
-          fi
-
-          # A new release must never be public while its artifacts are still
-          # building. The final publish-release job is the only place that
-          # removes draft status, after every required asset has been checked.
-          gh release create "${{ steps.resolve.outputs.release_tag }}" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "${{ steps.resolve.outputs.release_name }}" \
-            --notes-file "$BODY_FILE" \
-            --draft $PRERELEASE_FLAG
 
   resolve-benchmark:
     name: Resolve Benchmark Metadata
@@ -377,6 +309,7 @@ jobs:
       publish_npm: ${{ needs.resolve-production.outputs.publish_npm || needs.resolve-benchmark.outputs.publish_npm }}
       benchmark_only: ${{ needs.resolve-production.outputs.benchmark_only || needs.resolve-benchmark.outputs.benchmark_only }}
       prerelease: ${{ needs.resolve-production.outputs.prerelease || needs.resolve-benchmark.outputs.prerelease }}
+      draft: ${{ needs.resolve-production.outputs.draft || 'false' }}
     steps:
       - run: true
 
@@ -482,6 +415,18 @@ jobs:
           # stays exactly what the tag names.
           ref: ${{ env.RELEASE_TAG }}
           fetch-depth: 1
+
+      # The ONE copy of the Windows signing recipe (redrob-labs/.github,
+      # actions/sign-windows). The electron-builder `win.sign` hook calls its
+      # sign.ps1 for the uninstaller and installer mid-packaging, and the shared
+      # action below signs the unpacked app from the same checkout.
+      - name: Check out the shared signing recipe (Windows)
+        if: matrix.os_type == 'windows'
+        uses: actions/checkout@v6
+        with:
+          repository: redrob-labs/.github
+          ref: main
+          path: .redrob-shared
 
       - name: Enable git long paths (Windows)
         if: matrix.os_type == 'windows'
@@ -611,10 +556,11 @@ jobs:
       # Windows signing is Azure Artifact Signing over OpenID Connect, in three
       # steps around one constraint: GitHub's OIDC token lives minutes, and
       # electron-builder signs DURING packaging. So the unpacked app is produced
-      # first with signing off, `azure/login` runs, the unpacked executables are
-      # signed at once, and only then are the installer and zip packaged from
-      # that tree (`--prepackaged`), which signs the uninstaller and installer
-      # through the same hook. No certificate file, no password, no client secret
+      # first with signing off, `azure/login` runs, the unpacked executable is
+      # signed by the shared action, and only then are the installer and zip
+      # packaged from that tree (`--prepackaged`), which signs the uninstaller and
+      # installer through the `win.sign` hook -- itself a call into the same
+      # shared sign.ps1. No certificate file, no password, no client secret
       # anywhere: the three ARTIFACT_SIGNING_* values are plain identifiers and
       # the credential is the login.
       - name: Package Electron (Windows, unpacked)
@@ -627,6 +573,20 @@ jobs:
             ${{ matrix.electron_args }} \
             --dir \
             --publish never
+
+      - name: Locate the unpacked Windows app
+        if: matrix.os_type == 'windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          trees=(apps/desktop/dist-electron/win*unpacked)
+          if [ ${#trees[@]} -ne 1 ]; then
+            echo "Expected exactly one unpacked Windows tree, found ${#trees[@]}:" >&2
+            ls -la apps/desktop/dist-electron >&2 || true
+            exit 1
+          fi
+          echo "UNPACKED_DIR=${trees[0]}" >> "$GITHUB_ENV"
 
       # The job's GitHub token is exchanged for an Azure token against the
       # organization's app registration, whose federated credential accepts
@@ -643,25 +603,20 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # Only the app executable lives at the top of the unpacked tree; the
+      # executables under resources/app.asar.unpacked are Microsoft's
+      # OpenConsole.exe (node-pty's ConPTY), which already carries Microsoft's
+      # signature and is not ours to re-sign.
       - name: Sign the unpacked Windows app
         if: matrix.os_type == 'windows'
-        shell: bash
-        env:
-          ARTIFACT_SIGNING_ENDPOINT: ${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}
-          ARTIFACT_SIGNING_ACCOUNT: ${{ secrets.ARTIFACT_SIGNING_ACCOUNT }}
-          ARTIFACT_SIGNING_CERT_PROFILE: ${{ secrets.ARTIFACT_SIGNING_CERT_PROFILE }}
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          trees=(apps/desktop/dist-electron/win*unpacked)
-          if [ ${#trees[@]} -ne 1 ]; then
-            echo "Expected exactly one unpacked Windows tree, found ${#trees[@]}:" >&2
-            ls -la apps/desktop/dist-electron >&2 || true
-            exit 1
-          fi
-          echo "UNPACKED_DIR=${trees[0]}" >> "$GITHUB_ENV"
-          node apps/desktop/build/sign-windows.cjs --app-dir "${trees[0]}" \
-            --name "Redrob Cowork" --site "https://github.com/redrob-labs/redrob-cowork"
+        uses: redrob-labs/.github/actions/sign-windows@main
+        with:
+          files: ${{ env.UNPACKED_DIR }}/*.exe
+          description: Redrob Cowork
+          url: https://github.com/redrob-labs/redrob-cowork
+          endpoint: ${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}
+          account: ${{ secrets.ARTIFACT_SIGNING_ACCOUNT }}
+          cert-profile: ${{ secrets.ARTIFACT_SIGNING_CERT_PROFILE }}
 
       - name: Package Electron (Windows, installer + zip, signed)
         if: matrix.os_type == 'windows'
@@ -670,6 +625,7 @@ jobs:
           ARTIFACT_SIGNING_ENDPOINT: ${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}
           ARTIFACT_SIGNING_ACCOUNT: ${{ secrets.ARTIFACT_SIGNING_ACCOUNT }}
           ARTIFACT_SIGNING_CERT_PROFILE: ${{ secrets.ARTIFACT_SIGNING_CERT_PROFILE }}
+          REDROB_SHARED_DIR: ${{ github.workspace }}/.redrob-shared
         run: |
           set -euo pipefail
           # electron-builder resolves --prepackaged against apps/desktop, hence absolute.
@@ -721,16 +677,10 @@ jobs:
         shell: bash
         run: node scripts/release/launcher-asset-names.mjs rename apps/desktop/dist-electron
 
-      # Redrob Launcher reads one small file from every release to learn that the
-      # release reads its shared account file, so signing in to the launcher is
-      # all a user needs (launcher docs/release-manifest.md, schema 1). It is
-      # written into dist-electron here so the `redrob-*` upload below carries
-      # it like any installer (every platform job uploads it; --clobber makes
-      # the duplicates harmless), and the same script's check refuses a dist
-      # without it. The content is a constant in the script, unit-tested.
-      - name: Write the Redrob Launcher release manifest
-        shell: bash
-        run: node scripts/release/launcher-asset-names.mjs manifest apps/desktop/dist-electron
+      # The small `redrob-launcher.json` beside the installers (Redrob Launcher
+      # reads it to learn this release uses the launcher's shared sign-in) is
+      # attached by the shared publish job (`launcher_manifest: true`); the
+      # rename above writes the same bytes into dist-electron so its check holds.
 
       # The engine reaches the app through an electron-builder `extraResources`
       # filter that names files exactly. A filter naming a file that is not
@@ -830,66 +780,23 @@ jobs:
           fi
           printf '%s\n' "${manifests[@]}"
 
-      - name: Upload Electron release assets
-        if: env.BENCHMARK_ONLY != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          assets=(apps/desktop/dist-electron/${{ matrix.asset_prefix }}-*)
-          if [ ${#assets[@]} -eq 0 ]; then
-            echo "No Electron release assets found in apps/desktop/dist-electron" >&2
-            exit 1
-          fi
-          # One asset at a time, each pre-deleted, each retried.
-          #
-          # A single batched `--clobber` call failed three runs in a row on this leg, and the failures
-          # were not the same: HTTP 422 "ReleaseAsset.name already exists" once, HTTP 400 twice, both
-          # on the large archives and both minutes into the upload. Small blockmaps beside them
-          # succeeded, so it is not simply size: a 199MB Windows .exe uploads fine.
-          #
-          # Two things are wrong with the batched form. `--clobber` deletes then creates, and those are
-          # not one operation, so a retry that lands while GitHub still holds the old asset is refused.
-          # And a batch that fails halfway leaves some assets uploaded and some not, which is how a
-          # recovery run took the release from 14 assets down to 6: it deleted what it could not
-          # replace.
-          #
-          # Serial uploads make a failure affect one asset. The explicit delete first removes a partial
-          # asset an earlier attempt left behind, which `--clobber` alone does not always clear. The
-          # retry with backoff covers the transient case without hiding a real one, because the third
-          # failure still fails the job.
-          for asset in "${assets[@]}"; do
-            name="$(basename "$asset")"
-            gh release delete-asset "$RELEASE_TAG" "$name" --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
-            uploaded=false
-            for attempt in 1 2 3; do
-              if gh release upload "$RELEASE_TAG" "$asset" --repo "$GITHUB_REPOSITORY" --clobber; then
-                uploaded=true
-                break
-              fi
-              echo "::warning::upload of $name failed on attempt $attempt"
-              sleep "$((attempt * 20))"
-            done
-            if [ "$uploaded" != true ]; then
-              echo "::error::uploading $name failed three times" >&2
-              exit 1
-            fi
-            echo "uploaded $name"
-          done
-
-      - name: Retain benchmark Electron assets
-        if: env.BENCHMARK_ONLY == 'true'
+      # Nothing is uploaded to GitHub from the build legs. The installers travel
+      # as a `release-*` workflow artifact to the shared publish job
+      # (redrob-labs/.github release-publish.yml), which attaches every
+      # platform's assets, SHA256SUMS.txt and redrob-launcher.json to the
+      # release in one step -- so a release is never public, or half-populated,
+      # while a leg is still building. A benchmark run keeps the same artifacts
+      # for inspection and simply has no publish job.
+      - name: Upload release assets as a workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-${{ matrix.artifact }}
-          path: |
-            apps/desktop/dist-electron/${{ matrix.asset_prefix }}-*
-            apps/desktop/dist-electron/${{ matrix.manifest_pattern }}
+          name: release-${{ matrix.artifact }}
+          path: apps/desktop/dist-electron/${{ matrix.asset_prefix }}-*
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7
 
+      # Per-platform electron-updater manifests, merged across architectures by
+      # the updater-manifests job before they join the release.
       - name: Upload Electron updater manifest artifact
         uses: actions/upload-artifact@v4
         with:
@@ -913,8 +820,9 @@ jobs:
     timeout-minutes: 120
     permissions:
       actions: read
-      # Release assets are uploaded from this job with the job token.
-      contents: write
+      # Nothing is uploaded to the release from this job; assets travel as
+      # workflow artifacts to the shared publish job.
+      contents: read
       # The OIDC token `azure/login` exchanges for the Artifact Signing credential.
       id-token: write
     env:
@@ -955,108 +863,127 @@ jobs:
 
     steps: *electron-build-steps
 
-  # THE NPM PACKAGE DOES NOT GATE THE DESKTOP RELEASE.
-  #
-  # This job used to require publish-npm to be success or skipped. publish-npm authenticates to npm
-  # through trusted publishing (--provenance + id-token, no secret), which needs the redrob-server
-  # package to name this repository as a trusted publisher on npmjs.com. Until that is configured the
-  # job fails with ENEEDAUTH on every version bump -- and it took the whole release with it.
-  #
-  # That is what happened to v0.0.10: all six Electron platforms built successfully, this job was
-  # skipped, and the tag ended up with no assets behind it. A user waiting on the fix in that release
-  # had no way to install it, because an unrelated npm package could not authenticate.
-  #
-  # The Electron artifacts do not depend on the npm package, so its result no longer blocks them. A
-  # failed publish-npm still shows as a red job in the run, which is the signal that npm trusted
-  # publishing needs configuring; it just no longer withholds the desktop release.
-  publish-release:
-    name: Publish Electron Assets + GitHub Release
-    permissions:
-      actions: write
-      contents: write
-    needs:
-      - resolve-release
-      - verify-release
-      - publish-electron-unix
-      - publish-electron-windows
-      - publish-npm
+  # electron-builder writes one latest-mac.yml (and one latest.yml) per
+  # architecture; electron-updater reads one per feed. Merge them here, once
+  # every build leg is done, and hand the result to the publish job as another
+  # `release-*` artifact. Runs in benchmark mode too, so a manifest regression
+  # is caught without a release.
+  updater-manifests:
+    name: Merge updater manifests
+    needs: [resolve-release, verify-release, publish-electron-unix, publish-electron-windows]
     if: |
       always() &&
       needs.resolve-release.result == 'success' &&
       needs.verify-release.result == 'success' &&
-      needs.resolve-release.outputs.benchmark_only != 'true' &&
-      (needs.resolve-release.outputs.build_electron != 'true' || needs.publish-electron-unix.result == 'success') &&
-      (needs.resolve-release.outputs.build_electron != 'true' || needs.publish-electron-windows.result == 'success') &&
-      needs.publish-npm.result != 'cancelled'
+      needs.resolve-release.outputs.build_electron == 'true' &&
+      needs.publish-electron-unix.result == 'success' &&
+      needs.publish-electron-windows.result == 'success'
     runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
     env:
       RELEASE_TAG: ${{ needs.resolve-release.outputs.release_tag }}
-      RELEASE_PRERELEASE: ${{ needs.resolve-release.outputs.prerelease }}
     steps:
       - name: Checkout
-        if: needs.resolve-release.outputs.build_electron == 'true'
         uses: actions/checkout@v6
         with:
           ref: ${{ env.RELEASE_TAG }}
           fetch-depth: 1
 
       - name: Setup Node
-        if: needs.resolve-release.outputs.build_electron == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - name: Download Electron updater manifest artifacts
-        if: needs.resolve-release.outputs.build_electron == 'true'
         uses: actions/download-artifact@v4
         with:
           pattern: electron-*
           path: ${{ runner.temp }}/electron-dist
 
-      - name: Upload merged updater manifests
-        if: needs.resolve-release.outputs.build_electron == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/release/publish-electron-assets.mjs --manifests-only "${{ runner.temp }}/electron-dist" "$RELEASE_TAG"
+      - name: Merge updater manifests
+        run: node scripts/release/merge-updater-manifests.mjs "${{ runner.temp }}/electron-dist" "${{ runner.temp }}/release-manifests"
 
-      - name: Publish release after assets are ready
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
+      - name: Upload merged manifests as a release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-updater-manifests
+          path: ${{ runner.temp }}/release-manifests/*.yml
+          if-no-files-found: error
 
-          # Dispatch-based recovery runs default draft=false but may target a
-          # draft release created by an earlier tag push; always flip drafts
-          # here so AUR and updater feeds see public download URLs.
-          is_draft="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)"
-          if [ "$is_draft" != "true" ]; then
-            echo "Release $RELEASE_TAG is already published; nothing to do."
-            exit 0
-          fi
+  # THE NPM PACKAGE DOES NOT GATE THE DESKTOP RELEASE.
+  #
+  # An earlier shape of this job required publish-npm to be success or skipped. publish-npm
+  # authenticates to npm through trusted publishing (--provenance + id-token, no secret), which needs
+  # the redrob-server package to name this repository as a trusted publisher on npmjs.com. Until that
+  # is configured the job fails with ENEEDAUTH on every version bump -- and it took the whole release
+  # with it (v0.0.10: six Electron platforms built, the tag ended up with no assets behind it).
+  #
+  # The Electron artifacts do not depend on the npm package, so its result does not gate them.
+  #
+  # The release itself is created by the shared redrob-labs publish job: every `release-*` artifact
+  # (six platform legs + the merged updater manifests) is attached together with SHA256SUMS.txt and
+  # redrob-launcher.json, and the release is published as latest -- or left as a draft when the
+  # `draft` input asks for one, and flagged prerelease when `prerelease` does. It refuses to touch a
+  # release that is already published, so a recovery run of a PUBLISHED tag stops here; delete the
+  # release first, or bump and tag again.
+  publish:
+    name: Publish GitHub release
+    needs:
+      - resolve-release
+      - verify-release
+      - publish-electron-unix
+      - publish-electron-windows
+      - updater-manifests
+    if: |
+      always() &&
+      needs.resolve-release.result == 'success' &&
+      needs.verify-release.result == 'success' &&
+      needs.resolve-release.outputs.benchmark_only != 'true' &&
+      needs.resolve-release.outputs.build_electron == 'true' &&
+      needs.publish-electron-unix.result == 'success' &&
+      needs.publish-electron-windows.result == 'success' &&
+      needs.updater-manifests.result == 'success'
+    uses: redrob-labs/.github/.github/workflows/release-publish.yml@main
+    permissions:
+      contents: write
+    with:
+      version: ${{ needs.resolve-release.outputs.release_version }}
+      tag: ${{ needs.resolve-release.outputs.release_tag }}
+      title: Redrob Cowork
+      launcher_manifest: true
+      publish: ${{ needs.resolve-release.outputs.draft != 'true' }}
+      prerelease: ${{ needs.resolve-release.outputs.prerelease }}
 
-          if [ "${RELEASE_PRERELEASE}" = "true" ]; then
-            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease
-          else
-            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
-          fi
-
-      # Version-stamped assets are what the updater reads (through latest*.yml) and what
-      # a person gets from the releases page. A marketing page cannot link them: the
-      # name changes every release, and `releases/latest/download/<name>` needs an exact
-      # name. So the installers are uploaded a second time under version-less alias
-      # names, which is the one job the CDN mirror used to do.
+  # Version-stamped assets are what the updater reads (through latest*.yml) and what
+  # a person gets from the releases page. A marketing page cannot link them: the
+  # name changes every release, and `releases/latest/download/<name>` needs an exact
+  # name. So the installers are uploaded a second time under version-less alias
+  # names, which is the one job the CDN mirror used to do.
+  download-aliases:
+    name: Upload stable download aliases
+    needs: [resolve-release, publish]
+    if: |
+      always() &&
+      needs.resolve-release.result == 'success' &&
+      needs.publish.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ needs.resolve-release.outputs.release_tag }}
+      RELEASE_VERSION: ${{ needs.resolve-release.outputs.release_version }}
+    steps:
       - name: Upload stable download aliases
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ needs.resolve-release.outputs.release_tag }}
-          RELEASE_VERSION: ${{ needs.resolve-release.outputs.release_version }}
         run: |
           set -euo pipefail
           work="$(mktemp -d)"
           gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$work" \
-            --pattern 'redrob-*' --clobber
+            --pattern 'redrob-cowork-*' --clobber
           aliases=()
-          for asset in "$work"/redrob-*; do
+          for asset in "$work"/redrob-cowork-*; do
             name="$(basename "$asset")"
             case "$name" in
               *.blockmap) continue ;;
@@ -1074,9 +1001,11 @@ jobs:
             exit 1
           fi
           printf 'Uploading %s stable aliases\n' "${#aliases[@]}"
-          # Serial, pre-deleted, retried, for the same reason as the per-platform upload above: these
-          # are copies of the SAME large installers under unversioned names, so this step re-uploads
-          # every byte a second time and hits the same refusals.
+          # Serial, pre-deleted, retried: these are copies of the SAME large installers under
+          # unversioned names, and a single batched `--clobber` call failed three runs in a row
+          # (HTTP 422 "already exists" once, HTTP 400 twice, minutes into the upload). Serial
+          # uploads make a failure affect one asset; the explicit delete first removes a partial
+          # asset an earlier attempt left behind; the third failure still fails the job.
           for alias in "${aliases[@]}"; do
             name="$(basename "$alias")"
             gh release delete-asset "$RELEASE_TAG" "$name" --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
@@ -1273,13 +1202,16 @@ jobs:
 
   aur-publish:
     name: Publish AUR
-    needs: [resolve-release, publish-electron-unix, publish-release]
+    needs: [resolve-release, publish-electron-unix, publish]
+    # A draft release has no public download URLs for the PKGBUILD to fetch, so
+    # AUR waits for a published one.
     if: |
       always() &&
       needs.resolve-release.result == 'success' &&
       needs.resolve-release.outputs.benchmark_only != 'true' &&
+      needs.resolve-release.outputs.draft != 'true' &&
       needs.publish-electron-unix.result == 'success' &&
-      needs.publish-release.result == 'success'
+      needs.publish.result == 'success'
     # AUR is a community distribution channel hosted on aur.archlinux.org.
     # Outages there (e.g. "The AUR is down due to maintenance", 2026-08-04)
     # must not mark an otherwise-published release run as failed.

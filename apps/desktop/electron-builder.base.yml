@@ -98,12 +98,12 @@ win:
     # update -- cannot run this Electron version anyway.
     signingHashAlgorithms:
       - sha256
-    # Azure Artifact Signing over OpenID Connect: the hook runs signtool with the
-    # Azure.CodeSigning dlib, authenticated by the `az login` the release job
-    # performs right before packaging. No certificate file or secret exists. The
-    # hook also skips a vendor binary (elevate.exe, Microsoft's OpenConsole.exe)
-    # that already carries its own signature, since cloud signing bills per
-    # signature. See build/sign-windows.cjs.
+    # Azure Artifact Signing over OpenID Connect, through the ONE shared recipe:
+    # the hook hands each file to redrob-labs/.github's
+    # actions/sign-windows/sign.ps1 (checked out at .redrob-shared by the release
+    # workflow), authenticated by the `az login` the release job performs right
+    # before packaging. No certificate file or secret exists. See
+    # build/sign-windows.cjs.
     sign: build/sign-windows.cjs
     # electron-updater installs an update only when the installer's signer
     # matches this name (written into app-update.yml). electron-builder reads it

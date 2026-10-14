@@ -42,8 +42,9 @@ develop ──●─●────●──────●───────
   override a hotfix already on `main` legitimately needs.
 - **Working branches** are named `<type>/<short-slug>`, e.g. `fix/composer-drop-zone`,
   `feat/reasoning-effort`, `chore/bump-electron`, `docs/upstream-sync`.
-  Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, plus `hotfix` and
-  `release` for the two branches this document already describes but never named.
+  Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `sync`,
+  plus `hotfix` and `release` for the two branches this document already describes but
+  never named. The list is the org-wide one from `redrob-labs/.github`.
 - **Hotfixes** branch from `main`, not `develop`, so the fix does not drag unreleased work
   with it. Merge into `main`, release, **then merge `main` back into `develop`** or the fix
   is lost at the next release. This is the step that gets skipped; the sibling engine
@@ -57,7 +58,9 @@ Rebase your branch on `develop` before asking for review. Keep the branch focuse
 reviewer should be able to state what the branch does in one sentence.
 
 **The type list and the back-merge are enforced by
-[`.github/workflows/gitflow.yml`](./.github/workflows/gitflow.yml), not by trust.** It fails a pull
+[`.github/workflows/gitflow.yml`](./.github/workflows/gitflow.yml), not by trust** -- a thin caller
+of the shared `redrob-labs/.github/.github/workflows/gitflow.yml`, so the rules are the same in every
+redrob-labs repository. It fails a pull
 request whose head branch is not `<type>/<slug>` carrying one of the types above, which is how a
 branch named after the tool that produced it gets caught instead of merged; `develop` and `main`
 themselves pass, since a promotion or back-merge branch is not named after a type. On every push to

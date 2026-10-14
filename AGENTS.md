@@ -34,7 +34,8 @@ against `main` is wrong unless it is a release promotion or a hotfix.
 
 **Both of the rules above are now checked, not just written down.**
 `.github/workflows/gitflow.yml` fails a pull request whose head branch is not `<type>/<slug>` with
-one of `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `sync`, because a branch name says
+one of `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`, `sync`, `hotfix`,
+`release` (the org-wide list; the workflow is a caller of the shared one in `redrob-labs/.github`), because a branch name says
 what the change is and not what tool produced it. On every push to `main` the same workflow fails
 while `main` holds commits `develop` does not, so the back-merge step above stops being the one that
 gets skipped. Neither job is a required check, so both report without blocking a merge.
