@@ -1,0 +1,359 @@
+{
+  "generated_utc": "2026-10-14T01:19:12.859195+00:00",
+  "icon_source": "lobehub/lobe-icons (https://github.com/lobehub/lobe-icons)",
+  "license": "MIT (Copyright (c) 2023 LobeHub)",
+  "note": "Icons are provider/brand marks rendered by LobeHub, not per-model logos (model-specific marks do not exist). The 'provider' field identifies each model's maker. Ranking synthesized from Oct 2026 public LLM leaderboards.",
+  "count": 50,
+  "models": [
+    {
+      "rank": 1,
+      "model": "Claude Opus 5.5",
+      "provider": "Anthropic",
+      "file": "01_claude-opus-5-5.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 2,
+      "model": "Claude Fable 5.1",
+      "provider": "Anthropic",
+      "file": "02_claude-fable-5-1.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 3,
+      "model": "GPT-6 Astra",
+      "provider": "OpenAI",
+      "file": "03_gpt-6-astra.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 4,
+      "model": "Claude Opus 4.8",
+      "provider": "Anthropic",
+      "file": "04_claude-opus-4-8.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 5,
+      "model": "GPT-6.1 Sol",
+      "provider": "OpenAI",
+      "file": "05_gpt-6-1-sol.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 6,
+      "model": "Gemini 3.8 Flash",
+      "provider": "Google DeepMind",
+      "file": "06_gemini-3-8-flash.svg",
+      "source_icon": "gemini-color.svg"
+    },
+    {
+      "rank": 7,
+      "model": "Claude Sonnet 5",
+      "provider": "Anthropic",
+      "file": "07_claude-sonnet-5.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 8,
+      "model": "GPT-5.6 Sol",
+      "provider": "OpenAI",
+      "file": "08_gpt-5-6-sol.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 9,
+      "model": "Gemini 3.5 Flash",
+      "provider": "Google DeepMind",
+      "file": "09_gemini-3-5-flash.svg",
+      "source_icon": "gemini-color.svg"
+    },
+    {
+      "rank": 10,
+      "model": "GPT-5.5",
+      "provider": "OpenAI",
+      "file": "10_gpt-5-5.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 11,
+      "model": "Claude Opus 4.7",
+      "provider": "Anthropic",
+      "file": "11_claude-opus-4-7.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 12,
+      "model": "Gemini 3.1 Pro",
+      "provider": "Google DeepMind",
+      "file": "12_gemini-3-1-pro.svg",
+      "source_icon": "gemini-color.svg"
+    },
+    {
+      "rank": 13,
+      "model": "Grok 4.3",
+      "provider": "xAI",
+      "file": "13_grok-4-3.svg",
+      "source_icon": "grok.svg"
+    },
+    {
+      "rank": 14,
+      "model": "Claude Sonnet 4.6",
+      "provider": "Anthropic",
+      "file": "14_claude-sonnet-4-6.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 15,
+      "model": "GPT-5.4 Pro",
+      "provider": "OpenAI",
+      "file": "15_gpt-5-4-pro.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 16,
+      "model": "DeepSeek V4-Pro",
+      "provider": "DeepSeek",
+      "file": "16_deepseek-v4-pro.svg",
+      "source_icon": "deepseek-color.svg"
+    },
+    {
+      "rank": 17,
+      "model": "DeepSeek R1",
+      "provider": "DeepSeek",
+      "file": "17_deepseek-r1.svg",
+      "source_icon": "deepseek-color.svg"
+    },
+    {
+      "rank": 18,
+      "model": "Qwen3-Coder-Next",
+      "provider": "Alibaba (Qwen)",
+      "file": "18_qwen3-coder-next.svg",
+      "source_icon": "qwen-color.svg"
+    },
+    {
+      "rank": 19,
+      "model": "Qwen3.6-27B",
+      "provider": "Alibaba (Qwen)",
+      "file": "19_qwen3-6-27b.svg",
+      "source_icon": "qwen-color.svg"
+    },
+    {
+      "rank": 20,
+      "model": "Kimi K2.6",
+      "provider": "Moonshot AI",
+      "file": "20_kimi-k2-6.svg",
+      "source_icon": "kimi-color.svg"
+    },
+    {
+      "rank": 21,
+      "model": "GLM-5.1",
+      "provider": "Zhipu AI (Z.ai)",
+      "file": "21_glm-5-1.svg",
+      "source_icon": "zai.svg"
+    },
+    {
+      "rank": 22,
+      "model": "Mistral Large 3",
+      "provider": "Mistral AI",
+      "file": "22_mistral-large-3.svg",
+      "source_icon": "mistral-color.svg"
+    },
+    {
+      "rank": 23,
+      "model": "Mistral Medium 3.5",
+      "provider": "Mistral AI",
+      "file": "23_mistral-medium-3-5.svg",
+      "source_icon": "mistral-color.svg"
+    },
+    {
+      "rank": 24,
+      "model": "Claude Haiku 4.5",
+      "provider": "Anthropic",
+      "file": "24_claude-haiku-4-5.svg",
+      "source_icon": "claude-color.svg"
+    },
+    {
+      "rank": 25,
+      "model": "Llama 4 Maverick",
+      "provider": "Meta",
+      "file": "25_llama-4-maverick.svg",
+      "source_icon": "meta-color.svg"
+    },
+    {
+      "rank": 26,
+      "model": "Llama 4 Scout",
+      "provider": "Meta",
+      "file": "26_llama-4-scout.svg",
+      "source_icon": "meta-color.svg"
+    },
+    {
+      "rank": 27,
+      "model": "GPT-OSS 120B",
+      "provider": "OpenAI",
+      "file": "27_gpt-oss-120b.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 28,
+      "model": "Gemma 4",
+      "provider": "Google DeepMind",
+      "file": "28_gemma-4.svg",
+      "source_icon": "gemma-color.svg"
+    },
+    {
+      "rank": 29,
+      "model": "Grok 4",
+      "provider": "xAI",
+      "file": "29_grok-4.svg",
+      "source_icon": "grok.svg"
+    },
+    {
+      "rank": 30,
+      "model": "DeepSeek V4-Flash",
+      "provider": "DeepSeek",
+      "file": "30_deepseek-v4-flash.svg",
+      "source_icon": "deepseek-color.svg"
+    },
+    {
+      "rank": 31,
+      "model": "Command A",
+      "provider": "Cohere",
+      "file": "31_command-a.svg",
+      "source_icon": "cohere-color.svg"
+    },
+    {
+      "rank": 32,
+      "model": "Phi-5",
+      "provider": "Microsoft",
+      "file": "32_phi-5.svg",
+      "source_icon": "microsoft-color.svg"
+    },
+    {
+      "rank": 33,
+      "model": "Amazon Nova Pro",
+      "provider": "Amazon",
+      "file": "33_amazon-nova-pro.svg",
+      "source_icon": "nova-color.svg"
+    },
+    {
+      "rank": 34,
+      "model": "MiniMax M2",
+      "provider": "MiniMax",
+      "file": "34_minimax-m2.svg",
+      "source_icon": "minimax-color.svg"
+    },
+    {
+      "rank": 35,
+      "model": "Perplexity Sonar",
+      "provider": "Perplexity",
+      "file": "35_perplexity-sonar.svg",
+      "source_icon": "perplexity-color.svg"
+    },
+    {
+      "rank": 36,
+      "model": "Qwen3-Max",
+      "provider": "Alibaba (Qwen)",
+      "file": "36_qwen3-max.svg",
+      "source_icon": "qwen-color.svg"
+    },
+    {
+      "rank": 37,
+      "model": "ChatGLM-6",
+      "provider": "Zhipu AI (Z.ai)",
+      "file": "37_chatglm-6.svg",
+      "source_icon": "chatglm-color.svg"
+    },
+    {
+      "rank": 38,
+      "model": "Yi-Large 2",
+      "provider": "01.AI",
+      "file": "38_yi-large-2.svg",
+      "source_icon": "yi-color.svg"
+    },
+    {
+      "rank": 39,
+      "model": "ERNIE 5.0",
+      "provider": "Baidu",
+      "file": "39_ernie-5-0.svg",
+      "source_icon": "baidu-color.svg"
+    },
+    {
+      "rank": 40,
+      "model": "Jamba 2",
+      "provider": "AI21 Labs",
+      "file": "40_jamba-2.svg",
+      "source_icon": "ai21-brand-color.svg"
+    },
+    {
+      "rank": 41,
+      "model": "DBRX 2",
+      "provider": "Databricks",
+      "file": "41_dbrx-2.svg",
+      "source_icon": "dbrx-brand-color.svg"
+    },
+    {
+      "rank": 42,
+      "model": "Reka Core 2",
+      "provider": "Reka AI",
+      "file": "42_reka-core-2.svg",
+      "source_icon": "reka.svg"
+    },
+    {
+      "rank": 43,
+      "model": "Aya Expanse 2",
+      "provider": "Cohere",
+      "file": "43_aya-expanse-2.svg",
+      "source_icon": "aya-color.svg"
+    },
+    {
+      "rank": 44,
+      "model": "Stable LM 3",
+      "provider": "Stability AI",
+      "file": "44_stable-lm-3.svg",
+      "source_icon": "stability-color.svg"
+    },
+    {
+      "rank": 45,
+      "model": "SenseNova 6",
+      "provider": "SenseTime",
+      "file": "45_sensenova-6.svg",
+      "source_icon": "sensenova-color.svg"
+    },
+    {
+      "rank": 46,
+      "model": "GPT-5 mini",
+      "provider": "OpenAI",
+      "file": "46_gpt-5-mini.svg",
+      "source_icon": "openai.svg"
+    },
+    {
+      "rank": 47,
+      "model": "Gemini 3.1 Flash-Lite",
+      "provider": "Google DeepMind",
+      "file": "47_gemini-3-1-flash-lite.svg",
+      "source_icon": "gemini-color.svg"
+    },
+    {
+      "rank": 48,
+      "model": "Grok 4 mini",
+      "provider": "xAI",
+      "file": "48_grok-4-mini.svg",
+      "source_icon": "grok.svg"
+    },
+    {
+      "rank": 49,
+      "model": "DeepSeek V3",
+      "provider": "DeepSeek",
+      "file": "49_deepseek-v3.svg",
+      "source_icon": "deepseek-color.svg"
+    },
+    {
+      "rank": 50,
+      "model": "Mistral Small 3.2",
+      "provider": "Mistral AI",
+      "file": "50_mistral-small-3-2.svg",
+      "source_icon": "mistral-color.svg"
+    }
+  ]
+}
