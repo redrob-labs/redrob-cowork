@@ -202,7 +202,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     get description() { return t("extensions.builtin_computer_use_description"); },
     preview: true,
     source: { format: "redrob-builtin", origin: "builtin", trusted: true },
-    icon: { src: "/redrob-mark.svg" },
+    icon: { src: "/brand/redrob/redrob-mark-blue.svg" },
     composer: { prompt: "Use Computer Use to " },
     setup: {
       get instructions() { return t("extensions.builtin_computer_use_setup"); },
@@ -249,7 +249,7 @@ export const BUILT_IN_REDROB_EXTENSION_MANIFESTS: RedrobWorkExtensionManifest[] 
     get description() { return t("extensions.builtin_voice_mode_description"); },
     preview: true,
     source: { format: "redrob-builtin", origin: "builtin", trusted: true },
-    icon: { src: "/redrob-mark.svg" },
+    icon: { src: "/brand/redrob/redrob-mark-blue.svg" },
     composer: { prompt: "Use Voice Mode to " },
     setup: {
       get instructions() { return t("extensions.builtin_voice_mode_setup"); },

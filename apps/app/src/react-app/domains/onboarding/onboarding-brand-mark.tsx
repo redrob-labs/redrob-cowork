@@ -4,7 +4,7 @@ import { useShellConfig } from "../../shell/shell-config";
 
 /**
  * Compact brand lockup shared across the onboarding wizard steps: the
- * existing mark asset (`/redrob-mark.svg`) next to the app name, at a small
+ * Redrob mark (`/brand/redrob/redrob-mark-blue.svg`) next to the app name, at a small
  * fixed size so it reads as a quiet header rather than a splash logo. Reuses
  * the same icon + text pairing `welcome-page.tsx` already established,
  * factored out so every step shows the same compact identity.
@@ -15,11 +15,11 @@ export function OnboardingBrandMark() {
   return (
     <div className="flex items-center gap-2">
       <img
-        src={resolveExtensionIconSrc("/redrob-mark.svg")}
+        src={resolveExtensionIconSrc("/brand/redrob/redrob-mark-blue.svg")}
         alt=""
         width={20}
         height={20}
-        className="shrink-0 dark:invert"
+        className="shrink-0"
         aria-hidden="true"
       />
       <span className="text-sm font-semibold tracking-tight text-foreground">

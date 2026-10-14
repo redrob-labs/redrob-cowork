@@ -10,7 +10,7 @@ import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src"
 import { recheckRedrobKeyStatus } from "../../domains/billing/redrob-pay-sheet";
 import { useFrameStore } from "../store/frame-store";
 
-const MARK_SRC = resolveExtensionIconSrc("/redrob-mark.svg");
+const MARK_SRC = resolveExtensionIconSrc("/brand/redrob/redrob-mark-blue.svg");
 
 /** The build's version, the same one the feedback link reports. Empty in a bare test run. */
 export const APP_VERSION = String(import.meta.env.VITE_REDROB_APP_VERSION ?? "").trim();
