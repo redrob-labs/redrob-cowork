@@ -1,3 +1,8 @@
+/**
+ * The settings layout primitives: a stack of sections, each with a header (title / description)
+ * and items (title / description / actions / content / footnote). Thin presentational wrappers
+ * carrying the shared spacing and data-slot hooks so every settings page lays out the same way.
+ */
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

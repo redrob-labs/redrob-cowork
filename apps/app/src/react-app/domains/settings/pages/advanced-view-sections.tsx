@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The individual sections of the Advanced page (developer tools, runtime migration, diagnostics, etc.), split out of advanced-view. */
 import { useState, type ComponentProps, type ReactNode } from "react";
 import { CircleAlert, Cpu, Database, Info, RefreshCcw, Server } from "lucide-react";
 

@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The appearance "Language" section: a select of UI languages, each shown in its own and the current locale's name. */
 import {
   Select,
   SelectContent,

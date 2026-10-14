@@ -1,4 +1,10 @@
 /** @jsxImportSource react */
+/**
+ * The settings page body and its sidebar: the tab list (global and per-workspace), the tab
+ * metadata helpers (icon / label / description / beta), the beta badge, and the page heading that
+ * renders the active tab's title and description. The shell frames this; the active page's content
+ * is passed in as children.
+ */
 import { useState } from "react";
 import type * as React from "react";
 import { ArrowLeft, ChevronDown, Cog, Search } from "lucide-react";

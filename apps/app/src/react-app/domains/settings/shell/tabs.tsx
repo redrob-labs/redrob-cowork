@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** Sidebar tab primitives for the settings nav: the sidebar container, groups, and individual tab triggers. */
 import type * as React from "react";
 
 import { Badge } from "@/components/ui/badge";

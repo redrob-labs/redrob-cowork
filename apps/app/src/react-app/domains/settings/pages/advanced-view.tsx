@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Advanced settings page: composes the developer, runtime-migration and related sections, with local reducer state. */
 import { useEffect, useReducer, useState } from "react";
 
 import { Separator } from "@/components/ui/separator";

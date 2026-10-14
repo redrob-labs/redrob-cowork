@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Memory settings page: lists stored memories with copy/delete (optimistic), refresh, and an empty state. */
 import * as React from "react";
 import { BrainCircuit, Copy, RefreshCw, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

@@ -1,3 +1,10 @@
+/**
+ * The shared handle to the server and workspace the chat route is using. The chat
+ * route publishes it so the Desk menu reads the same chats off one connection; the
+ * `Desk*Client` aliases name, per feature, the redrob-server calls each area adds on
+ * top of the base client. Empty until a chat route mounts — the menu shows sample
+ * data until then.
+ */
 import { create } from "zustand";
 
 import type { RedrobServerClient } from "../../../app/lib/redrob-server";
@@ -23,8 +30,59 @@ export type DeskTeamClient = Pick<
   "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace" | "getTeamPolicy" | "syncTeamPolicy" | "leaveTeamPolicy"
 >;
 
+/** The calls the profile adds: the name teammates see on handoffs and in shared chats. */
+export type DeskProfileClient = Pick<RedrobServerClient, "getProfile" | "updateProfile">;
+
+/** The calls handoff adds: what a handoff would carry, and the file itself. */
+export type DeskHandoffClient = Pick<RedrobServerClient, "previewHandoff" | "createHandoff">;
+
+/** The calls opening a handoff adds: what a file is, opening it, and the chat's handoff state. */
+export type DeskHandoffOpenClient = Pick<RedrobServerClient, "inspectHandoff" | "openHandoff" | "getSessionHandoff" | "continueHandoff">;
+
+/** The calls a reply adds: making one, and attaching one that came back. */
+export type DeskHandoffReplyClient = Pick<RedrobServerClient, "createHandoffReply" | "inspectHandoffReply" | "applyHandoffReply">;
+
+/** The calls review adds: comments on a chat and the verdict on it. */
+export type DeskReviewClient = Pick<
+  RedrobServerClient,
+  "getSessionReview" | "addReviewComment" | "resolveReviewComment" | "deleteReviewComment" | "setReviewState"
+>;
+
+/** The calls live co-working adds: the room, who is waiting, and the host's guest list. */
+export type DeskRoomClient = Pick<
+  RedrobServerClient,
+  | "getRoom"
+  | "followRoomEvents"
+  | "endRoom"
+  | "roomHeartbeat"
+  | "leaveRoom"
+  | "listRoomKnocks"
+  | "answerRoomKnock"
+  | "revokeRoomInvites"
+  | "setGuestCapabilities"
+  | "setGuestPlanOnly"
+  | "removeGuest"
+  | "getRoomQueue"
+  | "enqueueRoomMessage"
+  | "removeRoomQueued"
+  | "editRoomQueued"
+>;
+
 export type DeskConnection = {
-  client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient) | null;
+  client:
+    | (DeskServerClient &
+        DeskFileClient &
+        DictationClient &
+        DeskProjectClient &
+        DeskConnectorClient &
+        DeskTeamClient &
+        DeskProfileClient &
+        DeskReviewClient &
+        DeskHandoffClient &
+        DeskHandoffOpenClient &
+        DeskHandoffReplyClient &
+        DeskRoomClient)
+    | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;
   /** The server-side id of the workspace the chat route has open. */
@@ -48,6 +106,10 @@ export const useDeskConnection = create<DeskConnection>()(() => ({
   chatsVersion: "",
 }));
 
+/**
+ * Publishes the connection the chat route holds. A no-op when nothing changed, so a
+ * re-render that reproduces the same handle does not wake the menu's subscribers.
+ */
 export function publishDeskConnection(next: DeskConnection) {
   const current = useDeskConnection.getState();
   if (

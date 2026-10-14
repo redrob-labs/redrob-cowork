@@ -1,3 +1,8 @@
+/**
+ * Local UI state for the MCP/Extensions view: the reducer, its state shape and initial value, covering
+ * the logout/remove confirmations, the loaded project/global opencode config, and the add-MCP modal.
+ * Separated from the view so the transitions are testable without React.
+ */
 import type { SetStateAction } from "react";
 
 import type { OpencodeConfigFile } from "../../../../app/lib/desktop";

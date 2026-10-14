@@ -5,6 +5,7 @@ import { Zap } from "lucide-react";
 import type { ComposerAttachment } from "@/app/types";
 import { t } from "@/i18n";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { DeskGreeting } from "@/react-app/desk/room/desk-greeting";
 import { NewTaskComposer, type NewTaskComposerContext } from "./new-task-composer";
 
 /**
@@ -103,13 +104,16 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
     </button>
   ) : null;
 
-  // The Desk's new chat (01-new-chat): the one spoken line, then the composer and its tools.
+  // The Cowork new chat (01-new-chat): the rotating greeting + brand beat, then the composer and its tools.
   if (inDeskFrame) {
     return (
       <div className="desk-new">
-        <h2 className="desk-new__line">{t("desk.new_chat_line")}</h2>
-        {composer}
-        {connectProvider}
+        <div className="desk-new__center">
+          <DeskGreeting />
+          {composer}
+          {connectProvider}
+        </div>
+        <p className="desk-new__disclaimer">{t("desk.home_disclaimer")}</p>
       </div>
     );
   }

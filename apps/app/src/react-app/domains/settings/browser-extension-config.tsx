@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** Config panel for the Redrob browser extension: a read-only "ready" card, registered under both ids it ships with. */
 import { MonitorSmartphone } from "lucide-react";
 
 import { t } from "@/i18n";

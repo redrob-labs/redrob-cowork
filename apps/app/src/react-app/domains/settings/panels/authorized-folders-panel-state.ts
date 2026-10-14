@@ -1,3 +1,8 @@
+/**
+ * State for the authorized-folders panel: the reducer, its initial state, and two small helpers
+ * (path normalization and the status line). Kept framework-free and separate from the panel so the
+ * transition logic can be unit-tested without React.
+ */
 import type { SetStateAction } from "react";
 
 import { t } from "../../../../i18n";
@@ -60,6 +65,7 @@ export function authorizedFoldersReducer(
   }
 }
 
+/** Trims the path and drops a trailing glob (`/*`) so an authorized entry is a plain directory. */
 export const normalizeAuthorizedFolderPath = (input: string | null | undefined) => {
   const trimmed = (input ?? "").trim();
   if (!trimmed) return "";
@@ -67,6 +73,7 @@ export const normalizeAuthorizedFolderPath = (input: string | null | undefined) 
   return normalizeDirectoryQueryPath(withoutWildcard);
 };
 
+/** The status line after an edit: the action taken plus how many existing entries were preserved. */
 export const buildAuthorizedFoldersStatus = (preservedCount: number, action?: string) => {
   const preservedLabel =
     preservedCount > 0

@@ -1,4 +1,9 @@
 /** @jsxImportSource react */
+/**
+ * List primitives for settings pages: a vertical list, its empty state, row/title parts, and the
+ * search input. Presentational wrappers over the shared design-system Field/InputGroup pieces so
+ * every settings list looks and behaves the same.
+ */
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 import { SettingsInset } from "./settings-section";

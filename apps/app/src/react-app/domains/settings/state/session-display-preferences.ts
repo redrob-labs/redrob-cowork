@@ -1,3 +1,7 @@
+/**
+ * Hook for the session display preferences stored in local prefs — currently the "show thinking"
+ * toggle — with set/toggle/reset helpers. A thin typed wrapper over the local-provider prefs store.
+ */
 import { useCallback } from "react";
 
 import { DEFAULT_SHOW_THINKING, useLocal } from "../../../kernel/local-provider";

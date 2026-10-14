@@ -1,4 +1,11 @@
 /** @jsxImportSource react */
+/**
+ * The Extensions settings screen: the inventory of MCP servers, skills and Library items
+ * (commands and agents) for the selected workspace, with connect/authorize/enable/remove
+ * actions and the detail modal (or routed detail page). All server work is handed in as
+ * props so the view stays presentational; the opencode config file is read through the
+ * desktop bridge or the Redrob server, depending on runtime.
+ */
 import { useEffect, useReducer, useRef, useState, type ReactNode, type SetStateAction } from "react";
 import {
   BookOpen,
@@ -88,6 +95,7 @@ import {
   type LibraryCommandItem,
 } from "../library";
 
+/** The per-server status this view renders, narrowed from the raw MCP status map. */
 export type ReactMcpStatus =
   | "connected"
   | "needs_auth"
@@ -97,6 +105,7 @@ export type ReactMcpStatus =
   | "disabled"
   | "disconnected";
 
+/** An installed skill, rendered as a card beside MCP servers in the grid. */
 export type SkillItem = {
   name: string;
   description?: string;
@@ -110,6 +119,7 @@ export type SkillItem = {
 
 const getSkillHiddenId = (skill: SkillItem) => `skill:${skill.name}`;
 
+/** Everything {@link McpView} needs: the inventory, per-server status, and the action callbacks. */
 export type McpViewProps = {
   busy: boolean;
   selectedWorkspaceRoot: string;
@@ -120,7 +130,6 @@ export type McpViewProps = {
   installedCommands?: LibraryCommandItem[];
   /** Composer agents to render in Library. */
   installedAgents?: LibraryAgentItem[];
-  /** MCP capabilities available to this workspace. */
   /** Organization inventory is still being fetched and nothing is cached yet. */
   inventoryLoading?: boolean;
   /** Uninstall a skill by name. */
@@ -326,6 +335,12 @@ function resolveExtensionDetailTarget(
   return entry ? { kind: "entry", entry } : null;
 }
 
+/**
+ * Renders the Extensions screen from {@link McpViewProps}: the searchable/filterable inventory
+ * of MCP servers, skills and Library items, plus the detail view (routed page when
+ * `onDetailIdChange` is given, otherwise a modal). Side effects are limited to loading the
+ * opencode config and persisting the grid/list layout choice; all mutations go through props.
+ */
 export function McpView(props: McpViewProps) {
   const skillCount = props.installedSkills?.length ?? 0;
   const useRoutedDetail = typeof props.onDetailIdChange === "function";
@@ -557,6 +572,7 @@ export function McpView(props: McpViewProps) {
             : Promise.resolve(null),
         ]);
         if (nextId !== configRequestId.current) return;
+        // The desktop bridge returns an untyped config shape; narrow it to the view's contract here.
         dispatchLocal({
           type: "configLoaded",
           project: project as OpencodeConfigFile | null,
@@ -688,6 +704,7 @@ export function McpView(props: McpViewProps) {
         : !props.isRemoteWorkspace
         ? await readOpencodeConfig(configScope, root)
         : null;
+      // Same bridge boundary as the config load: narrow the untyped bridge result.
       const configFile = resolved as OpencodeConfigFile | null;
       if (!configFile) {
         throw new Error(t("mcp.config_load_failed"));
@@ -1147,6 +1164,7 @@ function inventoryGroupLabel(group: ExtensionInventoryGroup) {
 
 type InventoryStateCounts = Record<Exclude<ExtensionInventoryState, "all">, number>;
 
+/** Tallies how many card groups fall into each inventory state (installed / available / …), for the filter counts. */
 export function countInventoryCardGroups(groups: ExtensionInventoryGroup[]): InventoryStateCounts {
   return {
     ready: groups.filter((group) => group === "ready").length,

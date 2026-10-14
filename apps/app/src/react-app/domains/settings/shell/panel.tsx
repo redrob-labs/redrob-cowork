@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** Panel primitives for a settings page: the content inset and a panel with heading / title / description. */
 import type * as React from "react";
 import { RefreshCcw } from "lucide-react";
 

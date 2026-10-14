@@ -1,4 +1,9 @@
 /** @jsxImportSource react */
+/**
+ * The panel that lists and edits the folders this workspace is allowed to access: add a folder,
+ * remove one, and see the save status. UI state lives in the reducer in
+ * `authorized-folders-panel-state.ts`; this file renders it and drives the server calls.
+ */
 import { useCallback, useEffect, useMemo, useReducer, useState, type SetStateAction } from "react";
 import { Folder, Info, Plus, X } from "lucide-react";
 

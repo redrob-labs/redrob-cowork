@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The General settings page: a hub of links/shortcuts into the other settings areas. */
 import {
   ArrowRight,
   ArrowUpRight,

@@ -1,3 +1,7 @@
+/**
+ * Local UI state for the Advanced page: the reducer tracking the reconnect, server-restart, deep-link
+ * and runtime-migration flows. Framework-free so the transitions can be tested without React.
+ */
 type AdvancedLocalState = {
   reconnectStatus: string | null;
   reconnectError: string | null;

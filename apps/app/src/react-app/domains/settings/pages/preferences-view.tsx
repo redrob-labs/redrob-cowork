@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Preferences settings page: desktop-notification preference and other per-user behavior toggles. */
 import {
   Select,
   SelectContent,

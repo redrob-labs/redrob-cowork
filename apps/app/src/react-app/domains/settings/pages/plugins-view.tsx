@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Plugins settings page: lists configured/installed plugins by scope (project vs global) with add/remove. */
 import { Cpu } from "lucide-react";
 
 import { t } from "../../../../i18n";

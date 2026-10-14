@@ -1,4 +1,10 @@
 /** @jsxImportSource react */
+/**
+ * A small registry mapping an extension id to the React node that renders its settings-panel
+ * config. Extensions register their factory at module load; the settings route looks one up for
+ * an inventory entry. Keeping it a registry (rather than a switch in the view) lets each extension
+ * own its config UI without the view importing every one.
+ */
 import type { ReactNode } from "react";
 import type { McpDirectoryInfo } from "../../../app/constants";
 import { extensionContribution } from "../../../app/extensions";
@@ -28,14 +34,6 @@ export type ExtensionConfigContext = {
     onInstall: (apiKey: string) => void | Promise<void>;
     onTestGenerate: (input: { apiKey: string; prompt: string }) => void | Promise<void>;
   };
-  voiceExtension: {
-    busy: boolean;
-    status: string | null;
-    error: string | null;
-    envKeyDetected: boolean;
-    onSaveApiKey: (apiKey: string) => void | Promise<void>;
-    onTestSession: () => void | Promise<void>;
-  };
   localProvider: {
     busy: boolean;
     status: string | null;
@@ -44,10 +42,12 @@ export type ExtensionConfigContext = {
   };
 };
 
+/** Builds an extension's config panel from the shared context. */
 export type ExtensionConfigFactory = (ctx: ExtensionConfigContext) => ReactNode;
 
 const registry = new Map<string, ExtensionConfigFactory>();
 
+/** Registers the config factory for an extension id (last registration wins). */
 export function registerExtensionConfig(id: string, factory: ExtensionConfigFactory) {
   registry.set(id, factory);
 }
@@ -56,6 +56,7 @@ function configRegistryId(entry: McpDirectoryInfo) {
   return extensionContribution(entry.extensionManifest, "settings-panel")?.ref ?? entry.serverName ?? entry.name;
 }
 
+/** The registered config panel for an inventory entry, or null when the extension contributes none. */
 export function getExtensionConfigSlot(
   entry: McpDirectoryInfo,
   ctx: ExtensionConfigContext,

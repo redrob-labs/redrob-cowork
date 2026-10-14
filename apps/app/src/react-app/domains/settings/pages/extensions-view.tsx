@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Extensions (Library) settings page: maps the extensions section/filter to the inventory and plugin views. */
 import { useMemo, type ReactNode } from "react";
 import { Cpu } from "lucide-react";
 

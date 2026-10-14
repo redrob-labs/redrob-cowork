@@ -1,4 +1,9 @@
 /** @jsxImportSource react */
+/**
+ * The reset confirmation modal: wipes onboarding only, or all local app data. Guards the action
+ * behind typing the word "RESET" and warns when runs are active. The destructive work is the
+ * caller's; this is the confirmation surface shown from both Debug and Recovery.
+ */
 import {
   AlertDialog,
   AlertDialogAction,

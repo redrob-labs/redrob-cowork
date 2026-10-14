@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The appearance "Theme" section: a system / light / dark picker with a small preview per option. */
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";

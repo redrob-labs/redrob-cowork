@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Environment settings page: view/add/edit/remove user environment variables, with the add/edit dialog. */
 import { useEffect, useId, useState, type SetStateAction } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, RefreshCw } from "lucide-react";

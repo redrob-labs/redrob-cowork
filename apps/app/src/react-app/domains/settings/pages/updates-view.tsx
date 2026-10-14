@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Updates settings page: release channel, update status/progress, and the install/check controls. */
 import { useState } from "react";
 import { CircleAlert, Info } from "lucide-react";
 

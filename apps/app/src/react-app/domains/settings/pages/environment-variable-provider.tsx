@@ -1,3 +1,8 @@
+/**
+ * Context provider for the Environment page: loads the user's env vars, validates keys (mirroring the
+ * server's rules), and exposes mutations to add/update/remove them, invalidating the env-context cache
+ * on change. The table and dialog read everything through this context.
+ */
 import { createContext, use, useCallback, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient, type UseMutateFunction } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";

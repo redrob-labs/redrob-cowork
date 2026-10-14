@@ -1,4 +1,10 @@
 /** @jsxImportSource react */
+/**
+ * The outer frame for the settings experience: the sidebar (tab nav + workspace switcher), the
+ * header (title, status, notification bell, close), and the content inset that holds the active
+ * page. A `compact` variant drops the chrome for embedding. Composes the pieces from
+ * `settings-page.tsx`; the active page is passed in as children.
+ */
 import type * as React from "react";
 import { ChevronDown, X } from "lucide-react";
 
@@ -99,7 +105,7 @@ export function SettingsShell(props: SettingsShellProps) {
   }
 
   return (
-    <div className="flex h-dvh min-h-dvh w-full overflow-hidden">
+    <div className="flex h-app min-h-app w-full overflow-hidden">
       <SidebarProvider defaultOpen className="relative min-h-0 flex-1">
         <SettingsSidebar
           activeTab={props.activeTab}

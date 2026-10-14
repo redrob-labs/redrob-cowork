@@ -1,4 +1,9 @@
 /** @jsxImportSource react */
+/**
+ * The Debug settings screen, shown only in developer mode. Surfaces runtime diagnostics
+ * (versions, config status, service health), the developer log, and the one-off Electron
+ * migration tools. Purely presentational: every value and action is passed in as a prop.
+ */
 import {
   CircleAlert,
   Copy,
@@ -81,6 +86,7 @@ type OpenCodeConnectDebugCard = StatusPill & {
 
 type ServiceStatus = { tone: "success" | "error"; message: string } | null;
 
+/** Everything {@link DebugView} renders and the callbacks it fires; all state lives in the caller. */
 export type DebugViewProps = {
   developerMode: boolean;
   busy: boolean;
@@ -455,6 +461,7 @@ function ServiceCard(props: ServiceCardProps) {
   );
 }
 
+/** Renders the debug screen, or nothing when developer mode is off (the gate lives here so callers need not check). */
 export function DebugView(props: DebugViewProps) {
   if (!props.developerMode) return null;
 

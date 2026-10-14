@@ -1,3 +1,7 @@
+/**
+ * Hook for the feature-flag toggles stored in local prefs (microsandbox, memory, continuous engine),
+ * each exposed as a read value plus a set/toggle helper. A thin typed wrapper over the prefs store.
+ */
 import { useCallback } from "react";
 
 import { useLocal } from "../../../kernel/local-provider";

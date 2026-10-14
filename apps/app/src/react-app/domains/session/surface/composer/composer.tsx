@@ -10,7 +10,6 @@ import type { ComposerAttachment, McpServerEntry, McpStatus, McpStatusMap, Model
 import { t } from "@/i18n";
 import {
   composerConfigureSectionForMenu,
-  isLibraryCommand,
   slugifyLibraryItemName,
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
@@ -22,6 +21,7 @@ import { listRunningAppsForMention } from "./app-mentions";
 import type { ComposerMentionKind } from "./mention-encoding";
 import {
   getSlashCommandQuery,
+  isComposerSlashOption,
   skillMenuSlashCommandName,
   skillSlashCommandName,
   type ComposerSlashCommandOption,
@@ -39,13 +39,15 @@ type MentionItem = {
   label: string;
 };
 
-type ToolMenuSection = "agents" | "commands" | "skills" | "connections";
+type ToolMenuSection = "agents" | "skills" | "connections";
 
 type ComposerProps = {
   draft: string;
   mentions: Record<string, ComposerMentionKind>;
   onDraftChange: (value: string) => void;
   onSend: () => void | Promise<void>;
+  /** Sends a spoken message as Send would; true when it went. Enables the Desk voice conversation. */
+  onSendText?: (message: string) => boolean;
   onSteer: () => void | Promise<void>;
   onQueue: () => void | Promise<void>;
   onStop: () => void | Promise<void>;
@@ -221,7 +223,7 @@ export function ReactSessionComposer(props: ComposerProps) {
   const [slashOpen, setSlashOpen] = useState(false);
   const [toolMenuOpen, setToolMenuOpen] = useState(false);
   const [toolMenuLayout, setToolMenuLayout] = useState<ToolMenuLayout | null>(null);
-  const [toolMenuSection, setToolMenuSection] = useState<ToolMenuSection>("commands");
+  const [toolMenuSection, setToolMenuSection] = useState<ToolMenuSection>("skills");
   const [mentionItems, setMentionItems] = useState<MentionItem[]>([]);
   const [mentionOpen, setMentionOpen] = useState(false);
   const [menuIndex, setMenuIndex] = useState(0);
@@ -348,6 +350,16 @@ export function ReactSessionComposer(props: ComposerProps) {
   const inDeskFrame = useInDeskFrame();
   const deskChatKey = props.sessionId ?? NEW_CHAT_KEY;
   const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;
+
+  // The composer placeholder rotates: a fresh on-voice prompt-starter each time an empty composer
+  // mounts, picked once per mount so it stays put while you type (a placeholder cannot change mid-type
+  // anyway — it clears on focus). Desk frame only; outside the frame keeps composer.placeholder.
+  const deskPlaceholder = useMemo(() => {
+    const n = 5; // desk.composer_placeholder_1..n
+    const pick = Math.floor(Math.random() * n) + 1;
+    return t(`desk.composer_placeholder_${pick}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally pick once per mount
+  }, []);
 
   useEffect(() => {
     setSlashOpen(slashOpenNext);
@@ -625,7 +637,7 @@ export function ReactSessionComposer(props: ComposerProps) {
     return undefined;
   }, [loadSkills, slashOpen, toolMenuOpen, toolMenuSection]);
 
-  const slashItems = useMemo<ComposerSlashCommandOption[]>(() => [...commands], [commands]);
+  const slashItems = useMemo<ComposerSlashCommandOption[]>(() => commands.filter(isComposerSlashOption), [commands]);
   const slashFiltered = useMemo(() => {
     if (!slashOpen) return [];
     if (!slashQuery) return slashItems.slice(0, 8);
@@ -649,7 +661,6 @@ export function ReactSessionComposer(props: ComposerProps) {
 
   const activeMenu = slashOpen ? "slash" : mentionOpen ? "mention" : null;
   const activeItems = activeMenu === "slash" ? slashFiltered : activeMenu === "mention" ? mentionFiltered : [];
-  const toolCommandItems = commands.filter(isLibraryCommand);
   const toolSkillItems = commands.filter((command) => command.source === "skill");
   const localCommandSkillNames = new Set(toolSkillItems.map((command) => command.name));
   const skillMenuItems: SkillCard[] = [
@@ -1134,7 +1145,7 @@ export function ReactSessionComposer(props: ComposerProps) {
             padding is the same intent, and a highlight that only lights up over
             the caret line reads as "drop not supported here". */}
         <div
-          className={`relative overflow-visible rounded-xl border bg-dls-surface transition-all ${panelRoundedClass} ${
+          className={`desk-composer-field relative overflow-visible rounded-xl border bg-dls-surface transition-all ${panelRoundedClass} ${
             dropzoneActive ? "border-dls-accent" : "border-dls-border"
           }`}
           data-dropzone-active={dropzoneActive ? "true" : undefined}
@@ -1199,7 +1210,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 previewUrl: attachment.previewUrl,
               }))}
               disabled={props.disabled}
-              placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}
+              placeholder={inDeskFrame ? deskPlaceholder : t("composer.placeholder")}
               onChange={props.onDraftChange}
               onSubmit={handleEditorSubmit}
               onExpandPastedText={handleExpandPastedText}
@@ -1288,180 +1299,12 @@ export function ReactSessionComposer(props: ComposerProps) {
                     event.currentTarget.value = "";
                   }}
                 />
-                <div
-                  ref={toolMenuRef}
-                  className="relative"
-                  onMouseDown={(event) => {
-                    const target = event.target;
-                    if (target instanceof Element && target.closest("button")) event.preventDefault();
-                  }}
-                >
-                  <button
-                    type="button"
-                    className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${toolMenuOpen ? "bg-accent text-foreground" : "text-subtle-foreground hover:bg-accent"}`}
-                    onClick={() => {
-                      setMentionOpen(false);
-                      setMentionItems([]);
-                      setSlashOpen(false);
-                      setToolMenuOpen((value) => !value);
-                    }}
-                    aria-expanded={toolMenuOpen}
-                    aria-haspopup="dialog"
-                    title={t("composer.tools_label")}
-                  >
-                    <Plus size={16} />
-                  </button>
-                  {toolMenuOpen && toolMenuLayout
-                    ? createPortal(
-                    <div
-                      ref={toolMenuPanelRef}
-                      className="fixed z-[200] flex overflow-hidden rounded-2xl border border-dls-border bg-dls-surface shadow-[var(--dls-shell-shadow)]"
-                      style={{
-                        left: toolMenuLayout.left,
-                        bottom: toolMenuLayout.bottom,
-                        width: toolMenuLayout.width,
-                        height: toolMenuLayout.maxHeight,
-                        maxHeight: toolMenuLayout.maxHeight,
-                      }}
-                    >
-                      <div className="flex h-full min-h-0 min-w-0 w-full">
-                        <div className="flex h-full w-[168px] shrink-0 flex-col overflow-y-auto border-r border-dls-border bg-muted/30 p-2 sm:w-[192px]">
-                          {([
-                            ["agents", t("composer.agents_label")],
-                            ["commands", t("dashboard.commands")],
-                            ["skills", t("dashboard.skills")],
-                            ["connections", t("composer.connections_mcps_label")],
-                          ] as const).map(([section, label]) => {
-                            const active = toolMenuSection === section;
-                            return (
-                            <button
-                              key={section}
-                              type="button"
-                              className={`mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-muted"}`}
-                              onClick={() => setToolMenuSection(section)}
-                            >
-                              <span className="truncate">{label}</span>
-                              <ChevronRight size={14} className="shrink-0 text-subtle-foreground" />
-                            </button>
-                            );
-                          })}
-                        </div>
-                        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                          <div className="mb-2 flex shrink-0 justify-end border-b border-dls-border px-3 pb-2 pt-2">
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1.5 rounded-full border border-dls-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
-                              onClick={() => {
-                                setToolMenuOpen(false);
-                                openToolMenuSettings();
-                              }}
-                            >
-                              <Settings size={12} />
-                              {t("composer.configure")}
-                            </button>
-                          </div>
-                          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-2">
-                          {toolMenuSection === "agents" ? (
-                            <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
-                              <button
-                                type="button"
-                                className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted/70 ${props.selectedAgent === null ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-                                onClick={() => applyAgentSelection(null)}
-                              >
-                                <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
-                                <div className="min-w-0 flex-1 truncate text-xs font-semibold">{t("composer.default_agent")}</div>
-                                {props.selectedAgent === null ? <Check size={14} className="mt-0.5 shrink-0 text-subtle-foreground" /> : null}
-                              </button>
-                              {nonDefaultAgents.map((agent) => {
-                                const active = props.selectedAgent === agent.name;
-                                return (
-                                  <button
-                                    key={agent.name}
-                                    type="button"
-                                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted/70 ${active ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-                                    onClick={() => applyAgentSelection(agent.name)}
-                                  >
-                                    <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
-                                    <div className="min-w-0 flex-1">
-                                      <div className="truncate text-xs font-semibold">{agent.name.charAt(0).toUpperCase() + agent.name.slice(1)}</div>
-                                      {agent.description ? <div className="truncate text-xs text-subtle-foreground">{agent.description}</div> : null}
-                                    </div>
-                                    {active ? <Check size={14} className="mt-0.5 shrink-0 text-subtle-foreground" /> : null}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          ) : null}
-                          {toolMenuSection === "commands" ? (
-                            toolCommandItems.length > 0 ? (
-                              <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
-                                {toolCommandItems.map((command) => (
-                                  <button
-                                    key={command.id}
-                                    type="button"
-                                    className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left text-muted-foreground transition-colors hover:bg-muted/70"
-                                    onClick={() => applyCommandSelection(command)}
-                                  >
-                                    <Terminal size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
-                                    <div className="min-w-0 flex-1">
-                                      <div className="truncate text-xs font-semibold text-muted-foreground">/{command.name}</div>
-                                      {command.description ? <div className="truncate text-xs text-subtle-foreground">{command.description}</div> : null}
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="px-3 py-2 text-xs text-subtle-foreground">
-                                {!commandsLoaded && commandsLoading ? t("composer.loading_commands") : t("composer.no_commands")}
-                              </div>
-                            )
-                          ) : null}
-                          {toolMenuSection === "skills" ? (
-                            skillMenuItems.length > 0 ? (
-                              <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
-                                {skillMenuItems.map((skill) => (
-                                  <button
-                                    key={`${skill.origin ?? "local"}:${skill.path || skill.name}`}
-                                    type="button"
-                                    className="flex min-w-0 w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left text-muted-foreground transition-colors hover:bg-muted/70"
-                                    onClick={() => applySkillSelection(skill)}
-                                  >
-                                    <Zap size={14} className="mt-0.5 shrink-0 text-subtle-foreground" />
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-center justify-between gap-3">
-                                        <div className="min-w-0 flex-1 truncate text-xs font-semibold text-muted-foreground">
-                                          /{skillMenuSlashCommandName(skill)}
-                                        </div>
-                                        {isLocalCapability(skill.origin) ? (
-                                          <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-2xs font-medium text-muted-foreground">
-                                            {t("composer.source_local")}
-                                          </span>
-                                        ) : null}
-                                      </div>
-                                      {skill.description ? <div className="truncate text-xs text-subtle-foreground">{skill.description}</div> : null}
-                                      {skill.origin === "redrob-connect" ? (
-                                        <div className="truncate text-2xs text-subtle-foreground">
-                                          {[skill.marketplaceName, skill.pluginName].filter(Boolean).join(" · ")}
-                                        </div>
-                                      ) : null}
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="px-3 py-2 text-xs text-subtle-foreground">
-                                {(!skillsLoaded && skillsLoading) || (!commandsLoaded && commandsLoading) ? t("composer.loading_commands") : t("context_panel.no_skills")}
-                              </div>
-                            )
-                          ) : null}
-                          {toolMenuSection === "connections" ? renderConnectionRows() : null}
-                          </div>
-                        </div>
-                      </div>
-                    </div>,
-                    document.body,
-                  ) : null}
-                </div>
+                {/*
+                  The "+" Agents/Skills/Connections tool menu was removed from the composer (round 2,
+                  item D): it duplicated discovery that the "/" slash menu already provides and cluttered
+                  the main chat. Skills/commands are still reachable by typing "/". The tool-menu state and
+                  loaders remain wired for the "/" menu; nothing opens this panel any more.
+                */}
                 <button
                   type="button"
                   className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent ${
@@ -1561,7 +1404,12 @@ export function ReactSessionComposer(props: ComposerProps) {
               */}
               <div className="ml-auto flex shrink-0 items-center gap-1.5">
                 {inDeskFrame ? (
-                  <DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
+                  <DeskComposerTools
+                    chatKey={deskChatKey}
+                    draft={props.draft}
+                    onDraftChange={props.onDraftChange}
+                    onSendText={props.onSendText}
+                  >
                     {modelControls}
                   </DeskComposerTools>
                 ) : null}

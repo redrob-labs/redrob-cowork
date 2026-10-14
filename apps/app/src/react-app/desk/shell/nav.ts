@@ -1,3 +1,9 @@
+/**
+ * Builds the Desk left-menu model from counts and the recent chats. Pure: it takes
+ * everything it shows through its input and returns `AppShellNavItem[]`, so the shell
+ * can render it the same whether the data is real or sample. Also the small time and
+ * privacy-label formatters the menu rows need.
+ */
 import { icons, type AppShellNavItem, type IconComponent } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
@@ -7,7 +13,7 @@ import type { Chat, PrivacyLevel } from "../services/types";
 export type DeskNavId =
   | "chat"
   | "projects"
-  | "playbooks"
+  | "skills"
   | "scheduled"
   | "history"
   | "guide"
@@ -60,6 +66,7 @@ export function formatNavTime(at: number, now: number, locale: string): string {
   return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(when);
 }
 
+/** The privacy level as its menu-row label, in the person's language. */
 export function privacyLevelLabel(level: PrivacyLevel): string {
   switch (level) {
     case "off":
@@ -89,9 +96,10 @@ export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
   const recent = [...input.chats].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, RECENT_CHAT_COUNT);
 
   return [
+    place("guide", t("desk.nav_guide"), icons.chart),
     place("chat", t("desk.nav_new_chat"), icons.plus),
+    place("skills", t("desk.nav_skills"), icons.sparkle),
     place("projects", t("desk.nav_projects"), icons.folder),
-    place("playbooks", t("desk.nav_playbooks"), icons.checklist),
     place("scheduled", t("desk.nav_scheduled"), icons.calendarClock, count(input.waiting)),
     place("history", t("desk.nav_history"), icons.history),
     { heading: t("desk.nav_recent") },
@@ -103,9 +111,8 @@ export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
       current: input.chatId === chat.id,
     })),
     { heading: t("desk.nav_how_it_works") },
-    place("guide", t("desk.nav_guide"), icons.chart, t("desk.nav_auto")),
-    place("connectors", t("desk.nav_connectors"), icons.plug, count(input.connected)),
     place("privacy", t("desk.nav_privacy"), icons.shieldCheck, input.privacy ? privacyLevelLabel(input.privacy) : undefined),
     place("memory", t("desk.nav_memory"), icons.bookOpen, count(input.notes)),
+    place("connectors", t("desk.nav_connectors"), icons.plug, count(input.connected)),
   ];
 }

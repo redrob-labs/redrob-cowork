@@ -1,13 +1,16 @@
 /** @jsxImportSource react */
-import { useSyncExternalStore, type MouseEvent } from "react";
+import { useSyncExternalStore, type CSSProperties, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { useHref } from "react-router";
 import { AppShell, IconButton, ThemeSwitch, icons, type AppShellProps } from "@redrob-labs/ui";
+import { TextSearch } from "lucide-react";
 
 import { getInitialThemeMode, setThemeMode, subscribeToTheme } from "../../../app/theme";
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import { DeskSidePanel } from "../panel/desk-side-panel";
+import { useUiStateStore } from "../../shell/ui-state-store";
 import { useFrameStore } from "../store/frame-store";
+import { useSessionFindStore } from "../../domains/session/surface/find-store";
 import { AccountMenu } from "./account-menu";
 import { DeskFrameContext } from "./desk-frame";
 import { buildDeskNav, type DeskNavId } from "./nav";
@@ -23,6 +26,16 @@ export type DeskShellProps = Pick<
   chatId?: string | null;
   /** The work fills the column edge to edge and scrolls itself (the chat). */
   fill?: boolean;
+  /** Hide the shell's top header entirely (the empty new-chat home: no title, nothing to put there). */
+  bareTop?: boolean;
+  /**
+   * Hide the shell's top header like `bareTop`, but WITHOUT the chat-home's overflow:visible override.
+   * `bareTop` is scoped to the empty chat home, where it also opens the work subtree's overflow so an
+   * upward status popover isn't clipped — correct there (no transcript to scroll), wrong for a tall
+   * scrolling page like Trending AI, where it turned the scroll container off and clipped the lower
+   * shelves. A screen that only wants the empty header gone keeps its own scroll with this instead.
+   */
+  headless?: boolean;
 };
 
 const MARK_SRC = resolveExtensionIconSrc("/redrob-mark.svg");
@@ -42,8 +55,8 @@ export function panelToggleLabel(open: boolean): string {
   return open ? t("desk.panel_close") : t("desk.panel_open");
 }
 
-export function deskShellClassName(fill: boolean, panelOpen: boolean): string {
-  return ["desk-shell", fill ? "desk-shell--fill" : null, panelOpen ? "desk-shell--panel" : null]
+export function deskShellClassName(fill: boolean, panelOpen: boolean, bareTop = false, headless = false): string {
+  return ["desk-shell", fill ? "desk-shell--fill" : null, panelOpen ? "desk-shell--panel" : null, bareTop ? "desk-shell--bare-top" : null, headless ? "desk-shell--headless" : null]
     .filter(Boolean)
     .join(" ");
 }
@@ -76,14 +89,65 @@ export function DeskShellView(props: DeskShellViewProps) {
     toHref: (path) => `${root}${path}`,
   });
   const panelLabel = panelToggleLabel(panelOpen);
+  // One sidebar state for every screen, so the title bar's toggle and Ctrl+B fold this menu too.
+  const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
+  const setSidebarOpen = useUiStateStore((state) => state.setSidebarOpen);
+  // The open chat publishes its header here (round 7, item 6) so the title + Find sit on the shell's
+  // top row beside Invite and the side panel, instead of a second header row inside the chat column.
+  const chatHeader = useFrameStore((state) => state.chatHeader);
+  // Round 8, items 5 + 7: the sidebar is draggable (width from the store, clamped 220-420) and the
+  // title-bar toggle fully hides it rather than leaving the DS 64px mini-rail.
+  const sideWidth = useUiStateStore((state) => state.workspaceLeftSidebarWidth);
+  const setSideWidth = useUiStateStore((state) => state.setWorkspaceLeftSidebarWidth);
+  const setSideResizing = useUiStateStore((state) => state.setWorkspaceLeftSidebarResizing);
+  const sideResizing = useUiStateStore((state) => state.workspaceLeftSidebarResizing);
+  const startSideResize = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = sideWidth;
+    setSideResizing(true);
+    const onMove = (move: PointerEvent) => setSideWidth(startWidth + (move.clientX - startX));
+    const onUp = () => {
+      setSideResizing(false);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+  const shellClass = [
+    deskShellClassName(Boolean(props.fill), panelOpen, Boolean(props.bareTop), Boolean(props.headless)),
+    sidebarOpen ? null : "desk-shell--side-hidden",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <DeskFrameContext value={true}>
-      <div className={deskShellClassName(Boolean(props.fill), panelOpen)} onClickCapture={keepSkipLinkOnScreen}>
+      <div
+        className={shellClass}
+        onClickCapture={keepSkipLinkOnScreen}
+        style={{ "--app-side-width": `${sideWidth}px` } as CSSProperties}
+      >
+        {sidebarOpen ? (
+          <div
+            className="desk-shell__side-resizer"
+            data-resizing={sideResizing ? "true" : undefined}
+            style={{ left: `calc(${sideWidth}px - 4px)` }}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t("desk.resize_sidebar")}
+            onPointerDown={startSideResize}
+          />
+        ) : null}
         <AppShell
           mark={MARK_SRC}
           symbol={MARK_SRC}
+          product="Redrob Cowork"
           collapsible
+          collapsed={!sidebarOpen}
+          onCollapsedChange={(collapsed) => setSidebarOpen(!collapsed)}
           nav={nav}
           navLabel={t("desk.nav_label")}
           skipLabel={t("desk.skip_to_work")}
@@ -108,7 +172,7 @@ export function DeskShellView(props: DeskShellViewProps) {
               <AccountMenu />
             </>
           }
-          title={props.title}
+          title={chatHeader ? chatHeader.title : props.title}
           meta={props.meta}
           rail={panelOpen ? undefined : props.rail}
           foot={props.foot}
@@ -116,14 +180,31 @@ export function DeskShellView(props: DeskShellViewProps) {
           actions={
             <>
               {props.actions}
-              <IconButton
-                label={panelLabel}
-                variant={panelOpen ? "secondary" : "ghost"}
-                size="sm"
-                onClick={props.onTogglePanel}
-              >
-                {icons.panelRight({ width: 16, height: 16, "aria-hidden": true })}
-              </IconButton>
+              {chatHeader?.findSessionId ? (
+                <IconButton
+                  label={t("find.in_conversation")}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    useSessionFindStore.getState().openFind({ sessionId: chatHeader.findSessionId as string })
+                  }
+                >
+                  <TextSearch width={16} height={16} aria-hidden />
+                </IconButton>
+              ) : null}
+              {/* Round 14, item C: the side-panel button belongs to a chat only. It is shown when a
+                  chat has published its header (chatHeader), and hidden on Trending AI, Skills,
+                  Projects and the other non-chat screens where there is no panel to open. */}
+              {chatHeader ? (
+                <IconButton
+                  label={panelLabel}
+                  variant={panelOpen ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={props.onTogglePanel}
+                >
+                  {icons.panelRight({ width: 16, height: 16, "aria-hidden": true })}
+                </IconButton>
+              ) : null}
             </>
           }
         >

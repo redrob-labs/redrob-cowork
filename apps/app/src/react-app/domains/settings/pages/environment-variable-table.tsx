@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The table of environment variables for the Environment page: each row with reveal/hide, edit and delete. */
 import type { ReactNode } from "react";
 import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
 

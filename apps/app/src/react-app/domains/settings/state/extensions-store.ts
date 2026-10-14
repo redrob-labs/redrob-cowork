@@ -481,6 +481,8 @@ export function createExtensionsStore(options: {
     refreshSkillsAborted = false;
     try {
       setStateField("skillsStatus", null);
+      // The SDK's public type does not expose the raw transport; reach its private `_client`
+      // to call the undocumented /skill route. Double-cast through unknown is the only way in.
       const rawClient = client as unknown as { _client?: { get: (input: { url: string }) => Promise<unknown> } };
       if (!rawClient._client) throw new Error(t("skills.status_opencode_unavailable"));
       const result = await rawClient._client.get({ url: "/skill" }) as {

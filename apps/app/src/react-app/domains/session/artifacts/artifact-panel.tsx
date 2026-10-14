@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { usePlatform } from "@/react-app/kernel/platform";
 import { type ArtifactPanelTab, usePanelTabStore } from "../panel/panel-tab-store";
 import { isCollectibleArtifactTarget, type BinaryData, type Data, type OpenTarget, type TextData } from "./open-target";
-import { HTMLPreview, ImagePreview, MarkdownPreview, PdfPreview, PlainText, PreviewError, PreviewLoading, PreviewUnavailable } from "./preview";
+import { AudioPreview, HTMLPreview, ImagePreview, MarkdownPreview, PdfPreview, PlainText, PreviewError, PreviewLoading, PreviewUnavailable, VideoPreview } from "./preview";
 import { t } from "@/i18n";
 
 const ArtifactTextEditor = lazy(() =>
@@ -101,6 +101,18 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
   const isDirectTextEdit = isTextContent(target) && target.preview === "markdown" && !isMarkdownPrimitiveEvalArtifact(target);
   const externalPath = useMemo(() => target.kind === "file" ? absoluteWorkspacePath(workspaceRoot, target.value) : target.value, [target.kind, target.value, workspaceRoot]);
   const canUseDesktopFileActions = target.kind === "file" && !isRemoteWorkspace && platform.capabilities.revealInFileManager;
+  const htmlSandbox = useMemo(() => client.artifactPreviewSandbox(window.location.origin), [client]);
+  /*
+   * The page's folder, so a multi-file page loads its own stylesheets and images. Without a grant the
+   * page still renders, only without them, which is how it rendered before.
+   */
+  const { data: htmlBasePath } = useQuery({
+    queryKey: ["artifact-preview-grant", workspaceId, target.value] as const,
+    queryFn: async () => (await client.grantArtifactPreview(workspaceId, target.value)).basePath,
+    enabled: target.preview === "html" && target.kind === "file" && target.exists !== false,
+    staleTime: 30 * 60 * 1000,
+    retry: false,
+  });
 
   const { data: fileIcon } = useQuery<string | null>({
     queryKey: ["desktop-file-icon", externalPath] as const,
@@ -370,13 +382,17 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
             onSave={saveSpreadsheetContent}
           />
         ) : target.preview === "html" && data?.kind === "text" ? (
-          <HTMLPreview type="text" title={target.name} content={data.data} />
+          <HTMLPreview title={target.name} content={data.data} sandbox={htmlSandbox} basePath={htmlBasePath} />
         ) : target.preview === "image" && data?.kind === "binary" && binaryObjectUrl ? (
           <ImagePreview src={binaryObjectUrl} alt={target.name} />
+        ) : target.preview === "audio" && data?.kind === "binary" && binaryObjectUrl ? (
+          <AudioPreview src={binaryObjectUrl} title={target.name} />
+        ) : target.preview === "video" && data?.kind === "binary" && binaryObjectUrl ? (
+          <VideoPreview src={binaryObjectUrl} title={target.name} />
         ) : target.preview === "pdf" && data?.kind === "binary" && binaryObjectUrl ? (
           <PdfPreview url={binaryObjectUrl} title={target.name} />
-        ) : data?.kind === "binary" && binaryObjectUrl && target.preview === "html" ? (
-          <HTMLPreview type="binary" title={target.name} url={binaryObjectUrl} />
+        ) : data?.kind === "binary" && target.preview === "html" ? (
+          <HTMLPreview title={target.name} content={new TextDecoder().decode(data.data)} sandbox={htmlSandbox} basePath={htmlBasePath} />
         ) : data?.kind === "text" ? (
           <PlainText content={data.data} />
         ) : (

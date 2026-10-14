@@ -1,4 +1,10 @@
 /** @jsxImportSource react */
+/**
+ * The first-run welcome screen: the brand lockup, the title/subtitle, and a single
+ * "Get started" action. Presentational only — the parent route decides what "Get started"
+ * does (it now creates a workspace folder for the user rather than opening a dialog), and
+ * passes the optional explicit folder picker and manual-folder fallback used off the happy path.
+ */
 import { useEffect } from "react";
 
 import { t } from "../../../i18n";
@@ -11,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollAreaViewport } from "@/components/ui/scroll-area";
 import { OnboardingBrandMark } from "./onboarding-brand-mark";
 
+/** The welcome action plus the optional folder-selection affordances the route may wire in. */
 type WelcomePageProps = {
   onGetStarted: () => void;
   getStartedLabel?: string;
@@ -24,6 +31,7 @@ type WelcomePageProps = {
   onChooseFolder?: () => void;
 };
 
+/** Renders the welcome card and marks the route ready so the boot splash can clear. */
 export function WelcomePage({
   onGetStarted,
   getStartedLabel,
@@ -45,12 +53,12 @@ export function WelcomePage({
   }, [markRouteReady]);
 
   return (
-    <Page className="min-h-dvh bg-muted dark:bg-background">
+    <Page className="min-h-app bg-muted dark:bg-background">
       <PageTitlebarRegion />
 
       <ScrollArea className="relative z-10">
         <ScrollAreaViewport>
-          <div className="flex min-h-dvh items-center justify-center px-4 py-16">
+          <div className="flex min-h-app items-center justify-center px-4 py-16">
             <div className="animate-in fade-in slide-in-from-bottom-2 flex w-full max-w-[440px] flex-col gap-6 duration-300">
               <div className="px-1">
                 <OnboardingBrandMark />

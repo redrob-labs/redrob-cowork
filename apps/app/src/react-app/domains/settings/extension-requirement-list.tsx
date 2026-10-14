@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** A checklist of an extension's enablement conditions, each shown met/unmet with an optional "fix" action. */
 import { CheckCircle2, Circle } from "lucide-react";
 
 import type { EnablementCondition, EnablementResult } from "@/app/extensions";

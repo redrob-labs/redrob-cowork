@@ -1,4 +1,5 @@
 /** @jsxImportSource react */
+/** The Recovery settings page: "start over" tools (reveal data dir, reset) offered to every user, not just developers. */
 import { useMutation } from "@tanstack/react-query";
 import { Info } from "lucide-react";
 

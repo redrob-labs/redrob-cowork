@@ -1,4 +1,9 @@
 /** @jsxImportSource react */
+/**
+ * Section-level settings primitives: a group header with a tone-coloured status pill, a "refresh"
+ * button, and the inset card wrapper. The tone variants (ready / warning / neutral / error) are
+ * defined once here with `cva` so status styling stays consistent across every settings page.
+ */
 import type * as React from "react";
 import { RefreshCcw } from "lucide-react";
 import { cva } from "class-variance-authority";
