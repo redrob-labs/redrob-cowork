@@ -1,6 +1,16 @@
 ---
 title: "Changelog"
 ---
+<Update label="Unreleased" tags={["🏗️ Refactoring"]}>
+
+  ## Windows installers are signed through Azure Artifact Signing over OpenID Connect
+
+  - Windows builds are Authenticode-signed by McKinley Rice, Inc. with a Public Trust certificate, so Windows SmartScreen and the desktop updater both recognize the publisher.
+  - The release pipeline holds no signing certificate, password or client secret: the job authenticates with its GitHub OpenID Connect token right before signing.
+  - A Windows build whose signature does not verify as Valid is refused; the former untrusted-signature test-build option is gone.
+
+</Update>
+
 <Update label="August 20th" tags={["🚀 New Features", "🐛 Bug Fixes", "🏗️ Refactoring"]}>
 
   ## [v0.18.35](https://github.com/redrob-labs/redrob-work/compare/v0.18.34...v0.18.35): Desktop respects Automation deployment controls
