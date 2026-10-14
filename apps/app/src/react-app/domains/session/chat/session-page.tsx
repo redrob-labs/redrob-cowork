@@ -139,6 +139,17 @@ const GLOBAL_VOICE_SIDE_PANEL_KEY = "__redrob_voice__";
 const EMPTY_TRANSCRIPT_TARGETS: OpenTarget[] = [];
 const EMPTY_SESSION_TABS: WorkbenchSessionTab[] = [];
 
+/**
+ * Module-scoped "the app has booted at least once" latch. SessionPage remounts
+ * when the desk route changes (Conversations and the other screens are separate
+ * route elements), so a per-instance flag would reset on every navigation. This
+ * survives those remounts: it flips false->true the first time the app is ready
+ * / connected / has a workspace, and from then on the cold-boot startup skeleton
+ * is never shown again (see showStartupSkeleton), so navigating to Conversations
+ * renders the empty hero directly instead of flashing the skeleton. One-way.
+ */
+let hasAppBootedOnce = false;
+
 export type OpenSessionTab = WorkbenchSessionTab;
 
 type PendingConversationHistoryNavigation = {
@@ -348,6 +359,25 @@ export function SessionPage(props: SessionPageProps) {
   const platform = usePlatform();
   const isMobile = useIsMobile();
   const bootOverlayVisible = useBootOverlayVisible();
+  // The startup skeleton (animate-pulse rows) is a COLD-BOOT affordance for the
+  // very first paint, before the app has anything to show. It keyed only off
+  // transient signals (clientConnected / startupPhase), which also dip for a
+  // frame during an in-app route change (e.g. clicking Conversations) — and
+  // because Conversations and the other desk screens are separate route
+  // elements, SessionPage REMOUNTS on that navigation, so a per-instance latch
+  // would reset every time. Latch "the app has booted at least once" at MODULE
+  // scope so it survives those remounts: once true, the cold skeleton never
+  // shows again and the empty hero is rendered immediately instead. One-way.
+  if (
+    !hasAppBootedOnce &&
+    (props.startupPhase === "ready" ||
+      props.startupPhase === "firstSessionReady" ||
+      props.startupPhase === "sessionIndexReady" ||
+      props.clientConnected ||
+      props.workspaces.length > 0)
+  ) {
+    hasAppBootedOnce = true;
+  }
   const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUiStateStore((state) => state.setSidebarOpen);
   const sidePanelSessionKey = getSidePanelSessionKey(props.selectedSessionId);
@@ -834,6 +864,7 @@ export function SessionPage(props: SessionPageProps) {
   const hasMainContentTakeover = Boolean(props.mainContentTakeover);
   const showWorkspaceSetupEmptyState = props.workspaces.length === 0 && !props.selectedSessionId;
   const showStartupSkeleton =
+    !hasAppBootedOnce &&
     !bootOverlayVisible &&
     !props.primarySlot &&
     !hasMainContentTakeover &&
