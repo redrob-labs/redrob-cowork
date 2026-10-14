@@ -570,11 +570,14 @@ const AssistantMessage = React.memo(
               return (
                 <React.Fragment key={`text-${index}`}>
                   {deskBlocks && !body ? null : <MessageContent
-                    // The design system's assistant bubble: generated text sits on
-                    // the AI surface with the AI edge, so machine output is never
-                    // mistaken for a person's.
+                    // Round 32 (Claude-style): the assistant reply is plain prose on
+                    // the page surface -- no bubble. The DS used to paint machine
+                    // output on the reserved AI surface (an edge + fill) so it read as
+                    // "not a person"; the right-aligned, darker USER bubble now carries
+                    // that distinction, so the reply reads as a clean document.
+                    // data-surface="ai" is kept as a semantic hook (not a visual).
                     data-surface="ai"
-                    className="text-foreground prose w-full min-w-0 flex-1 rounded-lg border border-border-ai bg-surface-ai p-4"
+                    className="text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
                     markdown
                     isStreaming={isStreaming}
                     highlightQuery={highlightQuery}
@@ -774,9 +777,11 @@ const UserMessage = React.memo(
               >
                 {hasContent ? (
                   <MessageContent
-                    // The design system's user bubble: the sunken surface at the
-                    // card radius, 12/16 inset.
-                    className="bg-muted text-foreground max-w-[85%] rounded-lg px-4 py-3 leading-6 sm:max-w-[75%] !select-text not-prose"
+                    // Round 32 (Claude-style): a tighter, subtly darker sent bubble.
+                    // --muted is --surface-sunken; mixing a little --border in steps it
+                    // one tone darker in BOTH themes (border is darker than muted light,
+                    // lighter-but-distinct dark). Tighter inset (px-3 py-2) + leading-snug.
+                    className="bg-[color-mix(in_srgb,var(--muted)_88%,var(--border))] text-foreground max-w-[85%] rounded-lg px-3 py-2 leading-snug sm:max-w-[75%] !select-text not-prose"
                     style={{ userSelect: "text" }}
                   >
                     {inlineParts.map((part, index) => {
