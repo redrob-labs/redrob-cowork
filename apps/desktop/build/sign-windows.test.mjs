@@ -24,6 +24,43 @@ function sharedCheckout() {
   return { root, script };
 }
 
+/** Minimal PE with a Certificate Table entry of the given size. */
+function writePe(path, { plus = false, certSize = 0, truncateOptional = false } = {}) {
+  const peOffset = 0x80;
+  const optionalSize = truncateOptional ? 2 : 0xf0;
+  const buffer = Buffer.alloc(peOffset + 24 + optionalSize + 16);
+
+  buffer.writeUInt16LE(0x5a4d, 0); // MZ
+  buffer.writeUInt32LE(peOffset, 0x3c);
+  buffer.writeUInt32LE(0x00004550, peOffset); // PE\0\0
+  buffer.writeUInt16LE(optionalSize, peOffset + 20);
+
+  const optionalAt = peOffset + 24;
+  buffer.writeUInt16LE(plus ? 0x20b : 0x10b, optionalAt);
+  if (!truncateOptional) {
+    const directoriesAt = optionalAt + (plus ? 112 : 96);
+    const entry = directoriesAt + 4 * 8;
+    buffer.writeUInt32LE(0x1000, entry); // address
+    buffer.writeUInt32LE(certSize, entry + 4);
+  }
+  writeFileSync(path, buffer);
+}
+
+function vendorPath(root, kind) {
+  if (kind === "elevate") {
+    const dir = join(root, "resources");
+    mkdirSync(dir, { recursive: true });
+    return join(dir, "elevate.exe");
+  }
+  const dir = join(root, "prebuilds", "win32-x64", "conpty");
+  mkdirSync(dir, { recursive: true });
+  return join(dir, "OpenConsole.exe");
+}
+
+function scratch() {
+  return mkdtempSync(join(tmpdir(), "sign-hook-"));
+}
+
 function fakeRunner(status = 0) {
   const calls = [];
   return {
@@ -34,6 +71,71 @@ function fakeRunner(status = 0) {
     },
   };
 }
+
+test("electron-builder takes a named `sign` export over the module: the module exports none", () => {
+  // app-builder-lib resolves `m.sign ?? m.default ?? m`. A helper exported under that name was
+  // called with electron-builder's configuration object as the file list ("nothing matches
+  // '[object Object]'") -- the hook function itself must be what electron-builder gets.
+  assert.equal(typeof hook, "function");
+  assert.ok(!("sign" in hook), "sign-windows.cjs must not export a `sign` property");
+});
+
+test("reads the certificate table size from PE32 and PE32+; unsigned is zero, non-PE is null", () => {
+  const root = scratch();
+  const pe32 = join(root, "a.exe");
+  const pe32plus = join(root, "b.exe");
+  writePe(pe32, { certSize: 16080 });
+  writePe(pe32plus, { plus: true, certSize: 7888 });
+  assert.equal(hook.certificateTableSize(pe32), 16080);
+  assert.equal(hook.certificateTableSize(pe32plus), 7888);
+
+  const unsigned = join(root, "c.exe");
+  writePe(unsigned, { certSize: 0 });
+  assert.equal(hook.certificateTableSize(unsigned), 0);
+  const notPe = join(root, "d.exe");
+  writeFileSync(notPe, "just text, definitely not a PE");
+  assert.equal(hook.certificateTableSize(notPe), null);
+  const odd = join(root, "e.exe");
+  writePe(odd, { truncateOptional: true });
+  assert.equal(hook.certificateTableSize(odd), 0);
+});
+
+test("a signed vendor binary is skipped; an unsigned one, our own files and a decoy are not", () => {
+  const root = scratch();
+  for (const kind of ["elevate", "openconsole"]) {
+    const file = vendorPath(root, kind);
+    writePe(file, { certSize: 9000 });
+    assert.equal(hook.isAlreadySignedVendorBinary(file), true, kind);
+  }
+  // A vendor that stops signing its own helper must not slip through unsigned.
+  const unsignedVendor = vendorPath(mkdtempSync(join(tmpdir(), "v-")), "elevate");
+  writePe(unsignedVendor, { certSize: 0 });
+  assert.equal(hook.isAlreadySignedVendorBinary(unsignedVendor), false);
+
+  const ours = join(root, "Redrob Cowork.exe");
+  writePe(ours, { certSize: 16080 });
+  assert.equal(hook.isAlreadySignedVendorBinary(ours), false);
+  const installer = join(root, "redrob-cowork-9.9.9-windows-x64.exe");
+  writePe(installer, { certSize: 16080 });
+  assert.equal(hook.isAlreadySignedVendorBinary(installer), false);
+
+  // Matching on basename alone would let one of our own binaries be skipped.
+  mkdirSync(join(root, "app"), { recursive: true });
+  const decoy = join(root, "app", "elevate.exe");
+  writePe(decoy, { certSize: 16080 });
+  assert.equal(hook.isAlreadySignedVendorBinary(decoy), false);
+});
+
+test("a skipped vendor binary never reaches the shared script, with or without signing configured", () => {
+  const root = scratch();
+  const vendor = vendorPath(root, "elevate");
+  writePe(vendor, { certSize: 9000 });
+  const runner = fakeRunner(0);
+  const { root: shared } = sharedCheckout();
+  assert.equal(hook.signFiles([vendor], {}, { env: { ...CONFIGURED_ENV, REDROB_SHARED_DIR: shared }, run: runner.run, log() {} }), "skipped");
+  assert.equal(hook.signFiles([vendor], {}, { env: {}, run: runner.run, log() {} }), "skipped");
+  assert.equal(runner.calls.length, 0);
+});
 
 test("the environment contract: three plain identifiers, all or nothing", () => {
   assert.equal(hook.signingConfigured({}), false);
@@ -108,25 +210,25 @@ test("configured: the file is handed to the shared script exactly once and a fai
   const env = { ...CONFIGURED_ENV, REDROB_SHARED_DIR: root };
   const runner = fakeRunner(0);
   const logs = [];
-  assert.equal(hook.sign(["dist\\Redrob Cowork Setup.exe"], { name: "Redrob Cowork" }, { env, run: runner.run, log: (m) => logs.push(m) }), "signed");
+  assert.equal(hook.signFiles(["dist\\Redrob Cowork Setup.exe"], { name: "Redrob Cowork" }, { env, run: runner.run, log: (m) => logs.push(m) }), "signed");
   assert.equal(runner.calls.length, 1);
   assert.equal(runner.calls[0].args.at(-1), "dist\\Redrob Cowork Setup.exe");
   assert.match(logs[0], /Signing through .*sign\.ps1/);
 
   const failing = fakeRunner(1);
   assert.throws(
-    () => hook.sign(["dist\\x.exe"], {}, { env, run: failing.run, log() {} }),
+    () => hook.signFiles(["dist\\x.exe"], {}, { env, run: failing.run, log() {} }),
     /sign\.ps1 failed for dist\\x\.exe \(exit 1\)/,
   );
 });
 
 test("unconfigured: nothing runs and the files stay unsigned; half-configured is an error", () => {
   const runner = fakeRunner(0);
-  assert.equal(hook.sign(["dist\\x.exe"], {}, { env: {}, run: runner.run, log() {} }), "unsigned");
+  assert.equal(hook.signFiles(["dist\\x.exe"], {}, { env: {}, run: runner.run, log() {} }), "unsigned");
   assert.equal(runner.calls.length, 0);
 
   assert.throws(
-    () => hook.sign(["dist\\x.exe"], {}, { env: { ARTIFACT_SIGNING_ACCOUNT: "a" }, run: runner.run, log() {} }),
+    () => hook.signFiles(["dist\\x.exe"], {}, { env: { ARTIFACT_SIGNING_ACCOUNT: "a" }, run: runner.run, log() {} }),
     /half-configured/,
   );
   assert.equal(runner.calls.length, 0);
@@ -136,7 +238,7 @@ test("configured without the shared checkout is an error naming the checkout, no
   const runner = fakeRunner(0);
   const empty = mkdtempSync(join(tmpdir(), "redrob-empty-"));
   assert.throws(
-    () => hook.sign(["dist\\x.exe"], {}, { env: { ...CONFIGURED_ENV }, run: runner.run, log() {}, repoRoot: empty }),
+    () => hook.signFiles(["dist\\x.exe"], {}, { env: { ...CONFIGURED_ENV }, run: runner.run, log() {}, repoRoot: empty }),
     /shared signing recipe not found/,
   );
   assert.equal(runner.calls.length, 0);

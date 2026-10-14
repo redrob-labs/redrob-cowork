@@ -102,7 +102,9 @@ win:
     # the hook hands each file to redrob-labs/.github's
     # actions/sign-windows/sign.ps1 (checked out at .redrob-shared by the release
     # workflow), authenticated by the `az login` the release job performs right
-    # before packaging. No certificate file or secret exists. See
+    # before packaging. No certificate file or secret exists. The hook skips a
+    # vendor binary (elevate.exe, Microsoft's OpenConsole.exe) that already
+    # carries its own signature, since cloud signing bills per signature. See
     # build/sign-windows.cjs.
     sign: build/sign-windows.cjs
     # electron-updater installs an update only when the installer's signer
