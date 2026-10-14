@@ -16,6 +16,8 @@ import { canRemoveSkill, CONSOLE_SKILLS_URL, skillRows, tagLabels, type SkillRow
 import { installSkill, removeSkill } from "./use-skills";
 import { runSkill } from "./desk-skill";
 import { useDeskStartStore } from "./start-chat";
+import { albumArtBase } from "../preview/model-chart-home";
+import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import { LIBRARY as SAMPLE_LIBRARY, SKILLS as SAMPLE_SKILLS, TAXONOMY as SAMPLE_TAXONOMY } from "../services/fixtures/skills";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
@@ -55,6 +57,55 @@ export function withFilter(filters: SkillFilters, key: "profession" | "task" | "
     if (!tasks.some((task) => task.id === next.task)) delete next.task;
   }
   return next;
+}
+
+/**
+ * Round 33: browse-by-category tiles for non-technical users, in place of the three
+ * jargon dropdowns as the PRIMARY browse. Each profession is an album-art tile (the
+ * same artwork language as Trending AI); picking one sets the profession filter, and
+ * picking the active one again clears it. The dropdowns stay below as a quiet "refine".
+ */
+export function SkillCategoryTiles(props: {
+  taxonomy: SkillTaxonomy | null;
+  active: string | undefined;
+  locale: string;
+  onPick: (professionId: string | undefined) => void;
+}) {
+  const professions = props.taxonomy?.professions ?? [];
+  if (professions.length === 0) return null;
+  const label = (value: { en: string; ko: string }) => (props.locale.startsWith("ko") ? value.ko : value.en);
+  return (
+    <div className="desk-skills__categories" role="group" aria-label={t("desk.skills_browse_heading")}>
+      {professions.map((profession) => {
+        const base = albumArtBase("picked-for-your-profession", profession.id);
+        const isActive = props.active === profession.id;
+        return (
+          <button
+            key={profession.id}
+            type="button"
+            className="desk-skills__category"
+            data-active={isActive ? "true" : undefined}
+            aria-pressed={isActive}
+            onClick={() => props.onPick(isActive ? undefined : profession.id)}
+          >
+            <span className="desk-skills__category-art" aria-hidden="true">
+              {base ? (
+                <img
+                  src={resolveExtensionIconSrc(`${base}.png`)}
+                  srcSet={`${resolveExtensionIconSrc(`${base}.png`)} 1x, ${resolveExtensionIconSrc(`${base}@2x.png`)} 2x, ${resolveExtensionIconSrc(`${base}@3x.png`)} 3x`}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+              ) : null}
+            </span>
+            <span className="desk-skills__category-label">{label(profession.label)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 /** What the team check says, when it is something to act on; null when there is nothing to say. */
@@ -301,6 +352,18 @@ export function SkillsScreen() {
           <h2 className="desk-skills__explainer-title">{t("desk.skills_explainer_title")}</h2>
           <p className="desk-skills__explainer-body">{t("desk.skills_explainer_body")}</p>
         </div>
+        {/*
+          Round 33: browse-by-category album-art tiles as the primary browse (reuses the
+          Trending AI tile language). Picking a profession sets the filter; the dropdowns
+          below become a quiet refine for task/language/search.
+        */}
+        <h3 className="desk-skills__browse-heading">{t("desk.skills_browse_heading")}</h3>
+        <SkillCategoryTiles
+          taxonomy={effectiveTaxonomy}
+          active={filters.profession}
+          locale={locale}
+          onPick={(professionId) => setFilters(withFilter(filters, "profession", professionId ?? ALL, effectiveTaxonomy))}
+        />
         {teamText ? (
           <p className="desk-settings__description">
             {teamText}{" "}
