@@ -13,7 +13,8 @@ import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
-import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/playbooks/start-chat";
+import { skillRunPrompt } from "@/react-app/desk/skills/skills";
+import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/skills/start-chat";
 import { syncCrashReports } from "@/react-app/desk/settings/crash-reports";
 import { useCheckStore } from "@/react-app/desk/thread/check-store";
 import { deskSystemText } from "@/react-app/desk/thread/memory-off";
@@ -100,6 +101,7 @@ import {
   workspaceLabel,
 } from "@/react-app/shell/route-workspaces";
 import { useLocal } from "@/react-app/kernel/local-provider";
+import { takeNewChatUsesDefault } from "@/react-app/kernel/model-config";
 import { usePlatform } from "@/react-app/kernel/platform";
 import { SessionPage, type OpenSessionTab } from "@/react-app/domains/session/chat/session-page";
 import type { NewTaskComposerContext } from "@/react-app/domains/session/chat/new-task-composer";
@@ -365,7 +367,7 @@ async function draftToParts(
       }
       const skillMatch = segment.match(/^\[skill (.+)\]$/);
       if (skillMatch?.[1]) {
-        parts.push({ type: "text", text: `Load [skill ${skillMatch[1]}] and follow its instructions.` });
+        parts.push({ type: "text", text: skillRunPrompt(skillMatch[1]) });
         continue;
       }
       if (segment.startsWith("@")) {
@@ -415,7 +417,7 @@ async function draftToParts(
         continue;
       }
       if (part.type === "skill") {
-        parts.push({ type: "text", text: `Load [skill ${part.name}] and follow its instructions.` });
+        parts.push({ type: "text", text: skillRunPrompt(part.name) });
         continue;
       }
       if (part.type === "app") {
@@ -1456,7 +1458,8 @@ export function SessionRoute() {
 
 
   const applyLastUsedModelToSession = useCallback((sessionId: string) => {
-    const previous = selectedSessionId ? getSessionModelSelection(selectedSessionId) : null;
+    // A model chosen for new chats in the guide wins over the open chat's model, once.
+    const previous = selectedSessionId && !takeNewChatUsesDefault() ? getSessionModelSelection(selectedSessionId) : null;
     const model = previous?.model ?? local.prefs.defaultModel;
     if (!model?.providerID || !model.modelID) return;
     const variant = previous ? previous.variant : (local.prefs.modelVariant ?? null);
@@ -2341,7 +2344,7 @@ export function SessionRoute() {
    * workspace under the user's home folder instead of asking where to put
    * it. Falls back to the create-workspace modal off desktop.
    */
-  // A new chat that sends its first prompt itself: the new chat screen, and a playbook's Run.
+  // A new chat that sends its first prompt itself: the new chat screen, and a skill's Run.
   const createTaskWithPrompt = (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => {
     void (async () => {
       const workspace = workspaces.find((item) => item.id === workspaceId);
@@ -2391,7 +2394,7 @@ export function SessionRoute() {
     })();
   };
 
-  // A playbook asked for a chat from its own screen: start it here, where chats are made.
+  // A skill asked for a chat from its own screen: start it here, where chats are made.
   const startPendingChat = useEffectEvent((pending: PendingDeskChat) => {
     if (!workspaces.some((item) => item.id === pending.workspaceId)) return;
     useDeskStartStore.getState().clear();

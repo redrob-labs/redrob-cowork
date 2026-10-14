@@ -135,7 +135,6 @@ import { cn } from "@/lib/utils"
 import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
-import { AnotherAnswerButton } from "./another-answer-button"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
@@ -635,7 +634,8 @@ type UserMessageProps = {
   isStreaming: boolean
 }
 
-const USER_SKILL_TOKEN_RE = /(Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
+// A skill picked in the composer is sent as "Use the `name` skill."; older chats sent the Load form.
+const USER_SKILL_TOKEN_RE = /(Use the `[^`]+` skill\.|Load \[skill [^\]]+\] and follow its instructions\.|\[skill [^\]]+\])/
 
 function UserSkillChip(props: { name: string }) {
   return (
@@ -738,7 +738,7 @@ function renderUserTextWithSkillChips(text: string, highlightQuery: string | und
   return text.split(USER_SKILL_TOKEN_RE).map((segment) => {
     const key = `${offset}:${segment}`
     offset += segment.length
-    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/)
+    const skillMatch = segment.match(/^(?:Load )?\[skill ([^\]]+)\](?: and follow its instructions\.)?$/) ?? segment.match(/^Use the `([^`]+)` skill\.$/)
     if (skillMatch?.[1]) return <UserSkillChip key={key} name={skillMatch[1]} />
     return <React.Fragment key={key}>{renderPlainTextWithLinks(segment, highlightQuery, key)}</React.Fragment>
   })
@@ -748,7 +748,7 @@ const UserMessage = React.memo(
   ({ message, isStreaming }: UserMessageProps) => {
     const { onRevertToUserMessage, onForkAtMessage, onEditUserMessage, highlightQuery, sessionId } = useMessageList()
     const messageText = React.useMemo(() => getMessagesText([message]), [message])
-    // Inside the Desk frame a prompt worth repeating can become a playbook.
+    // Inside the Desk frame a prompt worth repeating can become a skill.
     const inDeskFrame = useInDeskFrame()
     const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
@@ -822,12 +822,12 @@ const UserMessage = React.memo(
                       </MessageAction>
                     ) : null}
                     {inDeskFrame && messageText ? (
-                      <MessageAction tooltip={t("desk.playbook_save_from_message")}>
+                      <MessageAction tooltip={t("desk.skill_save_from_message")}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("desk.playbook_save_from_message")}
-                          onClick={() => openModal({ kind: "playbook", prompt: messageText })}
+                          aria-label={t("desk.skill_save_from_message")}
+                          onClick={() => openModal({ kind: "skill", instructions: messageText })}
                         >
                           <BookmarkPlus />
                         </Button>
@@ -1533,7 +1533,6 @@ function CompactionNotice({ messages }: { messages: UIMessage[] }) {
  * model, against a provider that is not this gateway, and showing the cost is still right there.
  */
 function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; className?: string }) {
-  const { variantModels, onAnotherAnswer, variantBusy, variantCurrentModel, dispatchAction } = useMessageList()
   const { cost, routedModel } = React.useMemo(() => {
     let cost: number | undefined
     let routedModel: string | undefined
@@ -1546,40 +1545,14 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
     return { cost, routedModel }
   }, [messages])
   const text = formatMessageCost(cost)
-  if (!text && !routedModel && !onAnotherAnswer) return null
+  if (!text && !routedModel) return null
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      {onAnotherAnswer ? (
-        <>
-          {/*
-            Two intents, because they are two questions. "Rewrite" hands this answer to another model and
-            asks for the same content in different words. "Ask again" asks another model the QUESTION and
-            gets its own answer. One button could not have meant both, and re-asking is not a paraphrase.
-          */}
-          <AnotherAnswerButton
-            busy={variantBusy}
-            remembered={variantCurrentModel}
-            hint={t("variants.paraphrase_hint")}
-            label={t("variants.paraphrase")}
-            models={variantModels ?? []}
-            onConnectProvider={() =>
-              dispatchAction({ target: "settings", action: "open", section: "providers" })
-            }
-            onPick={(model) => onAnotherAnswer(model, "paraphrase")}
-          />
-          <AnotherAnswerButton
-            busy={variantBusy}
-            remembered={variantCurrentModel}
-            hint={t("variants.another_hint")}
-            label={t("variants.another_answer")}
-            models={variantModels ?? []}
-            onConnectProvider={() =>
-              dispatchAction({ target: "settings", action: "open", section: "providers" })
-            }
-            onPick={(model) => onAnotherAnswer(model, "compare")}
-          />
-        </>
-      ) : null}
+      {/*
+        Round 11, item 7: the "Rewrite" (paraphrase) and "Ask again" (compare) buttons were removed
+        from under each response. The onAnotherAnswer plumbing stays wired through the tree so it can
+        be restored, but no button renders here.
+      */}
       {routedModel ? (
         <span
           className="max-w-[50%] truncate font-mono text-2xs text-muted-foreground/80"
