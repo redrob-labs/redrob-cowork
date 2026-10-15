@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, ModelGuide, ProtectionStatus, SectionMark, Skeleton, Table, icons, type TableColumn } from "@redrob-labs/ui";
-import { useSyncExternalStore, useState } from "react";
+import { useSyncExternalStore, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -67,6 +67,13 @@ export function ProfessionGuideView(props: {
   // Round 8, item 10: the chart-style browse layer. Null = the Spotify/Apple-Music home (banners +
   // tiles); a pick drills into the existing ModelGuide ranking for that profession or output.
   const [pick, setPick] = useState<ChartPick | null>(null);
+  // Round 37 (item 8): opening a chart (or switching charts) kept the shell's
+  // scroll position, so a detail could open scrolled to the middle. The scrolling
+  // container is the DS shell's #rr-shell-main; reset it to the top whenever the
+  // pick changes (enter a detail, switch charts, or return to the home).
+  useEffect(() => {
+    document.getElementById("rr-shell-main")?.scrollTo({ top: 0 });
+  }, [pick]);
   if (!pick) {
     return <ModelChartHome research={props.research} locale={props.locale} onOpen={setPick} />;
   }
