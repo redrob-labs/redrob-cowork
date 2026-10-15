@@ -1072,8 +1072,9 @@ export function AppSidebar(props: AppSidebarProps) {
       <Sidebar
         collapsible="offcanvas"
         // Redrob Cowork is the design system's Desk product: the rail carries
-        // the Desk wash (index.css, `[data-product]`).
-        data-product="desk"
+        // the Cowork wash (index.css, `[data-product]`). DS 1.6.0 renamed the
+        // product token from "desk" to "cowork".
+        data-product="cowork"
         className="border-e-0 group-data-[side=left]:border-e-0 mac:**:data-[sidebar=sidebar]:bg-transparent"
       >
         <div className="hidden h-12 mac:block mac:titlebar-drag"/>

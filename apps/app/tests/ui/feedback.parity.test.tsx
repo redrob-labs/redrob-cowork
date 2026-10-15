@@ -73,7 +73,10 @@ describe("toasts are the design system's Toast", () => {
         </DsToast>,
       );
       expect(parityTree(app)).toEqual(parityTree(designSystem));
-      expect(app).toContain('aria-live="polite"');
+      // DS 1.6.0: error/danger toasts announce assertively (they interrupt), the
+      // rest stay polite. The parity check above already proves the app matches the
+      // DS exactly; this just asserts the right live-region politeness per tone.
+      expect(app).toContain(tone === "danger" ? 'aria-live="assertive"' : 'aria-live="polite"');
     });
   }
 
