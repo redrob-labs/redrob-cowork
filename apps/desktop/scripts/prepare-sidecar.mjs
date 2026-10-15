@@ -27,6 +27,7 @@ import {
   packagedSidecarNames,
   redrobCodeArchiveName,
   redrobCodeBinaryName,
+  resolveLatestReleaseVersion,
 } from "./redrob-code-release.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -200,28 +201,62 @@ if (!existingEngineVersion && engineCandidatePath) {
       : null;
 }
 
-const normalizedEngineVersion = normalizeReleaseVersion(pinnedRedrobCodeVersion);
+// constants.json's redrobCodeVersion is the FLOOR: the oldest engine this app is known to work
+// with (its sharedAccount contract, daemon routes, ...). It is not what gets bundled.
+const floorEngineVersion = normalizeReleaseVersion(pinnedRedrobCodeVersion);
 
-if (!normalizedEngineVersion) {
-  console.error(`Redrob Code version could not be resolved from ${constantsPath}.`);
+if (!floorEngineVersion) {
+  console.error(`Redrob Code floor version could not be resolved from ${constantsPath}.`);
   process.exit(1);
 }
 
 // redrob-labs/redrob-code is public, so its release assets need no credential and
-// are the primary and only remote source. REDROB_CODE_RELEASE_VERSION=latest
-// follows GitHub's own stable alias; by default the pinned constants.json version
-// is fetched from its own tag so a build stays reproducible.
+// are the primary and only remote source. The bundled sidecar is only the fallback for a
+// machine without a launcher-installed engine, so it is the engine's NEWEST published release
+// (GitHub's `releases/latest`), resolved to an exact tag here so every leg of one release run can
+// be handed the same tag. REDROB_CODE_RELEASE_VERSION names a tag to bundle instead (a release
+// workflow passes the tag it resolved once; a developer can pin for a bisect).
 const releaseAsset = archiveOverride ?? (
   resolvedTargetTriple ? redrobCodeArchiveName(resolvedTargetTriple) : null
 );
 const releaseRepo = normalizeGithubRepo(process.env.REDROB_CODE_REPO);
-const releaseVersion = process.env.REDROB_CODE_RELEASE_VERSION?.trim() || normalizedEngineVersion;
+const requestedReleaseVersion = process.env.REDROB_CODE_RELEASE_VERSION?.trim() || "latest";
+const localEngineBin = process.env.REDROB_CODE_BIN?.trim();
+let normalizedEngineVersion = normalizeReleaseVersion(requestedReleaseVersion);
+if (!normalizedEngineVersion && !(localEngineBin && existsSync(localEngineBin))) {
+  try {
+    normalizedEngineVersion = await resolveLatestReleaseVersion(releaseRepo, {
+      token: process.env.GITHUB_TOKEN || process.env.GH_TOKEN || undefined,
+    });
+    console.log(`Redrob Code: newest release of ${releaseRepo} is v${normalizedEngineVersion}.`);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+if (normalizedEngineVersion && compareVersions(normalizedEngineVersion, floorEngineVersion) < 0) {
+  console.error(
+    `Redrob Code v${normalizedEngineVersion} is older than the floor v${floorEngineVersion} in ${constantsPath}.`,
+  );
+  process.exit(1);
+}
+const releaseVersion = normalizedEngineVersion ?? requestedReleaseVersion;
+
+function compareVersions(a, b) {
+  const pa = String(a).split(".").map(Number);
+  const pb = String(b).split(".").map(Number);
+  for (let i = 0; i < 3; i += 1) {
+    if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) - (pb[i] ?? 0);
+  }
+  return 0;
+}
 
 const shouldDownloadEngine =
   !engineCandidatePath ||
   !existsSync(engineCandidatePath) ||
   isStubBinary(engineCandidatePath) ||
   !existingEngineVersion ||
+  !normalizedEngineVersion ||
   existingEngineVersion !== normalizedEngineVersion;
 
 if (!shouldDownloadEngine) {
@@ -231,7 +266,7 @@ if (!shouldDownloadEngine) {
 if (shouldDownloadEngine) {
   // A locally built engine is the supported path when no release token exists:
   // point REDROB_CODE_BIN at it and the sidecar is copied instead of downloaded.
-  const localBin = process.env.REDROB_CODE_BIN?.trim();
+  const localBin = localEngineBin;
   if (localBin && existsSync(localBin)) {
     mkdirSync(sidecarDir, { recursive: true });
     installEngineBinary(localBin);
@@ -264,6 +299,7 @@ if (shouldDownloadEngine) {
           archiveName: releaseAsset,
           destPath: archivePath,
           writeArchive: (path, bytes) => writeFile(path, bytes),
+          token: process.env.GITHUB_TOKEN || process.env.GH_TOKEN || undefined,
         });
         console.log(
           `Downloaded ${releaseAsset} (${result.bytes} bytes) from ${result.assetUrl}; sha256 ${result.sha256} matches the release manifest.`,
@@ -328,6 +364,18 @@ if (shouldDownloadEngine) {
 
     installEngineBinary(extractedBinary);
     console.log(`Redrob Code sidecar updated to ${normalizedEngineVersion}.`);
+  }
+}
+
+// Which engine this build carries, for the release log and anyone reading the bundle.
+{
+  const bundled = existingEngineVersion && !shouldDownloadEngine ? existingEngineVersion : normalizedEngineVersion;
+  if (bundled) {
+    writeFileSync(join(sidecarDir, "redrob-code.version"), `v${bundled}\n`);
+    console.log(`Redrob Code sidecar: v${bundled}`);
+    if (process.env.GITHUB_STEP_SUMMARY) {
+      writeFileSync(process.env.GITHUB_STEP_SUMMARY, `Bundled Redrob Code sidecar: **v${bundled}**\n`, { flag: "a" });
+    }
   }
 }
 

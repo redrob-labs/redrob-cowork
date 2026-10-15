@@ -34,6 +34,8 @@ jobs:
           node-version: 24
 
       - name: Install Redrob Code engine
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           install_dir="$RUNNER_TEMP/redrob-code"
@@ -80,6 +82,8 @@ jobs:
           node-version: 24
 
       - name: Install Redrob Code engine
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           install_dir="$RUNNER_TEMP/redrob-code"

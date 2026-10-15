@@ -53,8 +53,36 @@ export const REDROB_CODE_ARCHIVE_BY_TARGET = {
   "aarch64-pc-windows-msvc": "redrob-windows-arm64.zip",
 };
 
-/** One digest manifest per release, in `sha256sum` format, covering every asset. */
-export const REDROB_CODE_SHA256SUMS_NAME = "SHA256SUMS";
+/**
+ * One digest manifest per release, in `sha256sum` format, covering every asset. Releases
+ * published by the shared redrob-labs publish job (v0.6.5 on) name it SHA256SUMS.txt; the
+ * engine's own older publish step named it SHA256SUMS. Tried in this order.
+ */
+export const REDROB_CODE_SHA256SUMS_NAMES = ["SHA256SUMS.txt", "SHA256SUMS"];
+export const REDROB_CODE_SHA256SUMS_NAME = REDROB_CODE_SHA256SUMS_NAMES[0];
+
+/**
+ * The engine's newest published release, as GitHub's own `releases/latest` resolves it (newest
+ * non-draft, non-prerelease). Resolved to an exact tag BEFORE anything is downloaded so the digest
+ * manifest and the archive come from the same release even if the engine publishes mid-build.
+ * The bundled sidecar is only the fallback for a machine without a launcher-installed engine, so
+ * it tracks the newest release rather than a pin that only goes stale.
+ */
+export async function resolveLatestReleaseVersion(repo = REDROB_CODE_REPO, { fetchImpl = fetch, token } = {}) {
+  const url = `https://api.github.com/repos/${repo}/releases/latest`;
+  const headers = { accept: "application/vnd.github+json", "user-agent": "redrob-cowork-prepare-sidecar" };
+  if (token) headers.authorization = `Bearer ${token}`;
+  const response = await fetchImpl(url, { headers });
+  if (!response.ok) {
+    throw new Error(`The newest ${repo} release could not be resolved from ${url} (HTTP ${response.status}).`);
+  }
+  const payload = await response.json();
+  const tag = String(payload?.tag_name ?? "").trim();
+  if (!/^v\d+\.\d+\.\d+$/.test(tag)) {
+    throw new Error(`The newest ${repo} release has an unexpected tag '${tag}'.`);
+  }
+  return tag.slice(1);
+}
 
 const REPO_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
@@ -91,9 +119,21 @@ export function releaseDownloadUrl(repo, version, assetName) {
   return normalized ? `${base}/download/v${normalized}/${assetName}` : `${base}/latest/download/${assetName}`;
 }
 
-/** Digest manifest URL for the same release the asset comes from. */
-export function releaseSha256SumsUrl(repo, version) {
-  return releaseDownloadUrl(repo, version, REDROB_CODE_SHA256SUMS_NAME);
+/** Digest manifest URL for the same release the asset comes from (first of the known names). */
+export function releaseSha256SumsUrl(repo, version, name = REDROB_CODE_SHA256SUMS_NAME) {
+  return releaseDownloadUrl(repo, version, name);
+}
+
+/** Read the release's digest manifest, trying each name it has been published under. */
+async function fetchSha256Sums(repo, version, fetchImpl) {
+  const tried = [];
+  for (const name of REDROB_CODE_SHA256SUMS_NAMES) {
+    const url = releaseSha256SumsUrl(repo, version, name);
+    const response = await fetchImpl(url, { redirect: "follow" });
+    if (response.ok) return { url, text: await response.text() };
+    tried.push(`${url} (HTTP ${response.status})`);
+  }
+  throw new Error(`The digest manifest for Redrob Code v${version} could not be read from: ${tried.join(", ")}`);
 }
 
 export function sha256Hex(bytes) {
@@ -143,26 +183,20 @@ export async function downloadRedrobCodeArchive({
   destPath,
   fetchImpl = fetch,
   writeArchive,
+  token,
 }) {
-  const normalizedVersion = normalizeReleaseVersion(version);
-  if (!normalizedVersion) {
-    throw new Error("A pinned Redrob Code version is required to download the engine archive.");
-  }
   if (!archiveName) {
     throw new Error("A release asset name is required to download the Redrob Code engine.");
   }
+  // `latest` (or no version) is resolved to the exact newest tag first, so the manifest and the
+  // archive are read from one release.
+  const normalizedVersion =
+    normalizeReleaseVersion(version) ?? (await resolveLatestReleaseVersion(repo, { fetchImpl, token }));
 
-  const sha256Url = releaseSha256SumsUrl(repo, version);
-  const sha256Response = await fetchImpl(sha256Url, { redirect: "follow" });
-  if (!sha256Response.ok) {
-    throw new Error(
-      `The ${REDROB_CODE_SHA256SUMS_NAME} manifest for Redrob Code v${normalizedVersion} could not be read ` +
-        `from ${sha256Url} (HTTP ${sha256Response.status}).`,
-    );
-  }
-  const expectedDigest = parseSha256Sums(await sha256Response.text(), archiveName);
+  const { url: sha256Url, text: sumsText } = await fetchSha256Sums(repo, normalizedVersion, fetchImpl);
+  const expectedDigest = parseSha256Sums(sumsText, archiveName);
 
-  const assetUrl = releaseDownloadUrl(repo, version, archiveName);
+  const assetUrl = releaseDownloadUrl(repo, normalizedVersion, archiveName);
   const assetResponse = await fetchImpl(assetUrl, { redirect: "follow" });
   if (!assetResponse.ok) {
     throw new Error(`Failed to download ${archiveName} from ${assetUrl} (HTTP ${assetResponse.status}).`);

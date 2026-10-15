@@ -1859,13 +1859,10 @@ export function createRuntimeManager({
     if (!REDROB_ENGINE_INSTALL_URL) {
       throw new Error(REDROB_ENGINE_INSTALL_UNAVAILABLE);
     }
-    const constantsPath = path.resolve(desktopRoot, "../../constants.json");
-    const payload = JSON.parse(await readFile(constantsPath, "utf8"));
-    const version = String(payload?.redrobCodeVersion ?? "").trim().replace(/^v/, "");
-    if (!version) {
-      throw new Error("constants.json is missing redrobCodeVersion");
-    }
-    return `curl -fsSL ${REDROB_ENGINE_INSTALL_URL} | bash -s -- --version ${version} --no-modify-path`;
+    // No --version: the installer resolves the engine's newest release itself. constants.json's
+    // redrobCodeVersion is the floor this app is known to work with, not the version to install;
+    // the launcher keeps the installed engine current from here.
+    return `curl -fsSL ${REDROB_ENGINE_INSTALL_URL} | bash -s -- --no-modify-path`;
   }
 
   function processMatchesSidecar(command) {

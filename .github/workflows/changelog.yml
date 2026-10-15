@@ -132,6 +132,8 @@ jobs:
 
       - name: Install Redrob Code engine
         if: steps.guard.outputs.stable == 'true' && steps.dedupe.outputs.documented == 'false'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           install_dir="$RUNNER_TEMP/redrob-code"
