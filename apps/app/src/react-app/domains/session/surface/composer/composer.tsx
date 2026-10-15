@@ -15,6 +15,7 @@ import {
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
 import { EffortSelect } from "@/components/effort-select";
+import { REDROB_MODEL_ID } from "@/react-app/domains/settings/redrob-provider";
 import { ContextMeter } from "@/components/chat/context-meter";
 import { ModelSelect } from "@/components/model-select";
 import { LexicalPromptEditor, syncAttachmentChipStatus, type LexicalPromptEditorHandle } from "./editor";
@@ -1101,16 +1102,20 @@ export function ReactSessionComposer(props: ComposerProps) {
         previously a read-only chip on the model control and could only be CHANGED by clicking a
         model and walking into a submenu, which is why the interaction was unreadable.
         `EffortSelect` renders nothing when the selected model publishes no levels.
+        Round 37 (item 9): Redrob Auto routes per task and has no user-facing effort level,
+        so hide the Effort selector entirely when Auto is the selected model.
       */}
-      <EffortSelect
-        options={props.modelBehaviorOptions ?? []}
-        value={props.modelVariant ?? null}
-        label={props.modelVariantLabel}
-        disabled={props.steering}
-        onChange={(value) => {
-          if (!props.steering) props.onModelVariantChange(value);
-        }}
-      />
+      {props.selectedModel.modelID === REDROB_MODEL_ID ? null : (
+        <EffortSelect
+          options={props.modelBehaviorOptions ?? []}
+          value={props.modelVariant ?? null}
+          label={props.modelVariantLabel}
+          disabled={props.steering}
+          onChange={(value) => {
+            if (!props.steering) props.onModelVariantChange(value);
+          }}
+        />
+      )}
     </>
   );
 
@@ -1311,6 +1316,11 @@ export function ReactSessionComposer(props: ComposerProps) {
                     if (target instanceof Element && target.closest("button")) event.preventDefault();
                   }}
                 >
+                  {/* Round 37 (item 9): the "+" tools button (agents/commands/skills/
+                     plugins/connections) is hidden everywhere. @-mention and slash
+                     access is unaffected -- it still works by typing "@"/"/" in the
+                     editor. The menu markup below stays but is no longer triggerable. */}
+                  {false ? (
                   <button
                     type="button"
                     className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${toolMenuOpen ? "bg-accent text-foreground" : "text-subtle-foreground hover:bg-accent"}`}
@@ -1326,6 +1336,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   >
                     <Plus size={16} />
                   </button>
+                  ) : null}
                   {toolMenuOpen && toolMenuLayout
                     ? createPortal(
                     <div
