@@ -775,6 +775,19 @@ export function SessionPage(props: SessionPageProps) {
     () => sessionTitleForId(props.sidebar.workspaceSessionGroups, props.selectedSessionId),
     [props.selectedSessionId, props.sidebar.workspaceSessionGroups],
   );
+  // Round 34, item 5: recent session titles for the empty-home starter-hint
+  // bias. Newest first, from the selected workspace's own sessions, capped so a
+  // large history does not over-weight the keyword match. Titles only -- no
+  // content -- used purely to pick which tangible starter to suggest.
+  const recentSessionTitles = useMemo(() => {
+    const group = props.sidebar.workspaceSessionGroups.find(
+      (entry) => entry.workspace.id === props.selectedWorkspaceId,
+    );
+    return (group?.sessions ?? [])
+      .slice(0, 20)
+      .map((session) => getDisplaySessionTitle(session.title))
+      .filter((title) => title.trim().length > 0);
+  }, [props.selectedWorkspaceId, props.sidebar.workspaceSessionGroups]);
   const workspaceName =
     props.selectedWorkspaceDisplay.displayName?.trim() ||
     props.selectedWorkspaceDisplay.name?.trim() ||
@@ -1483,6 +1496,7 @@ export function SessionPage(props: SessionPageProps) {
                       onRunTask={(prompt, attachments) => props.onChatFirstTask?.(prompt, attachments)}
                       onOpenProviderAuth={props.onOpenProviderAuth}
                       composer={props.newTaskComposer}
+                      recentTitles={recentSessionTitles}
                     />
                   ) : showSelectedWorkspaceError ? (
                     <div className="px-6 py-16">
@@ -1580,6 +1594,7 @@ export function SessionPage(props: SessionPageProps) {
                         }
                         onOpenProviderAuth={props.onOpenProviderAuth}
                         composer={props.newTaskComposer}
+                        recentTitles={recentSessionTitles}
                       />
                     </div>
                   )}

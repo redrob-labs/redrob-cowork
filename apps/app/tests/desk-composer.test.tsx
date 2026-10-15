@@ -388,7 +388,7 @@ function Providers(props: { children: ReactNode }) {
 }
 
 describe("the new chat screen", () => {
-  test("renders the serif line, the Desk placeholder and the tools in order inside the frame", () => {
+  test("renders the greeting, hint, Desk placeholder and the tools in order inside the frame", () => {
     const html = renderToStaticMarkup(
       <Providers>
         <DeskFrameContext value={true}>
@@ -396,7 +396,15 @@ describe("the new chat screen", () => {
         </DeskFrameContext>
       </Providers>,
     );
-    expect(html).toContain(`<h2 class="desk-new__line">${en["desk.new_chat_line"]}</h2>`);
+    // Round 34, item 5: the static serif line was replaced by a rotating
+    // greeting + starter-hint pair (time/history-driven, so the exact text is
+    // not asserted) rendered in the serif .desk-new__line + .desk-new__hint,
+    // left-aligned inside .desk-new__greeting; item 4 adds the centered
+    // disclaimer. Assert the scaffold + copy, not a frozen line.
+    expect(html).toContain('class="desk-new__greeting"');
+    expect(html).toContain('<h2 class="desk-new__line">');
+    expect(html).toContain('class="desk-new__hint"');
+    expect(html).toContain(`<p class="desk-new__disclaimer">${en["hero.disclaimer"]}</p>`);
     expect(html).toContain(en["desk.composer_placeholder"]);
     expect(html).not.toContain(en["hero.title"]);
     const mic = markupOf(html, `aria-label="Talk to Desk`);
@@ -419,9 +427,12 @@ describe("the new chat screen", () => {
     expect(html).not.toContain(en["desk.mode_plan"]);
   });
 
-  test("shows the serif line and the Desk placeholder inside the frame", () => {
+  test("shows the rotating greeting and the Desk placeholder inside the frame", () => {
     const hero = read("react-app/domains/session/chat/session-empty-hero.tsx");
-    expect(hero).toContain('<h2 className="desk-new__line">{t("desk.new_chat_line")}</h2>');
+    // Round 34, item 5: the greeting line is dynamic (resolved from the rotation
+    // helper), not a static key, and sits beside a hint sub-line.
+    expect(hero).toContain('<h2 className="desk-new__line">{greeting}</h2>');
+    expect(hero).toContain('<p className="desk-new__hint">{starterHint}</p>');
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain('placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}');
     expect(en["desk.composer_placeholder"]).toBe("Research, build, automate. Cowork picks the model");
