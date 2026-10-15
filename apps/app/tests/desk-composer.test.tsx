@@ -388,7 +388,7 @@ function Providers(props: { children: ReactNode }) {
 }
 
 describe("the new chat screen", () => {
-  test("renders the greeting, hint, Desk placeholder and the tools in order inside the frame", () => {
+  test("renders the greeting, Desk placeholder and the tools in order inside the frame", () => {
     const html = renderToStaticMarkup(
       <Providers>
         <DeskFrameContext value={true}>
@@ -396,16 +396,14 @@ describe("the new chat screen", () => {
         </DeskFrameContext>
       </Providers>,
     );
-    // Round 34, item 5: the static serif line was replaced by a rotating
-    // greeting + starter-hint pair (time/history-driven, so the exact text is
-    // not asserted) rendered in the serif .desk-new__line + .desk-new__hint,
-    // left-aligned inside .desk-new__greeting; item 4 adds the centered
-    // disclaimer. Assert the scaffold + copy, not a frozen line.
-    expect(html).toContain('class="desk-new__greeting"');
+    // Round 34/35: a rotating greeting (time/history-driven, exact text not
+    // asserted) in the sans .desk-new__line, centered; round 35 item 4 moved the
+    // starter hint OUT of a sub-line INTO the composer placeholder, so there is
+    // no .desk-new__hint; item 4 (round 34) keeps the centered disclaimer.
+    expect(html).toContain('class="desk-new__center"');
     expect(html).toContain('<h2 class="desk-new__line">');
-    expect(html).toContain('class="desk-new__hint"');
+    expect(html).not.toContain('class="desk-new__hint"');
     expect(html).toContain(`<p class="desk-new__disclaimer">${en["hero.disclaimer"]}</p>`);
-    expect(html).toContain(en["desk.composer_placeholder"]);
     expect(html).not.toContain(en["hero.title"]);
     const mic = markupOf(html, `aria-label="Talk to Desk`);
     const plan = markupOf(html, `aria-label="${en["desk.mode_plan"]}"`);
@@ -427,18 +425,22 @@ describe("the new chat screen", () => {
     expect(html).not.toContain(en["desk.mode_plan"]);
   });
 
-  test("shows the rotating greeting and the Desk placeholder inside the frame", () => {
+  test("shows the rotating greeting and the starter-hint placeholder inside the frame", () => {
     const hero = read("react-app/domains/session/chat/session-empty-hero.tsx");
-    // Round 34, item 5: the greeting line is dynamic (resolved from the rotation
-    // helper), not a static key, and sits beside a hint sub-line.
+    // Round 34/35: the greeting line is dynamic; round 35 item 4 moved the
+    // starter hint into the composer placeholder (placeholderOverride) and
+    // dropped the .desk-new__hint sub-line.
     expect(hero).toContain('<h2 className="desk-new__line">{greeting}</h2>');
-    expect(hero).toContain('<p className="desk-new__hint">{starterHint}</p>');
+    expect(hero).not.toContain('className="desk-new__hint"');
+    expect(hero).toContain('placeholderOverride={inDeskFrame ? starterHint : undefined}');
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
-    expect(composer).toContain('placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}');
-    expect(en["desk.composer_placeholder"]).toBe("Research, build, automate. Cowork picks the model");
+    // The placeholder now honours an override, falling back to the frame/default key.
+    expect(composer).toContain('placeholder={props.placeholderOverride ?? (inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder"))}');
     const css = read("app/index.css");
     const line = css.slice(css.indexOf(".desk-new__line {"), css.indexOf("}", css.indexOf(".desk-new__line {")));
-    expect(line).toContain("font-family: var(--font-serif)");
+    // Round 35 item 4: greeting is now sans (Trending AI header style) + centered, not serif.
+    expect(line).toContain("text-align: center");
+    expect(line).not.toContain("var(--font-serif)");
   });
 
   test("the composer puts the Desk tools before Send and the status under the field, only in the frame", () => {

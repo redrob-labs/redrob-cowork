@@ -1578,15 +1578,17 @@
 .desk-new__line {
   margin: 0;
   /*
-    The composer field below insets its editable text by var(--space-4) (its
-    inner px-4). The heading box starts at the column edge, so without a matching
-    inset the heading text sat 16px LEFT of where the person types, reading as
-    misaligned. Match the composer's text inset so the heading and the input
-    share one left edge.
+    Round 35, item 4: the greeting now matches the Trending AI section-header
+    STYLE -- sans (no serif), bold, tight tracking -- rather than the old big
+    serif, and is CENTER-aligned to the prompt box below (dropped the left inset
+    that aligned it to the composer's text edge). Kept at a hero size so it still
+    anchors the screen, just in the sans family/weight of the chart headers.
   */
-  padding-inline: var(--space-4);
-  font: var(--text-voice-2);
-  font-family: var(--font-serif);
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--ink-primary);
 }
 

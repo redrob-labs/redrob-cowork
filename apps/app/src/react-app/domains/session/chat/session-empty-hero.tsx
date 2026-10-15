@@ -108,6 +108,7 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
       onRunTask={submit}
       busy={props.busy ?? false}
       context={props.composer ?? null}
+      placeholderOverride={inDeskFrame ? starterHint : undefined}
     />
   );
 
@@ -129,17 +130,14 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
     </button>
   ) : null;
 
-  // The Desk's new chat (01-new-chat): a rotating greeting + starter hint, then the composer and its
-  // tools, then a quiet disclaimer. The greeting/hint share the composer's left edge via
-  // .desk-new__line's inset (round 34, item 5); the disclaimer is centered at the bottom (item 4).
+  // The Desk's new chat (01-new-chat): a centered greeting (round 35: sans, matching the Trending AI
+  // section-header style), then the composer whose placeholder is the rotating starter hint (round 35,
+  // item 4 -- the hint moved from a sub-line INTO the input), then a quiet disclaimer (item 4 round 34).
   if (inDeskFrame) {
     return (
       <div className="desk-new">
         <div className="desk-new__center">
-          <div className="desk-new__greeting">
-            <h2 className="desk-new__line">{greeting}</h2>
-            <p className="desk-new__hint">{starterHint}</p>
-          </div>
+          <h2 className="desk-new__line">{greeting}</h2>
           {composer}
           {connectProvider}
         </div>
