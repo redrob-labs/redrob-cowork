@@ -308,12 +308,14 @@ const status = (patch: Partial<DeskStatusInput> = {}): DeskStatusInput => ({
 });
 
 describe("the status line", () => {
-  test("privacy reads High, safe, only from a real state", () => {
+  test("privacy reads safe only from a real state", () => {
     const [privacy] = deskStatusItems(status({ privacy: { level: "high", preview: false } }));
     expect(privacy?.id).toBe("privacy");
     expect(privacy?.tone).toBe("safe");
-    expect(privacy?.value).toBe(en["desk.privacy_high"]);
-    expect(privacy?.level).toEqual({ n: 2, of: 3 });
+    // Round 38 (item 2): the chip is icon + title only (no value/level); the level
+    // still shows inside the panel.
+    expect(privacy?.value).toBeUndefined();
+    expect(privacy?.level).toBeUndefined();
     const panel = renderToStaticMarkup(<>{privacy?.panel}</>);
     expect(panel).toContain(`${en["desk.privacy_on_title"]}: ${en["desk.privacy_high"]}`);
   });
@@ -322,7 +324,7 @@ describe("the status line", () => {
     for (const privacy of [{ level: "high" as const, preview: true }, null]) {
       const [item] = deskStatusItems(status({ privacy }));
       expect(item?.tone).toBe("plain");
-      expect(item?.value).toBe(en["desk.privacy_off"]);
+      expect(item?.value).toBeUndefined();
       expect(item?.level).toBeUndefined();
       expect(renderToStaticMarkup(<>{item?.panel}</>)).toContain(en["desk.privacy_page_off_title"]);
     }
@@ -330,19 +332,19 @@ describe("the status line", () => {
 
   test("privacy says off on the web", () => {
     const [privacy] = deskStatusItems(status({ desktop: false }));
-    expect(privacy?.value).toBe(en["desk.privacy_off"]);
+    expect(privacy?.tone).toBe("plain");
     expect(renderToStaticMarkup(<>{privacy?.panel}</>)).toContain(en["desk.privacy_off_title"]);
   });
 
   test("memory is On for every AI or Off for this chat, with This project only in a project", () => {
     const on = deskStatusItems(status())[1];
-    expect(on?.value).toBe(en["desk.memory_on"]);
+    expect(on?.value).toBeUndefined();
     const outside = renderToStaticMarkup(<>{on?.panel}</>);
     expect(outside).not.toContain(en["desk.memory_project"]);
     expect(outside).toContain("22 notes, across every project");
 
     const off = deskStatusItems(status({ memory: "none" }))[1];
-    expect(off?.value).toBe(en["desk.memory_off"]);
+    expect(off?.value).toBeUndefined();
     expect(off?.tone).toBe("plain");
     expect(renderToStaticMarkup(<>{off?.panel}</>)).toContain(en["desk.memory_off_title"]);
 
@@ -352,6 +354,8 @@ describe("the status line", () => {
   });
 
   test("Cross-check reads the design system's word for the checks", () => {
+    // The value helper is still exported and used inside the panel; the chip itself
+    // no longer carries the value (round 38 item 2).
     expect(crossCheckStatusValue({ factCheck: "auto", challenge: "auto" })).toBe("When it matters");
     expect(crossCheckStatusValue({ factCheck: "always", challenge: "always" })).toBe("Always");
     expect(crossCheckStatusValue({ factCheck: "off", challenge: "off" })).toBe("Off");
@@ -359,7 +363,7 @@ describe("the status line", () => {
     expect(crossCheckStatusValue({ factCheck: "auto", challenge: "off" })).toBe("1 of 2 on");
     const check = deskStatusItems(status({ checks: { factCheck: "off", challenge: "off" } }))[2];
     expect(check?.tone).toBe("plain");
-    expect(check?.value).toBe("Off");
+    expect(check?.value).toBeUndefined();
   });
 
   test("everything it says is in Korean too", () => {
@@ -369,7 +373,9 @@ describe("the status line", () => {
     expect(crossCheckStatusValue({ factCheck: "auto", challenge: "off" })).toBe("2개 중 1개 켜짐");
     const html = renderToStaticMarkup(<DeskComposerStatusView {...status()} />);
     expect(html).toContain(ko["desk.status_privacy"]);
-    expect(html).toContain(ko["desk.memory_on"]);
+    // Round 38 (item 2): the chip shows the title (icon + title) but not the value,
+    // so the memory value text is no longer in the chip markup; the panel still carries it.
+    expect(html).toContain(ko["desk.status_memory"]);
     expect(html).toContain(ko["desk.status_label"]);
     expect(html).not.toMatch(/>[^<]*[A-Za-z]{3,}[^<]*</);
   });
