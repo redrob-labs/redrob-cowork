@@ -12,7 +12,7 @@
  * should declare those keys as required inputs instead.
  */
 import { readFile } from "node:fs/promises";
-import type { McpItem, ServerConfig } from "./types.js";
+import type { McpItem, ServerConfig, SkillScope } from "./types.js";
 import { listMcp } from "./mcp.js";
 import { listSkills } from "./skills.js";
 
@@ -20,7 +20,7 @@ export type ExportedSkill = {
   kind: "skill";
   name: string;
   description: string;
-  scope: "project" | "global";
+  scope: SkillScope;
   content: string;
 };
 

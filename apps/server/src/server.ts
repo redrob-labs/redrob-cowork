@@ -27,7 +27,7 @@ import {
   parseMcpAppSandboxCsp,
 } from "./mcp-app-sandbox.js";
 import { exportExtensions } from "./extensions-export.js";
-import { createSkill, deleteSkill, globalSkillsDir, installGlobalSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
+import { createSkill, deleteSkill, globalSkillsDir, installGlobalSkill, listSkills, renderSkillContentForResponse, upsertSkill, upsertUserSkill } from "./skills.js";
 import { publicCatalogue } from "./skill-library/public-catalogue.js";
 import { buildFrontmatter } from "./frontmatter.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
@@ -2989,7 +2989,7 @@ function createRoutes(
       action: result.action,
       path: result.path,
     });
-    return jsonResponse({ name, path: result.path, description: skill.description, scope: "project", metadata: { source: "library" } });
+    return jsonResponse({ name, path: result.path, description: skill.description, scope: "user", metadata: { source: "library" } });
   });
 
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
@@ -3021,9 +3021,9 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "skills.upsert",
       summary: `Upsert skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+      paths: [join(globalSkillsDir(), name, "SKILL.md"), join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
     });
-    const result = await upsertSkill(workspace.path, { name, content, description });
+    const result = await upsertUserSkill(workspace.path, { name, content, description });
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,
@@ -3039,7 +3039,7 @@ function createRoutes(
       action: result.action,
       path: result.path,
     });
-    return jsonResponse({ name, path: result.path, description: description ?? "", scope: "project" });
+    return jsonResponse({ name, path: result.path, description: description ?? "", scope: result.scope });
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/skills/:name", "client", async (ctx) => {

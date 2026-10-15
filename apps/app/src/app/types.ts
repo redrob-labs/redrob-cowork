@@ -283,7 +283,7 @@ export type SkillCard = {
   description?: string;
   trigger?: string;
   origin?: CapabilityOrigin;
-  scope?: "project" | "global";
+  scope?: "project" | "user" | "global";
   marketplaceName?: string;
   pluginName?: string;
   connectCapabilityName?: string;

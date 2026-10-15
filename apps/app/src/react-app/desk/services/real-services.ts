@@ -209,9 +209,9 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         const existing = (await listInstalled()).find((skill) => skill.name === draft.name);
         // A new skill never replaces one; a change is only ever to the person's own.
         if (draft.editing ? !existing || !canEditSkill(existing) : existing) throw new Error(`Cannot save the skill ${draft.name}`);
-        await client.upsertSkill(workspaceId, { name: draft.name, content: skillContent(draft), description: draft.description.trim() });
+        const saved = await client.upsertSkill(workspaceId, { name: draft.name, content: skillContent(draft), description: draft.description.trim() });
         const { profession, task, language } = draft;
-        return real({ name: draft.name, description: draft.description.trim(), origin: "mine", tags: tagsOf({ profession, task, language }), scope: "project" });
+        return real({ name: draft.name, description: draft.description.trim(), origin: "mine", tags: tagsOf({ profession, task, language }), scope: saved.scope ?? existing?.scope ?? "user" });
       },
       remove: async (name) => {
         const existing = (await listInstalled()).find((skill) => skill.name === name);

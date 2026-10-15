@@ -2,7 +2,7 @@ import { readdir, readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import type { Dirent } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
-import type { SkillItem } from "./types.js";
+import type { SkillItem, SkillScope } from "./types.js";
 import { parseFrontmatter, buildFrontmatter } from "./frontmatter.js";
 import { exists } from "./utils.js";
 import { validateDescription, validateSkillName } from "./validators.js";
@@ -85,7 +85,7 @@ const extractTriggerFromBody = (body: string) => {
 async function parseSkillEntry(
   skillPath: string,
   entryName: string,
-  scope: "project" | "global",
+  scope: SkillScope,
 ): Promise<SkillItem | null> {
   let content: string;
   try {
@@ -156,7 +156,7 @@ async function parseSkillEntry(
   };
 }
 
-async function listSkillsInDir(dir: string, scope: "project" | "global"): Promise<SkillItem[]> {
+async function listSkillsInDir(dir: string, scope: SkillScope): Promise<SkillItem[]> {
   if (!(await exists(dir))) return [];
   const entries = await readdir(dir, { withFileTypes: true });
   const groups = await Promise.all(
@@ -201,7 +201,7 @@ async function listSkillsInDir(dir: string, scope: "project" | "global"): Promis
 
 export async function listSkills(workspaceRoot: string, includeGlobal: boolean): Promise<SkillItem[]> {
   const roots = await findWorkspaceRoots(workspaceRoot);
-  const dirs: { dir: string; scope: "project" | "global" }[] = [];
+  const dirs: { dir: string; scope: SkillScope }[] = [];
   for (const root of roots) {
     // `.redrob` is the engine's folder; `.opencode` is the upstream legacy name it still reads.
     dirs.push({ dir: join(root, ".redrob", "skills"), scope: "project" });
@@ -210,7 +210,7 @@ export async function listSkills(workspaceRoot: string, includeGlobal: boolean):
   }
 
   if (includeGlobal) {
-    dirs.push({ dir: globalSkillsDir(), scope: "global" });
+    dirs.push({ dir: globalSkillsDir(), scope: "user" });
     dirs.push({ dir: join(homedir(), ".redrob", "skills"), scope: "global" });
     const globalOpencode = join(homedir(), ".config", "opencode", "skills");
     const globalClaude = join(homedir(), ".claude", "skills");
@@ -289,6 +289,26 @@ export async function upsertSkill(
   return { path: skillPath, action: existed ? "updated" : "added" };
 }
 
+/**
+ * Saves a person's own skill. A skill that already exists in the workspace or the user dir is
+ * updated in place; a new one goes to the user dir (~/.config/redrob/skills), where every
+ * Redrob app and every folder reads it. Skills in other global dirs are never written.
+ */
+export async function upsertUserSkill(
+  workspaceRoot: string,
+  payload: UpsertSkillPayload,
+): Promise<{ path: string; action: "added" | "updated"; scope: SkillScope }> {
+  const skill = buildSkillContent(payload);
+  const existing = (await listSkills(workspaceRoot, true)).find((item) => item.name === skill.name);
+  if (existing && existing.scope === "global") {
+    throw new ApiError(409, "skill_exists", `A skill named ${skill.name} already exists outside Redrob`);
+  }
+  const skillPath = existing?.path ?? join(globalSkillsDir(), skill.name, "SKILL.md");
+  await mkdir(dirname(skillPath), { recursive: true });
+  await writeFile(skillPath, skill.content, "utf8");
+  return { path: skillPath, action: existing ? "updated" : "added", scope: existing?.scope ?? "user" };
+}
+
 /** Creates a project skill atomically and refuses to overwrite an existing SKILL.md. */
 export async function createSkill(
   workspaceRoot: string,
@@ -343,14 +363,9 @@ export async function deleteSkill(workspaceRoot: string, name: string): Promise<
   // marketplace plugin bundles are namespaced under a plugin folder). Listing
   // supports this layout, so deletion must resolve it the same way.
   const items = await listSkills(workspaceRoot, true);
-  const globalDir = resolve(globalSkillsDir());
-  // A library skill installed globally is removable; other global skills (the person's own
-  // folders, Claude's, agents') are shown but never changed here.
-  const item = items.find(
-    (skill) =>
-      skill.name === trimmed &&
-      (skill.scope === "project" || (skill.metadata?.source === "library" && resolve(skill.path).startsWith(globalDir + "/"))),
-  );
+  // Workspace skills and the user dir's (library installs, the person's own) are removable;
+  // other global dirs (Claude's, agents') are shown but never changed here.
+  const item = items.find((skill) => skill.name === trimmed && skill.scope !== "global");
   if (!item) {
     throw new ApiError(404, "skill_not_found", `Skill not found: ${trimmed}`);
   }

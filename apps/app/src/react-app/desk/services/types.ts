@@ -99,8 +99,8 @@ export type DeskSkill = {
   description: string;
   origin: SkillOrigin;
   tags: SkillTags;
-  /** `global` is the person's own folder, outside the project: shown, never changed here. */
-  scope: "project" | "global";
+  /** `user` is Redrob's own dir, seen by every app; `global` is another global dir: shown, never changed here. */
+  scope: "project" | "user" | "global";
 };
 
 /** A skill in the Console's library, installed or not. */

@@ -167,11 +167,14 @@ export type RedrobSkillMetadata = {
   source?: "team" | "library";
 };
 
+/** `user` is the engine's own config dir (~/.config/redrob/skills), where Redrob writes; `global` is another dir, read-only. */
+export type RedrobSkillScope = "project" | "user" | "global";
+
 export type RedrobSkillItem = {
   name: string;
   path: string;
   description: string;
-  scope: "project" | "global";
+  scope: RedrobSkillScope;
   trigger?: string;
   error?: string;
   metadata?: RedrobSkillMetadata;

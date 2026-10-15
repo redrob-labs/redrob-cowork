@@ -195,11 +195,14 @@ export interface McpItem {
   }>;
 }
 
+/** Where a skill lives: the workspace folder, the engine's user config dir (Redrob-managed), or another global dir (read-only). */
+export type SkillScope = "project" | "user" | "global";
+
 export interface SkillItem {
   name: string;
   path: string;
   description: string;
-  scope: "project" | "global";
+  scope: SkillScope;
   trigger?: string;
   error?: string;
   /** The SKILL.md `metadata` block; `source: "library"` marks a skill installed from the Console. */
