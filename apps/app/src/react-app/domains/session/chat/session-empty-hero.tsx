@@ -1,11 +1,16 @@
 /** @jsxImportSource react */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Zap } from "lucide-react";
 
 import type { ComposerAttachment } from "@/app/types";
 import { t } from "@/i18n";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { NewTaskComposer, type NewTaskComposerContext } from "./new-task-composer";
+import {
+  greetingKeyFor,
+  starterGroupForHistory,
+  starterKeyFor,
+} from "./new-task-dynamic";
 
 /**
  * The starter card's prompt is sent to the model verbatim, so it is
@@ -48,6 +53,12 @@ export type SessionEmptyHeroProps = {
   onOpenProviderAuth?: () => void;
   /** Workspace-scoped wiring for the full composer (skills, agents, models). */
   composer?: NewTaskComposerContext | null;
+  /**
+   * Recent session titles (newest first), used only to bias the rotating
+   * starter hint toward the kind of work the person's chats show. Empty or
+   * omitted falls back to the neutral starter rotation (round 34, item 5).
+   */
+  recentTitles?: readonly string[];
 };
 
 /**
@@ -63,6 +74,21 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
     description: t(suggestion.descriptionKey),
     prompt: t(suggestion.promptKey),
   }));
+
+  // Round 34, item 5: a rotating warm greeting (time-of-day aware) plus a
+  // tangible starter hint biased by the kind of work the person's recent
+  // session titles show. Resolved once per mount (a stable seed) so the line
+  // does not flicker on every keystroke; the home remounts on navigation, so a
+  // fresh visit rotates. The starter also seeds the composer placeholder.
+  const { greeting, starterHint } = useMemo(() => {
+    const now = new Date();
+    const seed = Math.floor(now.getTime() / 1000);
+    const group = starterGroupForHistory(props.recentTitles ?? []);
+    return {
+      greeting: t(greetingKeyFor(now, seed)),
+      starterHint: t(starterKeyFor(group, seed)),
+    };
+  }, [props.recentTitles]);
 
   const submit = (resolvedPrompt: string, attachments: ComposerAttachment[]) => {
     const trimmedPrompt = resolvedPrompt.trim();
@@ -103,13 +129,21 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
     </button>
   ) : null;
 
-  // The Desk's new chat (01-new-chat): the one spoken line, then the composer and its tools.
+  // The Desk's new chat (01-new-chat): a rotating greeting + starter hint, then the composer and its
+  // tools, then a quiet disclaimer. The greeting/hint share the composer's left edge via
+  // .desk-new__line's inset (round 34, item 5); the disclaimer is centered at the bottom (item 4).
   if (inDeskFrame) {
     return (
       <div className="desk-new">
-        <h2 className="desk-new__line">{t("desk.new_chat_line")}</h2>
-        {composer}
-        {connectProvider}
+        <div className="desk-new__center">
+          <div className="desk-new__greeting">
+            <h2 className="desk-new__line">{greeting}</h2>
+            <p className="desk-new__hint">{starterHint}</p>
+          </div>
+          {composer}
+          {connectProvider}
+        </div>
+        <p className="desk-new__disclaimer">{t("hero.disclaimer")}</p>
       </div>
     );
   }
