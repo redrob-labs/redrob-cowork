@@ -27,7 +27,7 @@ import {
   parseMcpAppSandboxCsp,
 } from "./mcp-app-sandbox.js";
 import { exportExtensions } from "./extensions-export.js";
-import { deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
+import { createSkill, deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
 import { publicCatalogue } from "./skill-library/public-catalogue.js";
 import { buildFrontmatter } from "./frontmatter.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
@@ -2993,7 +2993,7 @@ function createRoutes(
     const { frontmatter: data, body } = skill;
     const priorMetadata = typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata) ? data.metadata : {};
     const content = buildFrontmatter({ ...data, metadata: { ...priorMetadata, source: "library" } }) + body.replace(/^\n/, "");
-    const result = await upsertSkill(workspace.path, { name, content, description: skill.description });
+    const result = await createSkill(workspace.path, { name, content, description: skill.description });
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,

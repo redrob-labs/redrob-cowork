@@ -8,11 +8,15 @@ const files: Record<string, string> = {
     skills: [
       { name: "eli5", version: "1.0.0", files: ["SKILL.md"] },
       { name: "kr-accountant-adjusting-entries", version: "1.2.0", files: ["SKILL.md"] },
+      { name: "missing-description", version: "1.0.0", files: ["SKILL.md"] },
+      { name: "mismatched-name", version: "1.0.0", files: ["SKILL.md"] },
       { name: "../escape", version: "1.0.0", files: ["SKILL.md"] },
     ],
   }),
   "eli5/SKILL.md": "---\nname: eli5\ndescription: Explain anything simply\ntitle: Explain like I am five\ntitle_ko: 쉽게 설명하기\nsummary: Plain answers\nsummary_ko: 쉬운 답\n---\n# ELI5\nBody text\n",
   "kr-accountant-adjusting-entries/SKILL.md": "---\nname: kr-accountant-adjusting-entries\ndescription: Korean year-end adjusting entries\ntitle: Adjusting entries\n---\nEntries body\n",
+  "missing-description/SKILL.md": "---\nname: missing-description\ntitle: Missing description\n---\nBody\n",
+  "mismatched-name/SKILL.md": "---\nname: another-name\ndescription: Wrong identity\n---\nBody\n",
 };
 
 // A stand-in for externalFetch that serves the in-memory catalogue and counts calls.

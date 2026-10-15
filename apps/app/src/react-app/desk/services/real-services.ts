@@ -189,7 +189,12 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
     skills: {
       list: async () => real(await listInstalled()),
       library: async (filters = {}) =>
-        real((await client.listLibrarySkills(workspaceId, filters)).skills.map((skill) => ({ name: skill.name, description: skill.description, tags: tagsOf(skill) }))),
+        real((await client.listLibrarySkills(workspaceId, filters)).skills.map((skill) => ({
+          name: skill.name,
+          ...(skill.title ? { title: skill.title } : {}),
+          description: skill.description,
+          tags: tagsOf(skill),
+        }))),
       taxonomy: async () => {
         const { professions, languages } = await client.getSkillTaxonomy(workspaceId);
         return real({ professions, languages });

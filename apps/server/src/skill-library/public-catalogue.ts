@@ -95,10 +95,13 @@ export function createPublicCatalogue(options: PublicCatalogueOptions = {}) {
     try {
       const content = await fetchText(`${encodeURIComponent(name)}/SKILL.md`);
       const { data, body } = parseCatalogueFrontmatter(content);
+      const frontmatterName = stringField(data, "name");
+      const description = stringField(data, "description");
+      if (frontmatterName !== name || !description) return null;
       return {
         name,
         version,
-        description: stringField(data, "description") ?? "",
+        description,
         title: stringField(data, "title"),
         titleKo: stringField(data, "title_ko"),
         summary: stringField(data, "summary"),

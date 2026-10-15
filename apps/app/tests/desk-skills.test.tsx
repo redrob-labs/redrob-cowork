@@ -307,13 +307,13 @@ describe("real skills", () => {
       },
       listLibrarySkills: async (workspaceId, filter) => {
         calls.push(`library:${workspaceId}:${JSON.stringify(filter)}`);
-        return { version: "v", source: "snapshot", skills: [{ name: "nda-review", description: "NDA.", profession: "lawyer", task: "review", language: "en", family: "nda-review", version: 1 }] };
+        return { version: "v", source: "snapshot", skills: [{ name: "nda-review", title: "NDA Review", description: "NDA.", profession: "lawyer", task: "review", language: "en", family: "nda-review", version: "1.0.0" }] };
       },
       getSkillTaxonomy: async () => ({ ...TAXONOMY, source: "console" }),
       getLibrarySkill: async (workspaceId, name) => {
         calls.push(`library-get:${workspaceId}:${name}`);
         if (name !== "nda-review") throw new Error("404");
-        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: 1, body: "Check the term.", source: "console" };
+        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: "1.0.0", body: "Check the term.", source: "console" };
       },
       installLibrarySkill: async (workspaceId, name) => {
         calls.push(`install:${workspaceId}:${name}`);
@@ -358,7 +358,7 @@ describe("real skills", () => {
   test("the library and its taxonomy; one skill installed or from the library", async () => {
     const { client, calls } = fakeClient();
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
-    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([{ name: "nda-review", description: "NDA.", tags: { profession: "lawyer", task: "review", language: "en" } }]);
+    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: { profession: "lawyer", task: "review", language: "en" } }]);
     expect((await services.skills.taxonomy()).data).toEqual(TAXONOMY);
     expect((await services.skills.get("mine")).data).toMatchObject({ body: "The mine instructions.", installed: { origin: "mine", scope: "project" } });
     expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null, tags: { task: "review" } });
