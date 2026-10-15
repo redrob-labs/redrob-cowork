@@ -596,23 +596,19 @@
   justify-content: center;
 }
 .rr-cstatus__panel {
-  max-width: 420px;
-  padding: var(--space-4);
+  max-width: 360px;
+  padding: var(--space-3);
   border-radius: 12px; /* --radius-lg literal: avoid reading a Tailwind/DS-shared var() */
   /*
-    Item 3 (round 5): Cross-check is the tallest panel; at the old 460px/64vh cap it
-    scrolled and the last row sat flush at the clipped edge. Raise the usable height
-    (it opens upward, so this uses the room above the composer) and add bottom
-    scroll padding so the final row is never cut off.
+    Round 35, item 2: the three long Cross-check text blocks (lede / when-it-matters
+    / foot) were removed, so the panel is now short -- cap it to fit its controls
+    (name + description + level picker per check) instead of the old tall 600px/78vh
+    that left a big empty scroll area. It opens upward into the room above the
+    composer; keep the thin overlay scrollbar for the rare case it still overflows.
   */
-  max-height: min(600px, 78vh);
-  scroll-padding-block-end: var(--space-4);
+  max-height: min(440px, 70vh);
+  scroll-padding-block-end: var(--space-3);
   font-size: 13px;
-  /*
-    Item 8: the panel showed a persistent ("sticky") scrollbar track even when the
-    content fit. Only reserve/stabilise the gutter when it actually scrolls, and
-    render a thin overlay scrollbar so a track never sits there on short content.
-  */
   scrollbar-gutter: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
