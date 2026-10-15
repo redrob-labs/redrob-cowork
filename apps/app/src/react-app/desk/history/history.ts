@@ -21,6 +21,28 @@ export function formatTook(ms: number): string | null {
   return `${rest}s`;
 }
 
+const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * When a History row last changed, in words (Claude-style): "just now", "5 minutes ago",
+ * "3 hours ago", "Yesterday", "4 days ago", then the locale date for anything older than a
+ * week. Pure and locale-aware; `now` is passed in so it is deterministic in tests.
+ */
+export function formatHistoryWhen(at: number, now: number, locale: string): string {
+  const delta = now - at;
+  if (delta < 60_000) return t("desk.history_when_just_now");
+  if (delta < 60 * 60_000) return t("desk.history_when_minutes_ago", { count: Math.max(1, Math.round(delta / 60_000)) });
+  if (delta < 24 * 60 * 60_000) return t("desk.history_when_hours_ago", { count: Math.max(1, Math.round(delta / (60 * 60_000))) });
+  const today = new Date(now);
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  if (at < startOfToday) {
+    const days = Math.floor((startOfToday - at) / HISTORY_DAY_MS) + 1;
+    if (days === 1) return t("desk.history_when_yesterday");
+    if (days < 7) return t("desk.history_when_days_ago", { count: days });
+  }
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(new Date(at));
+}
+
 function todoStep(todo: Pick<Todo, "content" | "status">): HistoryStep {
   const state = todo.status === "completed" ? "done" : todo.status === "in_progress" ? "active" : "todo";
   return { label: todo.content, state };
