@@ -114,6 +114,13 @@ type ComposerProps = {
    * placeholder when unset.
    */
   placeholderOverride?: string;
+  /**
+   * Round 36 (item 3): when true the editor starts at a two-line min-height
+   * (`min-h-[60px]`) instead of the one-line default. The new-chat hero sets it
+   * so the hero composer is two lines by default; the in-chat composer leaves it
+   * unset and stays one line. Both still grow to the same max height.
+   */
+  twoLineDefault?: boolean;
   topAccessory?: ReactNode;
 };
 
@@ -1206,6 +1213,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 previewUrl: attachment.previewUrl,
               }))}
               disabled={props.disabled}
+              minHeightClass={props.twoLineDefault ? "min-h-[60px]" : undefined}
               placeholder={props.placeholderOverride ?? (inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder"))}
               onChange={props.onDraftChange}
               onSubmit={handleEditorSubmit}
