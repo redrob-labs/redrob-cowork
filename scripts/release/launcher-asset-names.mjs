@@ -8,7 +8,7 @@
  *
  * with stem `redrob-cowork`, a version that starts with a digit (no leading
  * `v`), one of the os-arch tokens in LAUNCHER_TOKENS, and an extension it knows
- * how to install (.dmg, .AppImage, .tar.gz, .deb, .rpm, .flatpak, .msi,
+ * how to install (.dmg, .AppImage, .tar.gz, .deb, .rpm, .msi,
  * -portable.zip). electron-builder cannot produce those tokens by itself: its
  * `${os}` is mac/linux/win and its `${arch}` is x64/arm64, and a Windows `zip`
  * target carries no `-portable` marker. So the packager writes
@@ -60,14 +60,12 @@ export const LAUNCHER_TOKENS = [
   "windows-x64",
   "windows-arm64",
   "windows-x86",
-  "freebsd-x86_64",
 ];
 
 /** Suffixes the launcher installs (PackageKind::suffix), longest first. */
 export const INSTALLABLE_SUFFIXES = [
   "-portable.zip",
   ".AppImage",
-  ".flatpak",
   ".tar.gz",
   ".msi",
   ".dmg",
@@ -99,7 +97,6 @@ const BUILDER_EXTENSIONS = [
   ".exe.blockmap",
   ".AppImage",
   ".tar.gz",
-  ".flatpak",
   ".dmg",
   ".zip",
   ".exe",
