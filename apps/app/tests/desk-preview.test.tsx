@@ -24,7 +24,7 @@ import {
 } from "../src/react-app/desk/preview/preview";
 import { createFixtureDeskServices, resetSampleBoard, resetSampleSkills } from "../src/react-app/desk/services/fixture-services";
 import { HISTORY } from "../src/react-app/desk/services/fixtures/history";
-import { SKILLS } from "../src/react-app/desk/services/fixtures/skills";
+import { SKILLS, LIBRARY } from "../src/react-app/desk/services/fixtures/skills";
 import { createDeskServices } from "../src/react-app/desk/services/real-services";
 import type { DeskResult, Playbook, ScheduleBoard } from "../src/react-app/desk/services/types";
 import { deskRoutes } from "../src/react-app/desk/shell/desk-routes";
@@ -57,7 +57,8 @@ async function seeded(): Promise<QueryClient> {
   client.setQueryData([...previewKey("preview", "library"), {}], await fixture.skills.library({}));
   client.setQueryData(previewKey("preview", "taxonomy"), await fixture.skills.taxonomy());
   client.setQueryData(previewKey("preview", "team"), await fixture.skills.teamState());
-  client.setQueryData([...previewKey("preview", "skills"), "one", "first-review"], await fixture.skills.get("first-review"));
+  const teamSkillName = (SKILLS.find((s) => s.origin === "team") ?? SKILLS[0]).name;
+  client.setQueryData([...previewKey("preview", "skills"), "one", teamSkillName], await fixture.skills.get(teamSkillName));
   client.setQueryData(previewKey("preview", "board"), await fixture.schedules.list());
   client.setQueryData(previewKey("preview", "history"), await fixture.history.list());
   client.setQueryData(previewKey("preview", "catalog"), await fixture.catalog.get());
@@ -97,7 +98,8 @@ function boardDeps(client = new QueryClient()) {
 
 const SCREENS: ReadonlyArray<{ path: string; title: string; place: string; note: string }> = [
   { path: "/skills", title: "Skills", place: "skills", note: "Preview: sample skills. Connect a project to use your own." },
-  { path: "/skill/first-review", title: "first-review", place: "skills", note: "Preview: sample skills." },
+  // Round 38 (item 3): the detail entry points at the real team-origin skill (seeded in seeded()).
+  { path: `/skill/${(SKILLS.find((s) => s.origin === "team") ?? SKILLS[0]).name}`, title: (SKILLS.find((s) => s.origin === "team") ?? SKILLS[0]).name, place: "skills", note: "Preview: sample skills." },
   { path: "/scheduled", title: "Scheduled", place: "scheduled", note: "Preview: sample schedules." },
   { path: "/history", title: "History", place: "history", note: "Preview: sample history." },
 ];
@@ -157,15 +159,20 @@ describe("Skills", () => {
     expect(html).toContain("3 installed");
     for (const entry of SKILLS) expect(html).toContain(`href="/skill/${entry.name}"`);
     for (const badge of [">Team<", ">Mine<", ">Library<"]) expect(html).toContain(badge);
-    expect(html).toContain('aria-label="Add nda-review"');
+    // Round 38 (item 3): the library is the real cowork-skills set now. Assert the
+    // Add affordance for a real library skill that is NOT one of the installed three.
+    const notInstalled = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name));
+    expect(notInstalled).toBeTruthy();
+    expect(html).toContain(`aria-label="Add ${notInstalled!.name}"`);
     expect(html).toContain("New skill");
-    expect(html).toContain("Review documents and contracts");
   });
 
   test("a team skill shows its instructions, Run and Schedule, and says it is managed in Redrob Console", async () => {
-    const html = route("/skill/first-review", await seeded());
+    // Round 38 (item 3): the first installed skill is now the real team-origin skill.
+    const team = SKILLS.find((s) => s.origin === "team") ?? SKILLS[0];
+    const html = route(`/skill/${team.name}`, await seeded());
     expect(html).toContain("Managed in Redrob Console");
-    expect(html).toContain("Contract first review");
+    expect(html).toContain(team.title ?? team.name);
     expect(html).toContain(">Run<");
     expect(html).toContain(">Schedule<");
     expect(html).not.toContain(">Edit<");

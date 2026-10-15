@@ -8,7 +8,7 @@ import type { RedrobSkillItem, RedrobTeamSkillsState } from "../src/app/lib/redr
 import { setLocale } from "../src/i18n";
 import { scheduleDraft } from "../src/react-app/desk/scheduled/schedule-dialog";
 import { createFixtureDeskServices, resetSampleSkills } from "../src/react-app/desk/services/fixture-services";
-import { TAXONOMY } from "../src/react-app/desk/services/fixtures/skills";
+import { TAXONOMY, SKILLS, LIBRARY } from "../src/react-app/desk/services/fixtures/skills";
 import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
 import type { DeskSkill, SkillDraft } from "../src/react-app/desk/services/types";
 import { runSkill, SkillView } from "../src/react-app/desk/skills/desk-skill";
@@ -245,27 +245,30 @@ describe("sample skills", () => {
     const listed = await services.skills.list();
     expect(listed.preview).toBe(true);
     expect(listed.data.map((skill) => skill.origin).sort()).toEqual(["library", "mine", "team"]);
-    // Round 8, item 9: the sample library is now 9 English profession skills (3 each for Lawyer,
-    // Accountant, VC Investor); there is no Korean sample, so the KO-language filter is empty.
-    expect((await services.skills.library({ language: "ko" })).data.map((skill) => skill.name)).toEqual([]);
-    expect((await services.skills.library({ profession: "vc" })).data.map((skill) => skill.name).sort()).toEqual([
-      "deal-screener",
-      "investment-memo",
-      "startup-diligence",
-    ]);
-    await services.skills.install("nda-review");
-    await expect(services.skills.install("nda-review")).rejects.toThrow();
+    // Round 38 (item 3): the sample library is the real cowork-skills set (78: kr-* Korean,
+    // us-* English). The KO filter is now NON-empty, and the VC filter returns the real vc skills.
+    const koNames = (await services.skills.library({ language: "ko" })).data.map((s) => s.name);
+    expect(koNames.length).toBeGreaterThan(0);
+    expect(koNames.every((n) => n.startsWith("kr-"))).toBe(true);
+    const vcLib = (await services.skills.library({ profession: "vc" })).data.map((s) => s.name).sort();
+    const vcExpected = LIBRARY.filter((s) => s.tags.profession === "vc").map((s) => s.name).sort();
+    expect(vcLib).toEqual(vcExpected);
+    // Install/remove a real library skill that is NOT one of the pre-installed three.
+    const addName = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name))!.name;
+    await services.skills.install(addName);
+    await expect(services.skills.install(addName)).rejects.toThrow();
     await services.skills.save(DRAFT);
     await expect(services.skills.save(DRAFT)).rejects.toThrow();
     await services.skills.save({ ...DRAFT, editing: true, instructions: "Changed." });
     expect((await services.skills.get("weekly-update")).data).toMatchObject({ body: "Changed.", installed: { origin: "mine" } });
-    await services.skills.remove("nda-review");
-    await expect(services.skills.remove("first-review")).rejects.toThrow();
+    await services.skills.remove(addName);
+    await expect(services.skills.remove(SKILLS.find((s) => s.origin === "team")!.name)).rejects.toThrow();
     // Another instance reads the same sample skills, as the dialog and the screen do.
     const names = (await createFixtureDeskServices().skills.list()).data.map((skill) => skill.name);
     expect(names).toContain("weekly-update");
-    expect(names).not.toContain("nda-review");
-    expect((await services.skills.get("legal-memo")).data?.installed).toBeNull();
+    expect(names).not.toContain(addName);
+    const notInstalled = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name))!.name;
+    expect((await services.skills.get(notInstalled)).data?.installed).toBeNull();
     expect((await services.skills.teamState()).data).toBeNull();
   });
 
@@ -274,10 +277,12 @@ describe("sample skills", () => {
     const toasts: string[] = [];
     const invalidated: unknown[] = [];
     const deps = { skills: services.skills, queryClient: { invalidateQueries: async (filters: unknown) => void invalidated.push(filters) }, scope: "preview", showToast: (title: string) => void toasts.push(title) };
-    expect(await installSkill(deps, "nda-review")).toBe(true);
-    expect(await installSkill(deps, "nda-review")).toBe(false);
-    expect(await removeSkill(deps, "nda-review")).toBe(true);
-    expect(toasts).toEqual(["Added nda-review", "Couldn't add the skill", "Removed nda-review"]);
+    // Round 38 (item 3): use a real library skill not among the pre-installed three.
+    const add = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name))!.name;
+    expect(await installSkill(deps, add)).toBe(true);
+    expect(await installSkill(deps, add)).toBe(false);
+    expect(await removeSkill(deps, add)).toBe(true);
+    expect(toasts).toEqual([`Added ${add}`, "Couldn't add the skill", `Removed ${add}`]);
     expect(invalidated).toContainEqual({ queryKey: ["desk-preview", "preview", "skills"] });
     expect(await saveSkill({ skills: services.skills, invalidate: () => {}, showToast: (title) => void toasts.push(title) }, DRAFT)).toBe(true);
     expect(toasts.at(-1)).toBe("Skill saved");
