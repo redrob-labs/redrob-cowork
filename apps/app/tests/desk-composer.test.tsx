@@ -458,7 +458,7 @@ describe("the new chat screen", () => {
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain("{inDeskFrame ? null : modelControls}");
     expect(composer).toContain("<DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>\n                    {modelControls}");
-    expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} showValues={props.flush} /> : null}");
+    expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} showValues={Boolean(props.flush)} /> : null}");
     expect(composer).toContain("const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;");
   });
 });
