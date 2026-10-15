@@ -1622,6 +1622,11 @@ export function ReactSessionComposer(props: ComposerProps) {
           earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
         */}
         {inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}
+        {inDeskFrame && !props.flush ? (
+          // Round 35, item 3: a quiet disclaimer under the IN-CHAT composer, matching the
+          // new-chat home. The hero (flush) renders its own, so this is in-chat only.
+          <p className="desk-chat__disclaimer">{t("hero.disclaimer")}</p>
+        ) : null}
         <ContextMeter
           compacting={props.compactingSession}
           onCompact={props.onCompactSession}
