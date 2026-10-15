@@ -6,14 +6,32 @@ import { icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
 import { createDeskServices } from "../services/real-services";
-import type { Chat } from "../services/types";
+import type { Chat, DeskFile, Project, DeskSkill, Schedule } from "../services/types";
 import { DeskDialog } from "./desk-dialog";
 import { useDeskConnection } from "./desk-connection";
 import { chatPath } from "./desk-routes";
 
 const RESULT_LIMIT = 8;
 
+/** The search scopes, in the order the tab strip shows them. "all" is places + chats. */
+export const SEARCH_TABS = ["all", "chats", "artifacts", "skills", "projects", "scheduled"] as const;
+export type SearchTab = (typeof SEARCH_TABS)[number];
+
+export function searchTabLabel(tab: SearchTab): string {
+  return t(`titlebar.search_tab_${tab}`);
+}
+
 export type SearchResult = { id: string; label: string; meta?: string; path: string };
+
+/** Everything the per-type tabs can draw on. All lists arrive newest/natural order; the
+ *  functions below sort and filter. Empty arrays are fine — the tab then shows its empty line. */
+export type SearchData = {
+  chats: readonly Chat[];
+  projects: readonly Project[];
+  skills: readonly DeskSkill[];
+  schedules: readonly Schedule[];
+  artifacts: readonly DeskFile[];
+};
 
 /** The places Search can jump to, before any chat. */
 function places(): SearchResult[] {
@@ -27,7 +45,12 @@ function places(): SearchResult[] {
   ];
 }
 
-/** What a query matches: places by name, then chats by title, newest first. */
+function matches(query: string, label: string): boolean {
+  return label.toLowerCase().includes(query.trim().toLowerCase());
+}
+
+/** The "All" tab: places by name, then chats by title, newest first. Kept as a stable
+ *  exported helper (its unit test and callers rely on this exact shape). */
 export function searchResults(query: string, chats: readonly Chat[]): SearchResult[] {
   const q = query.trim().toLowerCase();
   const chatResults = [...chats]
@@ -39,12 +62,39 @@ export function searchResults(query: string, chats: readonly Chat[]): SearchResu
       path: chatPath(chat.id),
     }));
   const all = [...places(), ...chatResults];
-  return (q ? all.filter((result) => result.label.toLowerCase().includes(q)) : all).slice(0, RESULT_LIMIT);
+  return (q ? all.filter((result) => matches(q, result.label)) : all).slice(0, RESULT_LIMIT);
+}
+
+/** Results for one tab. "all" delegates to searchResults; the rest list that one type,
+ *  filtered by the query, newest/natural first, capped at RESULT_LIMIT. */
+export function searchResultsForTab(tab: SearchTab, query: string, data: SearchData): SearchResult[] {
+  if (tab === "all") return searchResults(query, data.chats);
+  const q = query.trim();
+  const out: SearchResult[] =
+    tab === "chats"
+      ? [...data.chats]
+          .sort((a, b) => b.updatedAt - a.updatedAt)
+          .map((chat) => ({ id: `chat-${chat.id}`, label: chat.title.trim() || t("desk.untitled_chat"), meta: t("titlebar.search_chat"), path: chatPath(chat.id) }))
+      : tab === "projects"
+        ? data.projects.map((project) => ({ id: `project-${project.id}`, label: project.name, meta: t("desk.nav_projects"), path: "/projects" }))
+        : tab === "skills"
+          ? data.skills.map((skill) => ({ id: `skill-${skill.name}`, label: skill.title ?? skill.name, meta: t("desk.nav_skills"), path: "/skills" }))
+          : tab === "scheduled"
+            ? data.schedules.map((schedule) => ({ id: `schedule-${schedule.id}`, label: schedule.name, meta: t("desk.nav_scheduled"), path: "/scheduled" }))
+            : // artifacts
+              data.artifacts.map((file) => ({ id: `artifact-${file.id}`, label: file.name, meta: file.projectName, path: "/history" }));
+  return (q ? out.filter((result) => matches(q, result.label)) : out).slice(0, RESULT_LIMIT);
+}
+
+/** The empty-state line for a tab when it has no (matching) items. */
+function emptyLabel(tab: SearchTab): string {
+  return t(`titlebar.search_empty_${tab}`);
 }
 
 /**
- * Search from the title bar or Ctrl+K on Desk screens: places and chats by name. The developer and
- * settings screens keep their own command palette, which the title bar opens instead.
+ * Search from the title bar or Ctrl+K on Desk screens: a scoped tab strip over places and
+ * chats, projects, skills, schedules and artifacts. The developer and settings screens keep
+ * their own command palette, which the title bar opens instead.
  */
 export function SearchDialog(props: { onClose: () => void }) {
   const navigate = useNavigate();
@@ -52,18 +102,30 @@ export function SearchDialog(props: { onClose: () => void }) {
   const workspaceId = useDeskConnection((state) => state.workspaceId);
   const chatsVersion = useDeskConnection((state) => state.chatsVersion);
   const services = useMemo(() => createDeskServices({ client, workspaceId }), [client, workspaceId]);
-  const chats = useQuery({
-    queryKey: ["desk-search", workspaceId ?? "preview", "chats", chatsVersion],
-    // Sample chats would read as the person's own, so a preview lists none.
-    queryFn: async () => {
-      const result = await services.chats.list();
-      return result.preview ? [] : result.data;
-    },
-    staleTime: 30_000,
-  });
+
+  // Sample data would read as the person's own, so a preview lists none for every type.
+  const unwrap = <T,>(result: { data: T; preview: boolean } | undefined, empty: T): T =>
+    !result || result.preview ? empty : result.data;
+
+  const base = ["desk-search", workspaceId ?? "preview", chatsVersion] as const;
+  const chats = useQuery({ queryKey: [...base, "chats"], queryFn: () => services.chats.list(), staleTime: 30_000 });
+  const projects = useQuery({ queryKey: [...base, "projects"], queryFn: () => services.projects.list(), staleTime: 30_000 });
+  const skills = useQuery({ queryKey: [...base, "skills"], queryFn: () => services.skills.list(), staleTime: 30_000 });
+  const schedules = useQuery({ queryKey: [...base, "schedules"], queryFn: () => services.schedules.list(), staleTime: 30_000 });
+  const files = useQuery({ queryKey: [...base, "files"], queryFn: () => services.files.list(), staleTime: 30_000 });
+
+  const data: SearchData = {
+    chats: unwrap(chats.data, [] as Chat[]),
+    projects: unwrap(projects.data, [] as Project[]),
+    skills: unwrap(skills.data, [] as DeskSkill[]),
+    schedules: unwrap(schedules.data?.data ? { data: schedules.data.data.schedules, preview: schedules.data.preview } : undefined, [] as Schedule[]),
+    artifacts: unwrap(files.data, [] as DeskFile[]),
+  };
+
   const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<SearchTab>("all");
   const [active, setActive] = useState(0);
-  const results = searchResults(query, chats.data ?? []);
+  const results = searchResultsForTab(tab, query, data);
 
   const go = (result: SearchResult | undefined) => {
     if (!result) return;
@@ -80,9 +142,13 @@ export function SearchDialog(props: { onClose: () => void }) {
       go(results[active]);
     }
   };
+  const pickTab = (next: SearchTab) => {
+    setTab(next);
+    setActive(0);
+  };
 
   return (
-    <DeskDialog open title={t("titlebar.search")} onClose={props.onClose} width={520}>
+    <DeskDialog open title={t("titlebar.search")} onClose={props.onClose} width={560}>
       <div className="desk-search">
         <label className="desk-search__field">
           {icons.search({ width: 16, height: 16, "aria-hidden": true })}
@@ -103,6 +169,20 @@ export function SearchDialog(props: { onClose: () => void }) {
             onKeyDown={onKeyDown}
           />
         </label>
+        <div className="desk-search__tabs" role="tablist" aria-label={t("titlebar.search")}>
+          {SEARCH_TABS.map((name) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={tab === name}
+              className="desk-search__tab"
+              onClick={() => pickTab(name)}
+            >
+              {searchTabLabel(name)}
+            </button>
+          ))}
+        </div>
         <ul id="desk-search-results" role="listbox" className="desk-search__results" aria-label={t("titlebar.search")}>
           {results.map((result, index) => (
             <li
@@ -121,7 +201,7 @@ export function SearchDialog(props: { onClose: () => void }) {
               {result.meta ? <span className="desk-search__meta">{result.meta}</span> : null}
             </li>
           ))}
-          {results.length === 0 ? <li className="desk-search__empty">{t("titlebar.search_empty")}</li> : null}
+          {results.length === 0 ? <li className="desk-search__empty">{emptyLabel(tab)}</li> : null}
         </ul>
       </div>
     </DeskDialog>
