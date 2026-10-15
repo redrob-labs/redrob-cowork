@@ -23,6 +23,7 @@ export type DeskTeamClient = Pick<
   "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace" | "getTeamPolicy" | "syncTeamPolicy" | "leaveTeamPolicy"
 >;
 
+/** The live Desk connection the Skills, Scheduled and History screens read through. */
 export type DeskConnection = {
   /** The workspace-bound Redrob client the Desk services call; null until connected. */
   client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient) | null;

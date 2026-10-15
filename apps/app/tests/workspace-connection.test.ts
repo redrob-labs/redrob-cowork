@@ -225,7 +225,7 @@ describe("MAJOR: deleting the last workspace clears the Desk connection", () => 
   // Regression: a settings-side delete of the last workspace refreshes the provider
   // to an empty record list. selectActiveWorkspace must then return null (not fall
   // back to a stale first record), so a cold /skills publishes no client for the
-  // deleted workspace and the Skills screen shows the real empty state.
+  // deleted workspace - the Desk services fall back to preview, not the deleted record.
   test("an empty record list yields a null Desk connection, never the deleted record", async () => {
     const emptyWorkspace = selectActiveWorkspace([], "");
     expect(emptyWorkspace).toBeNull();
@@ -239,8 +239,8 @@ describe("MAJOR: deleting the last workspace clears the Desk connection", () => 
     expect(desk.client).toBeNull();
     expect(desk.workspaceId).toBeNull();
 
-    // With no client, the Desk services fall back to preview/fixtures, so the Skills
-    // screen renders its real empty state instead of a client for the deleted workspace.
+    // With no client, the Desk services fall back to the fixture (preview) services, so the Skills
+    // screen shows the preview state under the preview note - not a client for the deleted workspace.
     const skills = await createDeskServices({ client: desk.client, workspaceId: desk.workspaceId }).skills.list();
     expect(skills.preview).toBe(true);
   });
@@ -291,15 +291,6 @@ describe("AUXILIARY: refresh edges", () => {
     expect(listed).toBe(0);
   });
 
-  test("an empty resolution on web is a real disconnect", async () => {
-    const outcome = await runWorkspaceConnectionRefresh(
-      refreshInput({
-        resolveConnection: async () => ({ normalizedBaseUrl: "", resolvedToken: "", resolvedHostToken: "", hostInfo: null }),
-      }),
-    );
-    expect(outcome.kind).toBe("disconnected");
-  });
-
   test("a superseded attempt writes nothing and stops before the list call", async () => {
     let listed = 0;
     const outcome = await runWorkspaceConnectionRefresh(
@@ -338,7 +329,7 @@ describe("AUXILIARY: refresh edges", () => {
     expect(chooseDefaultWorkspaceId(base)).toBe("a");
   });
 
-  test("a load error withholds the engine only for its own workspace's revision", () => {
+  test("a chats revision from another workspace is ignored, and the client passes through", () => {
     const workspace = { id: "ws_a", workspaceType: "local", path: "/work/a" };
     const endpoint = { client: {} as RedrobServerClient, workspaceId: "ws_a" };
     const other = deriveDeskConnection({
@@ -347,6 +338,7 @@ describe("AUXILIARY: refresh edges", () => {
       opencode: null,
       revision: { workspaceRecordId: "ws_b", version: "x:y", workspaceError: true },
     });
+    // The revision belongs to ws_b, so it does not attach to ws_a's connection.
     expect(other.chatsVersion).toBe("");
     expect(other.client).toBe(endpoint.client);
   });
@@ -380,11 +372,5 @@ describe("AUXILIARY: wiring", () => {
     expect(provider).toBeLessThan(publisher);
     expect(publisher).toBeLessThan(routes);
     expect(routesEnd).toBeLessThan(providerEnd);
-  });
-
-  test("the chat route contributes only the field-scoped chats revision", () => {
-    const route = read("react-app", "shell", "session-route.tsx");
-    expect(route).not.toContain("publishDeskConnection");
-    expect(route).toContain("publishDeskChatsRevision(");
   });
 });

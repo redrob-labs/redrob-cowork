@@ -234,9 +234,12 @@ export function SkillsScreen() {
     setBusy(name);
     void run(deps, name).finally(() => setBusy(null));
   };
-  // The Skills screen shows only real skills: the workspace's installed ones and the Console's
-  // library (served through redrob-server). An empty workspace shows the real empty state - never
-  // sample/frontend-only skills, in any build.
+  // When connected, the Skills screen shows only real skills: the workspace's installed ones and
+  // the Console library (served through redrob-server), so a connected-but-empty workspace shows
+  // the real empty state. With no connection (before the first connect, after the last workspace is
+  // deleted, or web disconnected) createDeskServices returns the fixture services, so the screen
+  // falls back to the preview (sample) state under the preview note. The removed dev-only fallback
+  // no longer injects samples over a connected-but-empty workspace.
   const rows = installed.data ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters, installedOnly }) : null;
   const effectiveTaxonomy = taxonomy.data?.data ?? null;
   const teamText = teamStatusText(team.data?.data ?? null);

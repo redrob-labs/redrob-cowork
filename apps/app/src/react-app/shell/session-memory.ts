@@ -34,6 +34,7 @@ function safeSet(key: string, value: string | null): void {
 /** Listeners told when the active workspace id is written, in this window or another. */
 const activeWorkspaceListeners = new Set<(id: string | null) => void>();
 
+/** The persisted active workspace id, or null when none is stored. */
 export function readActiveWorkspaceId(): string | null {
   const value = safeGet(ACTIVE_WORKSPACE_KEY);
   return value?.trim() || null;

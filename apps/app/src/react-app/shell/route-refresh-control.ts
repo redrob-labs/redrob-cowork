@@ -11,7 +11,7 @@ import { t } from "@/i18n";
 // connection provider can use it without importing each other.
 const ROUTE_REFRESH_STEP_TIMEOUT_MS = 15_000;
 
-// Rejects when `promise` outlives the step timeout, labelling which await stalled.
+/** Rejects when `promise` outlives the step timeout, labelling which await stalled. */
 export function withRouteRefreshTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     // Fires the timeout rejection if the awaited promise has not settled in time.
@@ -125,6 +125,7 @@ export function planRouteWorkspaceLoads(
   return [selectedId];
 }
 
+/** Creates the single-slot refresh lifecycle: one attempt in flight, supersede to replace it. */
 export function createRouteRefreshLifecycle(): RouteRefreshLifecycle {
   let latestGeneration = 0;
   let inFlightGeneration = 0;

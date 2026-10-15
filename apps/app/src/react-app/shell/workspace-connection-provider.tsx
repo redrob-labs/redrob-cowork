@@ -187,9 +187,11 @@ export function WorkspaceConnectionProvider(props: { children: ReactNode }) {
     const attempt = refreshLifecycleRef.current.begin(options);
     if (!attempt) return;
     const participant = () => participantRef.current;
-    participant()?.onRefreshStart?.();
     let routeReady = true;
     try {
+      // Inside the try so that if a participant hook ever throws, attempt.finish() in finally
+      // still releases the in-flight slot and later refreshes are not permanently skipped.
+      participant()?.onRefreshStart?.();
       const outcome = await runWorkspaceConnectionRefresh({
         desktopRuntime: isDesktopRuntime(),
         bootstrapDesktop: () =>
