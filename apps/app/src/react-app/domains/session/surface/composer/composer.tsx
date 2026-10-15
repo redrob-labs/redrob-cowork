@@ -1640,7 +1640,7 @@ export function ReactSessionComposer(props: ComposerProps) {
           each request carries the whole conversation, so that turn's own input already includes every
           earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
         */}
-        {inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} showValues={props.flush} /> : null}
+        {inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} showValues={Boolean(props.flush)} /> : null}
         {inDeskFrame && !props.flush ? (
           // Round 35, item 3: a quiet disclaimer under the IN-CHAT composer, matching the
           // new-chat home. The hero (flush) renders its own, so this is in-chat only.
