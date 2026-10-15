@@ -1584,10 +1584,11 @@
 }
 
 .desk-new__line {
-  /* Round 36 (item 4): margin-bottom adds ~30% (7.2px) on top of the --space-5
-     (24px) flex gap, so the greeting->composer gap reads ~31px while other
-     .desk-new__center child-gaps stay 24px. */
-  margin: 0 0 calc(var(--space-5) * 0.3);
+  /* Round 36 (item 4): add clearly perceptible air between the greeting and the
+     composer. The .desk-new__center flex gap is --space-5 (20px here); a 0.3x
+     margin (6px) was too subtle to read, so use --space-4 (16px) margin-bottom
+     -> greeting->composer reads ~36px while other center child-gaps stay 20px. */
+  margin: 0 0 var(--space-4);
   /*
     Round 35, item 4: the greeting now matches the Trending AI section-header
     STYLE -- sans (no serif), bold, tight tracking -- rather than the old big
