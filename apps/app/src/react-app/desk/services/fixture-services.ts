@@ -14,9 +14,9 @@ import { NOTES } from "./fixtures/notes";
 import { PRIVACY } from "./fixtures/privacy";
 import { PROJECTS } from "./fixtures/projects";
 import { SCHEDULE_BOARD } from "./fixtures/schedules";
-import { LIBRARY, SKILL_BODIES, SKILLS, TAXONOMY } from "./fixtures/skills";
+import { SKILL_BODIES, SKILLS, TAXONOMY } from "./fixtures/skills";
+import { consoleCatalogue } from "../skills/console-catalogue";
 import type { DeskResult, DeskSkill, MemoryNote, Schedule, ScheduleBoard } from "./types";
-import { matchesFilters } from "../skills/skills";
 import { scheduleName } from "../scheduled/schedules";
 
 const preview = <T>(data: T): Promise<DeskResult<T>> => Promise.resolve({ data, preview: true });
@@ -141,26 +141,26 @@ export function createFixtureDeskServices(options: { now?: () => number } = {}):
     },
     skills: {
       list: () => preview(copySkills(sampleSkills)),
-      library: (filters = {}) => preview(LIBRARY.filter((skill) => matchesFilters(skill, filters))),
+      // The library is the Console's public catalogue, real data even without a server.
+      library: async (filters = {}) => ({ data: await consoleCatalogue.list(filters), preview: false }),
       taxonomy: () => preview(TAXONOMY),
-      get: (name) => {
+      get: async (name) => {
         const installed = sampleSkills.find((skill) => skill.name === name);
-        const known = installed ?? LIBRARY.find((skill) => skill.name === name);
-        if (!known) return preview(null);
-        return preview({
-          name,
-          description: known.description,
-          tags: { ...known.tags },
-          body: sampleBodies[name] ?? "",
-          installed: installed ? { origin: installed.origin, scope: installed.scope } : null,
-        });
+        if (installed) {
+          return preview({
+            name,
+            description: installed.description,
+            tags: { ...installed.tags },
+            body: sampleBodies[name] ?? "",
+            installed: { origin: installed.origin, scope: installed.scope },
+          });
+        }
+        const skill = await consoleCatalogue.get(name);
+        return skill ? { data: skill, preview: false } : preview(null);
       },
+      // Installing writes into a workspace folder, which only a connected server can do.
       install: async (name) => {
-        const skill = LIBRARY.find((entry) => entry.name === name);
-        if (!skill) throw new Error(`No library skill ${name}`);
-        if (sampleSkills.some((entry) => entry.name === name)) throw new Error(`A skill named ${name} is already installed`);
-        sampleSkills = [...sampleSkills, { ...skill, origin: "library", scope: "project" }];
-        return { data: null, preview: true };
+        throw new Error(`Cannot install ${name}: no workspace is connected`);
       },
       save: async (draft) => {
         const existing = sampleSkills.find((entry) => entry.name === draft.name);

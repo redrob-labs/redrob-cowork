@@ -133,6 +133,8 @@ export type SkillsViewProps = {
   /** True while nothing matches because of the filters, not because there are no skills. */
   filtered: boolean;
   busy: string | null;
+  /** False with no connected workspace: the library still lists, but there is nowhere to install to. */
+  canAdd?: boolean;
   hrefFor: (name: string) => string;
   onAdd: (name: string) => void;
   onRemove: (name: string) => void;
@@ -174,6 +176,7 @@ export function SkillsView(props: SkillsViewProps) {
                   variant="secondary"
                   iconLeft={icons.plus(ICON)}
                   loading={props.busy === row.name}
+                  disabled={props.canAdd === false}
                   aria-label={t("desk.skill_add_label", { name: row.name })}
                   onClick={() => props.onAdd(row.name)}
                 >
@@ -214,7 +217,7 @@ export function SkillsScreen() {
     "Skills sometimes appears and sometimes does not": both queries used the defaults, so a transient
     server error or a routine refetch (filter change, refocus, 5-min staleTime) dropped `data` and the
     list blanked. keepPreviousData keeps the last good rows on screen while a refetch (incl. a new
-    filter key) is in flight, and a short retry rides out a transient listSkills/listLibrarySkills
+    filter key) is in flight, and a short retry rides out a transient listSkills or catalogue
     failure instead of surfacing it as an empty or error screen.
   */
   const installed = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, retry: 2, placeholderData: keepPreviousData });
@@ -234,12 +237,9 @@ export function SkillsScreen() {
     setBusy(name);
     void run(deps, name).finally(() => setBusy(null));
   };
-  // When connected, the Skills screen shows only real skills: the workspace's installed ones and
-  // the Console library (served through redrob-server), so a connected-but-empty workspace shows
-  // the real empty state. With no connection (before the first connect, after the last workspace is
-  // deleted, or web disconnected) createDeskServices returns the fixture services, so the screen
-  // falls back to the preview (sample) state under the preview note. The removed dev-only fallback
-  // no longer injects samples over a connected-but-empty workspace.
+  // The library is the Console's public catalogue, fetched by the browser directly, so it shows
+  // with or without a workspace connection. The installed list is the connected workspace's; with
+  // no connection it is empty and installing is refused.
   const rows = installed.data ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters, installedOnly }) : null;
   const effectiveTaxonomy = taxonomy.data?.data ?? null;
   const teamText = teamStatusText(team.data?.data ?? null);
@@ -305,6 +305,7 @@ export function SkillsScreen() {
             locale={locale}
             filtered={Boolean(q?.trim() || tags.profession || tags.task || tags.language)}
             busy={busy}
+            canAdd={!preview}
             hrefFor={skillPath}
             onAdd={act(installSkill)}
             onRemove={act(removeSkill)}

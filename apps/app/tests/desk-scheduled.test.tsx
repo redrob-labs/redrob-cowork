@@ -135,9 +135,6 @@ describe("the server's schedules on the screen", () => {
       getSkill: unused,
       upsertSkill: unused,
       deleteSkill: unused,
-      listLibrarySkills: unused,
-      getSkillTaxonomy: unused,
-      getLibrarySkill: unused,
       installLibrarySkill: unused,
       getTeamSkills: unused,
     };

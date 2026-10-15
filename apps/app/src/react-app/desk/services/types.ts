@@ -99,8 +99,8 @@ export type DeskSkill = {
   description: string;
   origin: SkillOrigin;
   tags: SkillTags;
-  /** `global` is the person's own folder, outside the project: shown, never changed here. */
-  scope: "project" | "global";
+  /** `user` is Redrob's own dir, seen by every app; `global` is another global dir: shown, never changed here. */
+  scope: "project" | "user" | "global";
 };
 
 /** A skill in the Console's library, installed or not. */
@@ -110,7 +110,7 @@ export type LibrarySkill = { name: string; title?: string; description: string; 
 export type SkillFilters = SkillTags & { q?: string };
 
 /** The professions, their tasks and the languages skills are filed under, in English and Korean. */
-export type SkillTaxonomy = Omit<RedrobSkillTaxonomy, "source">;
+export type SkillTaxonomy = RedrobSkillTaxonomy;
 
 /** One skill to read: installed (with its origin), or one the library has and this workspace has not. */
 export type SkillDetail = {

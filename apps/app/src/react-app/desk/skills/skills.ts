@@ -126,10 +126,11 @@ export function skillRunPrompt(name: string, extra = ""): string {
 }
 
 /** Who may change or remove a skill here: never a team's, never one outside the project. */
+/** Team skills are the Console's; skills in other global dirs are only shown. */
 export function canRemoveSkill(skill: Pick<DeskSkill, "origin" | "scope">): boolean {
-  return skill.origin !== "team" && skill.scope === "project";
+  return skill.origin !== "team" && skill.scope !== "global";
 }
 
 export function canEditSkill(skill: Pick<DeskSkill, "origin" | "scope">): boolean {
-  return skill.origin === "mine" && skill.scope === "project";
+  return skill.origin === "mine" && skill.scope !== "global";
 }

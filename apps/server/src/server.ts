@@ -1,4 +1,4 @@
-import { readFile, writeFile, rm, stat } from "node:fs/promises";
+import { mkdir, readFile, writeFile, rm, stat } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
@@ -27,7 +27,7 @@ import {
   parseMcpAppSandboxCsp,
 } from "./mcp-app-sandbox.js";
 import { exportExtensions } from "./extensions-export.js";
-import { createSkill, deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
+import { createSkill, deleteSkill, globalSkillsDir, installGlobalSkill, listSkills, renderSkillContentForResponse, upsertSkill, upsertUserSkill } from "./skills.js";
 import { publicCatalogue } from "./skill-library/public-catalogue.js";
 import { buildFrontmatter } from "./frontmatter.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
@@ -2943,33 +2943,8 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
-  // Public skill library: the live catalogue at console.redrob.ai/skills. Registered before
-  // /skills/:name so "library" is never read as a skill name.
-  addRoute(routes, "GET", "/workspace/:id/skills/library", "client", async (ctx) => {
-    await resolveWorkspace(config, ctx.params.id);
-    const q = ctx.url.searchParams.get("q") ?? undefined;
-    const result = await publicCatalogue.list({ q });
-    return jsonResponse({ ...result, source: "console" });
-  });
-
-  // The public catalogue carries no profession/task/language, so the taxonomy is empty.
-  addRoute(routes, "GET", "/workspace/:id/skills/library/taxonomy", "client", async (ctx) => {
-    await resolveWorkspace(config, ctx.params.id);
-    return jsonResponse({ professions: [], languages: [], source: "console" });
-  });
-
-  // One catalogue skill with its body, for the preview.
-  addRoute(routes, "GET", "/workspace/:id/skills/library/:name", "client", async (ctx) => {
-    await resolveWorkspace(config, ctx.params.id);
-    const name = String(ctx.params.name ?? "").trim();
-    const skill = name ? await publicCatalogue.get(name) : null;
-    if (!skill) {
-      throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
-    }
-    const { frontmatter: _frontmatter, ...item } = skill;
-    return jsonResponse(item);
-  });
-
+  // The public skill library (console.redrob.ai/skills) is read by the app directly; the server only
+  // installs. Registered before /skills/:name so "library" is never read as a skill name.
   // Installs a catalogue skill into the workspace, tagged metadata.source "library"; never overwrites.
   addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
     ensureWritable(config);
@@ -2980,20 +2955,25 @@ function createRoutes(
     if (!skill) {
       throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
     }
-    const existing = (await listSkills(workspace.path, false)).find((item) => item.name === name && item.scope === "project");
-    if (existing || (await exists(join(projectSkillsDir(workspace.path), name, "SKILL.md")))) {
+    // Installed once, globally, into the engine's config dir: every Redrob app and folder sees it.
+    if ((await listSkills(workspace.path, true)).some((item) => item.name === name)) {
       throw new ApiError(409, "skill_exists", `A skill named ${name} is already installed`);
     }
+    const skillDir = join(globalSkillsDir(), name);
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "skills.upsert",
       summary: `Install library skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+      paths: [join(skillDir, "SKILL.md")],
     });
     const { frontmatter: data, body } = skill;
     const priorMetadata = typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata) ? data.metadata : {};
     const content = buildFrontmatter({ ...data, metadata: { ...priorMetadata, source: "library" } }) + body.replace(/^\n/, "");
-    const result = await createSkill(workspace.path, { name, content, description: skill.description });
+    // SKILL.md plus the rest of the skill's files (references, examples, scripts).
+    const extras = await Promise.all(
+      skill.files.filter((file) => file !== "SKILL.md").map(async (file) => ({ path: file, content: await publicCatalogue.readFile(name, file) })),
+    );
+    const result = await installGlobalSkill(name, [{ path: "SKILL.md", content }, ...extras]);
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,
@@ -3009,7 +2989,7 @@ function createRoutes(
       action: result.action,
       path: result.path,
     });
-    return jsonResponse({ name, path: result.path, description: skill.description, scope: "project", metadata: { source: "library" } });
+    return jsonResponse({ name, path: result.path, description: skill.description, scope: "user", metadata: { source: "library" } });
   });
 
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
@@ -3041,9 +3021,9 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "skills.upsert",
       summary: `Upsert skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+      paths: [join(globalSkillsDir(), name, "SKILL.md"), join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
     });
-    const result = await upsertSkill(workspace.path, { name, content, description });
+    const result = await upsertUserSkill(workspace.path, { name, content, description });
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,
@@ -3059,7 +3039,7 @@ function createRoutes(
       action: result.action,
       path: result.path,
     });
-    return jsonResponse({ name, path: result.path, description: description ?? "", scope: "project" });
+    return jsonResponse({ name, path: result.path, description: description ?? "", scope: result.scope });
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/skills/:name", "client", async (ctx) => {
@@ -3074,7 +3054,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "skills.delete",
       summary: `Delete skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name)],
+      paths: [join(workspace.path, ".opencode", "skills", name), join(globalSkillsDir(), name)],
     });
     const result = await deleteSkill(workspace.path, name);
     await recordAudit(workspace.path, {

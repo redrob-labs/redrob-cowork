@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -11,6 +11,7 @@ import { createFixtureDeskServices, resetSampleSkills } from "../src/react-app/d
 import { TAXONOMY } from "../src/react-app/desk/services/fixtures/skills";
 import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
 import type { DeskSkill, SkillDraft } from "../src/react-app/desk/services/types";
+import { CONSOLE_CATALOGUE_BASE_URL, consoleCatalogue } from "../src/react-app/desk/skills/console-catalogue";
 import { runSkill, SkillView } from "../src/react-app/desk/skills/desk-skill";
 import { SkillFiltersView, SkillsView, teamStatusText, withFilter } from "../src/react-app/desk/skills/desk-skills";
 import { saveSkill, SkillDialogView, skillDialogState, withTag, withTitle } from "../src/react-app/desk/skills/skill-dialog";
@@ -31,9 +32,32 @@ import {
 import type { PendingDeskChat } from "../src/react-app/desk/skills/start-chat";
 import { installSkill, removeSkill } from "../src/react-app/desk/skills/use-skills";
 
+// The Console's public catalogue, as the browser fetches it: index.json, then one SKILL.md each.
+const CATALOGUE: Record<string, string> = {
+  "index.json": JSON.stringify({ skills: [{ name: "nda-review", version: "1.0.0", files: ["SKILL.md"] }, { name: "broken", version: "1.0.0" }] }),
+  "nda-review/SKILL.md": "---\nname: nda-review\ntitle: NDA Review\ndescription: NDA.\n---\n\nCheck the term.\n",
+  "broken/SKILL.md": "no frontmatter",
+};
+const catalogueCalls: string[] = [];
+const realFetch = globalThis.fetch;
+
 beforeEach(() => {
   setLocale("en");
   resetSampleSkills();
+  consoleCatalogue.reset();
+  catalogueCalls.length = 0;
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = String(input);
+    if (!url.startsWith(`${CONSOLE_CATALOGUE_BASE_URL}/`)) throw new Error(`unexpected fetch ${url}`);
+    const path = url.slice(CONSOLE_CATALOGUE_BASE_URL.length + 1);
+    catalogueCalls.push(path);
+    const body = CATALOGUE[path];
+    return body === undefined ? new Response("", { status: 404 }) : new Response(body, { status: 200 });
+  }) as typeof fetch;
+});
+
+afterEach(() => {
+  globalThis.fetch = realFetch;
 });
 
 const DRAFT: SkillDraft = { name: "weekly-update", description: "Writes the weekly client update.", instructions: "Read the week's files.", editing: false };
@@ -244,11 +268,17 @@ describe("sample skills", () => {
     const services = createFixtureDeskServices();
     const listed = await services.skills.list();
     expect(listed.preview).toBe(true);
-    // The sample skill catalogue was removed - installed list and library are empty.
+    // No sample installed skills; the library is the Console's public catalogue, real even here.
     expect(listed.data).toEqual([]);
-    expect((await services.skills.library({})).data).toEqual([]);
+    const library = await services.skills.library({});
+    expect(library.preview).toBe(false);
+    expect(library.data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: {} }]);
+    expect((await services.skills.library({ q: "nda" })).data.map((skill) => skill.name)).toEqual(["nda-review"]);
     expect((await services.skills.library({ profession: "vc" })).data).toEqual([]);
-    // Installing a library skill that does not exist is refused.
+    expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null });
+    // The catalogue is fetched once and cached; a skill without usable frontmatter is left out.
+    expect(catalogueCalls).toEqual(["index.json", "nda-review/SKILL.md", "broken/SKILL.md"]);
+    // Installing needs a connected workspace.
     await expect(services.skills.install("nda-review")).rejects.toThrow();
     // A skill of the person's own still saves, reads back and removes.
     await services.skills.save(DRAFT);
@@ -265,7 +295,7 @@ describe("sample skills", () => {
     const toasts: string[] = [];
     const invalidated: unknown[] = [];
     const deps = { skills: services.skills, queryClient: { invalidateQueries: async (filters: unknown) => void invalidated.push(filters) }, scope: "preview", showToast: (title: string) => void toasts.push(title) };
-    // Installing a sample library skill now fails (the library is empty); the toast says so.
+    // Installing without a connected workspace fails; the toast says so.
     expect(await installSkill(deps, "nda-review")).toBe(false);
     expect(toasts).toEqual(["Couldn't add the skill"]);
     expect(await saveSkill({ skills: services.skills, invalidate: () => {}, showToast: (title) => void toasts.push(title) }, DRAFT)).toBe(true);
@@ -304,16 +334,6 @@ describe("real skills", () => {
       deleteSkill: async (workspaceId, name) => {
         calls.push(`delete:${workspaceId}:${name}`);
         return { path: "/p" };
-      },
-      listLibrarySkills: async (workspaceId, filter) => {
-        calls.push(`library:${workspaceId}:${JSON.stringify(filter)}`);
-        return { version: "v", source: "snapshot", skills: [{ name: "nda-review", title: "NDA Review", description: "NDA.", profession: "lawyer", task: "review", language: "en", family: "nda-review", version: "1.0.0" }] };
-      },
-      getSkillTaxonomy: async () => ({ ...TAXONOMY, source: "console" }),
-      getLibrarySkill: async (workspaceId, name) => {
-        calls.push(`library-get:${workspaceId}:${name}`);
-        if (name !== "nda-review") throw new Error("404");
-        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: "1.0.0", body: "Check the term.", source: "console" };
       },
       installLibrarySkill: async (workspaceId, name) => {
         calls.push(`install:${workspaceId}:${name}`);
@@ -355,15 +375,18 @@ describe("real skills", () => {
     expect((await offline.skills.list()).data[0]?.origin).toBe("mine");
   });
 
-  test("the library and its taxonomy; one skill installed or from the library", async () => {
+  test("the library comes from the Console directly, not the server; one skill installed or from the library", async () => {
     const { client, calls } = fakeClient();
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
-    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: { profession: "lawyer", task: "review", language: "en" } }]);
-    expect((await services.skills.taxonomy()).data).toEqual(TAXONOMY);
+    expect((await services.skills.library({})).data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: {} }]);
+    // The public catalogue has no profession/task/language.
+    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([]);
+    expect((await services.skills.taxonomy()).data).toEqual({ professions: [], languages: [] });
     expect((await services.skills.get("mine")).data).toMatchObject({ body: "The mine instructions.", installed: { origin: "mine", scope: "project" } });
-    expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null, tags: { task: "review" } });
+    expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null, tags: {} });
     expect((await services.skills.get("nowhere")).data).toBeNull();
-    expect(calls).toContain(`library:ws_1:${JSON.stringify({ profession: "lawyer" })}`);
+    expect(catalogueCalls[0]).toBe("index.json");
+    expect(calls.some((call) => call.startsWith("library"))).toBe(false);
     expect(calls).toContain("get:ws_1:mine");
   });
 

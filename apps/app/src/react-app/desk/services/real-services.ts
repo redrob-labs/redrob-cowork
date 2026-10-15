@@ -13,6 +13,7 @@ import { connectorsFromMcp, type DeskMcpStatusMap } from "../connectors/connecto
 import { DESK_OUTBOX, deskFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/desk-files";
 import { chatDefaults, type DeskServices } from "./desk-services";
 import { createFixtureDeskServices } from "./fixture-services";
+import { consoleCatalogue } from "../skills/console-catalogue";
 import { canEditSkill, canRemoveSkill, deskSkillFrom, skillBody, skillContent, tagsOf } from "../skills/skills";
 import { HISTORY_LIMIT, HISTORY_STEPS_LIMIT, historyEntryFrom } from "../history/history";
 import { boardFromState } from "../scheduled/schedules";
@@ -24,7 +25,7 @@ import type { Chat, DeskFile, DeskResult, MemoryNote, MemoryNoteScope, Project }
 export type DeskServerClient = Pick<
   RedrobServerClient,
   "listWorkspaces" | "listSessions" | "getSession" | "listMemories" | "saveMemory" | "updateMemory" | "deleteMemory" | "listArtifacts" | "listMcp" | "getConfig" | "patchConfig" | "getSessionSnapshot" | "listSchedules" | "addSchedule" | "updateSchedule" | "deleteSchedule" | "answerScheduleWaiting"
-  | "listSkills" | "getSkill" | "upsertSkill" | "deleteSkill" | "listLibrarySkills" | "getSkillTaxonomy" | "getLibrarySkill" | "installLibrarySkill" | "getTeamSkills"
+  | "listSkills" | "getSkill" | "upsertSkill" | "deleteSkill" | "installLibrarySkill" | "getTeamSkills"
 >;
 
 export type RealDeskServicesDeps = {
@@ -185,28 +186,20 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
       },
       remove: async (scheduleId) => real(boardFromState(await client.deleteSchedule(workspaceId, scheduleId), workspaceId)),
     },
-    // Installed skills are the workspace's, then the person's own folder's; the library is the Console's.
+    // Installed skills are the workspace's, then the person's own folder's. The library is the
+    // Console's public catalogue, read by the browser directly; no server call.
     skills: {
       list: async () => real(await listInstalled()),
-      library: async (filters = {}) =>
-        real((await client.listLibrarySkills(workspaceId, filters)).skills.map((skill) => ({
-          name: skill.name,
-          ...(skill.title ? { title: skill.title } : {}),
-          description: skill.description,
-          tags: tagsOf(skill),
-        }))),
-      taxonomy: async () => {
-        const { professions, languages } = await client.getSkillTaxonomy(workspaceId);
-        return real({ professions, languages });
-      },
+      library: async (filters = {}) => real(await consoleCatalogue.list(filters)),
+      // The public catalogue carries no profession/task/language.
+      taxonomy: async () => real({ professions: [], languages: [] }),
       get: async (name) => {
         const installed = (await listInstalled()).find((skill) => skill.name === name);
         if (installed) {
           const { content } = await client.getSkill(workspaceId, name, { includeGlobal: true });
           return real({ name, description: installed.description, tags: installed.tags, body: skillBody(content), installed: { origin: installed.origin, scope: installed.scope } });
         }
-        const skill = await client.getLibrarySkill(workspaceId, name).catch(() => null);
-        return real(skill ? { name, description: skill.description, tags: tagsOf(skill), body: skill.body, installed: null } : null);
+        return real(await consoleCatalogue.get(name));
       },
       install: async (name) => {
         await client.installLibrarySkill(workspaceId, name);
@@ -216,9 +209,9 @@ export function createRealDeskServices(deps: RealDeskServicesDeps): DeskServices
         const existing = (await listInstalled()).find((skill) => skill.name === draft.name);
         // A new skill never replaces one; a change is only ever to the person's own.
         if (draft.editing ? !existing || !canEditSkill(existing) : existing) throw new Error(`Cannot save the skill ${draft.name}`);
-        await client.upsertSkill(workspaceId, { name: draft.name, content: skillContent(draft), description: draft.description.trim() });
+        const saved = await client.upsertSkill(workspaceId, { name: draft.name, content: skillContent(draft), description: draft.description.trim() });
         const { profession, task, language } = draft;
-        return real({ name: draft.name, description: draft.description.trim(), origin: "mine", tags: tagsOf({ profession, task, language }), scope: "project" });
+        return real({ name: draft.name, description: draft.description.trim(), origin: "mine", tags: tagsOf({ profession, task, language }), scope: saved.scope ?? existing?.scope ?? "user" });
       },
       remove: async (name) => {
         const existing = (await listInstalled()).find((skill) => skill.name === name);

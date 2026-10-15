@@ -22,10 +22,9 @@ const read = (name: string) => readFileSync(join(SHELL_DIR, name), "utf8");
 
 /** Calls that cross a process boundary and can therefore hang indefinitely. */
 const MUST_BE_BOUNDED = [
-  { file: "workspace-connection-provider.tsx", call: "workspaceBootstrap()" },
-  { file: "workspace-connection-provider.tsx", call: "resolveRedrobConnection()" },
-  { file: "workspace-connection-provider.tsx", call: ".listWorkspaces()" },
+  { file: "use-workspace-route-state.ts", call: "workspaceBootstrap()" },
   { file: "use-workspace-route-state.ts", call: ".getSession(" },
+  { file: "use-workspace-route-state.ts", call: ".listWorkspaces()" },
   { file: "settings-route.tsx", call: "workspaceBootstrap()" },
   { file: "settings-route.tsx", call: "resolveRedrobConnection()" },
   { file: "settings-route.tsx", call: ".listWorkspaces()" },
@@ -50,10 +49,9 @@ describe("route refresh steps are bounded", () => {
   }
 
   test("the shared helper is exported once and reused, not copied", () => {
-    const owner = read("route-refresh-control.ts");
+    const owner = read("use-workspace-route-state.ts");
     expect(owner).toContain("export function withRouteRefreshTimeout");
     // A second definition would drift from the first.
     expect(read("settings-route.tsx")).not.toContain("function withRouteRefreshTimeout");
-    expect(read("use-workspace-route-state.ts")).not.toContain("function withRouteRefreshTimeout");
   });
 });

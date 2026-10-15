@@ -32,6 +32,8 @@ export type PublicCatalogueSkill = PublicCatalogueSummary & {
   body: string;
   frontmatter: Record<string, unknown>;
   source: "console";
+  /** Every file the catalogue ships for the skill, relative to its folder; SKILL.md first. */
+  files: string[];
 };
 
 /** The library filter; only `q` applies because the catalogue carries no taxonomy fields. */
@@ -68,6 +70,12 @@ export function parseCatalogueFrontmatter(content: string): { data: Record<strin
   }
 }
 
+/** A relative path inside the skill folder: no absolute, no `..`, no empty segment. */
+export function isSafeSkillFile(file: string): boolean {
+  if (!file || file.startsWith("/") || file.includes("\\")) return false;
+  return file.split("/").every((segment) => segment !== "" && segment !== "." && segment !== "..");
+}
+
 function stringField(data: Record<string, unknown>, key: string): string | undefined {
   const value = data[key];
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
@@ -84,14 +92,15 @@ export function createPublicCatalogue(options: PublicCatalogueOptions = {}) {
   let snapshot: Snapshot | null = null;
   let inFlight: Promise<Snapshot> | null = null;
 
-  const fetchText = async (path: string): Promise<string> => {
+  const fetchResponse = async (path: string): Promise<Response> => {
     const response = await fetchImpl(`${baseUrl}/${path}`, { signal: AbortSignal.timeout(timeoutMs) });
     if (!response.ok) throw new Error(`Catalogue request failed: ${response.status} ${path}`);
-    return response.text();
+    return response;
   };
+  const fetchText = async (path: string): Promise<string> => (await fetchResponse(path)).text();
 
   // A skill whose SKILL.md cannot be read or parsed is left out rather than shown half-empty.
-  const loadSkill = async (name: string, version: string): Promise<PublicCatalogueSkill | null> => {
+  const loadSkill = async (name: string, version: string, files: string[]): Promise<PublicCatalogueSkill | null> => {
     try {
       const content = await fetchText(`${encodeURIComponent(name)}/SKILL.md`);
       const { data, body } = parseCatalogueFrontmatter(content);
@@ -109,6 +118,7 @@ export function createPublicCatalogue(options: PublicCatalogueOptions = {}) {
         body,
         frontmatter: data,
         source: "console",
+        files: ["SKILL.md", ...files.filter((file) => isSafeSkillFile(file) && file !== "SKILL.md")],
       };
     } catch {
       return null;
@@ -126,7 +136,7 @@ export function createPublicCatalogue(options: PublicCatalogueOptions = {}) {
           return false;
         }
       });
-      const skills = (await Promise.all(entries.map((entry) => loadSkill(entry.name, entry.version)))).filter(
+      const skills = (await Promise.all(entries.map((entry) => loadSkill(entry.name, entry.version, entry.files ?? [])))).filter(
         (skill): skill is PublicCatalogueSkill => skill !== null,
       );
       return { skills, loadedAt: now(), ok: true };
@@ -145,7 +155,7 @@ export function createPublicCatalogue(options: PublicCatalogueOptions = {}) {
     return inFlight;
   };
 
-  const toSummary = ({ body: _body, frontmatter: _frontmatter, source: _source, ...summary }: PublicCatalogueSkill) => summary;
+  const toSummary = ({ body: _body, frontmatter: _frontmatter, source: _source, files: _files, ...summary }: PublicCatalogueSkill) => summary;
 
   return {
     /** Lists the catalogue, narrowed by a case-insensitive `q` over name, title, summary and description. */
@@ -165,6 +175,12 @@ export function createPublicCatalogue(options: PublicCatalogueOptions = {}) {
     async get(name: string): Promise<PublicCatalogueSkill | null> {
       const { skills } = await current();
       return skills.find((skill) => skill.name === name) ?? null;
+    },
+    /** One of a skill's files (see `files`), as bytes; references may be any format. */
+    async readFile(name: string, file: string): Promise<Uint8Array> {
+      if (!isSafeSkillFile(file)) throw new Error(`Unsafe catalogue file path: ${file}`);
+      const path = `${encodeURIComponent(name)}/${file.split("/").map(encodeURIComponent).join("/")}`;
+      return new Uint8Array(await (await fetchResponse(path)).arrayBuffer());
     },
   };
 }

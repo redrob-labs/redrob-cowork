@@ -1,9 +1,8 @@
-import type { DeskSkill, LibrarySkill, SkillTaxonomy } from "../types";
+import type { DeskSkill, SkillTaxonomy } from "../types";
 
 /*
- * The preview/no-server mode ships NO sample skills: the installed list and the library are empty,
- * so preview mode shows the real empty state instead of fabricated skills (real skills come from
- * redrob-server / the Console). Only TAXONOMY remains - the profession/task/language vocabulary the
+ * The preview/no-server mode ships NO sample skills: the installed list is empty and the library
+ * is the Console's public catalogue, read directly by the browser. Only TAXONOMY remains - the profession/task/language vocabulary the
  * skill dialog and filters are built from.
  */
 
@@ -12,9 +11,6 @@ export const SKILLS: DeskSkill[] = [];
 
 /** No sample skill bodies. */
 export const SKILL_BODIES: Record<string, string> = {};
-
-/** No sample library skills. */
-export const LIBRARY: LibrarySkill[] = [];
 
 export const TAXONOMY: SkillTaxonomy = {
   professions: [
