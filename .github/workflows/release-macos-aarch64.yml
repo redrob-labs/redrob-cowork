@@ -310,8 +310,23 @@ jobs:
       benchmark_only: ${{ needs.resolve-production.outputs.benchmark_only || needs.resolve-benchmark.outputs.benchmark_only }}
       prerelease: ${{ needs.resolve-production.outputs.prerelease || needs.resolve-benchmark.outputs.prerelease }}
       draft: ${{ needs.resolve-production.outputs.draft || 'false' }}
+      # The engine release every leg bundles as its fallback sidecar: the newest published
+      # redrob-code release, resolved ONCE here so every platform carries the same engine even if
+      # the engine releases while the legs build. prepare-sidecar.mjs refuses anything below the
+      # floor in constants.json.
+      engine_tag: ${{ steps.engine.outputs.tag }}
     steps:
-      - run: true
+      - id: engine
+        name: Resolve the newest Redrob Code release for the bundled sidecar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="$(gh api repos/redrob-labs/redrob-code/releases/latest --jq .tag_name)"
+          case "$tag" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "::error::unexpected engine tag '$tag'"; exit 1 ;; esac
+          echo "bundling Redrob Code $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Redrob Code sidecar for this release: **$tag**" >> "$GITHUB_STEP_SUMMARY"
 
   verify-release:
     name: Verify Release Versions
@@ -524,9 +539,13 @@ jobs:
       - name: Build Electron app
         shell: bash
         env:
-          # TARGET tells prepare-sidecar.mjs which architecture's opencode binary
+          # TARGET tells prepare-sidecar.mjs which architecture's engine binary
           # to download (critical for cross-arch builds like x64 on arm64 mac).
           TARGET: ${{ matrix.target_triple }}
+          # The one engine tag this release bundles (resolved by resolve-release) and a token so the
+          # release lookups are not the runner's anonymous, shared rate limit.
+          REDROB_CODE_RELEASE_VERSION: ${{ needs.resolve-release.outputs.engine_tag }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm --filter @redrob/desktop build:electron
 
       - name: Package Electron (macOS, signed + notarized)
