@@ -202,6 +202,8 @@ export interface SkillItem {
   scope: "project" | "global";
   trigger?: string;
   error?: string;
+  /** The SKILL.md `metadata` block; `source: "library"` marks a skill installed from the Console. */
+  metadata?: Record<string, unknown> & { source?: string };
 }
 
 export interface CommandItem {

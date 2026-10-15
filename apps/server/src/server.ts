@@ -27,7 +27,7 @@ import {
   parseMcpAppSandboxCsp,
 } from "./mcp-app-sandbox.js";
 import { exportExtensions } from "./extensions-export.js";
-import { createSkill, deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
+import { createSkill, deleteSkill, globalSkillsDir, installGlobalSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
 import { publicCatalogue } from "./skill-library/public-catalogue.js";
 import { buildFrontmatter } from "./frontmatter.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
@@ -2955,27 +2955,25 @@ function createRoutes(
     if (!skill) {
       throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
     }
-    const existing = (await listSkills(workspace.path, false)).find((item) => item.name === name && item.scope === "project");
-    if (existing || (await exists(join(projectSkillsDir(workspace.path), name, "SKILL.md")))) {
+    // Installed once, globally, into the engine's config dir: every Redrob app and folder sees it.
+    if ((await listSkills(workspace.path, true)).some((item) => item.name === name)) {
       throw new ApiError(409, "skill_exists", `A skill named ${name} is already installed`);
     }
+    const skillDir = join(globalSkillsDir(), name);
     await requireApproval(ctx, {
       workspaceId: workspace.id,
       action: "skills.upsert",
       summary: `Install library skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+      paths: [join(skillDir, "SKILL.md")],
     });
     const { frontmatter: data, body } = skill;
     const priorMetadata = typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata) ? data.metadata : {};
     const content = buildFrontmatter({ ...data, metadata: { ...priorMetadata, source: "library" } }) + body.replace(/^\n/, "");
-    const result = await createSkill(workspace.path, { name, content, description: skill.description });
-    // The rest of the skill's files (references, examples, scripts) go next to SKILL.md.
-    const skillDir = dirname(result.path);
-    for (const file of skill.files.filter((entry) => entry !== "SKILL.md")) {
-      const target = join(skillDir, file);
-      await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, await publicCatalogue.readFile(name, file));
-    }
+    // SKILL.md plus the rest of the skill's files (references, examples, scripts).
+    const extras = await Promise.all(
+      skill.files.filter((file) => file !== "SKILL.md").map(async (file) => ({ path: file, content: await publicCatalogue.readFile(name, file) })),
+    );
+    const result = await installGlobalSkill(name, [{ path: "SKILL.md", content }, ...extras]);
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,
@@ -3056,7 +3054,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "skills.delete",
       summary: `Delete skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name)],
+      paths: [join(workspace.path, ".opencode", "skills", name), join(globalSkillsDir(), name)],
     });
     const result = await deleteSkill(workspace.path, name);
     await recordAudit(workspace.path, {
