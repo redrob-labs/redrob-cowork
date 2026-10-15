@@ -5,7 +5,6 @@ import type { Memory } from "@redrob/types/memory";
 import type { RedrobWorkspaceInfo } from "../src/app/lib/redrob-server";
 import type { DeskServices } from "../src/react-app/desk/services/desk-services";
 import { createFixtureDeskServices, runScripted } from "../src/react-app/desk/services/fixture-services";
-import { SKILLS } from "../src/react-app/desk/services/fixtures/skills";
 import { createDeskServices, createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
 import { deskClient } from "./helpers/desk-client";
 import type { DeskTimers, TimerHandle } from "../src/react-app/desk/timers";
@@ -76,7 +75,7 @@ describe("desk fixture services", () => {
     expect(connectors.filter((connector) => connector.state === "connected")).toHaveLength(6);
     expect((await services.schedules.list()).data.waiting).toHaveLength(2);
     expect((await services.privacy.get()).data.level).toBe("high");
-    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(SKILLS.map((s) => s.name));
+    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(["first-review", "deadline-tracker", "weekly-report"]);
 
     const notes = (await services.notes.list()).data;
     expect(notes.length).toBe(22);
