@@ -343,10 +343,17 @@ export type DeskStatusInput = {
   notes: { all: number; project: number; you: number } | null;
   checks: DeskCrossCheck;
   onChecksChange: (checks: DeskCrossCheck) => void;
+  /** Round 38 (item 2): show the setting value/level on each chip. True on the hero
+   *  (the main new-chat screen keeps the values visible); false in-chat, where the
+   *  chips are icon + title only. Defaults to true. */
+  showValues?: boolean;
 };
 
 /** Privacy, Memory and Cross-check: what will happen to this message, before Send. */
 export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
+  // Round 38 (item 2): the hero keeps the value/level visible; the in-chat row is
+  // icon + title only. Default to showing values (hero/sample renders).
+  const showValues = input.showValues !== false;
   // Sample data is not protection: only a real state can turn the chip on.
   const level = input.privacy && !input.privacy.preview ? input.privacy.level : "off";
   const privacyOn = input.desktop && level !== "off";
@@ -381,7 +388,9 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.shieldCheck(STATUS_ICON),
       tone: privacyOn ? "safe" : "plain",
       name: t("desk.status_privacy"),
-      // Round 38 (item 2): the in-chat status chips are icon + title only (no value/level).
+      // Round 38 (item 2): value/level only on the hero (showValues); in-chat is icon + title.
+      value: showValues ? (privacyOn ? privacyLevelLabel(level) : t("desk.privacy_off")) : undefined,
+      level: showValues && privacyOn ? { n: PRIVACY_N[level], of: levels.length } : undefined,
       panelLabel: t("desk.nav_privacy"),
       panel: (
         <PrivacyProtection
@@ -403,6 +412,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.bookOpen(STATUS_ICON),
       tone: input.memory === "none" ? "plain" : "on",
       name: t("desk.status_memory"),
+      value: showValues ? memoryStatusValue(input.memory) : undefined,
       panelLabel: t("desk.nav_memory"),
       panel: (
         <MemoryScope
@@ -426,6 +436,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.compare(STATUS_ICON),
       tone: checksOff ? "plain" : "on",
       name: t("desk.status_check"),
+      value: showValues ? crossCheckStatusValue(input.checks) : undefined,
       panelLabel: t("desk.status_check"),
       panel: (
         <CrossCheckSetting
@@ -448,7 +459,7 @@ export function DeskComposerStatusView(props: DeskStatusInput) {
 }
 
 /** The status line wired up: privacy from the Desk services, memory per chat, Cross-check from prefs. */
-export function DeskComposerStatus(props: { chatKey: string }) {
+export function DeskComposerStatus(props: { chatKey: string; showValues?: boolean }) {
   const { prefs, setPrefs } = useLocal();
   const client = useDeskConnection((state) => state.client);
   const workspaceId = useDeskConnection((state) => state.workspaceId);
@@ -503,6 +514,7 @@ export function DeskComposerStatus(props: { chatKey: string }) {
   return (
     <DeskComposerStatusView
       desktop={isDesktopRuntime()}
+      showValues={props.showValues}
       privacy={privacy.data ?? null}
       memory={memory}
       onMemoryChange={(next) => setMemory(props.chatKey, next)}

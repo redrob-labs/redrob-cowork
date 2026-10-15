@@ -308,23 +308,32 @@ const status = (patch: Partial<DeskStatusInput> = {}): DeskStatusInput => ({
 });
 
 describe("the status line", () => {
-  test("privacy reads safe only from a real state", () => {
+  test("privacy reads High, safe, only from a real state (hero shows the value)", () => {
     const [privacy] = deskStatusItems(status({ privacy: { level: "high", preview: false } }));
     expect(privacy?.id).toBe("privacy");
     expect(privacy?.tone).toBe("safe");
-    // Round 38 (item 2): the chip is icon + title only (no value/level); the level
-    // still shows inside the panel.
-    expect(privacy?.value).toBeUndefined();
-    expect(privacy?.level).toBeUndefined();
+    expect(privacy?.value).toBe(en["desk.privacy_high"]);
+    expect(privacy?.level).toEqual({ n: 2, of: 3 });
     const panel = renderToStaticMarkup(<>{privacy?.panel}</>);
     expect(panel).toContain(`${en["desk.privacy_on_title"]}: ${en["desk.privacy_high"]}`);
+  });
+
+  test("in-chat (showValues false) the chip is icon + title only - no value or level", () => {
+    const [privacy] = deskStatusItems(status({ privacy: { level: "high", preview: false }, showValues: false }));
+    expect(privacy?.tone).toBe("safe");
+    expect(privacy?.value).toBeUndefined();
+    expect(privacy?.level).toBeUndefined();
+    const [, memory] = deskStatusItems(status({ showValues: false }));
+    expect(memory?.value).toBeUndefined();
+    const check = deskStatusItems(status({ checks: { factCheck: "off", challenge: "off" }, showValues: false }))[2];
+    expect(check?.value).toBeUndefined();
   });
 
   test("sample data or no state reads Off, never protected", () => {
     for (const privacy of [{ level: "high" as const, preview: true }, null]) {
       const [item] = deskStatusItems(status({ privacy }));
       expect(item?.tone).toBe("plain");
-      expect(item?.value).toBeUndefined();
+      expect(item?.value).toBe(en["desk.privacy_off"]);
       expect(item?.level).toBeUndefined();
       expect(renderToStaticMarkup(<>{item?.panel}</>)).toContain(en["desk.privacy_page_off_title"]);
     }
@@ -332,19 +341,19 @@ describe("the status line", () => {
 
   test("privacy says off on the web", () => {
     const [privacy] = deskStatusItems(status({ desktop: false }));
-    expect(privacy?.tone).toBe("plain");
+    expect(privacy?.value).toBe(en["desk.privacy_off"]);
     expect(renderToStaticMarkup(<>{privacy?.panel}</>)).toContain(en["desk.privacy_off_title"]);
   });
 
   test("memory is On for every AI or Off for this chat, with This project only in a project", () => {
     const on = deskStatusItems(status())[1];
-    expect(on?.value).toBeUndefined();
+    expect(on?.value).toBe(en["desk.memory_on"]);
     const outside = renderToStaticMarkup(<>{on?.panel}</>);
     expect(outside).not.toContain(en["desk.memory_project"]);
     expect(outside).toContain("22 notes, across every project");
 
     const off = deskStatusItems(status({ memory: "none" }))[1];
-    expect(off?.value).toBeUndefined();
+    expect(off?.value).toBe(en["desk.memory_off"]);
     expect(off?.tone).toBe("plain");
     expect(renderToStaticMarkup(<>{off?.panel}</>)).toContain(en["desk.memory_off_title"]);
 
@@ -354,8 +363,6 @@ describe("the status line", () => {
   });
 
   test("Cross-check reads the design system's word for the checks", () => {
-    // The value helper is still exported and used inside the panel; the chip itself
-    // no longer carries the value (round 38 item 2).
     expect(crossCheckStatusValue({ factCheck: "auto", challenge: "auto" })).toBe("When it matters");
     expect(crossCheckStatusValue({ factCheck: "always", challenge: "always" })).toBe("Always");
     expect(crossCheckStatusValue({ factCheck: "off", challenge: "off" })).toBe("Off");
@@ -363,7 +370,7 @@ describe("the status line", () => {
     expect(crossCheckStatusValue({ factCheck: "auto", challenge: "off" })).toBe("1 of 2 on");
     const check = deskStatusItems(status({ checks: { factCheck: "off", challenge: "off" } }))[2];
     expect(check?.tone).toBe("plain");
-    expect(check?.value).toBeUndefined();
+    expect(check?.value).toBe("Off");
   });
 
   test("everything it says is in Korean too", () => {
@@ -373,9 +380,7 @@ describe("the status line", () => {
     expect(crossCheckStatusValue({ factCheck: "auto", challenge: "off" })).toBe("2개 중 1개 켜짐");
     const html = renderToStaticMarkup(<DeskComposerStatusView {...status()} />);
     expect(html).toContain(ko["desk.status_privacy"]);
-    // Round 38 (item 2): the chip shows the title (icon + title) but not the value,
-    // so the memory value text is no longer in the chip markup; the panel still carries it.
-    expect(html).toContain(ko["desk.status_memory"]);
+    expect(html).toContain(ko["desk.memory_on"]);
     expect(html).toContain(ko["desk.status_label"]);
     expect(html).not.toMatch(/>[^<]*[A-Za-z]{3,}[^<]*</);
   });
@@ -453,7 +458,7 @@ describe("the new chat screen", () => {
     const composer = read("react-app/domains/session/surface/composer/composer.tsx");
     expect(composer).toContain("{inDeskFrame ? null : modelControls}");
     expect(composer).toContain("<DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>\n                    {modelControls}");
-    expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}");
+    expect(composer).toContain("{inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} showValues={props.flush} /> : null}");
     expect(composer).toContain("const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;");
   });
 });
