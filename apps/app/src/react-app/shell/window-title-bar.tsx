@@ -122,10 +122,10 @@ export function WindowTitleBar() {
 
 const glyph = (draw: (typeof icons)["close"]) => draw({ width: 16, height: 16, "aria-hidden": true });
 
-// Round 12, item 2: the title bar's two square marks are now the REAL brand icons from the 2026
-// icon pack — the Redrob GROUP icon on the left, then the Redrob COWORK icon to its right. Both are
-// the `-icon-web` masters (superellipse tile, transparent corners), served from the app's public
-// root at /brand/. (They replaced the favicon.svg placeholders.)
+// Round 12, item 2 / Round 34: the title bar's two square marks are the REAL brand icons from the
+// 2026 icon pack. The LEFT mark links to the Redrob console and is now the official Redrob icon
+// (the `redrob-icon-web` master, the "R" symbol on the superellipse tile). The RIGHT mark is the
+// Redrob COWORK icon and links home. Both are served from the app's public root at /brand/.
 const REDROB_GROUP_MARK_SRC = resolveExtensionIconSrc("/brand/redrob-group.svg");
 const REDROB_COWORK_MARK_SRC = resolveExtensionIconSrc("/brand/redrob-cowork.svg");
 
