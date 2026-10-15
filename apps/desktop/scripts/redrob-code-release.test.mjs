@@ -10,10 +10,15 @@ import {
   redrobCodeArchiveName,
   redrobCodeBinaryName,
   REDROB_CODE_REPO,
+  REDROB_CODE_SHA256SUMS_NAMES,
   releaseDownloadUrl,
   releaseSha256SumsUrl,
+  resolveLatestReleaseVersion,
   sidecarFileNames,
 } from "./redrob-code-release.mjs";
+
+/** A manifest response for either name the engine has published it under. */
+const isSums = (url) => url.endsWith("/SHA256SUMS.txt") || url.endsWith("/SHA256SUMS");
 
 const ASSET = "redrob-linux-x64-baseline.zip";
 const BYTES = new Uint8Array([1, 2, 3]);
@@ -128,10 +133,49 @@ describe("public release download URLs", () => {
     );
   });
 
-  it("reads the digest manifest from the same release as the asset", () => {
+  it("reads the digest manifest from the same release as the asset, newest name first", () => {
+    assert.deepEqual(REDROB_CODE_SHA256SUMS_NAMES, ["SHA256SUMS.txt", "SHA256SUMS"]);
     assert.equal(
       releaseSha256SumsUrl(REDROB_CODE_REPO, "v0.1.0"),
+      "https://github.com/redrob-labs/redrob-code/releases/download/v0.1.0/SHA256SUMS.txt",
+    );
+    assert.equal(
+      releaseSha256SumsUrl(REDROB_CODE_REPO, "v0.1.0", "SHA256SUMS"),
       "https://github.com/redrob-labs/redrob-code/releases/download/v0.1.0/SHA256SUMS",
+    );
+  });
+
+  it("falls back to the older SHA256SUMS name when a release has no SHA256SUMS.txt", async () => {
+    const urls = [];
+    const result = await downloadRedrobCodeArchive({
+      version: "v0.6.4",
+      archiveName: ASSET,
+      destPath: "/tmp/redrob-code.zip",
+      fetchImpl: (url) => {
+        urls.push(url);
+        if (url.endsWith("/SHA256SUMS.txt")) return Promise.resolve({ ok: false, status: 404 });
+        if (url.endsWith("/SHA256SUMS")) return Promise.resolve({ ok: true, status: 200, text: async () => SUMS });
+        return Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer });
+      },
+      writeArchive: async () => {},
+    });
+    assert.equal(result.sha256, DIGEST);
+    assert.deepEqual(urls.map((u) => u.split("/").pop()), ["SHA256SUMS.txt", "SHA256SUMS", ASSET]);
+  });
+
+  it("resolves `latest` to the newest release tag through the API before downloading", async () => {
+    const version = await resolveLatestReleaseVersion(REDROB_CODE_REPO, {
+      fetchImpl: (url) => {
+        assert.equal(url, "https://api.github.com/repos/redrob-labs/redrob-code/releases/latest");
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ tag_name: "v0.6.5" }) });
+      },
+    });
+    assert.equal(version, "0.6.5");
+    await assert.rejects(
+      () => resolveLatestReleaseVersion(REDROB_CODE_REPO, {
+        fetchImpl: () => Promise.resolve({ ok: true, status: 200, json: async () => ({ tag_name: "v1.2.3-rc.1" }) }),
+      }),
+      /unexpected tag/,
     );
   });
 
@@ -143,7 +187,7 @@ describe("public release download URLs", () => {
       destPath: "/tmp/redrob-code.zip",
       fetchImpl: (url, init) => {
         calls.push({ url, init });
-        if (url.endsWith("/SHA256SUMS")) {
+        if (isSums(url)) {
           return Promise.resolve({ ok: true, status: 200, text: async () => SUMS });
         }
         return Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer });
@@ -178,7 +222,7 @@ describe("release asset digest verification", () => {
       archiveName: ASSET,
       destPath: "/tmp/redrob-code.zip",
       fetchImpl: (url) =>
-        url.endsWith("/SHA256SUMS")
+        isSums(url)
           ? Promise.resolve({ ok: true, status: 200, text: async () => SUMS })
           : Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer }),
       writeArchive: async (path, bytes) => {
@@ -201,7 +245,7 @@ describe("release asset digest verification", () => {
         archiveName: ASSET,
         destPath: "/tmp/unused.zip",
         fetchImpl: (url) =>
-          url.endsWith("/SHA256SUMS")
+          isSums(url)
             ? Promise.resolve({ ok: true, status: 200, text: async () => `${"c".repeat(64)}  ${ASSET}` })
             : Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer }),
         writeArchive: async () => {
@@ -212,22 +256,25 @@ describe("release asset digest verification", () => {
     );
   });
 
-  it("refuses a floating pin, so a build cannot become unreproducible by accident", async () => {
-    let reached = false;
-    await assert.rejects(
-      () => downloadRedrobCodeArchive({
-        version: "latest",
-        archiveName: ASSET,
-        destPath: "/tmp/unused.zip",
-        fetchImpl: () => {
-          reached = true;
-          throw new Error("must not reach the network for an unpinned version");
-        },
-        writeArchive: async () => {},
-      }),
-      /A pinned Redrob Code version is required/,
-    );
-    assert.equal(reached, false);
+  it("downloads `latest` from the exact tag the API resolved, never from the floating alias", async () => {
+    const urls = [];
+    const result = await downloadRedrobCodeArchive({
+      version: "latest",
+      archiveName: ASSET,
+      destPath: "/tmp/redrob-code.zip",
+      fetchImpl: (url) => {
+        urls.push(url);
+        if (url.startsWith("https://api.github.com/")) {
+          return Promise.resolve({ ok: true, status: 200, json: async () => ({ tag_name: "v0.6.5" }) });
+        }
+        if (isSums(url)) return Promise.resolve({ ok: true, status: 200, text: async () => SUMS });
+        return Promise.resolve({ ok: true, status: 200, arrayBuffer: async () => BYTES.buffer });
+      },
+      writeArchive: async () => {},
+    });
+    assert.equal(result.version, "0.6.5");
+    assert.ok(urls.every((u) => !u.includes("/releases/latest/download/")), "the alias is a race between manifest and asset");
+    assert.equal(result.assetUrl, `https://github.com/redrob-labs/redrob-code/releases/download/v0.6.5/${ASSET}`);
   });
 
   it("surfaces a missing manifest and a missing asset as distinct failures", async () => {
@@ -239,7 +286,7 @@ describe("release asset digest verification", () => {
         fetchImpl: () => Promise.resolve({ ok: false, status: 404 }),
         writeArchive: async () => {},
       }),
-      /SHA256SUMS manifest for Redrob Code v0\.0\.1 could not be read .*HTTP 404/,
+      /digest manifest for Redrob Code v0\.0\.1 could not be read from: .*SHA256SUMS\.txt \(HTTP 404\), .*SHA256SUMS \(HTTP 404\)/,
     );
     await assert.rejects(
       () => downloadRedrobCodeArchive({
@@ -247,7 +294,7 @@ describe("release asset digest verification", () => {
         archiveName: ASSET,
         destPath: "/tmp/unused.zip",
         fetchImpl: (url) =>
-          url.endsWith("/SHA256SUMS")
+          isSums(url)
             ? Promise.resolve({ ok: true, status: 200, text: async () => SUMS })
             : Promise.resolve({ ok: false, status: 404 }),
         writeArchive: async () => {},

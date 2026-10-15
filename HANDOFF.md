@@ -23,27 +23,31 @@ dashboard. Everything a user can do happens in this app.
   `enterprise-mcp-mock-server`, `handsfree`, `headless-threads`, `install-config`, `mcp-apps`,
   `paths`, `redrob-bootstrap`, `redrob-ui-mcp`, `types`, `ui`.
 
-### The engine is Redrob Code, pinned in constants.json
+### The engine is Redrob Code; constants.json holds the FLOOR, the bundle holds the newest release
 
-`constants.json` at the repo root is the single pin:
+`constants.json` at the repo root names the oldest engine this app is known to work with:
 
 ```json
-{ "redrobCodeVersion": "v1.18.31-redrob.9" }
+{ "redrobCodeVersion": "v0.6.2" }
 ```
 
-Everything reads that one value:
+It is a floor, not what gets bundled or installed:
 
-- `apps/desktop/electron/runtime.mjs` (~line 1777) resolves `constants.json` and throws if
-  `redrobCodeVersion` is missing.
-- `apps/desktop/scripts/prepare-sidecar.mjs` reads it to fetch the sidecar.
-- `apps/desktop/scripts/redrob-code-release.mjs` resolves the matching
-  `redrob-labs/redrob-code` release.
+- `apps/desktop/scripts/prepare-sidecar.mjs` bundles the engine's NEWEST published release
+  (`https://api.github.com/repos/redrob-labs/redrob-code/releases/latest`, resolved to an exact tag
+  before anything is downloaded), refuses anything below the floor, and writes the tag it bundled to
+  `resources/sidecars/redrob-code.version` and the build log. `REDROB_CODE_RELEASE_VERSION=vX.Y.Z`
+  bundles a specific tag instead (a release workflow resolves once and passes it to every leg).
+- `apps/desktop/scripts/redrob-code-release.mjs` downloads from the exact tag and verifies the
+  archive against the release's digest manifest (`SHA256SUMS.txt`, or the older `SHA256SUMS`).
+- `apps/desktop/electron/runtime.mjs` guided install runs the engine installer with no `--version`,
+  so a fresh machine gets the newest engine; the launcher keeps it current from there.
 - `apps/desktop/scripts/electron-build.mjs` copies `constants.json` beside the server dist so
   the packaged asar can resolve it.
-- `apps/server/src/server.ts` imports it directly and surfaces `redrobCodeVersion` through
+- `apps/server/src/server.ts` imports it directly and surfaces `redrobCodeVersion` (the floor) through
   `apps/server/src/routes/core.ts`.
-- `apps/desktop/electron/runtime.test.mjs` asserts the value is exactly `v0.0.3`, so bumping
-  the engine means editing both the constant and that assertion.
+- `apps/desktop/electron/runtime.test.mjs` and `scripts/release/launcher-asset-names.test.mjs` assert
+  the floor is a plain release tag at or above the contracts they describe.
 
 The desktop shell resolves the engine binary from `REDROB_CODE_BIN` or the packaged sidecar,
 both named `redrob`, and spawns it from `runtime.mjs`. Directory routing is the

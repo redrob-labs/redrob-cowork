@@ -271,19 +271,29 @@ test("rehearsal: `rename` writes the manifest and `check` refuses a dist that lo
   assert.ok(readdirSync(dir).includes("redrob-launcher.json"));
 });
 
-test("the release workflow writes the manifest before every asset upload, under the upload glob", () => {
+test("the release workflow renames assets before the release artifact upload and lets the shared publish attach the manifest", () => {
   const workflow = readFileSync(
     fileURLToPath(new URL("../../.github/workflows/release-macos-aarch64.yml", import.meta.url)),
     "utf8",
   );
-  const manifestStep = workflow.indexOf("launcher-asset-names.mjs manifest apps/desktop/dist-electron");
-  const upload = workflow.indexOf("- name: Upload Electron release assets");
-  assert.ok(manifestStep > 0, "no manifest step in the release workflow");
-  assert.ok(upload > manifestStep, "the manifest must be written before the upload step");
-  // Every platform job uploads `redrob-*` from dist-electron, which is how the manifest travels.
-  assert.ok(workflow.includes("assets=(apps/desktop/dist-electron/${{ matrix.asset_prefix }}-*)"));
+  const renameStep = workflow.indexOf("launcher-asset-names.mjs rename apps/desktop/dist-electron");
+  const upload = workflow.indexOf("- name: Upload release assets as a workflow artifact");
+  assert.ok(renameStep > 0, "no rename step in the release workflow");
+  assert.ok(upload > renameStep, "assets must be renamed before they are uploaded");
+  // Every platform job uploads `redrob-*` from dist-electron as a `release-*` artifact, which is
+  // what the shared publish job (redrob-labs/.github release-publish.yml) collects.
+  assert.ok(workflow.includes("name: release-${{ matrix.artifact }}"));
+  assert.ok(workflow.includes("path: apps/desktop/dist-electron/${{ matrix.asset_prefix }}-*"));
   assert.ok(/asset_prefix: redrob\n/.test(workflow));
+  assert.ok(workflow.includes("uses: redrob-labs/.github/.github/workflows/release-publish.yml@main"));
+  // The shared publish job writes redrob-launcher.json itself; it must be asked to, and what it
+  // writes is byte-for-byte what this script writes, so the two never disagree.
+  assert.match(workflow, /launcher_manifest: true/);
+  assert.equal(LAUNCHER_MANIFEST_CONTENT, '{ "schema": 1, "sharedAccount": true }\n');
   assert.ok(LAUNCHER_MANIFEST_NAME.startsWith("redrob-"));
+  // No release is created or uploaded to from this repository's own steps any more.
+  assert.ok(!workflow.includes("gh release create"), "release creation belongs to the shared publish job");
+  assert.ok(!/gh release upload "\$RELEASE_TAG" "\$asset"/.test(workflow), "per-leg asset upload belongs to the shared publish job");
 });
 
 test("sharedAccount: true is backed by an engine pin at or past v0.5.1", () => {
