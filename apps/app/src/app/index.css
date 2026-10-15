@@ -298,14 +298,16 @@
  * rule is written against its rail. `--app-product-*` because the design system
  * scopes its own `--product-*` to `.rr-shell`.
  */
-[data-product="desk"] {
-  --app-product-mark: var(--product-desk);
-  --app-product-wash: var(--product-desk-wash);
-  --app-product-line: var(--product-desk-line);
+/* Round 37 (item 2 / DS 1.6.0): the design system renamed the product from "desk"
+   to "cowork" (--product-desk* -> --product-cowork*, data-product="cowork"); follow it. */
+[data-product="cowork"] {
+  --app-product-mark: var(--product-cowork);
+  --app-product-wash: var(--product-cowork-wash);
+  --app-product-line: var(--product-cowork-line);
 }
 
-[data-theme="dark"] [data-product="desk"] {
-  --app-product-wash: color-mix(in srgb, var(--product-desk-wash) 55%, transparent);
+[data-theme="dark"] [data-product="cowork"] {
+  --app-product-wash: color-mix(in srgb, var(--product-cowork-wash) 55%, transparent);
 }
 
 [data-product] [data-sidebar="sidebar"] {

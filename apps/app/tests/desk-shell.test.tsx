@@ -214,7 +214,10 @@ describe("DeskShell", () => {
     expect(html).toContain("Account slot");
     expect(html).toContain("Skip to the work");
     expect(html).toContain('aria-label="Fold the menu"');
-    expect(html).not.toContain("data-product");
+    // Round 37 (DS 1.6.0): the shell now carries the renamed product marker
+    // data-product="cowork" (was absent / "desk"). That is intentional - it drives
+    // the product wash/mark - so assert it is present and correct.
+    expect(html).toContain('data-product="cowork"');
     // MemoryRouter's root is "/", so the menu links are plain paths here.
     expect(html).toMatch(/href="\/projects" aria-current="page"/);
   });

@@ -18,21 +18,21 @@ const INDEX_CSS = read("src/app/index.css");
 describe("Redrob Cowork is the Desk product", () => {
   test("the sidebar declares the Desk product", () => {
     const sidebar = read("src/react-app/domains/session/sidebar/app-sidebar.tsx");
-    expect(sidebar).toMatch(/<Sidebar\b[^>]*data-product="desk"/s);
+    expect(sidebar).toMatch(/<Sidebar\b[^>]*data-product="cowork"/s);
     // The header's divider is the product line.
     expect(sidebar).toContain("border-(--app-product-line)");
   });
 
   test("the Desk roles read the design system's Desk tokens", () => {
-    const desk = /\[data-product="desk"\] \{([^}]*)\}/.exec(INDEX_CSS);
+    const desk = /\[data-product="cowork"\] \{([^}]*)\}/.exec(INDEX_CSS);
     expect(desk).not.toBeNull();
-    expect(desk![1]).toContain("--app-product-mark: var(--product-desk);");
-    expect(desk![1]).toContain("--app-product-wash: var(--product-desk-wash);");
-    expect(desk![1]).toContain("--app-product-line: var(--product-desk-line);");
-    for (const token of ["--product-desk:", "--product-desk-wash:", "--product-desk-line:"]) {
+    expect(desk![1]).toContain("--app-product-mark: var(--product-cowork);");
+    expect(desk![1]).toContain("--app-product-wash: var(--product-cowork-wash);");
+    expect(desk![1]).toContain("--app-product-line: var(--product-cowork-line);");
+    for (const token of ["--product-cowork:", "--product-cowork-wash:", "--product-cowork-line:"]) {
       expect(DS_TOKENS, token).toContain(token);
     }
-    expect(DS_TOKENS).toContain("--product-desk: #d87101;");
+    expect(DS_TOKENS).toContain("--product-cowork: #d87101;");
   });
 
   test("the rail wash is the design system's AppShell wash, 132px and 55% on dark", () => {
@@ -41,7 +41,7 @@ describe("Redrob Cowork is the Desk product", () => {
     expect(INDEX_CSS).toContain(
       "[data-product] [data-sidebar=\"sidebar\"] {\n  background-image: linear-gradient(180deg, var(--app-product-wash) 0, transparent 132px);",
     );
-    expect(INDEX_CSS).toContain("color-mix(in srgb, var(--product-desk-wash) 55%, transparent)");
+    expect(INDEX_CSS).toContain("color-mix(in srgb, var(--product-cowork-wash) 55%, transparent)");
   });
 
   test("the work area is a design-system card", () => {
