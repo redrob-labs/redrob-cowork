@@ -386,6 +386,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       panelLabel: t("desk.nav_privacy"),
       panel: (
         <PrivacyProtection
+          compact
           state={privacyOn ? "on" : "off"}
           level={level}
           levels={levels}
@@ -407,6 +408,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       panelLabel: t("desk.nav_memory"),
       panel: (
         <MemoryScope
+          compact
           value={input.memory}
           options={memoryOptions}
           label={t("desk.memory_scope_label")}
@@ -430,6 +432,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       panelLabel: t("desk.status_check"),
       panel: (
         <CrossCheckSetting
+          compact
           value={input.checks}
           checks={crossChecks()}
           levels={crossCheckLevels()}
