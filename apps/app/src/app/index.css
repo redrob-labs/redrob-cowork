@@ -675,9 +675,13 @@
   min-width: 0;
   min-height: 0;
   border-left: 1px solid var(--border-subtle);
-  /* Round 15: match the MAIN WORK SECTION (--surface-raised), not the body (--surface-base),
-     so the panel beside the work reads as one continuous surface. */
-  background: var(--surface-raised);
+  /* Round 15: match the MAIN WORK SECTION (--surface-raised).
+     Round 36 (item 5): round 35 flipped the SHELL containers (#rr-shell-main,
+     .rr-shell__side) to white (--surface-base) but left THIS content pane grey,
+     so the left float read white and the right body read grey -- the seam Felix
+     reported. Match the pane to the shell/float: --surface-base (white). The
+     border-left divider stays (Felix: keep it) as a deliberate column line. */
+  background: var(--surface-base);
   animation: desk-panel-in var(--duration-base) var(--easing-entrance);
 }
 
@@ -1534,6 +1538,14 @@
   color: var(--ink-muted);
 }
 
+/*
+  Round 36 (item 4): the greeting <-> composer gap read too tight. Add ~30% more
+  space ONLY between those two (not composer <-> connect-provider). .desk-new__center
+  has a flex gap of --space-5 (24px); the greeting's own margin-bottom (set on the
+  real .desk-new__line rule below) stacks on top of that gap, so greeting->composer
+  becomes ~24px + 30% ~= 31px while every other center child-gap stays 24px.
+*/
+
 /* Round 7, item 7: the same quiet disclaimer under the IN-CHAT composer (the home one lives in SessionEmptyHero and only shows on the new-chat screen). Lighter top padding since it sits under the status chips, not a tall hero. */
 .desk-chat__disclaimer {
   margin: 0;
@@ -1572,7 +1584,10 @@
 }
 
 .desk-new__line {
-  margin: 0;
+  /* Round 36 (item 4): margin-bottom adds ~30% (7.2px) on top of the --space-5
+     (24px) flex gap, so the greeting->composer gap reads ~31px while other
+     .desk-new__center child-gaps stay 24px. */
+  margin: 0 0 calc(var(--space-5) * 0.3);
   /*
     Round 35, item 4: the greeting now matches the Trending AI section-header
     STYLE -- sans (no serif), bold, tight tracking -- rather than the old big
@@ -2174,7 +2189,11 @@ html[lang="ko"] {
   bullets do not balloon.
 */
 .markdown-content :is(ul, ol) {
-  margin-block: 0.5em;
+  /* Round 36 (item 1): the space BEFORE and AFTER the list read too wide (Felix
+     marked it); the between-bullet rhythm (li margin-block 0.15em) is already
+     right. Tighten only the list's own outer margin 0.5em -> 0.3em so the list
+     hugs its surrounding text a hair more without touching inter-item spacing. */
+  margin-block: 0.3em;
 }
 .markdown-content :is(ul, ol) > li {
   margin-block: 0.15em;
