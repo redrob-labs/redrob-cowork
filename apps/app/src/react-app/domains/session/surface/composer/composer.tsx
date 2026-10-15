@@ -107,6 +107,13 @@ type ComposerProps = {
   compactTopSpacing?: boolean;
   /** Render inline in a page (new-task hero): no sticky dock chrome or inner max-width, aligning with sibling content. */
   flush?: boolean;
+  /**
+   * Overrides the editor placeholder. Round 35, item 4: the new-chat hero passes
+   * its rotating starter hint here so the suggestion lives INSIDE the input
+   * instead of as a separate sub-line. Falls back to the frame/default
+   * placeholder when unset.
+   */
+  placeholderOverride?: string;
   topAccessory?: ReactNode;
 };
 
@@ -1199,7 +1206,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 previewUrl: attachment.previewUrl,
               }))}
               disabled={props.disabled}
-              placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}
+              placeholder={props.placeholderOverride ?? (inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder"))}
               onChange={props.onDraftChange}
               onSubmit={handleEditorSubmit}
               onExpandPastedText={handleExpandPastedText}
