@@ -506,6 +506,15 @@ export function SessionPage(props: SessionPageProps) {
   const [browserPanelDefaultWidth, setBrowserPanelDefaultWidth] = useState(browserPanelWidth);
   const sidebarProviderStyle: CSSProperties & Record<"--sidebar-width", string> = {
     "--sidebar-width": `${leftSidebarWidth}px`,
+    // Round 36 (item 2): the SidebarProvider wrapper carries `min-h-app-svh`
+    // (min-height: 100svh), correct when it is the top-level app shell. In the
+    // Desk frame it is nested inside the bounded shell content area, where that
+    // full-viewport min-height makes the wrapper ~40px taller than its parent and
+    // overflow the clipped bottom -- pushing the in-chat disclaimer (the composer's
+    // last child) below the fold so it was invisible. `min-h-app-svh` is a custom
+    // utility that twMerge will not dedupe against `min-h-0`, so neutralise it with
+    // an inline minHeight:0 (inline style wins) when nested in the Desk frame.
+    ...(inDeskFrame ? { minHeight: 0 } : {}),
   };
   useEffect(() => {
     if (sidePanelOpen) return;
@@ -1124,6 +1133,13 @@ export function SessionPage(props: SessionPageProps) {
         onOpenChange={setSidebarOpen}
         className={cn(
           "relative min-h-0 flex-1 mac:bg-transparent",
+          // Round 36 (item 2): defeat the wrapper's `min-h-app-svh` (100svh) in the
+          // Desk frame -- it is a custom utility twMerge will not dedupe against
+          // `min-h-0`, so force it important here. Paired with the inline minHeight:0
+          // in sidebarProviderStyle. Without this the chat column runs full-viewport
+          // tall inside the bounded Desk content area and the in-chat disclaimer
+          // (composer's last child) falls below the clipped bottom.
+          inDeskFrame && "!min-h-0",
           leftSidebarResizing &&
             "**:data-[slot=sidebar-container]:transition-none **:data-[slot=sidebar-gap]:transition-none",
           !showSidebar && "**:data-[slot=sidebar-container]:hidden **:data-[slot=sidebar-gap]:hidden",
@@ -1190,7 +1206,7 @@ export function SessionPage(props: SessionPageProps) {
             onSendFeedback: props.onSendFeedback,
           }}
         />
-        <SidebarInset className="min-h-0 overflow-hidden bg-sidebar mac:bg-transparent mac:[&_header]:transition-[padding-left] mac:[&_header]:duration-200 mac:[&_header]:ease-linear mac:peer-data-[state=collapsed]:[&_header]:pl-34 mac:max-md:[&_header]:pl-34">
+        <SidebarInset className={`min-h-0 overflow-hidden ${isEmptyHome || inDeskFrame ? "bg-background" : "bg-sidebar"} mac:bg-transparent mac:[&_header]:transition-[padding-left] mac:[&_header]:duration-200 mac:[&_header]:ease-linear mac:peer-data-[state=collapsed]:[&_header]:pl-34 mac:max-md:[&_header]:pl-34`}>
           <div className={`flex min-h-0 flex-1 max-lg:p-0 ${isEmptyHome ? "" : "lg:py-2 lg:pl-2"}`}>
           <ResizablePanelGroup
             orientation="horizontal"
@@ -1200,8 +1216,13 @@ export function SessionPage(props: SessionPageProps) {
             <ResizablePanel minSize={isMobile ? "0px" : "360px"} className="min-w-0">
               {/* Round 11, item 5: inside the Cowork/Desk frame the chat column sits flush in the
                   shell content area, so drop the card's rounded border + shadow there (it read as a
-                  stray border near the top-left). The standalone web/mac layout keeps its card. */}
-              <main className={`relative flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150 ${isEmptyHome || inDeskFrame ? "" : "lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card"}`}>
+                  stray border near the top-left). The standalone web/mac layout keeps its card.
+                  Round 36 (item 5): in the Desk frame this <main> previously stayed `bg-card`
+                  (--surface-raised, grey) while the shell + left float are white (--surface-base),
+                  so the right pane read grey against the white left panel -- the seam Felix saw.
+                  Use `bg-background` (white) in the Desk/empty-home frame to match; standalone
+                  web/mac keeps the grey card surface. */}
+              <main className={`relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden ${isEmptyHome || inDeskFrame ? "bg-background" : "bg-card"} max-lg:rounded-none max-lg:border-0 max-lg:shadow-none mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150 ${isEmptyHome || inDeskFrame ? "" : "lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card"}`}>
           {isEmptyHome || inDeskFrame ? (
             // Full-screen the new-chat hero: drop the "New session" header row. On the desktop app the
             // OS window-title-bar (window-title-bar.tsx) stays and keeps the drag region and controls;
