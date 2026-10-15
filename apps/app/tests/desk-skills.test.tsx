@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -8,10 +8,9 @@ import type { RedrobSkillItem, RedrobTeamSkillsState } from "../src/app/lib/redr
 import { setLocale } from "../src/i18n";
 import { scheduleDraft } from "../src/react-app/desk/scheduled/schedule-dialog";
 import { createFixtureDeskServices, resetSampleSkills } from "../src/react-app/desk/services/fixture-services";
-import { TAXONOMY } from "../src/react-app/desk/services/fixtures/skills";
+import { TAXONOMY, SKILLS, LIBRARY } from "../src/react-app/desk/services/fixtures/skills";
 import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
 import type { DeskSkill, SkillDraft } from "../src/react-app/desk/services/types";
-import { CONSOLE_CATALOGUE_BASE_URL, consoleCatalogue } from "../src/react-app/desk/skills/console-catalogue";
 import { runSkill, SkillView } from "../src/react-app/desk/skills/desk-skill";
 import { SkillFiltersView, SkillsView, teamStatusText, withFilter } from "../src/react-app/desk/skills/desk-skills";
 import { saveSkill, SkillDialogView, skillDialogState, withTag, withTitle } from "../src/react-app/desk/skills/skill-dialog";
@@ -32,32 +31,9 @@ import {
 import type { PendingDeskChat } from "../src/react-app/desk/skills/start-chat";
 import { installSkill, removeSkill } from "../src/react-app/desk/skills/use-skills";
 
-// The Console's public catalogue, as the browser fetches it: index.json, then one SKILL.md each.
-const CATALOGUE: Record<string, string> = {
-  "index.json": JSON.stringify({ skills: [{ name: "nda-review", version: "1.0.0", files: ["SKILL.md"] }, { name: "broken", version: "1.0.0" }] }),
-  "nda-review/SKILL.md": "---\nname: nda-review\ntitle: NDA Review\ndescription: NDA.\n---\n\nCheck the term.\n",
-  "broken/SKILL.md": "no frontmatter",
-};
-const catalogueCalls: string[] = [];
-const realFetch = globalThis.fetch;
-
 beforeEach(() => {
   setLocale("en");
   resetSampleSkills();
-  consoleCatalogue.reset();
-  catalogueCalls.length = 0;
-  globalThis.fetch = (async (input: string | URL | Request) => {
-    const url = String(input);
-    if (!url.startsWith(`${CONSOLE_CATALOGUE_BASE_URL}/`)) throw new Error(`unexpected fetch ${url}`);
-    const path = url.slice(CONSOLE_CATALOGUE_BASE_URL.length + 1);
-    catalogueCalls.push(path);
-    const body = CATALOGUE[path];
-    return body === undefined ? new Response("", { status: 404 }) : new Response(body, { status: 200 });
-  }) as typeof fetch;
-});
-
-afterEach(() => {
-  globalThis.fetch = realFetch;
 });
 
 const DRAFT: SkillDraft = { name: "weekly-update", description: "Writes the weekly client update.", instructions: "Read the week's files.", editing: false };
@@ -264,40 +240,50 @@ describe("one skill", () => {
 });
 
 describe("sample skills", () => {
-  test("the sample catalogue is empty; a user's own skill still saves and removes", async () => {
+  test("list, library, add, save, remove; team skills stay", async () => {
     const services = createFixtureDeskServices();
     const listed = await services.skills.list();
     expect(listed.preview).toBe(true);
-    // No sample installed skills; the library is the Console's public catalogue, real even here.
-    expect(listed.data).toEqual([]);
-    const library = await services.skills.library({});
-    expect(library.preview).toBe(false);
-    expect(library.data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: {} }]);
-    expect((await services.skills.library({ q: "nda" })).data.map((skill) => skill.name)).toEqual(["nda-review"]);
-    expect((await services.skills.library({ profession: "vc" })).data).toEqual([]);
-    expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null });
-    // The catalogue is fetched once and cached; a skill without usable frontmatter is left out.
-    expect(catalogueCalls).toEqual(["index.json", "nda-review/SKILL.md", "broken/SKILL.md"]);
-    // Installing needs a connected workspace.
-    await expect(services.skills.install("nda-review")).rejects.toThrow();
-    // A skill of the person's own still saves, reads back and removes.
+    expect(listed.data.map((skill) => skill.origin).sort()).toEqual(["library", "mine", "team"]);
+    // Round 38 (item 3): the sample library is the real cowork-skills set (78: kr-* Korean,
+    // us-* English). The KO filter is now NON-empty, and the VC filter returns the real vc skills.
+    const koNames = (await services.skills.library({ language: "ko" })).data.map((s) => s.name);
+    expect(koNames.length).toBeGreaterThan(0);
+    expect(koNames.every((n) => n.startsWith("kr-"))).toBe(true);
+    const vcLib = (await services.skills.library({ profession: "vc" })).data.map((s) => s.name).sort();
+    const vcExpected = LIBRARY.filter((s) => s.tags.profession === "vc").map((s) => s.name).sort();
+    expect(vcLib).toEqual(vcExpected);
+    // Install/remove a real library skill that is NOT one of the pre-installed three.
+    const addName = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name))!.name;
+    await services.skills.install(addName);
+    await expect(services.skills.install(addName)).rejects.toThrow();
     await services.skills.save(DRAFT);
     await expect(services.skills.save(DRAFT)).rejects.toThrow();
     await services.skills.save({ ...DRAFT, editing: true, instructions: "Changed." });
     expect((await services.skills.get("weekly-update")).data).toMatchObject({ body: "Changed.", installed: { origin: "mine" } });
-    await services.skills.remove("weekly-update");
-    expect((await createFixtureDeskServices().skills.list()).data).toEqual([]);
+    await services.skills.remove(addName);
+    await expect(services.skills.remove(SKILLS.find((s) => s.origin === "team")!.name)).rejects.toThrow();
+    // Another instance reads the same sample skills, as the dialog and the screen do.
+    const names = (await createFixtureDeskServices().skills.list()).data.map((skill) => skill.name);
+    expect(names).toContain("weekly-update");
+    expect(names).not.toContain(addName);
+    const notInstalled = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name))!.name;
+    expect((await services.skills.get(notInstalled)).data?.installed).toBeNull();
     expect((await services.skills.teamState()).data).toBeNull();
   });
 
-  test("actions toast and refresh the lists for a user's own skill", async () => {
+  test("actions toast, refresh the lists, and say when it was sample data", async () => {
     const services = createFixtureDeskServices();
     const toasts: string[] = [];
     const invalidated: unknown[] = [];
     const deps = { skills: services.skills, queryClient: { invalidateQueries: async (filters: unknown) => void invalidated.push(filters) }, scope: "preview", showToast: (title: string) => void toasts.push(title) };
-    // Installing without a connected workspace fails; the toast says so.
-    expect(await installSkill(deps, "nda-review")).toBe(false);
-    expect(toasts).toEqual(["Couldn't add the skill"]);
+    // Round 38 (item 3): use a real library skill not among the pre-installed three.
+    const add = LIBRARY.find((s) => !SKILLS.some((i) => i.name === s.name))!.name;
+    expect(await installSkill(deps, add)).toBe(true);
+    expect(await installSkill(deps, add)).toBe(false);
+    expect(await removeSkill(deps, add)).toBe(true);
+    expect(toasts).toEqual([`Added ${add}`, "Couldn't add the skill", `Removed ${add}`]);
+    expect(invalidated).toContainEqual({ queryKey: ["desk-preview", "preview", "skills"] });
     expect(await saveSkill({ skills: services.skills, invalidate: () => {}, showToast: (title) => void toasts.push(title) }, DRAFT)).toBe(true);
     expect(toasts.at(-1)).toBe("Skill saved");
   });
@@ -334,6 +320,16 @@ describe("real skills", () => {
       deleteSkill: async (workspaceId, name) => {
         calls.push(`delete:${workspaceId}:${name}`);
         return { path: "/p" };
+      },
+      listLibrarySkills: async (workspaceId, filter) => {
+        calls.push(`library:${workspaceId}:${JSON.stringify(filter)}`);
+        return { version: "v", source: "snapshot", skills: [{ name: "nda-review", description: "NDA.", profession: "lawyer", task: "review", language: "en", family: "nda-review", version: 1 }] };
+      },
+      getSkillTaxonomy: async () => ({ ...TAXONOMY, source: "console" }),
+      getLibrarySkill: async (workspaceId, name) => {
+        calls.push(`library-get:${workspaceId}:${name}`);
+        if (name !== "nda-review") throw new Error("404");
+        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: 1, body: "Check the term.", source: "console" };
       },
       installLibrarySkill: async (workspaceId, name) => {
         calls.push(`install:${workspaceId}:${name}`);
@@ -375,18 +371,15 @@ describe("real skills", () => {
     expect((await offline.skills.list()).data[0]?.origin).toBe("mine");
   });
 
-  test("the library comes from the Console directly, not the server; one skill installed or from the library", async () => {
+  test("the library and its taxonomy; one skill installed or from the library", async () => {
     const { client, calls } = fakeClient();
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
-    expect((await services.skills.library({})).data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: {} }]);
-    // The public catalogue has no profession/task/language.
-    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([]);
-    expect((await services.skills.taxonomy()).data).toEqual({ professions: [], languages: [] });
+    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([{ name: "nda-review", description: "NDA.", tags: { profession: "lawyer", task: "review", language: "en" } }]);
+    expect((await services.skills.taxonomy()).data).toEqual(TAXONOMY);
     expect((await services.skills.get("mine")).data).toMatchObject({ body: "The mine instructions.", installed: { origin: "mine", scope: "project" } });
-    expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null, tags: {} });
+    expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null, tags: { task: "review" } });
     expect((await services.skills.get("nowhere")).data).toBeNull();
-    expect(catalogueCalls[0]).toBe("index.json");
-    expect(calls.some((call) => call.startsWith("library"))).toBe(false);
+    expect(calls).toContain(`library:ws_1:${JSON.stringify({ profession: "lawyer" })}`);
     expect(calls).toContain("get:ws_1:mine");
   });
 

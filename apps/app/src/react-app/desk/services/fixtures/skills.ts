@@ -1,52 +1,142 @@
-import type { DeskSkill, SkillTaxonomy } from "../types";
+import type { DeskSkill, LibrarySkill, SkillTaxonomy } from "../types";
 
 /*
- * The preview/no-server mode ships NO sample skills: the installed list is empty and the library
- * is the Console's public catalogue, read directly by the browser. Only TAXONOMY remains - the profession/task/language vocabulary the
- * skill dialog and filters are built from.
+ * Round 38 (item 3): the Skills screen's sample data, generated from the real
+ * cowork-skills library (kr-/us- x lawyer/accountant/vc). kr-* -> Korean, us-* ->
+ * English. Titles and descriptions are copied verbatim from each SKILL.md frontmatter.
+ * Regenerate with scripts tools, do not hand-edit entries.
  */
 
-/** No sample installed skills. */
-export const SKILLS: DeskSkill[] = [];
+/** Sample installed skills: one of each profession, pre-installed as examples. */
+export const SKILLS: DeskSkill[] = [
+  { name: "us-lawyer-01-nda", title: "Draft a US Non-Disclosure Agreement (NDA)", description: "Draft a US Non-Disclosure Agreement (NDA). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", origin: "team", tags: { profession: "lawyer", task: "draft", language: "en" }, scope: "project" },
+  { name: "us-accountant-01-financial-statements", title: "Draft a GAAP Financial Statement Set (incl. footnotes)", description: "Prepare Financial Statements (GAAP). For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", origin: "mine", tags: { profession: "accountant", task: "close-books", language: "en" }, scope: "project" },
+  { name: "us-vc-01-investment-memo", title: "Draft a VC Investment / IC Memo", description: "Write an Investment / IC Memo. For a US VC. Use when the user asks to draft, review, or analyze this document type.", origin: "library", tags: { profession: "vc", task: "memo", language: "en" }, scope: "project" },
+];
 
-/** No sample skill bodies. */
-export const SKILL_BODIES: Record<string, string> = {};
+/** The full real skill library: all 78 cowork-skills. */
+export const LIBRARY: LibrarySkill[] = [
+  { name: "kr-accountant-01-jaemuujepyo-financial-statements", title: "\uc7ac\ubb34\uc81c\ud45c \uc791\uc131(\uc8fc\uc11d \ud3ec\ud568) - K-IFRS / \uc77c\ubc18\uae30\uc900", description: "Prepare Financial Statements. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-02-gyejeong-daesa-reconciliation", title: "\uacc4\uc815 \ub300\uc0ac / Reconciliation", description: "Account Reconciliation. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-03-bungae-gyeolsan-entries", title: "\ubd84\uac1c / \uacb0\uc0b0\uc218\uc815\ubd84\uac1c", description: "Journal / Closing Entries. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-04-bugagachise-vat", title: "\ubd80\uac00\uac00\uce58\uc138 \uc2e0\uace0 \uc870\uc11c", description: "VAT Return. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "tax", language: "ko" } },
+  { name: "kr-accountant-05-beopinse-semujojeong", title: "\ubc95\uc778\uc138 \uc138\ubb34\uc870\uc815\uacc4\uc0b0\uc11c", description: "Corporate-Tax Adjustment. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-06-gamsajoseo-pbc", title: "\uac10\uc0ac\uc870\uc11c / PBC", description: "Audit Workpaper / PBC. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-07-byeondongbunseok-icfr-memo", title: "\ubcc0\ub3d9\ubd84\uc11d \uba54\ubaa8 & \ub0b4\ubd80\ud68c\uacc4\uad00\ub9ac\uc81c\ub3c4 Narrative", description: "Variance / ICFR Memo. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-08-jaemubunseok-ratios", title: "\uc7ac\ubb34\ubd84\uc11d / \uc7ac\ubb34\ube44\uc728 \ubd84\uc11d", description: "Financial-Ratio Analysis. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-09-yeonmal-jeongsan", title: "kr-accountant-09-yeonmal-jeongsan", description: "Year-End Payroll Settlement. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-10-yangdo-sodeukse", title: "kr-accountant-10-yangdo-sodeukse", description: "Capital-Gains Tax. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-11-sangsok-jeungyeo-se", title: "kr-accountant-11-sangsok-jeungyeo-se", description: "Inheritance / Gift Tax. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-12-gajigeumgeum-injeong-ija", title: "kr-accountant-12-gajigeumgeum-injeong-ija", description: "Deemed-Interest Memo. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-accountant-13-gieop-eommu-chujinbi", title: "kr-accountant-13-gieop-eommu-chujinbi", description: "Entertainment-Expense Limit. For a KR Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "ko" } },
+  { name: "kr-lawyer-01-bimil-yuji-nda", title: "\ube44\ubc00\uc720\uc9c0\uacc4\uc57d\uc11c(NDA) \uc791\uc131", description: "Draft a Korean NDA. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-02-yongyeok-service-agreement", title: "\uc6a9\uc5ed\uacc4\uc57d\uc11c / \ub3c4\uae09\u00b7\uc704\ud0c1\uacc4\uc57d\uc11c \uc791\uc131", description: "Draft a Korean Services Agreement. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-03-gyeyakseo-review-doksojohang", title: "\uacc4\uc57d\uc11c \uac80\ud1a0 / \ub3c5\uc18c\uc870\ud56d \uc2dd\ubcc4", description: "Contract Review / Red-Flag Clauses. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-04-naeyongjeungmyeong", title: "\ub0b4\uc6a9\uc99d\uba85 \uc791\uc131", description: "Draft a Content-Certified Letter. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-05-uisarok-minutes", title: "\uc8fc\uc8fc\ucd1d\ud68c\u00b7\uc774\uc0ac\ud68c \uc758\uc0ac\ub85d \uc791\uc131", description: "Draft Board/Shareholder Minutes. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-06-jeonggwan-articles", title: "\uc815\uad00 \uc791\uc131", description: "Draft Articles of Incorporation. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-07-sojang-dapbyeonseo", title: "\uc18c\uc7a5 / \ub2f5\ubcc0\uc11c \ucd08\uc548 \uc791\uc131", description: "Draft a Complaint / Answer. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-08-jamun-uigyeonseo", title: "\uc790\ubb38\uc758\uacac\uc11c \uc791\uc131", description: "Draft a Legal Opinion. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-09-geunro-chwieop-gyuchik", title: "kr-lawyer-09-geunro-chwieop-gyuchik", description: "Employment Contract + Work Rules. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-10-juju-gan-gyeyak-sha", title: "kr-lawyer-10-juju-gan-gyeyak-sha", description: "Shareholders' Agreement, SHA. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-11-jusik-maesu-seontaekgwon", title: "kr-lawyer-11-jusik-maesu-seontaekgwon", description: "Stock Option Grant Agreement. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-12-gaein-jeongbo-cheori-bangchim", title: "kr-lawyer-12-gaein-jeongbo-cheori-bangchim", description: "Privacy Policy, PIPA. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-lawyer-13-gaapryu-gacheobun", title: "kr-lawyer-13-gaapryu-gacheobun", description: "Provisional Attachment / Injunction. For a KR Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "ko" } },
+  { name: "kr-vc-01-tusim-bogoseo-ic-memo", title: "\ud22c\uc790\uc2ec\uc0ac\ubcf4\uace0\uc11c(\ud22c\uc2ec\ubcf4\uace0\uc11c) \uc791\uc131", description: "Investment Committee Memo. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "memo", language: "ko" } },
+  { name: "kr-vc-02-termsheet-spa-sha-review", title: "\ud140\uc2dc\ud2b8\u00b7\ud22c\uc790\uacc4\uc57d\uc11c(SPA)\u00b7\uc8fc\uc8fc\uac04\uacc4\uc57d(SHA) \uac80\ud1a0", description: "Term Sheet / SPA / SHA Review. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-03-rcps-cb-safe-analysis", title: "RCPS\u00b7\uc804\ud658\uc0ac\ucc44(CB)\u00b7\uc870\uac74\ubd80\uc9c0\ubd84\uc778\uc218\uacc4\uc57d(SAFE) \ubd84\uc11d", description: "RCPS / CB / SAFE Analysis. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-04-captable-huiseok-dilution", title: "\ucea1\ud14c\uc774\ube14\u00b7\ud76c\uc11d \ubd84\uc11d", description: "Cap Table / Dilution. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-05-silsayoyak-diligence", title: "\uc2dc\uc7a5\u00b7\uacbd\uc7c1\u00b7\ucc3d\uc5c5\uc790 \uc2e4\uc0ac \uc694\uc57d", description: "Diligence Summary. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "diligence", language: "ko" } },
+  { name: "kr-vc-06-lp-unyong-bogo", title: "LP \ubcf4\uace0 / \uc6b4\uc6a9\ubcf4\uace0 (\ubaa8\ud0dc\ud380\ub4dc\u00b7\uc870\ud569)", description: "LP / Operating Report. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-07-geojeol-decline-comm", title: "\ud22c\uc790 \uac70\uc808(Decline) \ucee4\ubba4\ub2c8\ucf00\uc774\uc158", description: "Decline Communication. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-08-deal-screening-scorecard", title: "\ub51c \uc2a4\ud06c\ub9ac\ub2dd \uc2a4\ucf54\uc5b4\uce74\ub4dc", description: "Deal Screening Scorecard. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "diligence", language: "ko" } },
+  { name: "kr-vc-09-tuja-johap-gyuyak-lpa", title: "kr-vc-09-tuja-johap-gyuyak-lpa", description: "Fund Partnership Agreement / LPA. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-10-motae-fund-chuljae", title: "kr-vc-10-motae-fund-chuljae", description: "Fund-of-Funds Application & Report. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-11-seonggwa-bosu-carry", title: "kr-vc-11-seonggwa-bosu-carry", description: "Carried-Interest Settlement. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-12-stock-option-pool-design", title: "kr-vc-12-stock-option-pool-design", description: "Option-Pool Design & Grant. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "kr-vc-13-sanghwan-jeonhwan-haengsa", title: "kr-vc-13-sanghwan-jeonhwan-haengsa", description: "Redemption / Conversion Exercise. For a KR VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "ko" } },
+  { name: "us-accountant-01-financial-statements", title: "Draft a GAAP Financial Statement Set (incl. footnotes)", description: "Prepare Financial Statements (GAAP). For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-02-bank-reconciliation", title: "Prepare a Bank / Account Reconciliation", description: "Prepare a Bank Reconciliation. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-03-adjusting-entries", title: "Draft Period-End Adjusting & Correcting Entries", description: "Prepare Adjusting Journal Entries. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-04-variance-analysis", title: "Write a Budget-vs-Actual Variance Analysis", description: "Prepare a Budget-to-Actual Variance Analysis. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-05-audit-workpaper-pbc", title: "Prepare & Review Audit Workpapers / PBC", description: "Prepare an Audit Workpaper / PBC. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-06-tax-return-booktotax-1120-1065", title: "Draft a Book-to-Tax Reconciliation & Return Workpaper Narrative (1120 / 1065)", description: "Prepare a Book-to-Tax Reconciliation (1120/1065). For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "tax", language: "en" } },
+  { name: "us-accountant-07-mdna-management-memo", title: "Draft an MD&A / Management Analysis Memo", description: "Draft an MD&A / Management Memo. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-08-sox-icfr-narrative", title: "Draft a SOX 404 Internal-Control Narrative / RCM", description: "Draft a SOX 404 ICFR Narrative. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-09-form-1040-schedule-c", title: "us-accountant-09-form-1040-schedule-c", description: "Prepare a Form 1040 + Schedule C Workpaper. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "tax", language: "en" } },
+  { name: "us-accountant-10-asc606-revenue-memo", title: "us-accountant-10-asc606-revenue-memo", description: "Draft an ASC 606 Revenue Recognition Memo. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-11-asc842-lease-memo", title: "us-accountant-11-asc842-lease-memo", description: "Draft an ASC 842 Lease Accounting Memo. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-accountant-12-wayfair-nexus-memo", title: "us-accountant-12-wayfair-nexus-memo", description: "Draft a Sales-and-Use Economic-Nexus Memo (Post-Wayfair). For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "tax", language: "en" } },
+  { name: "us-accountant-13-rnd-credit-174-memo", title: "us-accountant-13-rnd-credit-174-memo", description: "Draft an R&D Credit Section 41 / 174 Memo. For a US Accountant. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "accountant", task: "close-books", language: "en" } },
+  { name: "us-lawyer-01-nda", title: "Draft a US Non-Disclosure Agreement (NDA)", description: "Draft a US Non-Disclosure Agreement (NDA). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-02-master-services-agreement", title: "Draft a US Master Services Agreement (MSA) + SOW", description: "Draft a US Master Services Agreement (MSA) + SOW. For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-03-contract-redline-review", title: "Redline and Issue-Spot a Commercial Contract", description: "Redline and Issue-Spot a Commercial Contract. For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "review", language: "en" } },
+  { name: "us-lawyer-04-demand-letter", title: "Draft a US Demand Letter (breach / payment / pre-litigation)", description: "Draft a US Demand Letter (breach / payment / pre-litigation). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-05-cease-and-desist", title: "Draft a US Cease-and-Desist Letter", description: "Draft a US Cease-and-Desist Letter. For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-06-privacy-policy-ccpa", title: "Draft a US Privacy Policy (CCPA/CPRA-aligned)", description: "Draft a US Privacy Policy (CCPA/CPRA-aligned). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-07-board-written-consent", title: "Draft a Board Unanimous Written Consent (DGCL \u00a7141(f))", description: "Draft a Board Unanimous Written Consent (DGCL 141(f)). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-08-engagement-letter", title: "Draft a Client Engagement Letter (ABA Model Rule 1.5)", description: "Draft a Client Engagement Letter (ABA Model Rule 1.5). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "draft", language: "en" } },
+  { name: "us-lawyer-09-piia-employee-ip", title: "us-lawyer-09-piia-employee-ip", description: "Draft an Employee PIIA + At-Will Offer Letter. For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "en" } },
+  { name: "us-lawyer-10-83b-election", title: "us-lawyer-10-83b-election", description: "Prepare an IRC Section 83(b) Election (Form 15620). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "en" } },
+  { name: "us-lawyer-11-dpa-gdpr-art28", title: "us-lawyer-11-dpa-gdpr-art28", description: "Draft a Data Processing Addendum (GDPR Art. 28 / CCPA). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "en" } },
+  { name: "us-lawyer-12-de-certificate-incorporation", title: "us-lawyer-12-de-certificate-incorporation", description: "Draft a Delaware Certificate of Incorporation / Charter Amendment. For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "en" } },
+  { name: "us-lawyer-13-litigation-hold-notice", title: "us-lawyer-13-litigation-hold-notice", description: "Draft a Litigation / Legal Hold Notice. For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "lawyer", task: "client", language: "en" } },
+  { name: "us-vc-01-investment-memo", title: "Draft a VC Investment / IC Memo", description: "Write an Investment / IC Memo. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "memo", language: "en" } },
+  { name: "us-vc-02-term-sheet-review", title: "Review / Draft a Priced-Round Term Sheet", description: "Review a Term Sheet. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-03-safe-convertible-analysis", title: "Analyze a SAFE / Convertible Note", description: "Analyze a SAFE / Convertible Note. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-04-cap-table-dilution", title: "Build & Explain a Pro-Forma Cap Table", description: "Model a Cap Table / Dilution. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-05-option-pool-analysis", title: "Analyze the Option Pool Shuffle", description: "Analyze an Option Pool. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-06-diligence-summary", title: "Write a Diligence Summary", description: "Write a Diligence Summary. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-07-lp-update-letter", title: "Draft an LP Quarterly Update Letter", description: "Draft an LP Update Letter. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-08-screening-pass-email", title: "Score a Deal & Draft a Pass/Decline Email", description: "Draft a Screening / Pass Email. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "diligence", language: "en" } },
+  { name: "us-vc-09-409a-valuation-review", title: "us-vc-09-409a-valuation-review", description: "Write a 409A Valuation Review Memo. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-10-vcoc-management-rights-letter", title: "us-vc-10-vcoc-management-rights-letter", description: "Draft a VCOC Management Rights Letter. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-11-pro-rata-side-letter-review", title: "us-vc-11-pro-rata-side-letter-review", description: "Write a Pro-Rata / Side-Letter Review Memo. For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+  { name: "us-vc-12-data-room-ddq", title: "us-vc-12-data-room-ddq", description: "Build a Data-Room Index + Diligence Request List (DDQ). For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "diligence", language: "en" } },
+  { name: "us-vc-13-asc820-markdown-memo", title: "us-vc-13-asc820-markdown-memo", description: "Write a Portfolio Fair-Value Markdown Memo (ASC 820). For a US VC. Use when the user asks to draft, review, or analyze this document type.", tags: { profession: "vc", task: "screen", language: "en" } },
+];
+
+/** What each sample installed skill says to do (the description, shown as the body). */
+export const SKILL_BODIES: Record<string, string> = {
+  "us-lawyer-01-nda": "# Draft a US Non-Disclosure Agreement (NDA)\\n\\nDraft a US Non-Disclosure Agreement (NDA). For a US Lawyer. Use when the user asks to draft, review, or analyze this document type.",
+  "us-accountant-01-financial-statements": "# Draft a GAAP Financial Statement Set (incl. footnotes)\\n\\nPrepare Financial Statements (GAAP). For a US Accountant. Use when the user asks to draft, review, or analyze this document type.",
+  "us-vc-01-investment-memo": "# Draft a VC Investment / IC Memo\\n\\nWrite an Investment / IC Memo. For a US VC. Use when the user asks to draft, review, or analyze this document type.",
+};
 
 export const TAXONOMY: SkillTaxonomy = {
   professions: [
     {
       id: "lawyer",
-      label: { en: "Lawyer", ko: "변호사" },
+      label: { en: "Lawyer", ko: "\ubcc0\ud638\uc0ac" },
       tasks: [
-        { id: "client", label: { en: "Advise and update clients", ko: "의뢰인 자문과 진행 상황 공유" } },
-        { id: "research", label: { en: "Research the law", ko: "법률 리서치" } },
-        { id: "review", label: { en: "Review documents and contracts", ko: "문서와 계약서 검토" } },
-        { id: "memo", label: { en: "Write briefs and memos", ko: "서면과 메모 작성" } },
-        { id: "draft", label: { en: "Draft contracts", ko: "계약서 초안 작성" } },
+        { id: "client", label: { en: "Advise and update clients", ko: "\uc758\ub8b0\uc778 \uc790\ubb38\uacfc \uc9c4\ud589 \uc0c1\ud669 \uacf5\uc720" } },
+        { id: "research", label: { en: "Research the law", ko: "\ubc95\ub960 \ub9ac\uc11c\uce58" } },
+        { id: "review", label: { en: "Review documents and contracts", ko: "\ubb38\uc11c\uc640 \uacc4\uc57d\uc11c \uac80\ud1a0" } },
+        { id: "memo", label: { en: "Write briefs and memos", ko: "\uc11c\uba74\uacfc \uba54\ubaa8 \uc791\uc131" } },
+        { id: "draft", label: { en: "Draft contracts", ko: "\uacc4\uc57d\uc11c \ucd08\uc548 \uc791\uc131" } },
       ],
     },
     {
       id: "accountant",
-      label: { en: "Accountant (CPA)", ko: "회계사" },
+      label: { en: "Accountant (CPA)", ko: "\ud68c\uacc4\uc0ac" },
       tasks: [
-        { id: "close-books", label: { en: "Close the books and reconcile accounts", ko: "결산 마감과 계정 대사" } },
-        { id: "tax", label: { en: "Prepare tax filings", ko: "세무 신고 준비" } },
-        { id: "audit", label: { en: "Review and audit statements", ko: "재무제표 검토와 감사" } },
+        { id: "close-books", label: { en: "Close the books and reconcile accounts", ko: "\uacb0\uc0b0 \ub9c8\uac10\uacfc \uacc4\uc815 \ub300\uc0ac" } },
+        { id: "tax", label: { en: "Prepare tax filings", ko: "\uc138\ubb34 \uc2e0\uace0 \uc900\ube44" } },
+        { id: "audit", label: { en: "Review and audit statements", ko: "\uc7ac\ubb34\uc81c\ud45c \uac80\ud1a0\uc640 \uac10\uc0ac" } },
       ],
     },
     {
       id: "vc",
-      label: { en: "VC Investor", ko: "벤처 투자자" },
+      label: { en: "VC Investor", ko: "\ubca4\ucc98 \ud22c\uc790\uc790" },
       tasks: [
-        { id: "diligence", label: { en: "Run diligence on a startup", ko: "스타트업 실사" } },
-        { id: "memo", label: { en: "Write an investment memo", ko: "투자 메모 작성" } },
-        { id: "screen", label: { en: "Screen the inbound deal flow", ko: "인바운드 딜 선별" } },
+        { id: "diligence", label: { en: "Run diligence on a startup", ko: "\uc2a4\ud0c0\ud2b8\uc5c5 \uc2e4\uc0ac" } },
+        { id: "memo", label: { en: "Write an investment memo", ko: "\ud22c\uc790 \uba54\ubaa8 \uc791\uc131" } },
+        { id: "screen", label: { en: "Screen the inbound deal flow", ko: "\uc778\ubc14\uc6b4\ub4dc \ub51c \uc120\ubcc4" } },
       ],
     },
   ],
   languages: [
-    { id: "en", label: { en: "English", ko: "영어" } },
-    { id: "ko", label: { en: "Korean", ko: "한국어" } },
-    { id: "hi", label: { en: "Hindi", ko: "힌디어" } },
+    { id: "en", label: { en: "English", ko: "\uc601\uc5b4" } },
+    { id: "ko", label: { en: "Korean", ko: "\ud55c\uad6d\uc5b4" } },
   ],
 };
