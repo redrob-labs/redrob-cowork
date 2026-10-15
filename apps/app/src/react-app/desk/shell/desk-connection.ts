@@ -23,11 +23,13 @@ export type DeskTeamClient = Pick<
   "exportWorkspace" | "previewWorkspaceImport" | "importWorkspace" | "getTeamPolicy" | "syncTeamPolicy" | "leaveTeamPolicy"
 >;
 
+/** The live Desk connection the Skills, Scheduled and History screens read through. */
 export type DeskConnection = {
+  /** The workspace-bound Redrob client the Desk services call; null until connected. */
   client: (DeskServerClient & DeskFileClient & DictationClient & DeskProjectClient & DeskConnectorClient & DeskTeamClient) | null;
   /** The engine client for that workspace: connector status and the sign-in flow. */
   opencode: Client | null;
-  /** The server-side id of the workspace the chat route has open. */
+  /** The server-side id of the active workspace. */
   workspaceId: string | null;
   /** That workspace's folder on this computer; null for a remote workspace. Never shown. */
   workspaceRoot: string | null;
@@ -36,9 +38,10 @@ export type DeskConnection = {
 };
 
 /**
- * The server and workspace the chat route is using, published by `SessionRoute` so the
- * Desk menu reads the same chats without a second connection. Empty until a chat route
- * has mounted; the menu shows sample data until then.
+ * The server and workspace the app is using, published by the always-mounted
+ * `DeskConnectionPublisher` (the only writer) from the app-wide workspace
+ * connection, so every Desk screen, including a cold landing on /skills, reads
+ * the live connection. Empty only until the first connection resolves.
  */
 export const useDeskConnection = create<DeskConnection>()(() => ({
   client: null,
@@ -48,6 +51,7 @@ export const useDeskConnection = create<DeskConnection>()(() => ({
   chatsVersion: "",
 }));
 
+/** Replaces the whole Desk connection snapshot; call only from DeskConnectionPublisher. */
 export function publishDeskConnection(next: DeskConnection) {
   const current = useDeskConnection.getState();
   if (
@@ -60,4 +64,76 @@ export function publishDeskConnection(next: DeskConnection) {
     return;
   }
   useDeskConnection.setState(next);
+}
+
+/**
+ * The one field-scoped contribution the chat route makes to the Desk
+ * connection. Session lists are loaded only by the chat route, so it stays the
+ * enricher for the chats revision; it never writes the whole snapshot.
+ */
+export type DeskChatsRevision = {
+  /** The local workspace record id the revision belongs to. */
+  workspaceRecordId: string;
+  /** Session ids and titles of that workspace, joined; changes on add or rename. */
+  version: string;
+  /** True while the chat route holds a load error for that workspace, which withholds the engine client. */
+  workspaceError: boolean;
+};
+
+/** The latest chats revision from the chat route; read by DeskConnectionPublisher. */
+export const useDeskChatsRevision = create<DeskChatsRevision>()(() => ({
+  workspaceRecordId: "",
+  version: "",
+  workspaceError: false,
+}));
+
+/** Records the chat route's chats revision; a no-op when nothing changed. */
+export function publishDeskChatsRevision(next: DeskChatsRevision) {
+  const current = useDeskChatsRevision.getState();
+  if (
+    current.workspaceRecordId === next.workspaceRecordId &&
+    current.version === next.version &&
+    current.workspaceError === next.workspaceError
+  ) {
+    return;
+  }
+  useDeskChatsRevision.setState(next);
+}
+
+/** The chats revision string for one workspace's sessions: `id:title` joined by `|`. */
+export function deskChatsVersion(sessions: ReadonlyArray<{ id: string; title?: string | null }>): string {
+  return sessions.map((session) => `${session.id}:${session.title}`).join("|");
+}
+
+/** What deriveDeskConnection reads: the active record, its endpoint, the engine client, the route's revision. */
+export type DeskConnectionSource = {
+  /** The active workspace record, or null before any resolves. */
+  workspace: { id: string; workspaceType?: string | null; path?: string | null } | null;
+  /** That record's endpoint from the sanctioned resolver, or null while unreachable. */
+  endpoint: { client: DeskConnection["client"]; workspaceId: string } | null;
+  /** The engine client built for that endpoint, or null. */
+  opencode: Client | null;
+  /** The chat route's latest chats revision. */
+  revision: DeskChatsRevision;
+};
+
+/** Whether the chats revision belongs to the active workspace record. */
+export function revisionMatches(revision: DeskChatsRevision, workspaceRecordId: string | null | undefined): boolean {
+  return Boolean(workspaceRecordId) && revision.workspaceRecordId === workspaceRecordId;
+}
+
+/**
+ * The full five-field Desk connection for the active workspace. A revision
+ * from another workspace is ignored so a switch never carries stale chats.
+ */
+export function deriveDeskConnection(source: DeskConnectionSource): DeskConnection {
+  const { workspace, endpoint } = source;
+  const matches = revisionMatches(source.revision, workspace?.id);
+  return {
+    client: endpoint?.client ?? null,
+    opencode: source.opencode,
+    workspaceId: endpoint?.workspaceId || null,
+    workspaceRoot: workspace?.workspaceType === "remote" ? null : workspace?.path?.trim() || null,
+    chatsVersion: matches ? source.revision.version : "",
+  };
 }

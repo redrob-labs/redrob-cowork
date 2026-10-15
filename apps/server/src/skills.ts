@@ -156,7 +156,7 @@ async function listSkillsInDir(dir: string, scope: "project" | "global"): Promis
         return item ? [item] : [];
       }
 
-      // Domain/category folder: <dir>/<domain>/<name>/SKILL.md – scan one level deeper.
+      // Domain/category folder: <dir>/<domain>/<name>/SKILL.md - scan one level deeper.
       // This supports the convention where global skills are organised as
       //   skills/<domain>/<skill-name>/SKILL.md
       // in addition to the flat   skills/<skill-name>/SKILL.md  layout.
@@ -271,6 +271,26 @@ export async function upsertSkill(
   const existed = await exists(skillPath);
   await writeFile(skillPath, skill.content, "utf8");
   return { path: skillPath, action: existed ? "updated" : "added" };
+}
+
+/** Creates a project skill atomically and refuses to overwrite an existing SKILL.md. */
+export async function createSkill(
+  workspaceRoot: string,
+  payload: UpsertSkillPayload,
+): Promise<{ path: string; action: "added" }> {
+  const skill = buildSkillContent(payload);
+  const skillDir = join(projectSkillsDir(workspaceRoot), skill.name);
+  await mkdir(skillDir, { recursive: true });
+  const skillPath = join(skillDir, "SKILL.md");
+  try {
+    await writeFile(skillPath, skill.content, { encoding: "utf8", flag: "wx" });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new ApiError(409, "skill_exists", `A skill named ${skill.name} is already installed`);
+    }
+    throw error;
+  }
+  return { path: skillPath, action: "added" };
 }
 
 export async function deleteSkill(workspaceRoot: string, name: string): Promise<{ path: string }> {

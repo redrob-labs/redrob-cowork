@@ -180,14 +180,20 @@ export type RedrobSkillItem = {
 /** Where a library answer came from: the Console, or the copy bundled with redrob-server. */
 export type RedrobLibrarySource = "console" | "snapshot";
 
+/**
+ * One library entry. The public catalogue (console.redrob.ai/skills) carries a semver
+ * string version and no profession/task/language/family, so those are optional.
+ */
 export type RedrobLibrarySkillSummary = {
   name: string;
   description: string;
-  profession: string;
-  task: string;
-  language: string;
-  family: string;
-  version: number;
+  profession?: string;
+  task?: string;
+  language?: string;
+  family?: string;
+  version: string;
+  title?: string;
+  summary?: string;
 };
 
 export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; source: RedrobLibrarySource };
@@ -977,7 +983,7 @@ function buildAuthHeaders(token?: string, hostToken?: string, extra?: Record<str
 
 // Use Tauri's fetch when running in the desktop app to avoid CORS issues.
 // Stream URLs (SSE) bypass the plugin because its `fetch_read_body` IPC call
-// blocks until the body closes — that freezes the webview for infinite bodies.
+// blocks until the body closes - that freezes the webview for infinite bodies.
 const REDROB_STREAM_URL_RE = /\/events(\b|\?)|\/event-stream\b|\/stream\b/;
 
 function isStreamUrl(url: string): boolean {
@@ -2025,7 +2031,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
 
     // Redrob Key, owned by Redrob Code (host-auth only). The value is written
     // straight through to the engine's auth store and never persisted by Work,
-    // so there is no getter for it — only whether the engine holds one.
+    // so there is no getter for it - only whether the engine holds one.
     //
     // Connect and disconnect both reload the engine before answering (the engine
     // resolves the credential once when it builds provider state), so they use
@@ -2104,7 +2110,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         timeoutMs: timeouts.config,
       }),
 
-    // User-level env vars (host-auth only — desktop shell is the sole caller).
+    // User-level env vars (host-auth only - desktop shell is the sole caller).
     // See apps/server/src/env-file.ts and apps/app/pr/environment-variables.md.
     listUserEnvKeys: () =>
       requestJson<{ keys: string[] }>(

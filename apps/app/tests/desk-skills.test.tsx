@@ -240,45 +240,34 @@ describe("one skill", () => {
 });
 
 describe("sample skills", () => {
-  test("list, library, add, save, remove; team skills stay", async () => {
+  test("the sample catalogue is empty; a user's own skill still saves and removes", async () => {
     const services = createFixtureDeskServices();
     const listed = await services.skills.list();
     expect(listed.preview).toBe(true);
-    expect(listed.data.map((skill) => skill.origin).sort()).toEqual(["library", "mine", "team"]);
-    // Round 8, item 9: the sample library is now 9 English profession skills (3 each for Lawyer,
-    // Accountant, VC Investor); there is no Korean sample, so the KO-language filter is empty.
-    expect((await services.skills.library({ language: "ko" })).data.map((skill) => skill.name)).toEqual([]);
-    expect((await services.skills.library({ profession: "vc" })).data.map((skill) => skill.name).sort()).toEqual([
-      "deal-screener",
-      "investment-memo",
-      "startup-diligence",
-    ]);
-    await services.skills.install("nda-review");
+    // The sample skill catalogue was removed - installed list and library are empty.
+    expect(listed.data).toEqual([]);
+    expect((await services.skills.library({})).data).toEqual([]);
+    expect((await services.skills.library({ profession: "vc" })).data).toEqual([]);
+    // Installing a library skill that does not exist is refused.
     await expect(services.skills.install("nda-review")).rejects.toThrow();
+    // A skill of the person's own still saves, reads back and removes.
     await services.skills.save(DRAFT);
     await expect(services.skills.save(DRAFT)).rejects.toThrow();
     await services.skills.save({ ...DRAFT, editing: true, instructions: "Changed." });
     expect((await services.skills.get("weekly-update")).data).toMatchObject({ body: "Changed.", installed: { origin: "mine" } });
-    await services.skills.remove("nda-review");
-    await expect(services.skills.remove("first-review")).rejects.toThrow();
-    // Another instance reads the same sample skills, as the dialog and the screen do.
-    const names = (await createFixtureDeskServices().skills.list()).data.map((skill) => skill.name);
-    expect(names).toContain("weekly-update");
-    expect(names).not.toContain("nda-review");
-    expect((await services.skills.get("legal-memo")).data?.installed).toBeNull();
+    await services.skills.remove("weekly-update");
+    expect((await createFixtureDeskServices().skills.list()).data).toEqual([]);
     expect((await services.skills.teamState()).data).toBeNull();
   });
 
-  test("actions toast, refresh the lists, and say when it was sample data", async () => {
+  test("actions toast and refresh the lists for a user's own skill", async () => {
     const services = createFixtureDeskServices();
     const toasts: string[] = [];
     const invalidated: unknown[] = [];
     const deps = { skills: services.skills, queryClient: { invalidateQueries: async (filters: unknown) => void invalidated.push(filters) }, scope: "preview", showToast: (title: string) => void toasts.push(title) };
-    expect(await installSkill(deps, "nda-review")).toBe(true);
+    // Installing a sample library skill now fails (the library is empty); the toast says so.
     expect(await installSkill(deps, "nda-review")).toBe(false);
-    expect(await removeSkill(deps, "nda-review")).toBe(true);
-    expect(toasts).toEqual(["Added nda-review", "Couldn't add the skill", "Removed nda-review"]);
-    expect(invalidated).toContainEqual({ queryKey: ["desk-preview", "preview", "skills"] });
+    expect(toasts).toEqual(["Couldn't add the skill"]);
     expect(await saveSkill({ skills: services.skills, invalidate: () => {}, showToast: (title) => void toasts.push(title) }, DRAFT)).toBe(true);
     expect(toasts.at(-1)).toBe("Skill saved");
   });
@@ -318,13 +307,13 @@ describe("real skills", () => {
       },
       listLibrarySkills: async (workspaceId, filter) => {
         calls.push(`library:${workspaceId}:${JSON.stringify(filter)}`);
-        return { version: "v", source: "snapshot", skills: [{ name: "nda-review", description: "NDA.", profession: "lawyer", task: "review", language: "en", family: "nda-review", version: 1 }] };
+        return { version: "v", source: "snapshot", skills: [{ name: "nda-review", title: "NDA Review", description: "NDA.", profession: "lawyer", task: "review", language: "en", family: "nda-review", version: "1.0.0" }] };
       },
       getSkillTaxonomy: async () => ({ ...TAXONOMY, source: "console" }),
       getLibrarySkill: async (workspaceId, name) => {
         calls.push(`library-get:${workspaceId}:${name}`);
         if (name !== "nda-review") throw new Error("404");
-        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: 1, body: "Check the term.", source: "console" };
+        return { name, description: "NDA.", profession: "lawyer", task: "review", language: "en", family: name, version: "1.0.0", body: "Check the term.", source: "console" };
       },
       installLibrarySkill: async (workspaceId, name) => {
         calls.push(`install:${workspaceId}:${name}`);
@@ -369,7 +358,7 @@ describe("real skills", () => {
   test("the library and its taxonomy; one skill installed or from the library", async () => {
     const { client, calls } = fakeClient();
     const services = createRealDeskServices({ client, workspaceId: "ws_1" });
-    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([{ name: "nda-review", description: "NDA.", tags: { profession: "lawyer", task: "review", language: "en" } }]);
+    expect((await services.skills.library({ profession: "lawyer" })).data).toEqual([{ name: "nda-review", title: "NDA Review", description: "NDA.", tags: { profession: "lawyer", task: "review", language: "en" } }]);
     expect((await services.skills.taxonomy()).data).toEqual(TAXONOMY);
     expect((await services.skills.get("mine")).data).toMatchObject({ body: "The mine instructions.", installed: { origin: "mine", scope: "project" } });
     expect((await services.skills.get("nda-review")).data).toMatchObject({ body: "Check the term.", installed: null, tags: { task: "review" } });

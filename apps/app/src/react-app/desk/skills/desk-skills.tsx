@@ -13,7 +13,6 @@ import { DeskShell } from "../shell/desk-shell";
 import { useFrameStore } from "../store/frame-store";
 import { canRemoveSkill, CONSOLE_SKILLS_URL, skillRows, tagLabels, type SkillRow } from "./skills";
 import { installSkill, removeSkill } from "./use-skills";
-import { LIBRARY as SAMPLE_LIBRARY, SKILLS as SAMPLE_SKILLS, TAXONOMY as SAMPLE_TAXONOMY } from "../services/fixtures/skills";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
 const ALL = "all";
@@ -235,22 +234,16 @@ export function SkillsScreen() {
     setBusy(name);
     void run(deps, name).finally(() => setBusy(null));
   };
-  const realRows = installed.data ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters, installedOnly }) : null;
-  /*
-    Dev convenience: in a dev build the Skills screen is often pointed at a real but EMPTY workspace
-    (no installed skills, empty Console library), so there is nothing to iterate the UI against. When
-    dev + the real services have resolved to zero rows, fall back to the sample fixtures so the screen
-    always has skills to style. Never in a production build, and never when real skills exist.
-  */
-  const devFallback =
-    import.meta.env.DEV && realRows !== null && realRows.length === 0
-      ? skillRows({ installed: SAMPLE_SKILLS, library: installedOnly ? null : SAMPLE_LIBRARY, filters, installedOnly })
-      : null;
-  const rows = devFallback ?? realRows;
-  const usingDevSamples = devFallback !== null;
-  const effectiveTaxonomy = (taxonomy.data?.data ?? null) ?? (usingDevSamples ? SAMPLE_TAXONOMY : null);
+  // When connected, the Skills screen shows only real skills: the workspace's installed ones and
+  // the Console library (served through redrob-server), so a connected-but-empty workspace shows
+  // the real empty state. With no connection (before the first connect, after the last workspace is
+  // deleted, or web disconnected) createDeskServices returns the fixture services, so the screen
+  // falls back to the preview (sample) state under the preview note. The removed dev-only fallback
+  // no longer injects samples over a connected-but-empty workspace.
+  const rows = installed.data ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters, installedOnly }) : null;
+  const effectiveTaxonomy = taxonomy.data?.data ?? null;
   const teamText = teamStatusText(team.data?.data ?? null);
-  const count = usingDevSamples ? SAMPLE_SKILLS.length : installed.data?.data.length;
+  const count = installed.data?.data.length;
 
   return (
     <DeskShell
@@ -295,8 +288,8 @@ export function SkillsScreen() {
           /*
             Skeleton ONLY on the very first load, before the INSTALLED list has arrived (rows is null
             only then). It used to also skeleton on `!installedOnly && library.isLoading`, which blanked
-            the whole screen every time the library query re-fetched — on a filter change, on refocus,
-            or when its 5-min staleTime expired — so the skills "sometimes showed and sometimes did not".
+            the whole screen every time the library query re-fetched - on a filter change, on refocus,
+            or when its 5-min staleTime expired - so the skills "sometimes showed and sometimes did not".
             Once the installed list is in, rows is non-null (installed-only, or installed+library), so we
             render it and let the uninstalled library stream in without hiding what is already there.
           */

@@ -31,13 +31,38 @@ function safeSet(key: string, value: string | null): void {
   }
 }
 
+/** Listeners told when the active workspace id is written, in this window or another. */
+const activeWorkspaceListeners = new Set<(id: string | null) => void>();
+
+/** The persisted active workspace id, or null when none is stored. */
 export function readActiveWorkspaceId(): string | null {
   const value = safeGet(ACTIVE_WORKSPACE_KEY);
   return value?.trim() || null;
 }
 
+/** Persists the active workspace id and tells every subscriber (the app-wide connection provider). */
 export function writeActiveWorkspaceId(id: string | null): void {
-  safeSet(ACTIVE_WORKSPACE_KEY, id?.trim() || null);
+  const normalized = id?.trim() || null;
+  safeSet(ACTIVE_WORKSPACE_KEY, normalized);
+  for (const listener of activeWorkspaceListeners) listener(normalized);
+}
+
+/**
+ * Subscribes to active workspace id writes: same-document writes through
+ * writeActiveWorkspaceId and cross-window `storage` events. Returns the unsubscribe.
+ */
+export function subscribeActiveWorkspaceId(listener: (id: string | null) => void): () => void {
+  activeWorkspaceListeners.add(listener);
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key !== ACTIVE_WORKSPACE_KEY) return;
+    listener(event.newValue?.trim() || null);
+  };
+  const canListen = typeof window !== "undefined" && typeof window.addEventListener === "function";
+  if (canListen) window.addEventListener("storage", handleStorage);
+  return () => {
+    activeWorkspaceListeners.delete(listener);
+    if (canListen) window.removeEventListener("storage", handleStorage);
+  };
 }
 
 export function readWorkspaceOrderIds(): string[] {
