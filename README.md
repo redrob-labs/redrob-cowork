@@ -68,8 +68,8 @@ can link it without being edited on every release.
 Beside the installers every release carries `redrob-launcher.json`
 (`{ "schema": 1, "sharedAccount": true }`): Redrob Launcher reads it to learn that this
 release reads the launcher's shared account file, so signing in to the launcher is all a
-user needs. `scripts/release/launcher-asset-names.mjs` writes it and refuses a release
-directory without it.
+user needs. The shared redrob-labs publish job attaches it; `scripts/release/launcher-asset-names.mjs`
+writes the same bytes into the build output and refuses a release directory without it.
 
 ```text
 https://github.com/redrob-labs/redrob-cowork/releases/download/v{version}/redrob-cowork-{version}-linux-x86_64.AppImage

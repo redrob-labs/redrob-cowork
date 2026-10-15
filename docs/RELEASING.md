@@ -31,10 +31,18 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
    `apps/{app,desktop,server}/package.json` in the CI workspace only. That is
    what electron-builder, `app.getVersion()`, the Vite renderer bundle, and
    the `redrob-server` npm publish all read.
-5. `publish-release` flips the draft public once required assets exist. From
-   that moment the desktop updater serves the new version: it reads published
-   releases from the GitHub Releases API at runtime — prereleases and drafts are
-   excluded, so a rollback demotion removes a version immediately.
+5. Every build leg uploads its installers as a `release-*` workflow artifact;
+   `updater-manifests` merges the per-architecture `latest*.yml` feeds into one
+   per platform. Nothing touches GitHub Releases until then.
+6. `publish` -- the shared redrob-labs job
+   (`redrob-labs/.github/.github/workflows/release-publish.yml`) -- downloads
+   every `release-*` artifact, writes `SHA256SUMS.txt` and `redrob-launcher.json`,
+   creates the release `Redrob Cowork vX.Y.Z` with generated notes and all assets
+   attached in one step, and publishes it as latest (`draft=true` leaves a draft,
+   `prerelease=true` flags it). From that moment the desktop updater serves the
+   new version: it reads published releases from the GitHub Releases API at
+   runtime — prereleases and drafts are excluded, so a rollback demotion removes
+   a version immediately. `download-aliases` then adds the version-less copies.
 
 ## Prerequisites
 
@@ -82,7 +90,10 @@ a normal reviewed PR and close the loop there.
 
   Recovery runs skip tag creation and monotonicity. Sources are pinned to the
   tag; workflow-file fixes are picked up from `main` automatically because the
-  workflow definition runs from the dispatched ref.
+  workflow definition runs from the dispatched ref. The shared publish job
+  refreshes a **draft** release (its assets are replaced) but refuses to touch a
+  release that is already **published**: delete it first
+  (`gh release delete vX.Y.Z`) or bump and tag again.
 
 - **A tagged version turned out defective before publish**: leave the release
   as a draft or delete it (`gh release delete vX.Y.Z`), fix forward on `main`,
@@ -147,19 +158,27 @@ client secret anywhere in the repository or its secrets.
   `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`,
   `ARTIFACT_SIGNING_ENDPOINT`, `ARTIFACT_SIGNING_ACCOUNT`,
   `ARTIFACT_SIGNING_CERT_PROFILE`.
+- **One recipe, shared.** The signing recipe is not in this repository. It is
+  `redrob-labs/.github/actions/sign-windows` (`sign.ps1`): signtool with the
+  `Azure.CodeSigning` dlib from the `Microsoft.ArtifactSigning.Client` NuGet
+  package, metadata excluding every credential a runner cannot satisfy (so a
+  missing login fails in seconds instead of waiting on a browser prompt), then
+  `signtool verify /pa` + Status `Valid` + signer CN `McKinley Rice, Inc.`. The
+  Windows job checks that repository out at `.redrob-shared`.
 - **Order.** The OIDC token lives minutes and electron-builder signs *during*
   packaging, so the job runs `electron-builder --dir` (unpacked, unsigned),
-  then logs in, then `apps/desktop/build/sign-windows.cjs --app-dir` signs the
-  unpacked executables at once, then `electron-builder --prepackaged` builds
-  the installer and zip, signing the uninstaller and installer through the same
-  hook. The hook runs signtool with the `Azure.CodeSigning` dlib from the
-  `Microsoft.ArtifactSigning.Client` NuGet package; its metadata excludes every
-  credential a runner cannot satisfy, so a missing login fails in seconds
-  instead of waiting on a browser prompt.
-- **Verification.** Every signature is checked twice: by the hook as it is
+  then logs in, then the shared `sign-windows` action signs the unpacked app
+  executable, then `electron-builder --prepackaged` builds the installer and
+  zip. electron-builder's `win.sign` hook, `apps/desktop/build/sign-windows.cjs`,
+  is a thin shim: it runs `pwsh -File .redrob-shared/actions/sign-windows/sign.ps1
+  <file>` for the uninstaller and installer with the three `ARTIFACT_SIGNING_*`
+  variables in the environment (all unset: the files stay unsigned with a
+  warning, so a local build still works; a partial set is an error).
+- **Verification.** Every signature is checked twice: by `sign.ps1` as it is
   written and by the `Verify Windows signatures` step afterwards -- `signtool
   verify /pa /v` and `Get-AuthenticodeSignature` Status `Valid`, signed by
-  `McKinley Rice, Inc.`, with the line `<file> signed by <Subject>` in the log.
+  `McKinley Rice, Inc.`, with the line `<file> signed by CN=McKinley Rice, Inc.`
+  in the log.
   There is no untrusted-root allowance and no test-build escape hatch: an
   unsigned Windows build fails the job. `win.signtoolOptions.publisherName` in
   `apps/desktop/electron-builder.base.yml` names the same publisher, which is
@@ -170,8 +189,11 @@ client secret anywhere in the repository or its secrets.
 
 ## What blocks publishing (and what doesn't)
 
-`Publish GitHub Release` requires the electron matrix, electron assets, and
-npm publish. It does **not** require:
+`Publish GitHub release` (the shared `publish` job) requires the electron
+matrix and the merged updater manifests. It does **not** require:
+
+- `Publish redrob-server` (npm) -- a package that cannot authenticate must not
+  withhold six signed installers.
 
 - `Publish AUR` (`continue-on-error`) — aur.archlinux.org outages are not
   release failures. AUR publishing renders the committed
@@ -209,7 +231,8 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 | `Tag vX.Y.Z already exists` on a fresh cut | version already released | rerun with `-f tag=vX.Y.Z` (recovery) or pick a higher version |
 | `verify-release` fails monotonicity | manual tag lower than an existing release | choose a version above the current highest stable tag |
 | `release:review` fails placeholder check | someone committed a real version into package.json | restore `0.0.0-dev` — CI stamps versions from the tag |
-| Desktop app shows updater 404 for the new version | tag exists but the release is still a draft mid-run | wait for `Publish GitHub Release`; self-heals |
+| Desktop app shows updater 404 for the new version | tag exists but the release is not created until every leg is built | wait for `Publish GitHub release`; self-heals |
+| `publish` fails with `Release vX.Y.Z is already published` | recovery run of a tag whose release is public | delete the release (`gh release delete vX.Y.Z`) and rerun, or bump and tag again |
 | Release run red only on AUR / Daytona | external channel failure | release still publishes; rerun with the same tag when the channel recovers |
 | All `electron-linux-*` fail compiling a native module | a raw-V8 native addon meeting new Electron headers under GCC | keep native deps converged on one N-API-based major across the whole workspace (see #3561/#3563) |
 | Windows legs fail in afterPack with `Missing staged MCP runtime package` | asar path-separator mismatch | fixed — `normalizeAsarEntryPath` in `electron-after-pack.cjs` |
@@ -217,6 +240,15 @@ gh release view vX.Y.Z --repo redrob-labs/redrob-work   # published, not draft
 
 ## History
 
+- **2026-10-15**: gitflow, Windows signing and publishing moved to the shared
+  redrob-labs pieces (`redrob-labs/.github`): `gitflow.yml` is a caller of the
+  shared workflow; the in-repo signing recipe (`sign-windows.cjs`, 520 lines)
+  became a shim over `actions/sign-windows/sign.ps1`; the per-leg `gh release
+  upload` loops, the early draft creation and `publish-electron-assets.mjs` were
+  replaced by `release-*` artifacts, `merge-updater-manifests.mjs` and the shared
+  `release-publish.yml`. The `release_name`/`release_body` inputs went with them
+  (title is `Redrob Cowork vX.Y.Z`, notes are generated); `draft` now means
+  "leave a draft" and defaults to false.
 - **2026-10-14**: Windows signing moved to Azure Artifact Signing over OpenID
   Connect (job `environment: release` + `id-token: write`, login right before
   signing, Public Trust certificate `CN=McKinley Rice, Inc.`). The `.pfx`
