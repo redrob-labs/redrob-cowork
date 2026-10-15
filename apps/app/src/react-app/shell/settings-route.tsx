@@ -4,7 +4,7 @@ import { Navigate, useLocation, useNavigate, useParams } from "react-router";
 import { toast } from "@/components/ui/sonner";
 
 // Shared with the session route so both bound their refresh steps the same way.
-import { withRouteRefreshTimeout } from "./use-workspace-route-state";
+import { withRouteRefreshTimeout } from "./route-refresh-control";
 
 import {
   SUGGESTED_PLUGINS,
@@ -1295,7 +1295,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       // ignore browser event dispatch failures
     }
 
-    // OpenCode reconnects MCPs async after dispose — the store polls until
+    // OpenCode reconnects MCPs async after dispose - the store polls until
     // statuses settle so users don't have to collapse/expand the card.
     void pollMcpServersAfterReloadRef.current?.();
 
@@ -1668,7 +1668,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     const configuredEnvKeys = new Set(userEnvKeys);
     const loadedPlugins = new Set<string>();
     // Browser plugin detection: check if any configured plugin matches the chrome-devtools name.
-    // For now, treat it as loaded if the plugin is in the MCP/plugin list — this will
+    // For now, treat it as loaded if the plugin is in the MCP/plugin list - this will
     // be refined when we add a real plugin-loaded signal from the engine.
     const browserPluginConfigured = connectionsSnapshot.mcpServers.some(
       (s) => s.name === "opencode-chrome-devtools" || s.config.command?.some((c: string) => c.includes("chrome-devtools")),
@@ -1907,6 +1907,13 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
       }
     }
     await refreshRouteState();
+    // The always-mounted WorkspaceConnectionProvider owns the records /skills and
+    // the other Desk screens read; it refreshes on this event, so without the
+    // dispatch a settings-side delete would leave it (and /skills) holding the
+    // deleted workspace until some unrelated refresh fired.
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("redrob-server-settings-changed"));
+    }
   }, [redrobClient, refreshRouteState, selectedWorkspaceId, workspaces]);
 
   if (route.redirectPath && !props.embedded) {
