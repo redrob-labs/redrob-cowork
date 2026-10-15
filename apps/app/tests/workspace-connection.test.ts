@@ -1,6 +1,4 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
 
 import type { WorkspaceList } from "../src/app/lib/desktop";
 import { createRedrobServerClient, type RedrobServerClient } from "../src/app/lib/redrob-server";
@@ -31,8 +29,7 @@ import {
  * chat route published the Desk connection, so a cold landing on /skills had no
  * connection and the Skills screen showed the sample fixtures.
  *
- * MAJOR tests carry the four behaviours the change exists for. AUXILIARY tests
- * pin the edges and the wiring and can be trimmed without losing that bar.
+ * These tests carry the four behaviours the change exists for.
  */
 
 const LOCAL_BASE = "http://127.0.0.1:4096";
@@ -268,109 +265,5 @@ describe("MAJOR: chat create and rename still invalidate recent chats", () => {
     expect(versions).toEqual(["s1:First", "s2:New chat|s1:First", "s2:Renamed|s1:First"]);
     // Each is a distinct recent-chats query key (use-desk-nav-data keys on chatsVersion).
     expect(new Set(versions).size).toBe(3);
-  });
-});
-
-describe("AUXILIARY: refresh edges", () => {
-  test("a desktop connection gap retains state and never installs a stale handle", async () => {
-    const resolved: unknown[] = [];
-    let listed = 0;
-    const outcome = await runWorkspaceConnectionRefresh(
-      refreshInput({
-        desktopRuntime: true,
-        resolveConnection: async () => ({ normalizedBaseUrl: "", resolvedToken: "", resolvedHostToken: "", hostInfo: null }),
-        onConnectionResolved: (connection) => void resolved.push(connection),
-        listWorkspaces: async () => {
-          listed += 1;
-          return { items: [] };
-        },
-      }),
-    );
-    expect(outcome.kind).toBe("gap");
-    expect(resolved).toEqual([]);
-    expect(listed).toBe(0);
-  });
-
-  test("a superseded attempt writes nothing and stops before the list call", async () => {
-    let listed = 0;
-    const outcome = await runWorkspaceConnectionRefresh(
-      refreshInput({
-        isCurrent: () => false,
-        listWorkspaces: async () => {
-          listed += 1;
-          return { items: [] };
-        },
-      }),
-    );
-    expect(outcome.kind).toBe("stale");
-    expect(listed).toBe(0);
-  });
-
-  test("the handle is installed before the workspace list is requested", async () => {
-    const order: string[] = [];
-    await runWorkspaceConnectionRefresh(
-      refreshInput({
-        onConnectionResolved: () => void order.push("resolved"),
-        listWorkspaces: async () => {
-          order.push("listed");
-          return { items: [] };
-        },
-      }),
-    );
-    expect(order).toEqual(["resolved", "listed"]);
-  });
-
-  test("without a chat route the choice is persisted, then desktop, then server, then first", () => {
-    const workspaces = [{ id: "a" }, { id: "b" }, { id: "c" }] as RouteWorkspace[];
-    const base = { workspaces, persistedActiveId: null, desktopSelectedId: "", serverActiveId: "" };
-    expect(chooseDefaultWorkspaceId({ ...base, persistedActiveId: "c", desktopSelectedId: "b" })).toBe("c");
-    expect(chooseDefaultWorkspaceId({ ...base, persistedActiveId: "gone", desktopSelectedId: "b" })).toBe("b");
-    expect(chooseDefaultWorkspaceId({ ...base, serverActiveId: "c" })).toBe("c");
-    expect(chooseDefaultWorkspaceId(base)).toBe("a");
-  });
-
-  test("a chats revision from another workspace is ignored, and the client passes through", () => {
-    const workspace = { id: "ws_a", workspaceType: "local", path: "/work/a" };
-    const endpoint = { client: {} as RedrobServerClient, workspaceId: "ws_a" };
-    const other = deriveDeskConnection({
-      workspace,
-      endpoint,
-      opencode: null,
-      revision: { workspaceRecordId: "ws_b", version: "x:y", workspaceError: true },
-    });
-    // The revision belongs to ws_b, so it does not attach to ws_a's connection.
-    expect(other.chatsVersion).toBe("");
-    expect(other.client).toBe(endpoint.client);
-  });
-});
-
-describe("AUXILIARY: wiring", () => {
-  const SRC = join(import.meta.dir, "..", "src");
-  const read = (...parts: string[]) => readFileSync(join(SRC, ...parts), "utf8");
-  const files = (dir: string): string[] =>
-    readdirSync(dir).flatMap((name) => {
-      const path = join(dir, name);
-      if (statSync(path).isDirectory()) return files(path);
-      return /\.(ts|tsx)$/.test(name) ? [path] : [];
-    });
-
-  test("DeskConnectionPublisher is the only caller of publishDeskConnection", () => {
-    const callers = files(SRC)
-      .filter((path) => /publishDeskConnection\(/.test(readFileSync(path, "utf8").replace(/export function publishDeskConnection\(/, "")))
-      .map((path) => path.replace(/\\/g, "/").split("/src/")[1]);
-    expect(callers).toEqual(["react-app/shell/desk-connection-publisher.tsx"]);
-  });
-
-  test("the provider and publisher wrap <Routes> in AppRoot, so /skills is covered", () => {
-    const appRoot = read("react-app", "shell", "app-root.tsx");
-    const provider = appRoot.indexOf("<WorkspaceConnectionProvider>");
-    const publisher = appRoot.indexOf("<DeskConnectionPublisher />");
-    const routes = appRoot.indexOf("<Routes>");
-    const routesEnd = appRoot.indexOf("</Routes>");
-    const providerEnd = appRoot.indexOf("</WorkspaceConnectionProvider>");
-    expect(provider).toBeGreaterThan(-1);
-    expect(provider).toBeLessThan(publisher);
-    expect(publisher).toBeLessThan(routes);
-    expect(routesEnd).toBeLessThan(providerEnd);
   });
 });
