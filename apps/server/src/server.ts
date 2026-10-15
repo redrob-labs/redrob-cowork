@@ -28,6 +28,8 @@ import {
 } from "./mcp-app-sandbox.js";
 import { exportExtensions } from "./extensions-export.js";
 import { deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
+import { publicCatalogue } from "./skill-library/public-catalogue.js";
+import { buildFrontmatter } from "./frontmatter.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
 import {
   addSchedule,
@@ -537,7 +539,7 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
  * Credentials for the Redrob Models voice broker.
  *
  * `REDROB_MODELS_API_KEY` is the canonical name: it names what it authenticates and pairs with
- * `REDROB_MODELS_BASE_URL`. `REDROB_CLOUD_API_KEY` is a legacy alias and has to stay readable —
+ * `REDROB_MODELS_BASE_URL`. `REDROB_CLOUD_API_KEY` is a legacy alias and has to stay readable -
  * it is the name this store has persisted since the OpenWork rebrand, so it is what an existing
  * install actually carries on disk. The cloud-removal sweep (`10b401c`) deleted the two lines that
  * read it, on the strength of the name alone, which left the broker branch unreachable for every
@@ -2769,7 +2771,7 @@ function createRoutes(
       const logicalUpdates: Record<string, unknown> = { ...topLevelUpdates };
 
       // Per-provider merge: record values upsert, explicit `null` deletes
-      // (mergeRuntimeProviderUpdate) — so clients can remove runtime-managed
+      // (mergeRuntimeProviderUpdate) - so clients can remove runtime-managed
       // providers (e.g. cloud imports) without read-modify-write races.
       const providerUpdate = isRecord(provider) ? provider : {};
       if (Object.keys(providerUpdate).length) {
@@ -2939,6 +2941,75 @@ function createRoutes(
     const includeGlobal = ctx.url.searchParams.get("includeGlobal") === "true";
     const items = await listSkills(workspace.path, includeGlobal);
     return jsonResponse({ items });
+  });
+
+  // Public skill library: the live catalogue at console.redrob.ai/skills. Registered before
+  // /skills/:name so "library" is never read as a skill name.
+  addRoute(routes, "GET", "/workspace/:id/skills/library", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    const q = ctx.url.searchParams.get("q") ?? undefined;
+    const result = await publicCatalogue.list({ q });
+    return jsonResponse({ ...result, source: "console" });
+  });
+
+  // The public catalogue carries no profession/task/language, so the taxonomy is empty.
+  addRoute(routes, "GET", "/workspace/:id/skills/library/taxonomy", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    return jsonResponse({ professions: [], languages: [], source: "console" });
+  });
+
+  // One catalogue skill with its body, for the preview.
+  addRoute(routes, "GET", "/workspace/:id/skills/library/:name", "client", async (ctx) => {
+    await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    const skill = name ? await publicCatalogue.get(name) : null;
+    if (!skill) {
+      throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
+    }
+    const { frontmatter: _frontmatter, ...item } = skill;
+    return jsonResponse(item);
+  });
+
+  // Installs a catalogue skill into the workspace, tagged metadata.source "library"; never overwrites.
+  addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    const skill = name ? await publicCatalogue.get(name) : null;
+    if (!skill) {
+      throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
+    }
+    const existing = (await listSkills(workspace.path, false)).find((item) => item.name === name && item.scope === "project");
+    if (existing || (await exists(join(projectSkillsDir(workspace.path), name, "SKILL.md")))) {
+      throw new ApiError(409, "skill_exists", `A skill named ${name} is already installed`);
+    }
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "skills.upsert",
+      summary: `Install library skill ${name}`,
+      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+    });
+    const { frontmatter: data, body } = skill;
+    const priorMetadata = typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata) ? data.metadata : {};
+    const content = buildFrontmatter({ ...data, metadata: { ...priorMetadata, source: "library" } }) + body.replace(/^\n/, "");
+    const result = await upsertSkill(workspace.path, { name, content, description: skill.description });
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "skills.upsert",
+      target: result.path,
+      summary: `Installed library skill ${name}`,
+      timestamp: Date.now(),
+    });
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills", {
+      type: "skill",
+      name,
+      action: result.action,
+      path: result.path,
+    });
+    return jsonResponse({ name, path: result.path, description: skill.description, scope: "project", metadata: { source: "library" } });
   });
 
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
@@ -3340,7 +3411,7 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
-  // Toggle `enabled` on a workspace MCP. Strict body validation — `Boolean(body.enabled)`
+  // Toggle `enabled` on a workspace MCP. Strict body validation - `Boolean(body.enabled)`
   // would silently disable on `{}` or coerce `"false"` to true.
   addRoute(routes, "POST", "/workspace/:id/mcp/:name/enabled", "client", async (ctx) => {
     ensureWritable(config);
@@ -4494,7 +4565,7 @@ async function withEngineMcpRegistrationLock<Result>(
 
 // POST one MCP entry to the engine, retrying once on 5xx/network errors
 // (the engine is often mid-rebuild right after a dispose). 4xx responses
-// are not retried — they won't change.
+// are not retried - they won't change.
 async function postMcpEntryWithRetry(
   config: ServerConfig,
   workspace: WorkspaceInfo,
