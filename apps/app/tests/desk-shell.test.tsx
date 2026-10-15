@@ -54,16 +54,12 @@ describe("buildDeskNav", () => {
       "Skills",
       "Projects",
       "Scheduled",
-      "History",
       "Recent",
       "Notice by email - valid?",
       "Seorin indemnity cap",
       "Draft v3 against our standard",
       "Hanbit exhibit list",
-      "Your Cowork",
-      "Privacy protection",
-      "Memory",
-      "Connectors",
+      "Kim Minjun's questions on liability",
     ]);
   });
 
@@ -72,10 +68,14 @@ describe("buildDeskNav", () => {
     expect(meta.scheduled).toBe("2");
     // Round 17: the Trending AI (guide) row no longer carries an "Auto" trailing badge.
     expect(meta.guide).toBeUndefined();
-    expect(meta.connectors).toBe("6");
-    expect(meta.privacy).toBe("High");
-    expect(meta.memory).toBe("22");
+    // Round 37: Privacy/Memory/Connectors rows were removed from the left menu
+    // (moved to Settings), so they no longer appear here.
+    expect(meta.connectors).toBeUndefined();
+    expect(meta.privacy).toBeUndefined();
+    expect(meta.memory).toBeUndefined();
     expect(meta.chat).toBeUndefined();
+    // Round 37: Recent rows no longer carry a date/time meta.
+    expect(meta["recent-notice"]).toBeUndefined();
   });
 
   test("a count from sample data is never shown as the person's own", () => {
@@ -93,7 +93,7 @@ describe("buildDeskNav", () => {
     expect(meta.memory).toBeUndefined();
   });
 
-  test("Recent holds the four newest chats, newest first, whatever order they arrive in", () => {
+  test("Recent holds the five newest chats, newest first, whatever order they arrive in", () => {
     const nav = buildDeskNav(input({ chats: [...CHATS].reverse() }));
     const recent = nav.filter((item) => String(item.id).startsWith("recent-"));
     expect(recent.map((item) => item.id)).toEqual([
@@ -101,8 +101,10 @@ describe("buildDeskNav", () => {
       "recent-indemnity",
       "recent-s-draft3",
       "recent-hanbit-exh",
+      "recent-s-kim",
     ]);
-    expect(recent.map((item) => item.meta)).toEqual(["09:40", "08:10", "Fri", "Fri"]);
+    // Round 37: Recent rows carry no date/time meta.
+    expect(recent.map((item) => item.meta)).toEqual([undefined, undefined, undefined, undefined, undefined]);
   });
 
   test("hrefs are hash routes by default, and follow the router when it says otherwise", () => {
@@ -113,14 +115,11 @@ describe("buildDeskNav", () => {
       "#/skills",
       "#/projects",
       "#/scheduled",
-      "#/history",
       "#/chat/notice",
       "#/chat/indemnity",
       "#/chat/s-draft3",
       "#/chat/hanbit-exh",
-      "#/privacy",
-      "#/memory",
-      "#/connectors",
+      "#/chat/s-kim",
     ]);
     const plain = buildDeskNav(input({ toHref: (path) => path }));
     expect(plain[0]?.href).toBe("/guide");
@@ -278,7 +277,13 @@ describe("Desk routes", () => {
       expect(html).toContain(`<h1 class="rr-shell__title">${title}</h1>`);
       expect(html).toContain(note);
       expect(html).not.toContain("on its way");
-      expect(html).toContain(`href="/${place}" aria-current="page"`);
+      // Round 37 (item 6): History was removed from the left menu, so its route
+      // renders the screen but has no current nav row; the others still do.
+      if (place === "history") {
+        expect(html).not.toContain(`href="/${place}" aria-current="page"`);
+      } else {
+        expect(html).toContain(`href="/${place}" aria-current="page"`);
+      }
       expect(html).not.toContain("chat screen");
     }
   });
