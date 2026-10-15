@@ -177,35 +177,12 @@ export type RedrobSkillItem = {
   metadata?: RedrobSkillMetadata;
 };
 
-/** Where a library answer came from: the Console, or the copy bundled with redrob-server. */
-export type RedrobLibrarySource = "console" | "snapshot";
-
-/**
- * One library entry. The public catalogue (console.redrob.ai/skills) carries a semver
- * string version and no profession/task/language/family, so those are optional.
- */
-export type RedrobLibrarySkillSummary = {
-  name: string;
-  description: string;
-  profession?: string;
-  task?: string;
-  language?: string;
-  family?: string;
-  version: string;
-  title?: string;
-  summary?: string;
-};
-
-export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; source: RedrobLibrarySource };
-
-export type RedrobLibraryFilter = { profession?: string; task?: string; language?: string; q?: string };
-
 export type RedrobSkillLabel = { en: string; ko: string };
 
+/** The profession/task/language vocabulary the skill dialog and filters are built from. */
 export type RedrobSkillTaxonomy = {
   professions: Array<{ id: string; label: RedrobSkillLabel; tasks: Array<{ id: string; label: RedrobSkillLabel }> }>;
   languages: Array<{ id: string; label: RedrobSkillLabel }>;
-  source: RedrobLibrarySource;
 };
 
 /** GET /workspace/:id/skills/team: what the last check of the Console installed. */
@@ -1637,21 +1614,6 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken },
       );
     },
-    listLibrarySkills: (workspaceId: string, filter: RedrobLibraryFilter = {}) => {
-      const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => Boolean(value))).toString();
-      return requestJson<{ version: string; skills: RedrobLibrarySkillSummary[]; source: RedrobLibrarySource }>(
-        baseUrl,
-        `/workspace/${workspaceId}/skills/library${query ? `?${query}` : ""}`,
-        { token, hostToken },
-      );
-    },
-    getSkillTaxonomy: (workspaceId: string) =>
-      requestJson<RedrobSkillTaxonomy>(baseUrl, `/workspace/${workspaceId}/skills/library/taxonomy`, { token, hostToken }),
-    getLibrarySkill: (workspaceId: string, name: string) =>
-      requestJson<RedrobLibrarySkill>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}`, {
-        token,
-        hostToken,
-      }),
     installLibrarySkill: (workspaceId: string, name: string) =>
       requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}/install`, {
         token,

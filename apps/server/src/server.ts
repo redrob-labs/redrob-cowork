@@ -1,4 +1,4 @@
-import { readFile, writeFile, rm, stat } from "node:fs/promises";
+import { mkdir, readFile, writeFile, rm, stat } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
@@ -2943,33 +2943,8 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
-  // Public skill library: the live catalogue at console.redrob.ai/skills. Registered before
-  // /skills/:name so "library" is never read as a skill name.
-  addRoute(routes, "GET", "/workspace/:id/skills/library", "client", async (ctx) => {
-    await resolveWorkspace(config, ctx.params.id);
-    const q = ctx.url.searchParams.get("q") ?? undefined;
-    const result = await publicCatalogue.list({ q });
-    return jsonResponse({ ...result, source: "console" });
-  });
-
-  // The public catalogue carries no profession/task/language, so the taxonomy is empty.
-  addRoute(routes, "GET", "/workspace/:id/skills/library/taxonomy", "client", async (ctx) => {
-    await resolveWorkspace(config, ctx.params.id);
-    return jsonResponse({ professions: [], languages: [], source: "console" });
-  });
-
-  // One catalogue skill with its body, for the preview.
-  addRoute(routes, "GET", "/workspace/:id/skills/library/:name", "client", async (ctx) => {
-    await resolveWorkspace(config, ctx.params.id);
-    const name = String(ctx.params.name ?? "").trim();
-    const skill = name ? await publicCatalogue.get(name) : null;
-    if (!skill) {
-      throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
-    }
-    const { frontmatter: _frontmatter, ...item } = skill;
-    return jsonResponse(item);
-  });
-
+  // The public skill library (console.redrob.ai/skills) is read by the app directly; the server only
+  // installs. Registered before /skills/:name so "library" is never read as a skill name.
   // Installs a catalogue skill into the workspace, tagged metadata.source "library"; never overwrites.
   addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
     ensureWritable(config);
@@ -2994,6 +2969,13 @@ function createRoutes(
     const priorMetadata = typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata) ? data.metadata : {};
     const content = buildFrontmatter({ ...data, metadata: { ...priorMetadata, source: "library" } }) + body.replace(/^\n/, "");
     const result = await createSkill(workspace.path, { name, content, description: skill.description });
+    // The rest of the skill's files (references, examples, scripts) go next to SKILL.md.
+    const skillDir = dirname(result.path);
+    for (const file of skill.files.filter((entry) => entry !== "SKILL.md")) {
+      const target = join(skillDir, file);
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, await publicCatalogue.readFile(name, file));
+    }
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,

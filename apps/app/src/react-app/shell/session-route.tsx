@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
-import { deskChatsVersion, publishDeskChatsRevision } from "@/react-app/desk/shell/desk-connection";
+import { publishDeskConnection } from "@/react-app/desk/shell/desk-connection";
 import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
 import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
 import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
@@ -554,7 +554,7 @@ export function SessionRoute() {
   const [providerConnectedIds, setProviderConnectedIds] = useState<string[]>([]);
   const [disabledProviderIds, setDisabledProviderIds] = useState<string[]>([]);
 
-  // Provider IDs that were just added - used to highlight them as
+  // Provider IDs that were just added — used to highlight them as
   useEffect(() => {
     setPaletteAccessibleTargets([]);
   }, [selectedSessionId, selectedWorkspaceId]);
@@ -909,7 +909,7 @@ export function SessionRoute() {
   }, [engineReloadVersion, opencodeClient, selectedWorkspaceRoot]);
 
   // Shared by the composer (plug menu, @ mentions) and the command palette.
-  // Hidden and subagent-only entries are excluded - those are task-tool
+  // Hidden and subagent-only entries are excluded — those are task-tool
   // delegation targets, not agents the user can run a session as.
   const listAgents = useCallback(async () => {
     // Include engineReloadVersion so the composer refetches after newly added
@@ -1969,7 +1969,7 @@ export function SessionRoute() {
 
   const handleOpenProviderAuth = useCallback(() => {
     // Pre-workspace (chat-first) there is no opencode client yet, so the
-    // modal cannot load auth methods - fall back to the AI Providers page.
+    // modal cannot load auth methods — fall back to the AI Providers page.
     void sessionProviderAuthStore.openProviderAuthModal({ returnFocusTarget: "composer" }).catch(() => {
       handleOpenSettings("/settings/ai");
     });
@@ -2308,7 +2308,7 @@ export function SessionRoute() {
             // persisted fallback draft drops their tokens.
             saveSessionDraft(targetWorkspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
             // The composer reads its draft from the composer state store, not
-            // the persisted draft store - seed both so the prompt shows up.
+            // the persisted draft store — seed both so the prompt shows up.
             useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
             if (firstTaskAttachments.length) {
               useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
@@ -2367,7 +2367,7 @@ export function SessionRoute() {
           // persisted fallback draft drops their tokens.
           saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
           // The composer reads its draft from the composer state store,
-          // not the persisted draft store - seed both.
+          // not the persisted draft store — seed both.
           useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
           if (firstTaskAttachments.length) {
             useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
@@ -2447,21 +2447,20 @@ export function SessionRoute() {
   }), [handleCreateWorkspace]);
   useControlAction(createWorkspaceControlAction);
 
-  // The Desk menu lists this workspace's recent chats. Only this route loads the
-  // session lists, so it contributes the chats revision (plus whether the
-  // workspace has a load error); DeskConnectionPublisher is the sole writer of
-  // the Desk connection snapshot and composes it with the app-wide connection.
-  const deskChatsRevision = useMemo(
-    () => deskChatsVersion(sessionsByWorkspaceId[selectedWorkspaceId] ?? []),
+  // The Desk menu lists this workspace's recent chats through the same server connection.
+  const deskChatsVersion = useMemo(
+    () => (sessionsByWorkspaceId[selectedWorkspaceId] ?? []).map((session) => `${session.id}:${session.title}`).join("|"),
     [sessionsByWorkspaceId, selectedWorkspaceId],
   );
   useEffect(() => {
-    publishDeskChatsRevision({
-      workspaceRecordId: selectedWorkspaceId,
-      version: deskChatsRevision,
-      workspaceError: Boolean(selectedWorkspaceError),
+    publishDeskConnection({
+      client: selectedWorkspaceEndpoint?.client ?? null,
+      opencode: opencodeClient ?? null,
+      workspaceId: selectedWorkspaceEndpoint?.workspaceId || null,
+      workspaceRoot: selectedWorkspace?.workspaceType === "remote" ? null : selectedWorkspaceRoot || null,
+      chatsVersion: deskChatsVersion,
     });
-  }, [deskChatsRevision, selectedWorkspaceError, selectedWorkspaceId]);
+  }, [deskChatsVersion, opencodeClient, selectedWorkspace?.workspaceType, selectedWorkspaceEndpoint?.client, selectedWorkspaceEndpoint?.workspaceId, selectedWorkspaceRoot]);
   // The local server (not a remote workspace's) holds the Personal workspace.
   useEffect(() => ensurePersonalWorkspaceOnce(client), [client]);
 

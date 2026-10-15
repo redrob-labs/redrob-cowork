@@ -110,7 +110,7 @@ export type LibrarySkill = { name: string; title?: string; description: string; 
 export type SkillFilters = SkillTags & { q?: string };
 
 /** The professions, their tasks and the languages skills are filed under, in English and Korean. */
-export type SkillTaxonomy = Omit<RedrobSkillTaxonomy, "source">;
+export type SkillTaxonomy = RedrobSkillTaxonomy;
 
 /** One skill to read: installed (with its origin), or one the library has and this workspace has not. */
 export type SkillDetail = {
