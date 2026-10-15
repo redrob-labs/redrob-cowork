@@ -381,8 +381,7 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.shieldCheck(STATUS_ICON),
       tone: privacyOn ? "safe" : "plain",
       name: t("desk.status_privacy"),
-      value: privacyOn ? privacyLevelLabel(level) : t("desk.privacy_off"),
-      level: privacyOn ? { n: PRIVACY_N[level], of: levels.length } : undefined,
+      // Round 38 (item 2): the in-chat status chips are icon + title only (no value/level).
       panelLabel: t("desk.nav_privacy"),
       panel: (
         <PrivacyProtection
@@ -404,7 +403,6 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.bookOpen(STATUS_ICON),
       tone: input.memory === "none" ? "plain" : "on",
       name: t("desk.status_memory"),
-      value: memoryStatusValue(input.memory),
       panelLabel: t("desk.nav_memory"),
       panel: (
         <MemoryScope
@@ -428,7 +426,6 @@ export function deskStatusItems(input: DeskStatusInput): ComposerStatusItem[] {
       icon: icons.compare(STATUS_ICON),
       tone: checksOff ? "plain" : "on",
       name: t("desk.status_check"),
-      value: crossCheckStatusValue(input.checks),
       panelLabel: t("desk.status_check"),
       panel: (
         <CrossCheckSetting
