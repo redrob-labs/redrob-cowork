@@ -152,24 +152,14 @@ describe("the Preview routes", () => {
 });
 
 describe("Skills", () => {
-  test("lists the sample skills with where each came from, and the library's not yet added", async () => {
+  test("shows the empty state in preview mode - no sample skills", async () => {
     const html = route("/skills", await seeded());
-    expect(html).toContain("3 installed");
-    for (const entry of SKILLS) expect(html).toContain(`href="/skill/${entry.name}"`);
-    for (const badge of [">Team<", ">Mine<", ">Library<"]) expect(html).toContain(badge);
-    expect(html).toContain('aria-label="Add nda-review"');
+    // The sample catalogue was removed; preview mode now shows the real empty state.
+    expect(SKILLS).toHaveLength(0);
+    expect(html).not.toContain('href="/skill/first-review"');
     expect(html).toContain("New skill");
-    expect(html).toContain("Review documents and contracts");
-  });
-
-  test("a team skill shows its instructions, Run and Schedule, and says it is managed in Redrob Console", async () => {
-    const html = route("/skill/first-review", await seeded());
-    expect(html).toContain("Managed in Redrob Console");
-    expect(html).toContain("Contract first review");
-    expect(html).toContain(">Run<");
-    expect(html).toContain(">Schedule<");
-    expect(html).not.toContain(">Edit<");
-    expect(html).toContain('href="/skills"');
+    // The preview note still marks this as preview (sample) data.
+    expect(html).toContain("Preview");
   });
 
   test("an unknown skill says so", async () => {
