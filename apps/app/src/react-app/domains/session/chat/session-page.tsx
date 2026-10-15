@@ -1364,7 +1364,7 @@ export function SessionPage(props: SessionPageProps) {
 
           <ResizablePanelGroup orientation="vertical" className="min-h-0 flex-1 overflow-hidden">
             <ResizablePanel minSize="180px" className="min-h-0">
-            <div className="relative h-full min-w-0 overflow-hidden bg-dls-surface mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+            <div className={`relative h-full min-w-0 overflow-hidden ${isEmptyHome || inDeskFrame ? "bg-background" : "bg-dls-surface"} mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150`}>
               {props.primarySlot ? (
                 <div className="h-full overflow-y-auto" data-workspace-primary-slot>
                   {props.primarySlot}
