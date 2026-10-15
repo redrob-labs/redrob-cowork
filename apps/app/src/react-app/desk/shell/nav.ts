@@ -80,7 +80,9 @@ export function privacyLevelLabel(level: PrivacyLevel): string {
   }
 }
 
-const count = (value: number | null) => (value === null ? undefined : String(value));
+/** Round 38 (item 1): a count badge, but a zero shows NO meta (an empty "0" badge
+ *  beside Scheduled read as noise). Null (still loading) and 0 both yield undefined. */
+const countPositive = (value: number | null) => (value && value > 0 ? String(value) : undefined);
 
 /** The Desk menu, in the handoff's order. Pure: everything it shows comes in through `input`. */
 export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
@@ -106,7 +108,7 @@ export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
     place("chat", t("desk.nav_new_chat"), icons.plus),
     place("skills", t("desk.nav_skills"), icons.sparkle),
     place("projects", t("desk.nav_projects"), icons.folder),
-    place("scheduled", t("desk.nav_scheduled"), icons.calendarClock, count(input.waiting)),
+    place("scheduled", t("desk.nav_scheduled"), icons.calendarClock, countPositive(input.waiting)),
     { heading: t("desk.nav_recent") },
     ...recent.map((chat) => ({
       id: `recent-${chat.id}`,
