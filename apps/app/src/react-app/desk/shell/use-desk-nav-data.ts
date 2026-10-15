@@ -20,8 +20,8 @@ export function counted<T, R>(result: DeskResult<T>, read: (data: T) => R): R | 
 
 /**
  * What the Desk menu shows: recent chats, runs waiting, connectors connected, the
- * privacy level and the number of notes. Real where the chat route has published a
- * server and workspace, sample data otherwise (see `createDeskServices`).
+ * privacy level and the number of notes. Real once the app-wide connection has
+ * published a server and workspace, sample data otherwise (see `createDeskServices`).
  */
 export function useDeskNavData(): DeskNavData {
   const client = useDeskConnection((state) => state.client);
