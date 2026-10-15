@@ -320,8 +320,9 @@ describe("/memory routes", () => {
       const html = render(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, path, client);
       expect(html).toContain('<h1 class="rr-shell__title">Memory</h1>');
       expect(html).toContain("22 notes");
-      expect(html).toContain('href="/memory" aria-current="page"');
-      // The menu marks Memory; the scope picker marks the scope.
+      // Round 37 (item 5): Memory left the "Your Cowork" left-menu group (moved to
+      // Settings), so there is no current MENU row for it; the in-screen scope
+      // picker still marks the active scope.
       expect(html).toContain(`aria-current="page" href="${memoryFilterPath(filter)}"`);
       expect(html).not.toContain("This part of Redrob Cowork is on its way.");
       expect(html).not.toContain("chat screen");

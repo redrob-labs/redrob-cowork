@@ -109,7 +109,12 @@ describe("the Preview routes", () => {
       const html = route(screen.path, client);
       expect(html).toContain("rr-shell");
       expect(html).toContain(`<h1 class="rr-shell__title">${screen.title}</h1>`);
-      expect(html).toContain(`href="/${screen.place}" aria-current="page"`);
+      // Round 37 (item 6): History left the menu; its route still renders.
+      if (screen.place === "history") {
+        expect(html).not.toContain(`href="/${screen.place}" aria-current="page"`);
+      } else {
+        expect(html).toContain(`href="/${screen.place}" aria-current="page"`);
+      }
       expect(html).toContain("rr-alert");
       expect(html).toContain(screen.note);
       expect(html).not.toContain("chat screen");

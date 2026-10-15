@@ -24,7 +24,7 @@ export type DeskNavId =
 export type DeskNavInput = {
   current?: DeskNavId | null;
   chatId?: string | null;
-  /** Any order; the four newest are shown. */
+  /** Any order; the five newest are shown. */
   chats: readonly Chat[];
   /** Null while a count is still loading: the row shows no meta rather than a wrong one. */
   waiting: number | null;
@@ -37,7 +37,7 @@ export type DeskNavInput = {
   toHref?: (path: string) => string;
 };
 
-export const RECENT_CHAT_COUNT = 4;
+export const RECENT_CHAT_COUNT = 5;
 
 const hashHref = (path: string) => `#${path}`;
 
@@ -95,24 +95,24 @@ export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
   });
   const recent = [...input.chats].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, RECENT_CHAT_COUNT);
 
+  // Round 37: left-menu slimmed. Item 6: History row removed from the menu (route
+  // still exists). Item 5: the "Your Cowork" group (nav_how_it_works heading +
+  // Privacy/Memory/Connectors) is removed from the left menu -- all three remain
+  // reachable in Settings (Memory -> memory tab, Connectors -> ai tab, Privacy ->
+  // Preferences). Item 7: Recent shows the latest 5 (RECENT_CHAT_COUNT) with NO
+  // date/time meta on the right.
   return [
     place("guide", t("desk.nav_guide"), icons.chart),
     place("chat", t("desk.nav_new_chat"), icons.plus),
     place("skills", t("desk.nav_skills"), icons.sparkle),
     place("projects", t("desk.nav_projects"), icons.folder),
     place("scheduled", t("desk.nav_scheduled"), icons.calendarClock, count(input.waiting)),
-    place("history", t("desk.nav_history"), icons.history),
     { heading: t("desk.nav_recent") },
     ...recent.map((chat) => ({
       id: `recent-${chat.id}`,
       label: chat.title.trim() || t("desk.untitled_chat"),
-      meta: formatNavTime(chat.updatedAt, input.now, input.locale),
       href: toHref(`/chat/${encodeURIComponent(chat.id)}`),
       current: input.chatId === chat.id,
     })),
-    { heading: t("desk.nav_how_it_works") },
-    place("privacy", t("desk.nav_privacy"), icons.shieldCheck, input.privacy ? privacyLevelLabel(input.privacy) : undefined),
-    place("memory", t("desk.nav_memory"), icons.bookOpen, count(input.notes)),
-    place("connectors", t("desk.nav_connectors"), icons.plug, count(input.connected)),
   ];
 }

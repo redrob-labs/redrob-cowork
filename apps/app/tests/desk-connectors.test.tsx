@@ -299,13 +299,15 @@ describe("ConnectorsView", () => {
 });
 
 describe("/connectors route", () => {
-  test("renders inside the shell with Connectors current and the connected count", () => {
+  test("renders inside the shell (no longer a left-menu row after round 37)", () => {
     const client = new QueryClient();
     client.setQueryData([CONNECTORS_QUERY_KEY, "preview"], { data: CONNECTORS, preview: true });
     const html = render(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, "/connectors", client);
     expect(html).toContain('<h1 class="rr-shell__title">Connectors</h1>');
     expect(html).toContain("6 connected");
-    expect(html).toContain('href="/connectors" aria-current="page"');
+    // Round 37 (item 5): Connectors moved out of the "Your Cowork" left-menu group
+    // into Settings, so no current nav row for it.
+    expect(html).not.toContain('href="/connectors" aria-current="page"');
     expect(html).toContain("Gmail");
     expect(html).not.toContain("This part of Redrob Cowork is on its way.");
     expect(html).not.toContain("chat screen");

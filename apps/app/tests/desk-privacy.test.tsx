@@ -101,13 +101,15 @@ describe("PrivacyView", () => {
 });
 
 describe("/privacy route", () => {
-  test("renders the screen inside the shell, with Privacy protection current in the menu", () => {
+  test("renders the screen inside the shell (no longer a left-menu row after round 37)", () => {
     const client = new QueryClient();
     client.setQueryData([PRIVACY_QUERY_KEY, "preview"], { data: PRIVACY, preview: true });
     const html = render(<Routes>{deskRoutes(<span>chat screen</span>)}</Routes>, "/privacy", client);
     expect(html).toContain("rr-shell");
     expect(html).toContain('<h1 class="rr-shell__title">Privacy protection</h1>');
-    expect(html).toContain('href="/privacy" aria-current="page"');
+    // Round 37 (item 5): Privacy moved out of the "Your Cowork" left-menu group
+    // into Settings, so there is no current nav row for it any more.
+    expect(html).not.toContain('href="/privacy" aria-current="page"');
     expect(html).toContain("Privacy protection is off");
     expect(html).not.toContain("This part of Redrob Cowork is on its way.");
     expect(html).not.toContain("chat screen");
