@@ -570,14 +570,16 @@ const AssistantMessage = React.memo(
               return (
                 <React.Fragment key={`text-${index}`}>
                   {deskBlocks && !body ? null : <MessageContent
-                    // Round 32 (Claude-style): the assistant reply is plain prose on
-                    // the page surface -- no bubble. The DS used to paint machine
-                    // output on the reserved AI surface (an edge + fill) so it read as
-                    // "not a person"; the right-aligned, darker USER bubble now carries
-                    // that distinction, so the reply reads as a clean document.
-                    // data-surface="ai" is kept as a semantic hook (not a visual).
+                    // Round 32/34 (Claude-style): the assistant reply is plain prose on
+                    // the page surface -- NO bubble. The DS MessageContent base paints a
+                    // filled bubble (bg-secondary rounded-lg p-2); round 33 added
+                    // data-surface="ai" + a text className but did NOT override that base,
+                    // so the grey bubble still rendered (Felix "still not done"). Override
+                    // the base here -- bg-transparent, no radius, no inset padding -- via
+                    // the cn(base, className) twMerge in MessageContent. The right-aligned
+                    // darker USER bubble now carries the "machine vs person" distinction.
                     data-surface="ai"
-                    className="text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
+                    className="bg-transparent rounded-none p-0 text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
                     markdown
                     isStreaming={isStreaming}
                     highlightQuery={highlightQuery}
