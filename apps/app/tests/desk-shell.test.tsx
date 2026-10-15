@@ -60,6 +60,7 @@ describe("buildDeskNav", () => {
       "Draft v3 against our standard",
       "Hanbit exhibit list",
       "Kim Minjun's questions on liability",
+      "View all",
     ]);
   });
 
@@ -76,6 +77,20 @@ describe("buildDeskNav", () => {
     expect(meta.chat).toBeUndefined();
     // Round 37: Recent rows no longer carry a date/time meta.
     expect(meta["recent-notice"]).toBeUndefined();
+  });
+
+  test("Recent 'View all' links to the History page, below the recent chats", () => {
+    const nav = buildDeskNav(input());
+    const viewAll = nav.find((item) => item.id === "recent-view-all");
+    expect(viewAll?.label).toBe("View all");
+    expect(viewAll?.href).toBe("#/history");
+    const ids = nav.map((item) => String(item.id));
+    expect(ids.indexOf("recent-view-all")).toBe(ids.length - 1);
+    expect(buildDeskNav(input({ current: "history" })).find((i) => i.id === "recent-view-all")?.current).toBe(true);
+  });
+
+  test("with no recent chats there is no 'View all' row", () => {
+    expect(buildDeskNav(input({ chats: [] })).some((item) => item.id === "recent-view-all")).toBe(false);
   });
 
   test("a count from sample data is never shown as the person's own", () => {
@@ -95,7 +110,7 @@ describe("buildDeskNav", () => {
 
   test("Recent holds the five newest chats, newest first, whatever order they arrive in", () => {
     const nav = buildDeskNav(input({ chats: [...CHATS].reverse() }));
-    const recent = nav.filter((item) => String(item.id).startsWith("recent-"));
+    const recent = nav.filter((item) => String(item.id).startsWith("recent-") && item.id !== "recent-view-all");
     expect(recent.map((item) => item.id)).toEqual([
       "recent-notice",
       "recent-indemnity",
@@ -120,6 +135,7 @@ describe("buildDeskNav", () => {
       "#/chat/s-draft3",
       "#/chat/hanbit-exh",
       "#/chat/s-kim",
+      "#/history",
     ]);
     const plain = buildDeskNav(input({ toHref: (path) => path }));
     expect(plain[0]?.href).toBe("/guide");

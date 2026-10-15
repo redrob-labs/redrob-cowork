@@ -116,5 +116,16 @@ export function buildDeskNav(input: DeskNavInput): AppShellNavItem[] {
       href: toHref(`/chat/${encodeURIComponent(chat.id)}`),
       current: input.chatId === chat.id,
     })),
+    // Round 39 (item): "View all" under Recent routes to the History page, which left the
+    // left menu in round 37 (item 6) but is still a live route. Shown only when there are
+    // recent chats -- with an empty Recent there is nothing to view all of.
+    ...(recent.length
+      ? [{
+          id: "recent-view-all",
+          label: t("desk.nav_recent_view_all"),
+          href: toHref("/history"),
+          current: input.current === "history",
+        }]
+      : []),
   ];
 }
