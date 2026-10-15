@@ -343,13 +343,13 @@
   margin: var(--space-2);
   border-radius: 16px;
   overflow: hidden;
-  /* Round 15: the floating card must match the MAIN WORK SECTION, which the DS paints
-     --surface-raised (#f8f9fb light / #141719 dark), NOT the body's --surface-base.
-     Round 14 matched it to the body instead, and the leading `#fff 22%` wash in the old
-     gradient lightened it further — both read as a seam against the main section. Solid
-     --surface-raised, no wash: the card is now the SAME surface as the work area, and the
-     border + shadow + radius alone make it float. */
-  background-color: var(--surface-raised);
+  /* Round 15/35: the floating card matches the MAIN WORK SECTION. Round 35:
+     Felix sees the grey card framed by the white window gap as "left is white,
+     right is grey" -- so match BOTH surfaces to WHITE (--surface-base), the same
+     tone as the gap/body, instead of grey (--surface-raised). The card still
+     FLOATS -- border + shadow + radius keep it lifted -- but there is no longer
+     a grey-vs-white edge anywhere. */
+  background-color: var(--surface-base);
   background-image: none;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, transparent);
   box-shadow:
@@ -357,7 +357,7 @@
     inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent);
 }
 [data-theme="dark"] .desk-shell .rr-shell__side {
-  background-color: var(--surface-raised);
+  background-color: var(--surface-base);
   background-image: none;
   border-color: color-mix(in srgb, #fff 7%, transparent);
   box-shadow:
@@ -372,15 +372,13 @@
 }
 
 /*
-  Round 32: the main work area is painted --surface-raised, the SAME tone as the
-  floating sidebar card above. The DS leaves #rr-shell-main transparent, so it fell
-  through to the body's --surface-base (pure white): on a content-light screen like
-  Conversations that left a visible seam between the raised sidebar card (#f8f9fb)
-  and the whiter page. Content-heavy screens (Trending AI) masked it, so it only
-  read as "Conversations doesn't match". Both surfaces are now one tone.
+  Round 32/35: the main work area matches the floating sidebar card. Round 35:
+  both are now --surface-base (white), the same tone as the window gap/body, so
+  the left panel and right body read as one continuous white surface with no
+  grey-vs-white edge. (Was --surface-raised grey.)
 */
 .desk-shell #rr-shell-main {
-  background-color: var(--surface-raised);
+  background-color: var(--surface-base);
 }
 
 .desk-shell--fill #rr-shell-main {
@@ -2167,6 +2165,29 @@ html[lang="ko"] {
  * unlayered `font-family` would beat the `:lang(ko)` rule and put Hangul back in
  * the Latin face. Smoothing is left to the platform, as the preflight asks.
  */
+
+/*
+  Round 35, item 1: chat replies render through .markdown-content with Tailwind
+  Typography `prose`, whose default list spacing (li margin 0.5em, and a tall
+  gap between items) reads "too spaced out" in a chat bubble -- the paragraph
+  line-height is fine, so this tightens ONLY the list rhythm, scoped to the chat
+  markdown. Lists sit closer to the surrounding text and each other; a paragraph
+  nested inside a list item loses its extra top/bottom margin so multi-line
+  bullets do not balloon.
+*/
+.markdown-content :is(ul, ol) {
+  margin-block: 0.5em;
+}
+.markdown-content :is(ul, ol) > li {
+  margin-block: 0.15em;
+  padding-inline-start: 0.1em;
+}
+.markdown-content li > p {
+  margin-block: 0.1em;
+}
+.markdown-content li > :is(ul, ol) {
+  margin-block: 0.15em;
+}
 
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
