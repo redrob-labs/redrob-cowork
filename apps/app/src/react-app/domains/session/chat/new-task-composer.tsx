@@ -255,6 +255,9 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
       onUploadInboxFiles={null}
       // The hero owns its own page padding, so the composer must fill the hero column and line up with the suggestion cards.
       flush
+      // Round 36 (item 3): the hero composer is two lines by default; the in-chat
+      // composer stays one line. NewTaskComposer is only ever the hero, so set it here.
+      twoLineDefault
       placeholderOverride={props.placeholderOverride}
       draftScopeKey={`new-task:${workspaceId ?? "chat-first"}`}
     />
