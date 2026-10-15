@@ -1283,6 +1283,38 @@
   color: var(--ink-primary);
   font: var(--text-body);
 }
+/* Scope tabs (All / Chats / Artifacts / Skills / Projects / Scheduled): a horizontal row
+   under the field; the active tab reads as a soft filled pill. */
+.desk-search__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.desk-search__tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--control-radius);
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  cursor: pointer;
+}
+.desk-search__tab:hover {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+.desk-search__tab[aria-selected="true"] {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+.desk-search__tab:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
 .desk-search__results {
   display: flex;
   flex-direction: column;
