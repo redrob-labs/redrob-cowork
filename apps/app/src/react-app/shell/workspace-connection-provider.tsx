@@ -38,7 +38,11 @@ import {
 } from "@/react-app/infra/workspace-server-client";
 
 import { resolveRedrobConnection } from "./redrob-connection";
-import { createRouteRefreshLifecycle, withRouteRefreshTimeout } from "./route-refresh-control";
+import {
+  createRouteRefreshLifecycle,
+  planRouteConnectionGap,
+  withRouteRefreshTimeout,
+} from "./route-refresh-control";
 import { describeRouteError, orderRouteWorkspaces, type RouteWorkspace } from "./route-workspaces";
 import {
   readActiveWorkspaceId,
@@ -223,7 +227,7 @@ export function WorkspaceConnectionProvider(props: { children: ReactNode }) {
       if (outcome.kind === "stale") return;
 
       if (outcome.kind === "gap") {
-        routeReady = false;
+        routeReady = planRouteConnectionGap({ desktopRuntime: isDesktopRuntime() }).markRouteReady;
         // Quarantine the live connection (the old loopback port may now belong
         // to another process) but keep records as display state.
         setConnectionPending(true);
