@@ -1125,7 +1125,7 @@ export function ReactSessionComposer(props: ComposerProps) {
       className={
         props.flush
           ? `relative ${toolMenuOpen ? "z-50" : "z-20"}`
-          : `sticky bottom-0 ${toolMenuOpen ? "z-50" : "z-20"} bg-gradient-to-t from-dls-surface via-dls-surface/95 to-transparent ${CHAT_COLUMN_OUTER} pb-[max(0.5rem,calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px)))] ${props.compactTopSpacing ? "pt-0" : "pt-1"}`
+          : `sticky bottom-0 ${toolMenuOpen ? "z-50" : "z-20"} bg-gradient-to-t from-background via-background/95 to-transparent ${CHAT_COLUMN_OUTER} pb-[max(0.5rem,calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px)))] ${props.compactTopSpacing ? "pt-0" : "pt-1"}`
       }
       style={{ contain: "layout style" }}
       onKeyDownCapture={handleKeyDownCapture}

@@ -586,6 +586,18 @@
 }
 
 /*
+  Round 37 (item 4): the broad bare-top `overflow: visible` above also matched the
+  prompt EDITOR (its class contains `overflow-y-auto`), killing its internal scroll
+  so a long draft on the new-chat hero spilled out of the composer box, above and
+  below it. The editor is a bounded, max-height field and MUST keep scrolling inside
+  itself. Restore that here with a more specific selector (so this wins over the
+  broad rule) without affecting the status-popover-clipping fix above.
+*/
+.desk-shell--bare-top #rr-shell-main [contenteditable="true"][class*="overflow-y-auto"] {
+  overflow-y: auto;
+}
+
+/*
   Item 5 -- the panel read large next to the compact composer. Size it down to the
   app's own scale: tighter padding and radius, smaller gaps, smaller level cards and
   type, a narrower max width, and a shorter max height. A deliberate, local override of
