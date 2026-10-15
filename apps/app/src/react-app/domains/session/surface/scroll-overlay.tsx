@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import {
   selectSessionIsStickyBottom,
@@ -26,12 +26,19 @@ const JumpToStartButton = memo(function JumpToStartButton({
     onJumpToStartOfMessage("smooth");
   }, [onJumpToStartOfMessage]);
 
+  // Round 34: a single icon-only UP chevron (was a "Jump to start" text pill).
+  // Shown at the bottom of a long turn to jump to the start of the latest
+  // message; the label is kept as aria-label/title for a11y + the tooltip layer.
   return (
     <button
       type="button"
-      className="rounded-full px-3 py-1.5 text-xs text-dls-text transition-colors hover:bg-dls-hover"
+      className="flex size-7 items-center justify-center rounded-full text-dls-text transition-colors hover:bg-dls-hover"
       onClick={handleClick}
-    >{t("session.jump_to_start")}</button>
+      aria-label={t("session.jump_to_start")}
+      title={t("session.jump_to_start")}
+    >
+      <ChevronUp size={16} strokeWidth={2.25} aria-hidden="true" />
+    </button>
   );
 });
 
@@ -77,7 +84,11 @@ export const SessionScrollOverlay = memo(function SessionScrollOverlay({
 }: SessionScrollOverlayProps) {
   const { isAtBottom, topClippedMessageId } = useSessionScrollOverlayState(sessionId);
   const showJumpToStart = !isStreaming && Boolean(topClippedMessageId);
-  const showJumpToLatest = !isAtBottom;
+  // Round 34: the two controls are mutually exclusive -- never shown together,
+  // so the overlay is always a single chevron. Jump-to-start wins when the
+  // latest message's own top is clipped (you are at the very bottom of a long
+  // turn); otherwise jump-to-latest shows only when you have scrolled up.
+  const showJumpToLatest = !showJumpToStart && !isAtBottom;
 
   if (!showJumpToStart && !showJumpToLatest) {
     return null;
