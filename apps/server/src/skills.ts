@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile, mkdir, rm } from "node:fs/promises";
+import { cp, readdir, readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import type { Dirent } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
@@ -290,9 +290,10 @@ export async function upsertSkill(
 }
 
 /**
- * Saves a person's own skill. A skill that already exists in the workspace or the user dir is
- * updated in place; a new one goes to the user dir (~/.config/redrob/skills), where every
- * Redrob app and every folder reads it. Skills in other global dirs are never written.
+ * Saves a person's own skill to the user dir (~/.config/redrob/skills), where every Redrob app
+ * and every folder reads it. A skill still sitting in a workspace folder is moved there on save:
+ * its sibling files come along and the workspace copy is removed. Skills in other global dirs
+ * are never written.
  */
 export async function upsertUserSkill(
   workspaceRoot: string,
@@ -303,10 +304,19 @@ export async function upsertUserSkill(
   if (existing && existing.scope === "global") {
     throw new ApiError(409, "skill_exists", `A skill named ${skill.name} already exists outside Redrob`);
   }
-  const skillPath = existing?.path ?? join(globalSkillsDir(), skill.name, "SKILL.md");
-  await mkdir(dirname(skillPath), { recursive: true });
+  const skillDir = join(globalSkillsDir(), skill.name);
+  const skillPath = join(skillDir, "SKILL.md");
+  if (existing && existing.scope === "project") {
+    const fromDir = dirname(existing.path);
+    if (resolve(fromDir) !== resolve(skillDir)) {
+      await mkdir(dirname(skillDir), { recursive: true });
+      await cp(fromDir, skillDir, { recursive: true, force: false, errorOnExist: false });
+      await rm(fromDir, { recursive: true, force: true });
+    }
+  }
+  await mkdir(skillDir, { recursive: true });
   await writeFile(skillPath, skill.content, "utf8");
-  return { path: skillPath, action: existing ? "updated" : "added", scope: existing?.scope ?? "user" };
+  return { path: skillPath, action: existing ? "updated" : "added", scope: "user" };
 }
 
 /** Creates a project skill atomically and refuses to overwrite an existing SKILL.md. */
