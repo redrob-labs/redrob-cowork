@@ -145,7 +145,7 @@ describe("the Preview routes", () => {
     setLocale("ko");
     expect(route("/skills", client)).toContain("미리 보기: 예시 스킬입니다.");
     expect(route("/scheduled", client)).toContain("나를 기다리는 실행 (2)");
-    expect(route("/history", client)).toContain("스스로 실행");
+    expect(route("/history", client)).toContain("기록");
     client.setQueryData(GUIDE_RESEARCH_KEY, await loadGuideResearch());
     expect(route("/guide", client)).toContain("당신의 직업을 위한 추천");
   });
@@ -324,16 +324,17 @@ describe("Scheduled", () => {
 });
 
 describe("History", () => {
-  test("a table of everything Cowork did and who approved it, from the sample entries", async () => {
+  test("a flat clickable list of everything Cowork did, newest first, from the sample entries", async () => {
     const html = route("/history", await seeded());
-    expect(html).toContain("<table");
-    expect(html).toContain("Everything Cowork did, in order");
+    // Round 39: the table is gone — each entry is a full-width row linking to its chat.
+    expect(html).toContain("desk-history");
+    expect(html).not.toContain("<table");
+    expect(html).not.toContain("Everything Cowork did, in order");
     for (const entry of HISTORY) expect(html).toContain(entry.what.replace(/'/g, "&#x27;"));
-    expect(html).toContain("Ran on its own");
-    expect(html).toContain("Lee Dohyun");
-    expect(html).toContain("Approval - sent outside");
-    expect(html).toContain("desk-preview__figure");
-    expect(html).toContain("4m 12s");
+    // Rows link to the chat and carry no approver/figure/took column any more.
+    expect(html).toContain('href="#/chat/');
+    expect(html).not.toContain("Ran on its own");
+    expect(html).not.toContain("desk-preview__figure");
     expect(html.indexOf("Renewal sweep read 41 contracts")).toBeLessThan(html.indexOf("Declined to send 1 notice letter"));
   });
 

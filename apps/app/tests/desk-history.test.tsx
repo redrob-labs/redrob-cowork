@@ -3,7 +3,7 @@ import type { Session } from "@redrob-labs/sdk/v2/client";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import type { RedrobSessionSnapshot } from "../src/app/lib/redrob-server";
-import { formatTook, historyEntryFrom, stepsDone } from "../src/react-app/desk/history/history";
+import { formatHistoryWhen, formatTook, historyEntryFrom, stepsDone } from "../src/react-app/desk/history/history";
 import { HistoryView } from "../src/react-app/desk/preview/desk-history";
 import { createRealDeskServices, type DeskServerClient } from "../src/react-app/desk/services/real-services";
 
@@ -93,15 +93,32 @@ describe("real History", () => {
 });
 
 describe("the History screen", () => {
-  test("real entries name the project and leave out who approved", () => {
-    const entry = historyEntryFrom({ session: session("s1", Date.UTC(2026, 9, 5, 9)), projectId: "ws_1", mode: "run" });
-    const html = renderToStaticMarkup(<HistoryView entries={[entry]} locale="en" preview={false} projectName={() => "Seorin MSA"} />);
-    expect(html).toContain("Seorin MSA");
+  test("each row is the title with its relative time, linking to the chat", () => {
+    const now = Date.UTC(2026, 9, 15, 12);
+    const entry = historyEntryFrom({ session: session("s1", now - 3 * 60 * 60_000), projectId: "ws_1", mode: "run" });
+    const html = renderToStaticMarkup(<HistoryView entries={[entry]} locale="en" preview={false} now={now} />);
     expect(html).toContain("Chat s1");
+    expect(html).toContain("3 hours ago");
+    expect(html).toContain('href="#/chat/s1"');
+    // The old table columns are gone: no project name, no approver.
     expect(html).not.toContain("On its own");
   });
 
   test("nothing yet says so", () => {
     expect(renderToStaticMarkup(<HistoryView entries={[]} locale="en" preview={false} />)).toContain("Nothing here yet");
+  });
+});
+
+describe("formatHistoryWhen (Claude-style relative time)", () => {
+  const now = Date.UTC(2026, 9, 15, 12);
+  test("just now / minutes / hours", () => {
+    expect(formatHistoryWhen(now - 30_000, now, "en")).toBe("Just now");
+    expect(formatHistoryWhen(now - 5 * 60_000, now, "en")).toBe("5 minutes ago");
+    expect(formatHistoryWhen(now - 3 * 60 * 60_000, now, "en")).toBe("3 hours ago");
+  });
+  test("yesterday / N days ago / older is a date", () => {
+    expect(formatHistoryWhen(now - 30 * 60 * 60_000, now, "en")).toBe("Yesterday");
+    expect(formatHistoryWhen(Date.UTC(2026, 9, 12, 10), now, "en")).toBe("3 days ago");
+    expect(formatHistoryWhen(Date.UTC(2026, 8, 1, 10), now, "en")).toMatch(/2026/);
   });
 });

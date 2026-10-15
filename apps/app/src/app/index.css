@@ -1313,6 +1313,53 @@
   padding: var(--space-2) var(--space-3);
 }
 
+/* History (/history): a flat, full-width clickable list — title left, relative time right,
+   hairline dividers, no cards (Claude-style). Rows link to the chat. */
+.desk-history {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desk-history__row {
+  border-bottom: 1px solid var(--border-subtle);
+}
+.desk-history__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-1);
+  color: var(--ink-primary);
+  text-decoration: none;
+  font: var(--text-body);
+}
+.desk-history__link:hover {
+  color: var(--ink-primary);
+}
+.desk-history__row:hover {
+  background: var(--surface-sunken);
+}
+.desk-history__link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+  border-radius: var(--control-radius);
+}
+.desk-history__what {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.desk-history__when {
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
 .desk-hint {
   margin: 0;
   font: var(--text-body-sm);
