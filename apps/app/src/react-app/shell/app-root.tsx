@@ -22,6 +22,8 @@ import {
   type RedrobControlAction,
 } from "./control/control-provider";
 import { RedrobContextPublisher } from "./redrob-context-publisher";
+import { DeskConnectionPublisher } from "./desk-connection-publisher";
+import { WorkspaceConnectionProvider } from "./workspace-connection-provider";
 import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
@@ -106,6 +108,10 @@ export function AppRoot() {
           <RedrobRouteControlActions />
           <RedrobContextPublisher />
           <EvalRelaunchControlActions />
+          {/* Always mounted across every route, /skills included: the app-wide
+              workspace connection and the sole Desk connection writer. */}
+          <WorkspaceConnectionProvider>
+            <DeskConnectionPublisher />
             <Routes>
               <Route
                 path="/welcome"
@@ -159,6 +165,7 @@ export function AppRoot() {
               />
               {import.meta.env.DEV ? <Route path="/__ds" element={<DsStory />} /> : null}
             </Routes>
+          </WorkspaceConnectionProvider>
           <DeskLayer />
           <LoadingOverlay />
         </RedrobControlProvider>
