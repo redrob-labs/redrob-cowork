@@ -70,16 +70,16 @@ import type { NewTaskComposerContext } from "./new-task-composer";
 import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
-import { useInDeskFrame } from "../../../desk/shell/desk-frame";
+import { useInCoworkFrame } from "../../../cowork/shell/cowork-frame";
 import {
   applyFramePanelCommand,
   BROWSER_TARGET,
   FILES_TARGET,
   routeSidePanelRequest,
   type SidePanelTarget,
-} from "../../../desk/panel/route-side-panel";
-import { useFrameStore } from "../../../desk/store/frame-store";
-import { browserHeldResult } from "../../../desk/panel/desk-browser-state";
+} from "../../../cowork/panel/route-side-panel";
+import { useFrameStore } from "../../../cowork/store/frame-store";
+import { browserHeldResult } from "../../../cowork/panel/cowork-browser-state";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
 import { useBootOverlayVisible } from "../../../shell/boot-state";
@@ -138,6 +138,17 @@ const STARTUP_SKELETON_ROWS = [
 const GLOBAL_VOICE_SIDE_PANEL_KEY = "__redrob_voice__";
 const EMPTY_TRANSCRIPT_TARGETS: OpenTarget[] = [];
 const EMPTY_SESSION_TABS: WorkbenchSessionTab[] = [];
+
+/**
+ * Module-scoped "the app has booted at least once" latch. SessionPage remounts
+ * when the cowork route changes (Conversations and the other screens are separate
+ * route elements), so a per-instance flag would reset on every navigation. This
+ * survives those remounts: it flips false->true the first time the app is ready
+ * / connected / has a workspace, and from then on the cold-boot startup skeleton
+ * is never shown again (see showStartupSkeleton), so navigating to Conversations
+ * renders the empty hero directly instead of flashing the skeleton. One-way.
+ */
+let hasAppBootedOnce = false;
 
 export type OpenSessionTab = WorkbenchSessionTab;
 
@@ -342,12 +353,31 @@ function controlStringArg(args: unknown, key: string) {
 
 export function SessionPage(props: SessionPageProps) {
   const { config: shellConfig } = useShellConfig();
-  // Inside the Desk frame the shell owns the menu, so the session sidebar stays hidden.
-  const inDeskFrame = useInDeskFrame();
-  const showSidebar = shellConfig.sidebar && !inDeskFrame;
+  // Inside the Cowork frame the shell owns the menu, so the session sidebar stays hidden.
+  const inCoworkFrame = useInCoworkFrame();
+  const showSidebar = shellConfig.sidebar && !inCoworkFrame;
   const platform = usePlatform();
   const isMobile = useIsMobile();
   const bootOverlayVisible = useBootOverlayVisible();
+  // The startup skeleton (animate-pulse rows) is a COLD-BOOT affordance for the
+  // very first paint, before the app has anything to show. It keyed only off
+  // transient signals (clientConnected / startupPhase), which also dip for a
+  // frame during an in-app route change (e.g. clicking Conversations) - and
+  // because Conversations and the other cowork screens are separate route
+  // elements, SessionPage REMOUNTS on that navigation, so a per-instance latch
+  // would reset every time. Latch "the app has booted at least once" at MODULE
+  // scope so it survives those remounts: once true, the cold skeleton never
+  // shows again and the empty hero is rendered immediately instead. One-way.
+  if (
+    !hasAppBootedOnce &&
+    (props.startupPhase === "ready" ||
+      props.startupPhase === "firstSessionReady" ||
+      props.startupPhase === "sessionIndexReady" ||
+      props.clientConnected ||
+      props.workspaces.length > 0)
+  ) {
+    hasAppBootedOnce = true;
+  }
   const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUiStateStore((state) => state.setSidebarOpen);
   const sidePanelSessionKey = getSidePanelSessionKey(props.selectedSessionId);
@@ -379,8 +409,8 @@ export function SessionPage(props: SessionPageProps) {
   const artifactTargetCount = artifactFileTargets.length;
   const hasArtifactTargets = artifactTargetCount > 0;
   const hasBrowserTabs = sessionPanelState.tabs.some((tab) => tab.type === "browser");
-  // In the Desk frame the old panel never shows, even if a stored state still names it.
-  const activeSidePanel = voiceSidePanelOpen ? "voice" : inDeskFrame && sessionSidePanel === "panel" ? null : sessionSidePanel;
+  // In the Cowork frame the old panel never shows, even if a stored state still names it.
+  const activeSidePanel = voiceSidePanelOpen ? "voice" : inCoworkFrame && sessionSidePanel === "panel" ? null : sessionSidePanel;
   const sidePanelOpen = activeSidePanel !== null;
   const panelRailActive = activeSidePanel === "panel";
   const voiceRailActive = activeSidePanel === "voice";
@@ -425,17 +455,17 @@ export function SessionPage(props: SessionPageProps) {
   const browserPanelRef = usePanelRef();
   const preserveSidePanelOnPanelOpenRef = useRef(false);
 
-  // Inside the Desk frame both of these hand "panel" requests to the frame's side panel.
+  // Inside the Cowork frame both of these hand "panel" requests to the frame's side panel.
   const setCurrentSidePanel = useCallback((panel: SidePanelItem | null, target?: SidePanelTarget) => {
-    const command = routeSidePanelRequest(panel, inDeskFrame, target);
+    const command = routeSidePanelRequest(panel, inCoworkFrame, target);
     if (command) return applyFramePanelCommand(command, useFrameStore.getState());
     setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, panel === "voice" ? "voice" : null);
     if (panel === "voice") return;
     setSidePanelState(sidePanelSessionKey, panel);
-  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey]);
+  }, [inCoworkFrame, setSidePanelState, sidePanelSessionKey]);
 
   const toggleCurrentSidePanel = useCallback((panel: SidePanelItem, target: SidePanelTarget = BROWSER_TARGET) => {
-    const command = routeSidePanelRequest(panel, inDeskFrame, { ...target, toggle: true });
+    const command = routeSidePanelRequest(panel, inCoworkFrame, { ...target, toggle: true });
     if (command) return applyFramePanelCommand(command, useFrameStore.getState());
     if (panel === "voice") {
       toggleSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, "voice");
@@ -443,7 +473,7 @@ export function SessionPage(props: SessionPageProps) {
     }
     setSidePanelState(GLOBAL_VOICE_SIDE_PANEL_KEY, null);
     toggleSidePanelState(sidePanelSessionKey, panel);
-  }, [inDeskFrame, setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
+  }, [inCoworkFrame, setSidePanelState, sidePanelSessionKey, toggleSidePanelState]);
 
   // When the agent calls a built-in browser tool, the main process opens
   // the WebContentsView and sends panel-opened; when hide_browser is called
@@ -476,6 +506,15 @@ export function SessionPage(props: SessionPageProps) {
   const [browserPanelDefaultWidth, setBrowserPanelDefaultWidth] = useState(browserPanelWidth);
   const sidebarProviderStyle: CSSProperties & Record<"--sidebar-width", string> = {
     "--sidebar-width": `${leftSidebarWidth}px`,
+    // Round 36 (item 2): the SidebarProvider wrapper carries `min-h-app-svh`
+    // (min-height: 100svh), correct when it is the top-level app shell. In the
+    // Cowork frame it is nested inside the bounded shell content area, where that
+    // full-viewport min-height makes the wrapper ~40px taller than its parent and
+    // overflow the clipped bottom -- pushing the in-chat disclaimer (the composer's
+    // last child) below the fold so it was invisible. `min-h-app-svh` is a custom
+    // utility that twMerge will not dedupe against `min-h-0`, so neutralise it with
+    // an inline minHeight:0 (inline style wins) when nested in the Cowork frame.
+    ...(inCoworkFrame ? { minHeight: 0 } : {}),
   };
   useEffect(() => {
     if (sidePanelOpen) return;
@@ -590,8 +629,8 @@ export function SessionPage(props: SessionPageProps) {
       if (provider !== "auto" && provider !== "builtin") {
         return { ok: false, error: `Browser provider is not available yet: ${provider}` };
       }
-      // Take over in the Desk panel hands the browser to the person; Desk waits for it back.
-      const held = browserHeldResult(useFrameStore.getState().browser.desk);
+      // Take over in the Cowork panel hands the browser to the person; Cowork waits for it back.
+      const held = browserHeldResult(useFrameStore.getState().browser.cowork);
       if (held) return held;
       setCurrentSidePanel("panel");
       return window.__REDROB_ELECTRON__?.browser?.openUrl?.(url, provider);
@@ -609,7 +648,7 @@ export function SessionPage(props: SessionPageProps) {
     previewArgs: { proxy: "env:DE" },
     disabled: !isElectronRuntime(),
     execute: async (args) => {
-      const held = browserHeldResult(useFrameStore.getState().browser.desk);
+      const held = browserHeldResult(useFrameStore.getState().browser.cowork);
       if (held) return held;
       const proxy = controlStringArg(args, "proxy") || "";
       const setProxy = window.__REDROB_ELECTRON__?.browser?.setProxy;
@@ -745,6 +784,19 @@ export function SessionPage(props: SessionPageProps) {
     () => sessionTitleForId(props.sidebar.workspaceSessionGroups, props.selectedSessionId),
     [props.selectedSessionId, props.sidebar.workspaceSessionGroups],
   );
+  // Round 34, item 5: recent session titles for the empty-home starter-hint
+  // bias. Newest first, from the selected workspace's own sessions, capped so a
+  // large history does not over-weight the keyword match. Titles only -- no
+  // content -- used purely to pick which tangible starter to suggest.
+  const recentSessionTitles = useMemo(() => {
+    const group = props.sidebar.workspaceSessionGroups.find(
+      (entry) => entry.workspace.id === props.selectedWorkspaceId,
+    );
+    return (group?.sessions ?? [])
+      .slice(0, 20)
+      .map((session) => getDisplaySessionTitle(session.title))
+      .filter((title) => title.trim().length > 0);
+  }, [props.selectedWorkspaceId, props.sidebar.workspaceSessionGroups]);
   const workspaceName =
     props.selectedWorkspaceDisplay.displayName?.trim() ||
     props.selectedWorkspaceDisplay.name?.trim() ||
@@ -834,6 +886,7 @@ export function SessionPage(props: SessionPageProps) {
   const hasMainContentTakeover = Boolean(props.mainContentTakeover);
   const showWorkspaceSetupEmptyState = props.workspaces.length === 0 && !props.selectedSessionId;
   const showStartupSkeleton =
+    !hasAppBootedOnce &&
     !bootOverlayVisible &&
     !props.primarySlot &&
     !hasMainContentTakeover &&
@@ -888,7 +941,7 @@ export function SessionPage(props: SessionPageProps) {
   // header's "New session" title and its hints are dropped to give the hero the full height (Q5:
   // home-screen only). The header bar itself stays for the window-drag region and its controls.
   const isEmptyHome =
-    inDeskFrame &&
+    inCoworkFrame &&
     !props.selectedSessionId &&
     !props.primarySlot &&
     !hasMainContentTakeover &&
@@ -909,27 +962,27 @@ export function SessionPage(props: SessionPageProps) {
     (workspace) => workspace.id === props.selectedWorkspaceId && workspace.workspaceType === "remote",
   );
   const findButtonSessionId = props.selectedSessionId;
-  // Item 6 (round 7): in the Desk frame the chat header is rendered ONCE, by the Desk shell's top
+  // Item 6 (round 7): in the Cowork frame the chat header is rendered ONCE, by the Cowork shell's top
   // bar, so the title sits on the same row as Invite + the side panel. Publish the title + find
   // target to the frame store for the shell to read; the local <header> below is suppressed in the
   // frame. Clear it when this chat screen is not the one owning the frame header.
   const setChatHeader = useFrameStore((state) => state.setChatHeader);
-  const deskHeaderTitle = props.primaryTitle
+  const coworkHeaderTitle = props.primaryTitle
     ? props.primaryTitle
     : props.mainContentTitle
     ? props.mainContentTitle
     : showWorkspaceSetupEmptyState
     ? t("session.create_or_connect_workspace")
     : selectedSessionTitle || t("session.default_title");
-  const deskHeaderFindId = !props.primarySlot && findButtonSessionId && !hasMainContentTakeover ? findButtonSessionId : null;
+  const coworkHeaderFindId = !props.primarySlot && findButtonSessionId && !hasMainContentTakeover ? findButtonSessionId : null;
   useEffect(() => {
-    if (!inDeskFrame || isEmptyHome) {
+    if (!inCoworkFrame || isEmptyHome) {
       setChatHeader(null);
       return;
     }
-    setChatHeader({ title: deskHeaderTitle, findSessionId: deskHeaderFindId });
+    setChatHeader({ title: coworkHeaderTitle, findSessionId: coworkHeaderFindId });
     return () => setChatHeader(null);
-  }, [inDeskFrame, isEmptyHome, deskHeaderTitle, deskHeaderFindId, setChatHeader]);
+  }, [inCoworkFrame, isEmptyHome, coworkHeaderTitle, coworkHeaderFindId, setChatHeader]);
   const canGoBackInConversationHistory = !pendingConversationHistoryNavigation && canNavigateSelectedConversationHistory(
     conversationHistory,
     props.selectedWorkspaceId,
@@ -1080,6 +1133,13 @@ export function SessionPage(props: SessionPageProps) {
         onOpenChange={setSidebarOpen}
         className={cn(
           "relative min-h-0 flex-1 mac:bg-transparent",
+          // Round 36 (item 2): defeat the wrapper's `min-h-app-svh` (100svh) in the
+          // Cowork frame -- it is a custom utility twMerge will not dedupe against
+          // `min-h-0`, so force it important here. Paired with the inline minHeight:0
+          // in sidebarProviderStyle. Without this the chat column runs full-viewport
+          // tall inside the bounded Cowork content area and the in-chat disclaimer
+          // (composer's last child) falls below the clipped bottom.
+          inCoworkFrame && "!min-h-0",
           leftSidebarResizing &&
             "**:data-[slot=sidebar-container]:transition-none **:data-[slot=sidebar-gap]:transition-none",
           !showSidebar && "**:data-[slot=sidebar-container]:hidden **:data-[slot=sidebar-gap]:hidden",
@@ -1146,24 +1206,29 @@ export function SessionPage(props: SessionPageProps) {
             onSendFeedback: props.onSendFeedback,
           }}
         />
-        <SidebarInset className="min-h-0 overflow-hidden bg-sidebar mac:bg-transparent mac:[&_header]:transition-[padding-left] mac:[&_header]:duration-200 mac:[&_header]:ease-linear mac:peer-data-[state=collapsed]:[&_header]:pl-34 mac:max-md:[&_header]:pl-34">
+        <SidebarInset className={`min-h-0 overflow-hidden ${isEmptyHome || inCoworkFrame ? "bg-background" : "bg-sidebar"} mac:bg-transparent mac:[&_header]:transition-[padding-left] mac:[&_header]:duration-200 mac:[&_header]:ease-linear mac:peer-data-[state=collapsed]:[&_header]:pl-34 mac:max-md:[&_header]:pl-34`}>
           <div className={`flex min-h-0 flex-1 max-lg:p-0 ${isEmptyHome ? "" : "lg:py-2 lg:pl-2"}`}>
           <ResizablePanelGroup
             orientation="horizontal"
             onLayoutChanged={sidePanelOpen ? commitBrowserPanelWidth : undefined}
-            className={`min-h-0 flex-1 max-lg:rounded-none ${isEmptyHome || inDeskFrame ? "" : "lg:rounded-(--card-radius)"}`}
+            className={`min-h-0 flex-1 max-lg:rounded-none ${isEmptyHome || inCoworkFrame ? "" : "lg:rounded-(--card-radius)"}`}
           >
             <ResizablePanel minSize={isMobile ? "0px" : "360px"} className="min-w-0">
-              {/* Round 11, item 5: inside the Cowork/Desk frame the chat column sits flush in the
+              {/* Round 11, item 5: inside the Cowork/Cowork frame the chat column sits flush in the
                   shell content area, so drop the card's rounded border + shadow there (it read as a
-                  stray border near the top-left). The standalone web/mac layout keeps its card. */}
-              <main className={`relative flex h-full min-w-0 flex-col overflow-hidden bg-card max-lg:rounded-none max-lg:border-0 max-lg:shadow-none mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150 ${isEmptyHome || inDeskFrame ? "" : "lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card"}`}>
-          {isEmptyHome || inDeskFrame ? (
+                  stray border near the top-left). The standalone web/mac layout keeps its card.
+                  Round 36 (item 5): in the Cowork frame this <main> previously stayed `bg-card`
+                  (--surface-raised, grey) while the shell + left float are white (--surface-base),
+                  so the right pane read grey against the white left panel -- the seam Felix saw.
+                  Use `bg-background` (white) in the Cowork/empty-home frame to match; standalone
+                  web/mac keeps the grey card surface. */}
+              <main className={`relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden ${isEmptyHome || inCoworkFrame ? "bg-background" : "bg-card"} max-lg:rounded-none max-lg:border-0 max-lg:shadow-none mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150 ${isEmptyHome || inCoworkFrame ? "" : "lg:rounded-(--card-radius) lg:border lg:border-border lg:shadow-card"}`}>
+          {isEmptyHome || inCoworkFrame ? (
             // Full-screen the new-chat hero: drop the "New session" header row. On the desktop app the
             // OS window-title-bar (window-title-bar.tsx) stays and keeps the drag region and controls;
             // a minimal drag strip stands in only where that bar is absent (web/mac titlebar-drag).
-            // In the Desk frame the chat header is rendered once by the shell's top bar (round 7, item
-            // 6) so the title shares a row with Invite + the side panel — drop the local header too.
+            // In the Cowork frame the chat header is rendered once by the shell's top bar (round 7, item
+            // 6) so the title shares a row with Invite + the side panel - drop the local header too.
             <div className="mac:titlebar-drag h-0 shrink-0" aria-hidden="true" />
           ) : (
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
@@ -1209,8 +1274,8 @@ export function SessionPage(props: SessionPageProps) {
                   <TooltipContent>Find in conversation (⌘F)</TooltipContent>
                 </Tooltip>
               ) : null}
-              {/* The Desk frame has its own side panel button. */}
-              {inDeskFrame ? null : <Tooltip>
+              {/* The Cowork frame has its own side panel button. */}
+              {inCoworkFrame ? null : <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
@@ -1299,7 +1364,7 @@ export function SessionPage(props: SessionPageProps) {
 
           <ResizablePanelGroup orientation="vertical" className="min-h-0 flex-1 overflow-hidden">
             <ResizablePanel minSize="180px" className="min-h-0">
-            <div className="relative h-full min-w-0 overflow-hidden bg-dls-surface mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150">
+            <div className={`relative h-full min-w-0 overflow-hidden ${isEmptyHome || inCoworkFrame ? "bg-background" : "bg-dls-surface"} mac:bg-dls-surface/85 mac:backdrop-blur-2xl mac:backdrop-saturate-150`}>
               {props.primarySlot ? (
                 <div className="h-full overflow-y-auto" data-workspace-primary-slot>
                   {props.primarySlot}
@@ -1444,7 +1509,7 @@ export function SessionPage(props: SessionPageProps) {
                       </div>
                     </div>
                   ) : showWorkspaceSetupEmptyState ? (
-                    // Chat-first: no workspace yet — the composer creates a
+                    // Chat-first: no workspace yet - the composer creates a
                     // default chat workspace instead of asking where to put it.
                     <SessionEmptyHero
                       providerCount={providerCount}
@@ -1452,6 +1517,7 @@ export function SessionPage(props: SessionPageProps) {
                       onRunTask={(prompt, attachments) => props.onChatFirstTask?.(prompt, attachments)}
                       onOpenProviderAuth={props.onOpenProviderAuth}
                       composer={props.newTaskComposer}
+                      recentTitles={recentSessionTitles}
                     />
                   ) : showSelectedWorkspaceError ? (
                     <div className="px-6 py-16">
@@ -1549,6 +1615,7 @@ export function SessionPage(props: SessionPageProps) {
                         }
                         onOpenProviderAuth={props.onOpenProviderAuth}
                         composer={props.newTaskComposer}
+                        recentTitles={recentSessionTitles}
                       />
                     </div>
                   )}
@@ -1654,9 +1721,9 @@ export function SessionPage(props: SessionPageProps) {
               </Sheet>
             ) : null}
           </ResizablePanelGroup>
-          {/* In the Desk frame the browser and the files are the frame's panel; only voice stays here. */}
-          {inDeskFrame && !voiceExtensionEnabled ? null : <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
-            {isElectronRuntime() && !inDeskFrame ? (
+          {/* In the Cowork frame the browser and the files are the frame's panel; only voice stays here. */}
+          {inCoworkFrame && !voiceExtensionEnabled ? null : <aside className="hidden w-9 shrink-0 flex-col items-center gap-1 px-0.5 py-2 text-muted-foreground lg:flex mac:titlebar-no-drag">
+            {isElectronRuntime() && !inCoworkFrame ? (
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -1689,7 +1756,7 @@ export function SessionPage(props: SessionPageProps) {
                 <Mic2 size={15} />
               </Button>
             ) : null}
-            {inDeskFrame ? null : <Button
+            {inCoworkFrame ? null : <Button
               variant="ghost"
               size="icon-sm"
               className={cn(

@@ -111,11 +111,11 @@ describe("read aloud", () => {
   });
 
   test("voice is allowed at Off, Standard and High privacy, and not at Strict", () => {
-    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "off" } })).toBe(true);
-    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "standard" } })).toBe(true);
+    expect(voiceAllowedForPrivacy({ coworkPrivacy: { level: "off" } })).toBe(true);
+    expect(voiceAllowedForPrivacy({ coworkPrivacy: { level: "standard" } })).toBe(true);
     expect(voiceAllowedForPrivacy({})).toBe(true);
-    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "high" } })).toBe(true);
-    expect(voiceAllowedForPrivacy({ deskPrivacy: { level: "strict" } })).toBe(false);
+    expect(voiceAllowedForPrivacy({ coworkPrivacy: { level: "high" } })).toBe(true);
+    expect(voiceAllowedForPrivacy({ coworkPrivacy: { level: "strict" } })).toBe(false);
   });
 
   test("each request names the workspace, which the server checks privacy against", async () => {

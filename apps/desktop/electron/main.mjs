@@ -1987,17 +1987,17 @@ const desktopCommandHandlers = {
       }
       return `Could not find "${target}" on disk.`;
   },
-  // The Desk side panel's Open and Show in folder: a workspace-relative file, only inside a
+  // The Cowork side panel's Open and Show in folder: a workspace-relative file, only inside a
   // local workspace (or a folder one authorizes). Never a path the renderer made up.
   "__openWorkspaceFile": async (event, ...args) => {
       const target = await authorizedWorkspaceFile(args[0], args[1]);
-      if (!target) return "This file is outside the folders Desk may use.";
+      if (!target) return "This file is outside the folders Cowork may use.";
       if (!existsSync(target)) return "This file is no longer there.";
       return shell.openPath(target);
   },
   "__revealWorkspaceFile": async (event, ...args) => {
       const target = await authorizedWorkspaceFile(args[0], args[1]);
-      if (!target) return "This file is outside the folders Desk may use.";
+      if (!target) return "This file is outside the folders Cowork may use.";
       if (!existsSync(target)) return "This file is no longer there.";
       shell.showItemInFolder(target);
       return undefined;

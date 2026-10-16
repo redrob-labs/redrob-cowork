@@ -1,8 +1,42 @@
-// Concurrency and degraded-state policy for the session route's
-// refreshRouteState. Extracted as pure helpers so the desktop restart
-// recovery contract is unit-testable without rendering the route.
+// Concurrency and degraded-state policy for the workspace connection refresh
+// (run by WorkspaceConnectionProvider, joined by the session route). Extracted
+// as pure helpers so the desktop restart recovery contract is unit-testable
+// without rendering the route.
+import { t } from "@/i18n";
+
+// Hard ceiling for each blocking await of a route or connection refresh. A hung
+// desktop bridge or unresponsive server otherwise leaves loading true forever,
+// which the session pane renders as an indefinite loading state. Lives here, a
+// dependency-neutral module, so both the route hook and the always-mounted
+// connection provider can use it without importing each other.
+const ROUTE_REFRESH_STEP_TIMEOUT_MS = 15_000;
+
+// Rejects when `promise` outlives the step timeout, labelling which await stalled.
+export function withRouteRefreshTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    // Fires the timeout rejection if the awaited promise has not settled in time.
+    const timer = window.setTimeout(
+      () => reject(new Error(t("workspace.route_refresh_timeout", {
+        label,
+        seconds: ROUTE_REFRESH_STEP_TIMEOUT_MS / 1000,
+      }))),
+      ROUTE_REFRESH_STEP_TIMEOUT_MS,
+    );
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
 export type RouteRefreshAttempt = {
+  /** Monotonic id of this attempt; the newest one is current. */
   readonly generation: number;
   /**
    * False once a newer refresh began. Stale attempts must stop writing
@@ -26,6 +60,7 @@ export type RouteRefreshLifecycle = {
    * latch and letting two writers race.
    */
   begin(options?: { supersede?: boolean }): RouteRefreshAttempt | null;
+  /** True while some attempt still holds the in-flight slot. */
   isInFlight(): boolean;
 };
 
@@ -90,6 +125,7 @@ export function planRouteWorkspaceLoads(
   return [selectedId];
 }
 
+/** Creates a refresh lifecycle: one in-flight slot, monotonic generations, supersede support. */
 export function createRouteRefreshLifecycle(): RouteRefreshLifecycle {
   let latestGeneration = 0;
   let inFlightGeneration = 0;
@@ -142,7 +178,7 @@ export type RouteConnectionGapPlan = {
  * disconnected UI mid-restart; the *connection* is still torn down for the
  * duration of the gap.
  *
- * On web there is no local process to wait for — an empty resolution is a
+ * On web there is no local process to wait for - an empty resolution is a
  * real disconnected state and the route should reflect it immediately.
  */
 export function planRouteConnectionGap(input: { desktopRuntime: boolean }): RouteConnectionGapPlan {

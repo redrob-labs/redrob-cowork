@@ -4,7 +4,7 @@ Status: plan, partly superseded. Team policies (steps 1-3) are built. The privac
 detection model and the on-device route labeller described below were built and then REMOVED:
 personal details are now masked in Redrob Code, the engine, in one place for every provider and
 every app that runs on it (`privacy.mask_pii`, off | regex | model). Cowork keeps only the
-workspace's level (`deskPrivacy.level`, lockable by a team policy) and carries it to the engine
+workspace's level (`coworkPrivacy.level`, lockable by a team policy) and carries it to the engine
 (`apps/server/src/engine-privacy.ts`: off -> off, standard -> regex, high and strict -> model).
 Strict additionally turns voice off (`voice-privacy.ts`), since speech cannot be masked. The
 `names` list a policy may carry is stored but not used by the engine's masker.
@@ -112,7 +112,7 @@ policy that the signature does not cover.
 **Verification and enforcement** in `redrob-server`:
 1. Check the signature, that `accountId` matches the account the device key belongs to, and that
    `version` is newer than the stored one.
-2. Apply the privacy level and lock, the team notes (tagged `desk-locked`, replaced as a whole
+2. Apply the privacy level and lock, the team notes (tagged `cowork-locked`, replaced as a whole
    set), playbooks, skills and the connector allowlist.
 3. Record `policy.applied` with the version.
 

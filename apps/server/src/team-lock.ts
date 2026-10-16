@@ -11,8 +11,8 @@ import { LOCKED_MEMORY_TAG } from "./local-memory-store.js";
  * under any lock but cannot move it.
  */
 
-/** Matches DESK_PRIVACY_CONFIG_KEY in apps/app/src/react-app/desk/privacy/privacy-store.ts. */
-export const DESK_PRIVACY_CONFIG_KEY = "deskPrivacy";
+/** Matches COWORK_PRIVACY_CONFIG_KEY in apps/app/src/react-app/cowork/privacy/privacy-store.ts. */
+export const COWORK_PRIVACY_CONFIG_KEY = "coworkPrivacy";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -26,19 +26,19 @@ function stable(value: unknown): string {
 }
 
 const lockedPrivacy = (redrob: Record<string, unknown>) => {
-  const privacy = redrob[DESK_PRIVACY_CONFIG_KEY];
+  const privacy = redrob[COWORK_PRIVACY_CONFIG_KEY];
   return isRecord(privacy) && privacy.locked === true;
 };
 
 /** Whether going from `before` to `after` sets, lifts or changes a locked privacy setting. */
 export function touchesPrivacyLock(before: Record<string, unknown>, after: Record<string, unknown>): boolean {
   if (!lockedPrivacy(before) && !lockedPrivacy(after)) return false;
-  return stable(before[DESK_PRIVACY_CONFIG_KEY]) !== stable(after[DESK_PRIVACY_CONFIG_KEY]);
+  return stable(before[COWORK_PRIVACY_CONFIG_KEY]) !== stable(after[COWORK_PRIVACY_CONFIG_KEY]);
 }
 
 /** Whether `after` holds a locked privacy setting that `before` does not hold as it is: a new lock. */
 export function setsPrivacyLock(before: Record<string, unknown>, after: Record<string, unknown>): boolean {
-  return lockedPrivacy(after) && stable(before[DESK_PRIVACY_CONFIG_KEY]) !== stable(after[DESK_PRIVACY_CONFIG_KEY]);
+  return lockedPrivacy(after) && stable(before[COWORK_PRIVACY_CONFIG_KEY]) !== stable(after[COWORK_PRIVACY_CONFIG_KEY]);
 }
 
 /** The redrob config an import would leave behind, for the lock check. */

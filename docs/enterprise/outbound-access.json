@@ -87,7 +87,7 @@
       "components": [
         "renderer"
       ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
+      "purpose": "Source cited by a sample playbook in the Cowork preview data; opened only if the person clicks it.",
       "requirement": "optional",
       "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
@@ -245,7 +245,7 @@
       "components": [
         "renderer"
       ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
+      "purpose": "Source cited by a sample playbook in the Cowork preview data; opened only if the person clicks it.",
       "requirement": "optional",
       "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
@@ -350,7 +350,7 @@
       "components": [
         "renderer"
       ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
+      "purpose": "Source cited by a sample playbook in the Cowork preview data; opened only if the person clicks it.",
       "requirement": "optional",
       "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
@@ -511,7 +511,7 @@
       "components": [
         "renderer"
       ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
+      "purpose": "Source cited by a sample playbook in the Cowork preview data; opened only if the person clicks it.",
       "requirement": "optional",
       "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null
@@ -522,7 +522,7 @@
       "components": [
         "renderer"
       ],
-      "purpose": "Source cited by a sample playbook in the Desk preview data; opened only if the person clicks it.",
+      "purpose": "Source cited by a sample playbook in the Cowork preview data; opened only if the person clicks it.",
       "requirement": "optional",
       "blockedEffect": "The sample citation link does not open. Nothing else is affected.",
       "override": null

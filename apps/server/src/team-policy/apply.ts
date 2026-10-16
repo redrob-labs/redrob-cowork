@@ -4,7 +4,7 @@ import { ApiError } from "../errors.js";
 import { LOCKED_MEMORY_TAG, replaceTaggedMemories } from "../local-memory-store.js";
 import { readRedrobWorkspaceConfig, writeRedrobWorkspaceConfig } from "../redrob-workspace-config-store.js";
 import { buildSkillContent, deleteSkill, upsertSkill } from "../skills.js";
-import { DESK_PRIVACY_CONFIG_KEY } from "../team-lock.js";
+import { COWORK_PRIVACY_CONFIG_KEY } from "../team-lock.js";
 import type { Actor, ServerConfig } from "../types.js";
 import { shortId } from "../utils.js";
 import { createWorkspaceKvStore, isRecord } from "../workspace-kv-store.js";
@@ -23,8 +23,8 @@ import type { TeamPolicy } from "./policy.js";
 /** Every note a policy brings carries this tag; no /memory route may add, edit or remove one. */
 export const TEAM_POLICY_NOTE_TAG = "team-policy";
 const teamNoteTag = (accountId: string) => `${TEAM_POLICY_NOTE_TAG}:${accountId}`;
-/** Matches TEAM_SCOPE_TAG in apps/app/src/react-app/desk/team/team-file.ts. */
-const TEAM_SCOPE_TAG = "desk-scope:team";
+/** Matches TEAM_SCOPE_TAG in apps/app/src/react-app/cowork/team/team-file.ts. */
+const TEAM_SCOPE_TAG = "cowork-scope:team";
 
 export type TeamPolicyState = {
   accountId: string;
@@ -185,7 +185,7 @@ export async function applyTeamPolicy(
 
   await writeRedrobWorkspaceConfig(config, workspace.id, (current) => ({
     ...current,
-    [DESK_PRIVACY_CONFIG_KEY]: privacyConfig(policy),
+    [COWORK_PRIVACY_CONFIG_KEY]: privacyConfig(policy),
   }));
 
   const now = options.now?.() ?? Date.now();
@@ -235,10 +235,10 @@ export async function leaveTeamPolicy(
   await replaceTaggedMemories(config, teamNoteTag(state.accountId), []);
 
   const stored = await readRedrobWorkspaceConfig(config, workspace.id);
-  const privacy = isRecord(stored[DESK_PRIVACY_CONFIG_KEY]) ? stored[DESK_PRIVACY_CONFIG_KEY] : {};
+  const privacy = isRecord(stored[COWORK_PRIVACY_CONFIG_KEY]) ? stored[COWORK_PRIVACY_CONFIG_KEY] : {};
   await writeRedrobWorkspaceConfig(config, workspace.id, (current) => ({
     ...current,
-    [DESK_PRIVACY_CONFIG_KEY]: { level: privacy.level ?? "standard", names: [], setBy: null, locked: false },
+    [COWORK_PRIVACY_CONFIG_KEY]: { level: privacy.level ?? "standard", names: [], setBy: null, locked: false },
   }));
 
   const now = options.now?.() ?? Date.now();

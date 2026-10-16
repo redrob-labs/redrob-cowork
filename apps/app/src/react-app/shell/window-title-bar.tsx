@@ -5,7 +5,7 @@ import { IconButton, icons } from "@redrob-labs/ui";
 import type { WindowControlAction, WindowState } from "@/app/lib/desktop-types";
 
 import { t } from "@/i18n";
-import { useFrameStore } from "../desk/store/frame-store";
+import { useFrameStore } from "../cowork/store/frame-store";
 import { resolveExtensionIconSrc } from "../design-system/extension-icon-src";
 import { openDesktopUrl } from "@/app/lib/desktop";
 import { isDesktopRuntime } from "@/app/lib/runtime-env";
@@ -29,7 +29,7 @@ type TitleBarPlatform = "windows" | "linux";
  * implements `__windowControl` / `__windowState`; `DesktopCommandMap` in
  * `@redrob/types/desktop-ipc` is their shared declaration. We narrow the bridge
  * to just these two commands here rather than reach across to the whole command
- * map — the shapes match that declaration verbatim.
+ * map - the shapes match that declaration verbatim.
  */
 type WindowBridge = {
   invokeDesktop?: {
@@ -93,7 +93,7 @@ function useWindowState(): WindowState {
  *
  * This app runs on a HASH router, where `history.state.idx` never advances past 0, so we cannot
  * read reachability off it. Instead we fold each navigation (its type + the location key) into an
- * ordered key-stack with a pointer — see `history-reach.ts`, which is pure and unit-tested.
+ * ordered key-stack with a pointer - see `history-reach.ts`, which is pure and unit-tested.
  */
 export function useHistoryReach(): { canGoBack: boolean; canGoForward: boolean } {
   const location = useLocation();
@@ -122,15 +122,15 @@ export function WindowTitleBar() {
 
 const glyph = (draw: (typeof icons)["close"]) => draw({ width: 16, height: 16, "aria-hidden": true });
 
-// Round 12, item 2: the title bar's two square marks are now the REAL brand icons from the 2026
-// icon pack — the Redrob GROUP icon on the left, then the Redrob COWORK icon to its right. Both are
-// the `-icon-web` masters (superellipse tile, transparent corners), served from the app's public
-// root at /brand/. (They replaced the favicon.svg placeholders.)
+// Round 12, item 2 / Round 34: the title bar's two square marks are the REAL brand icons from the
+// 2026 icon pack. The LEFT mark links to the Redrob console and is now the official Redrob icon
+// (the `redrob-icon-web` master, the "R" symbol on the superellipse tile). The RIGHT mark is the
+// Redrob COWORK icon and links home. Both are served from the app's public root at /brand/.
 const REDROB_GROUP_MARK_SRC = resolveExtensionIconSrc("/brand/redrob-group.svg");
 const REDROB_COWORK_MARK_SRC = resolveExtensionIconSrc("/brand/redrob-cowork.svg");
 
 // Round 13, item 2: the Group mark links to the Redrob console; the system browser on desktop, a
-// new tab on web (same policy as desk-connectors' openExternal, kept local so the title bar does
+// new tab on web (same policy as cowork-connectors' openExternal, kept local so the title bar does
 // not pull in that screen's module).
 const REDROB_CONSOLE_URL = "https://console.redrob.ai";
 function openExternalUrl(url: string) {
@@ -171,7 +171,7 @@ function WindowTitleBarView({ platform }: { platform: TitleBarPlatform }) {
       {/*
         Round 10, item 4: the Redrob GROUP mark then the Redrob COWORK mark dock to the RIGHT with
         the search bar, just before the window buttons: [Group] [Cowork] [Search] [buttons]. The nav
-        cluster stays far left. (Both marks share one glyph as a placeholder — see the consts above.)
+        cluster stays far left. (Both marks share one glyph as a placeholder - see the consts above.)
       */}
       <div className="window-titlebar__right titlebar-no-drag">
         {/*

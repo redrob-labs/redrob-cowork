@@ -133,7 +133,7 @@ describe("redrob runtime config file", () => {
     // The Memory Bank section is present and distinct from the existing ## Memory section.
     expect(prompt).toContain("## Memory Bank");
     expect(prompt).toContain("## Memory\n");
-    // The app puts the notes in the system text under this heading (desk/thread/memory-context.ts).
+    // The app puts the notes in the system text under this heading (cowork/thread/memory-context.ts).
     expect(prompt).toContain("Notes the person saved");
     // The meta-MCP the old flow relied on is swept from configs, so nothing may point at it.
     expect(prompt).not.toContain("search_capabilities");

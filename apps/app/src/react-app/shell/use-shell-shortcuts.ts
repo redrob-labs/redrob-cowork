@@ -30,8 +30,8 @@ let commandPaletteHosts = 0;
 
 /**
  * Opens the command palette when the current screen has one (the developer and settings screens) and
- * reports whether it did. The title bar's search box and the Desk search shortcut use this to choose
- * between the palette and the Desk search dialog.
+ * reports whether it did. The title bar's search box and the Cowork search shortcut use this to choose
+ * between the palette and the Cowork search dialog.
  */
 export function openCommandPalette(): boolean {
   if (commandPaletteHosts === 0) return false;

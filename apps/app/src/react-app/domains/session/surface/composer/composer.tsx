@@ -15,6 +15,7 @@ import {
   type ComposerSettingsSection,
 } from "@/react-app/domains/settings/library";
 import { EffortSelect } from "@/components/effort-select";
+import { REDROB_MODEL_ID } from "@/react-app/domains/settings/redrob-provider";
 import { ContextMeter } from "@/components/chat/context-meter";
 import { ModelSelect } from "@/components/model-select";
 import { LexicalPromptEditor, syncAttachmentChipStatus, type LexicalPromptEditorHandle } from "./editor";
@@ -28,9 +29,9 @@ import {
 } from "./slash-command";
 import { FILE_URL_RE, HTTP_URL_RE, type PastedTextChip } from "./pasted-text";
 import { dragEventHasFiles } from "./drag-files";
-import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
-import { DeskComposerStatus, DeskComposerTools } from "@/react-app/desk/composer/desk-composer";
-import { NEW_CHAT_KEY } from "@/react-app/desk/composer/composer-state";
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
+import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/composer/cowork-composer";
+import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
 
 type MentionItem = {
   id: string;
@@ -107,6 +108,20 @@ type ComposerProps = {
   compactTopSpacing?: boolean;
   /** Render inline in a page (new-task hero): no sticky dock chrome or inner max-width, aligning with sibling content. */
   flush?: boolean;
+  /**
+   * Overrides the editor placeholder. Round 35, item 4: the new-chat hero passes
+   * its rotating starter hint here so the suggestion lives INSIDE the input
+   * instead of as a separate sub-line. Falls back to the frame/default
+   * placeholder when unset.
+   */
+  placeholderOverride?: string;
+  /**
+   * Round 36 (item 3): when true the editor starts at a two-line min-height
+   * (`min-h-[60px]`) instead of the one-line default. The new-chat hero sets it
+   * so the hero composer is two lines by default; the in-chat composer leaves it
+   * unset and stays one line. Both still grow to the same max height.
+   */
+  twoLineDefault?: boolean;
   topAccessory?: ReactNode;
 };
 
@@ -121,8 +136,8 @@ function isNonDefaultAgent(agent: Agent) {
 /**
  * Extract external file/URL drops from a clipboard. Only used when the user
  * drag-drops a file reference from another app (Finder / browser), which sets
- * the text/uri-list MIME type explicitly. Plain text pastes — even ones that
- * contain absolute paths like "/Users/..." — are NEVER treated as links here
+ * the text/uri-list MIME type explicitly. Plain text pastes - even ones that
+ * contain absolute paths like "/Users/..." - are NEVER treated as links here
  * because that intercepted real text pastes and made composer paste feel
  * broken. Plain text goes straight into the editor via Lexical's default.
  */
@@ -190,7 +205,7 @@ type ToolMenuLayout = {
 
 /**
  * Where the "+" panel opens: above the trigger, inside the work column. It used to be held inside the
- * window only, so with the Desk side panel open it ran across the panel. The column is the composer's
+ * window only, so with the Cowork side panel open it ran across the panel. The column is the composer's
  * `main`; without one (a bare test page) the window is the bound, as before.
  */
 export function measureToolMenuLayout(trigger: HTMLElement): ToolMenuLayout {
@@ -344,10 +359,10 @@ export function ReactSessionComposer(props: ComposerProps) {
   const mentionOpenNext = Boolean(mentionMatch);
   const mentionQuery = mentionMatch?.[1] ?? "";
   const nonDefaultAgents = useMemo(() => agents.filter(isNonDefaultAgent), [agents]);
-  // Inside the Desk frame Plan or Run picks the agent, so the agent picker steps aside.
-  const inDeskFrame = useInDeskFrame();
-  const deskChatKey = props.sessionId ?? NEW_CHAT_KEY;
-  const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;
+  // Inside the Cowork frame Plan or Run picks the agent, so the agent picker steps aside.
+  const inCoworkFrame = useInCoworkFrame();
+  const coworkChatKey = props.sessionId ?? NEW_CHAT_KEY;
+  const showAgentPicker = !inCoworkFrame && props.selectedAgent !== null;
 
   useEffect(() => {
     setSlashOpen(slashOpenNext);
@@ -811,7 +826,7 @@ export function ReactSessionComposer(props: ComposerProps) {
   }, [props.onDraftChange]);
 
   const handleKeyDownCapture: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    // IME composition guard — block Enter while IME is mid-character.
+    // IME composition guard - block Enter while IME is mid-character.
     const imeActive =
       imeComposingRef.current ||
       (event.nativeEvent as KeyboardEvent).isComposing === true ||
@@ -1087,16 +1102,20 @@ export function ReactSessionComposer(props: ComposerProps) {
         previously a read-only chip on the model control and could only be CHANGED by clicking a
         model and walking into a submenu, which is why the interaction was unreadable.
         `EffortSelect` renders nothing when the selected model publishes no levels.
+        Round 37 (item 9): Redrob Auto routes per task and has no user-facing effort level,
+        so hide the Effort selector entirely when Auto is the selected model.
       */}
-      <EffortSelect
-        options={props.modelBehaviorOptions ?? []}
-        value={props.modelVariant ?? null}
-        label={props.modelVariantLabel}
-        disabled={props.steering}
-        onChange={(value) => {
-          if (!props.steering) props.onModelVariantChange(value);
-        }}
-      />
+      {props.selectedModel.modelID === REDROB_MODEL_ID ? null : (
+        <EffortSelect
+          options={props.modelBehaviorOptions ?? []}
+          value={props.modelVariant ?? null}
+          label={props.modelVariantLabel}
+          disabled={props.steering}
+          onChange={(value) => {
+            if (!props.steering) props.onModelVariantChange(value);
+          }}
+        />
+      )}
     </>
   );
 
@@ -1106,7 +1125,7 @@ export function ReactSessionComposer(props: ComposerProps) {
       className={
         props.flush
           ? `relative ${toolMenuOpen ? "z-50" : "z-20"}`
-          : `sticky bottom-0 ${toolMenuOpen ? "z-50" : "z-20"} bg-gradient-to-t from-dls-surface via-dls-surface/95 to-transparent ${CHAT_COLUMN_OUTER} pb-[max(0.5rem,calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px)))] ${props.compactTopSpacing ? "pt-0" : "pt-1"}`
+          : `sticky bottom-0 ${toolMenuOpen ? "z-50" : "z-20"} bg-gradient-to-t from-background via-background/95 to-transparent ${CHAT_COLUMN_OUTER} pb-[max(0.5rem,calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px)))] ${props.compactTopSpacing ? "pt-0" : "pt-1"}`
       }
       style={{ contain: "layout style" }}
       onKeyDownCapture={handleKeyDownCapture}
@@ -1129,7 +1148,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         wide window.
       */}
       <div className={props.flush ? "" : CHAT_COLUMN}>
-        {/* Main composer panel — also the drop target. The whole panel accepts a
+        {/* Main composer panel - also the drop target. The whole panel accepts a
             drag, not just the text area: a file dropped on the action row or the
             padding is the same intent, and a highlight that only lights up over
             the caret line reads as "drop not supported here". */}
@@ -1169,7 +1188,7 @@ export function ReactSessionComposer(props: ComposerProps) {
           {renderSlashMenu()}
 
           {/*
-            The pasted-text chip used to render twice — once inline inside
+            The pasted-text chip used to render twice - once inline inside
             the Lexical editor (via ComposerPastedTextNode) and again as a
             separate rail here above the composer. Keep only the inline
             chip; its pill already shows label + line count, and the user
@@ -1199,7 +1218,8 @@ export function ReactSessionComposer(props: ComposerProps) {
                 previewUrl: attachment.previewUrl,
               }))}
               disabled={props.disabled}
-              placeholder={inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder")}
+              minHeightClass={props.twoLineDefault ? "min-h-[60px]" : undefined}
+              placeholder={props.placeholderOverride ?? (inCoworkFrame ? t("cowork.composer_placeholder") : t("composer.placeholder"))}
               onChange={props.onDraftChange}
               onSubmit={handleEditorSubmit}
               onExpandPastedText={handleExpandPastedText}
@@ -1255,7 +1275,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           }
                         : undefined,
                   });
-                  // Intentionally no preventDefault — the notice is advisory,
+                  // Intentionally no preventDefault - the notice is advisory,
                   // the paste still goes through the editor.
                 }
               }}
@@ -1272,7 +1292,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               }}
             />
 
-            {/* Action row — tools, attachments, model, and send stay on one line */}
+            {/* Action row - tools, attachments, model, and send stay on one line */}
             <div className="mt-2 flex items-center gap-1.5">
               <div className="flex min-w-0 flex-1 items-center gap-1.5">
                 <input
@@ -1296,6 +1316,11 @@ export function ReactSessionComposer(props: ComposerProps) {
                     if (target instanceof Element && target.closest("button")) event.preventDefault();
                   }}
                 >
+                  {/* Round 37 (item 9): the "+" tools button (agents/commands/skills/
+                     plugins/connections) is hidden everywhere. @-mention and slash
+                     access is unaffected -- it still works by typing "@"/"/" in the
+                     editor. The menu markup below stays but is no longer triggerable. */}
+                  {false ? (
                   <button
                     type="button"
                     className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${toolMenuOpen ? "bg-accent text-foreground" : "text-subtle-foreground hover:bg-accent"}`}
@@ -1311,6 +1336,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   >
                     <Plus size={16} />
                   </button>
+                  ) : null}
                   {toolMenuOpen && toolMenuLayout
                     ? createPortal(
                     <div
@@ -1543,7 +1569,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   ) : null}
                 </div>
 
-                {inDeskFrame ? null : modelControls}
+                {inCoworkFrame ? null : modelControls}
                 {props.modelUnavailable ? (
                   <span className="max-w-[20rem] truncate text-xs font-medium text-destructive-ink">
                     {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
@@ -1557,13 +1583,13 @@ export function ReactSessionComposer(props: ComposerProps) {
                 - Idle: send arrow.
                 - Busy: stop icon in that same slot (Enter still queues;
                   Cmd/Ctrl+Enter still steers).
-                Inside the Desk frame the mic, Plan or Run and the model sit before it.
+                Inside the Cowork frame the mic, Plan or Run and the model sit before it.
               */}
               <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                {inDeskFrame ? (
-                  <DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
+                {inCoworkFrame ? (
+                  <CoworkComposerTools chatKey={coworkChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
                     {modelControls}
-                  </DeskComposerTools>
+                  </CoworkComposerTools>
                 ) : null}
                 {props.busy && escapeArmed ? (
                   <span className="self-center pr-1 text-xs font-medium text-subtle-foreground max-lg:hidden">
@@ -1614,7 +1640,12 @@ export function ReactSessionComposer(props: ComposerProps) {
           each request carries the whole conversation, so that turn's own input already includes every
           earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
         */}
-        {inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} /> : null}
+        {inCoworkFrame ? <CoworkComposerStatus chatKey={coworkChatKey} showValues={Boolean(props.flush)} /> : null}
+        {inCoworkFrame && !props.flush ? (
+          // Round 35, item 3: a quiet disclaimer under the IN-CHAT composer, matching the
+          // new-chat home. The hero (flush) renders its own, so this is in-chat only.
+          <p className="cowork-chat__disclaimer">{t("hero.disclaimer")}</p>
+        ) : null}
         <ContextMeter
           compacting={props.compactingSession}
           onCompact={props.onCompactSession}

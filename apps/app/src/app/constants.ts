@@ -167,7 +167,7 @@ export const MCP_QUICK_CONNECT: McpDirectoryInfo[] = [
     command: ["npx", "-y", "redrob-ui-mcp"],
     oauth: false,
     kind: "ui-control",
-    iconSrc: "/redrob-mark.svg",
+    iconSrc: "/brand/redrob/redrob-mark-blue.svg",
     // Internal UI-control surface for agents driving the desktop app. Hidden
     // from the default catalog; "Show hidden" reveals it.
     defaultHidden: true,

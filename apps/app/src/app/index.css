@@ -288,8 +288,8 @@
 }
 
 /**
- * Product identity. Redrob Cowork is the design system's Desk product: its mark
- * is Desk orange (#d87101) and its rail carries the Desk wash, the way the design
+ * Product identity. Redrob Cowork is the design system's Cowork product: its mark
+ * is Cowork orange (#d87101) and its rail carries the Cowork wash, the way the design
  * system's AppShell does it - `.rr-shell[data-product] .rr-shell__side` - a
  * gradient from the wash into the surface over the top 132px, at 55% on dark.
  * Actions stay Redrob Blue; the product colour is identity, not interaction.
@@ -298,14 +298,16 @@
  * rule is written against its rail. `--app-product-*` because the design system
  * scopes its own `--product-*` to `.rr-shell`.
  */
-[data-product="desk"] {
-  --app-product-mark: var(--product-desk);
-  --app-product-wash: var(--product-desk-wash);
-  --app-product-line: var(--product-desk-line);
+/* Round 37 (item 2 / DS 1.6.0): the design system renamed the product from "cowork"
+   to "cowork" (--product-cowork* -> --product-cowork*, data-product="cowork"); follow it. */
+[data-product="cowork"] {
+  --app-product-mark: var(--product-cowork);
+  --app-product-wash: var(--product-cowork-wash);
+  --app-product-line: var(--product-cowork-line);
 }
 
-[data-theme="dark"] [data-product="desk"] {
-  --app-product-wash: color-mix(in srgb, var(--product-desk-wash) 55%, transparent);
+[data-theme="dark"] [data-product="cowork"] {
+  --app-product-wash: color-mix(in srgb, var(--product-cowork-wash) 55%, transparent);
 }
 
 [data-product] [data-sidebar="sidebar"] {
@@ -313,7 +315,7 @@
 }
 
 /**
- * The Desk frame (`DeskShell`) fills the window. The page itself never scrolls (#root is
+ * The Cowork frame (`CoworkShell`) fills the window. The page itself never scrolls (#root is
  * overflow hidden), so the menu and the work column each scroll on their own. Layout only:
  * the look is the design system's. `--fill` is for a screen that lays itself out edge to
  * edge and scrolls inside, which is the session page today.
@@ -323,14 +325,14 @@
  * system's vocabulary, which no app stylesheet defines (design-system-collisions.test.ts).
  * The work column is the first `div` in `main`; the header before it is a `header`.
  */
-.desk-shell,
-.desk-shell > div {
+.cowork-shell,
+.cowork-shell > div {
   height: 100%;
 }
 
 /*
-  Round 12 (revised): the Desk sidebar as an Apple-Music-style FLOATING POPUP CARD. Per the
-  reference it is not a flush rail — it is a rounded rectangle inset from the window on all sides,
+  Round 12 (revised): the Cowork sidebar as an Apple-Music-style FLOATING POPUP CARD. Per the
+  reference it is not a flush rail - it is a rounded rectangle inset from the window on all sides,
   with a soft shadow and a more vibrant translucent gradient tint.
 
   How it floats inside a CSS-grid column: the DS lays `.rr-shell__side` as the first grid column, so
@@ -339,25 +341,25 @@
   where the window is vibrant, e.g. macOS; a richer translucent tint otherwise). The inner scroll
   area (#rr-shell-side) keeps its own overflow, so the rounded corners read without clipping scroll.
 */
-.desk-shell .rr-shell__side {
+.cowork-shell .rr-shell__side {
   margin: var(--space-2);
   border-radius: 16px;
   overflow: hidden;
-  /* Round 15: the floating card must match the MAIN WORK SECTION, which the DS paints
-     --surface-raised (#f8f9fb light / #141719 dark), NOT the body's --surface-base.
-     Round 14 matched it to the body instead, and the leading `#fff 22%` wash in the old
-     gradient lightened it further — both read as a seam against the main section. Solid
-     --surface-raised, no wash: the card is now the SAME surface as the work area, and the
-     border + shadow + radius alone make it float. */
-  background-color: var(--surface-raised);
+  /* Round 15/35: the floating card matches the MAIN WORK SECTION. Round 35:
+     Felix sees the grey card framed by the white window gap as "left is white,
+     right is grey" -- so match BOTH surfaces to WHITE (--surface-base), the same
+     tone as the gap/body, instead of grey (--surface-raised). The card still
+     FLOATS -- border + shadow + radius keep it lifted -- but there is no longer
+     a grey-vs-white edge anywhere. */
+  background-color: var(--surface-base);
   background-image: none;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, transparent);
   box-shadow:
     0 12px 32px -16px color-mix(in srgb, var(--redrob-black) 30%, transparent),
     inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent);
 }
-[data-theme="dark"] .desk-shell .rr-shell__side {
-  background-color: var(--surface-raised);
+[data-theme="dark"] .cowork-shell .rr-shell__side {
+  background-color: var(--surface-base);
   background-image: none;
   border-color: color-mix(in srgb, #fff 7%, transparent);
   box-shadow:
@@ -365,23 +367,33 @@
     inset 0 1px 0 color-mix(in srgb, #fff 7%, transparent);
 }
 
-.desk-shell #rr-shell-side,
-.desk-shell #rr-shell-main {
+.cowork-shell #rr-shell-side,
+.cowork-shell #rr-shell-main {
   min-height: 0;
   overflow-y: auto;
 }
 
-.desk-shell--fill #rr-shell-main {
+/*
+  Round 32/35: the main work area matches the floating sidebar card. Round 35:
+  both are now --surface-base (white), the same tone as the window gap/body, so
+  the left panel and right body read as one continuous white surface with no
+  grey-vs-white edge. (Was --surface-raised grey.)
+*/
+.cowork-shell #rr-shell-main {
+  background-color: var(--surface-base);
+}
+
+.cowork-shell--fill #rr-shell-main {
   overflow: hidden;
 }
 
-.desk-shell--fill #rr-shell-main > div:first-of-type {
+.cowork-shell--fill #rr-shell-main > div:first-of-type {
   min-height: 0;
   padding: 0;
   gap: 0;
 }
 
-.desk-shell--fill #rr-shell-main > div:first-of-type > * {
+.cowork-shell--fill #rr-shell-main > div:first-of-type > * {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -393,7 +405,7 @@
   desktop app the custom window title bar (window-title-bar.tsx) owns the drag region,
   so no drag strip is lost here.
 */
-.desk-shell--bare-top .rr-shell__top {
+.cowork-shell--bare-top .rr-shell__top {
   display: none;
 }
 
@@ -401,29 +413,29 @@
   Round 19: `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
   work subtree's overflow. `--bare-top` is the EMPTY CHAT HOME, which has no scrolling transcript and
   needs overflow:visible so an upward status popover isn't clipped (see the rule further down). A tall
-  SCROLLING screen that merely has no header — Trending AI — must keep its scroll container, so it uses
+  SCROLLING screen that merely has no header - Trending AI - must keep its scroll container, so it uses
   this instead. Reusing `--bare-top` there turned #rr-shell-main to overflow:visible and clipped the
   lower shelves (the "missing scrollbar"). Same header-hide, different overflow contract.
 */
-.desk-shell--headless .rr-shell__top {
+.cowork-shell--headless .rr-shell__top {
   display: none;
 }
 
 /*
-  Sidebar brand lockup (round 4, item 6). DeskShell now passes product="Redrob
+  Sidebar brand lockup (round 4, item 6). CoworkShell now passes product="Redrob
   Cowork", so the wordmark renders beside the mark. Make the mark a touch larger
   with rounded corners, and set the wordmark in the design system's own sans at a
-  sidebar-appropriate size. Scoped to the Desk shell brand row.
+  sidebar-appropriate size. Scoped to the Cowork shell brand row.
 */
-.desk-shell .rr-shell__brand .rr-mark,
-.desk-shell .rr-shell__brand .rr-mark img,
-.desk-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
+.cowork-shell .rr-shell__brand .rr-mark,
+.cowork-shell .rr-shell__brand .rr-mark img,
+.cowork-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
   width: 34px;
   height: 34px;
   border-radius: 4px; /* less rounded than before (round 5, item 6) */
   overflow: hidden;
 }
-.desk-shell .rr-shell__product {
+.cowork-shell .rr-shell__product {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -433,7 +445,7 @@
   Round 7, item 2: the DS brand row leaves too much space between the mark and the
   "Redrob Cowork" wordmark. Tighten the gap so the lockup reads as one unit.
 */
-.desk-shell .rr-shell__brand {
+.cowork-shell .rr-shell__brand {
   gap: 8px;
 }
 
@@ -442,28 +454,28 @@
   "Redrob Cowork" wordmark) is redundant now that the window title bar carries the
   sidebar toggle (round 4, item 5) -- both flip the same sidebarOpen store. Hide it.
 */
-.desk-shell .rr-shell__fold {
+.cowork-shell .rr-shell__fold {
   display: none;
 }
 
 /*
   Round 8, item 6: the sidebar brand lockup keeps only the "Redrob Cowork" wordmark; drop the
-  square mark image (the title bar now carries the Cowork mark). Scoped to the Desk shell.
+  square mark image (the title bar now carries the Cowork mark). Scoped to the Cowork shell.
 */
-.desk-shell .rr-shell__brand .rr-mark,
-.desk-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
+.cowork-shell .rr-shell__brand .rr-mark,
+.cowork-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
   display: none;
 }
 
 /*
-  Round 8, item 5: the left sidebar is draggable. The DeskShell has no right rail, so the DS grid is
+  Round 8, item 5: the left sidebar is draggable. The CoworkShell has no right rail, so the DS grid is
   `232px minmax(0,1fr)`; drive that first column from --app-side-width (set from the UI store, clamped
   220-420 to match the store), and lay a thin drag handle on the sidebar's right edge.
 */
-.desk-shell .rr-shell--norail {
+.cowork-shell .rr-shell--norail {
   grid-template-columns: var(--app-side-width, 260px) minmax(0, 1fr);
 }
-.desk-shell__side-resizer {
+.cowork-shell__side-resizer {
   position: absolute;
   top: var(--app-titlebar-height, 0px);
   bottom: 0;
@@ -474,10 +486,10 @@
 }
 /*
   Round 11, item 4: the handle keeps its 8px hit area, but on hover/drag it draws only a thin
-  2px line centred in that area (via ::before) instead of filling the whole 8px with colour — the
+  2px line centred in that area (via ::before) instead of filling the whole 8px with colour - the
   old full-width 35% fill read as a border that thickened too much. Lower opacity too.
 */
-.desk-shell__side-resizer::before {
+.cowork-shell__side-resizer::before {
   content: "";
   position: absolute;
   inset-block: 0;
@@ -487,23 +499,23 @@
   background: transparent;
   transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
-.desk-shell__side-resizer:hover::before,
-.desk-shell__side-resizer[data-resizing="true"]::before {
+.cowork-shell__side-resizer:hover::before,
+.cowork-shell__side-resizer[data-resizing="true"]::before {
   background: color-mix(in srgb, var(--spectrum-sky) 22%, transparent);
 }
 
 /*
   Round 8, item 7: the title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS
-  64px mini-rail. When the shell carries desk-shell--side-hidden, drop to a SINGLE 1fr column so the
+  64px mini-rail. When the shell carries cowork-shell--side-hidden, drop to a SINGLE 1fr column so the
   work fills the whole width. (A two-track `0 minmax(0,1fr)` left the sidebar's `display:none` grid
-  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track — the whole
+  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track - the whole
   page measured 0 wide. One column has nowhere else to flow.)
 */
-.desk-shell--side-hidden .rr-shell--norail {
+.cowork-shell--side-hidden .rr-shell--norail {
   grid-template-columns: minmax(0, 1fr);
 }
-.desk-shell--side-hidden .rr-shell__side,
-.desk-shell--side-hidden .desk-shell__side-resizer {
+.cowork-shell--side-hidden .rr-shell__side,
+.cowork-shell--side-hidden .cowork-shell__side-resizer {
   display: none;
 }
 
@@ -511,19 +523,19 @@
   Round 9, item 3: the account block (the "Log in or sign up" / profile row) is the VERY
   bottom section, with the theme switch directly ABOVE it. DOM order in the DS foot is
   aside (account) then theme, and the DS pins theme to the bottom with `margin-top:auto`.
-  To make account last we flip the visual order with `order` (the foot is a flex column —
+  To make account last we flip the visual order with `order` (the foot is a flex column -
   `margin-top:auto` already works on it) and move the auto margin onto the theme row so the
   free space collapses above the pair, dropping theme + account to the bottom together.
   Result top-to-bottom: [free space] -> theme -> account.
 */
-.desk-shell .rr-shell__theme {
+.cowork-shell .rr-shell__theme {
   order: 0;
   margin-top: auto;
-  /* Round 11, item 12: pull the account block closer to the theme row — trim the DS theme row's
+  /* Round 11, item 12: pull the account block closer to the theme row - trim the DS theme row's
      own bottom padding so the gap above "Log in or sign up" is smaller. */
   padding-bottom: var(--space-1);
 }
-.desk-shell .rr-shell__aside {
+.cowork-shell .rr-shell__aside {
   order: 1;
   margin-top: 0;
   margin-bottom: 0;
@@ -533,11 +545,11 @@
 
 /*
   Round 11, item 6: the chat-session header (the DS shell top bar carrying the "New session" title +
-  Invite + panel button) was taller than the app chrome. Match the 48px chrome height — the DS default
+  Invite + panel button) was taller than the app chrome. Match the 48px chrome height - the DS default
   is padding var(--space-3) top+bottom with no fixed height, which read as too thick. Fix the strip to
   48px with tighter vertical padding (border-box so the 1px bottom border is included).
 */
-.desk-shell .rr-shell__top {
+.cowork-shell .rr-shell__top {
   box-sizing: border-box;
   height: var(--app-titlebar-height, 48px);
   min-height: var(--app-titlebar-height, 48px);
@@ -545,7 +557,7 @@
 }
 
 /* Round 6, item 3: the not-connected account placeholder avatar (neutral person glyph). */
-.desk-account__avatar-placeholder {
+.cowork-account__avatar-placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -563,16 +575,28 @@
   Item 2 -- clipping. The panel (.rr-cstatus__panel) is position:absolute and opens
   UPWARD (bottom: 100% + space-2), so the nested overflow:hidden / overflow:auto
   containers between the composer and the shell main cut it off, and the home felt
-  stuck. On the EMPTY HOME ONLY (.desk-shell--bare-top) the hero owns the screen and
+  stuck. On the EMPTY HOME ONLY (.cowork-shell--bare-top) the hero owns the screen and
   there is no transcript that needs its own clipping, so let that work subtree show
   overflow -- the panel then opens into free space above the composer. Real sessions
   (no bare-top) keep their overflow so the transcript scrolls normally.
 */
-.desk-shell--bare-top #rr-shell-main,
-.desk-shell--bare-top #rr-shell-main > div,
-.desk-shell--bare-top #rr-shell-main [class*="overflow-hidden"],
-.desk-shell--bare-top #rr-shell-main [class*="overflow-y-auto"] {
+.cowork-shell--bare-top #rr-shell-main,
+.cowork-shell--bare-top #rr-shell-main > div,
+.cowork-shell--bare-top #rr-shell-main [class*="overflow-hidden"],
+.cowork-shell--bare-top #rr-shell-main [class*="overflow-y-auto"] {
   overflow: visible;
+}
+
+/*
+  Round 37 (item 4): the broad bare-top `overflow: visible` above also matched the
+  prompt EDITOR (its class contains `overflow-y-auto`), killing its internal scroll
+  so a long draft on the new-chat hero spilled out of the composer box, above and
+  below it. The editor is a bounded, max-height field and MUST keep scrolling inside
+  itself. Restore that here with a more specific selector (so this wins over the
+  broad rule) without affecting the status-popover-clipping fix above.
+*/
+.cowork-shell--bare-top #rr-shell-main [contenteditable="true"][class*="overflow-y-auto"] {
+  overflow-y: auto;
 }
 
 /*
@@ -586,23 +610,19 @@
   justify-content: center;
 }
 .rr-cstatus__panel {
-  max-width: 420px;
-  padding: var(--space-4);
+  max-width: 360px;
+  padding: var(--space-3);
   border-radius: 12px; /* --radius-lg literal: avoid reading a Tailwind/DS-shared var() */
   /*
-    Item 3 (round 5): Cross-check is the tallest panel; at the old 460px/64vh cap it
-    scrolled and the last row sat flush at the clipped edge. Raise the usable height
-    (it opens upward, so this uses the room above the composer) and add bottom
-    scroll padding so the final row is never cut off.
+    Round 35, item 2: the three long Cross-check text blocks (lede / when-it-matters
+    / foot) were removed, so the panel is now short -- cap it to fit its controls
+    (name + description + level picker per check) instead of the old tall 600px/78vh
+    that left a big empty scroll area. It opens upward into the room above the
+    composer; keep the thin overlay scrollbar for the rare case it still overflows.
   */
-  max-height: min(600px, 78vh);
-  scroll-padding-block-end: var(--space-4);
+  max-height: min(440px, 70vh);
+  scroll-padding-block-end: var(--space-3);
   font-size: 13px;
-  /*
-    Item 8: the panel showed a persistent ("sticky") scrollbar track even when the
-    content fit. Only reserve/stabilise the gutter when it actually scrolls, and
-    render a thin overlay scrollbar so a track never sits there on short content.
-  */
   scrollbar-gutter: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
@@ -648,34 +668,38 @@
 }
 
 /**
- * The side panel (`desk/panel/desk-side-panel.tsx`), beside the work while it is open:
+ * The side panel (`cowork/panel/cowork-side-panel.tsx`), beside the work while it is open:
  * 440px, 400px under 1180px, and under 900px a full-height sheet over the work. Its
  * header is the shell header's height, so the two hairlines meet. The browser is flush;
  * Electron lays the page over the body by its bounds.
  */
-.desk-shell--panel {
+.cowork-shell--panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 440px;
 }
 
-.desk-shell--panel > div {
+.cowork-shell--panel > div {
   min-width: 0;
 }
 
-.desk-panel {
+.cowork-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-width: 0;
   min-height: 0;
   border-left: 1px solid var(--border-subtle);
-  /* Round 15: match the MAIN WORK SECTION (--surface-raised), not the body (--surface-base),
-     so the panel beside the work reads as one continuous surface. */
-  background: var(--surface-raised);
-  animation: desk-panel-in var(--duration-base) var(--easing-entrance);
+  /* Round 15: match the MAIN WORK SECTION (--surface-raised).
+     Round 36 (item 5): round 35 flipped the SHELL containers (#rr-shell-main,
+     .rr-shell__side) to white (--surface-base) but left THIS content pane grey,
+     so the left float read white and the right body read grey -- the seam Felix
+     reported. Match the pane to the shell/float: --surface-base (white). The
+     border-left divider stays (Felix: keep it) as a deliberate column line. */
+  background: var(--surface-base);
+  animation: cowork-panel-in var(--duration-base) var(--easing-entrance);
 }
 
-.desk-panel__top {
+.cowork-panel__top {
   display: flex;
   flex: none;
   align-items: center;
@@ -687,37 +711,37 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-panel__title {
+.cowork-panel__title {
   margin: 0;
   font: var(--text-body-strong);
   font-weight: 600;
   color: var(--ink-primary);
 }
 
-.desk-panel__actions {
+.cowork-panel__actions {
   display: flex;
   gap: 2px;
 }
 
-.desk-panel__body {
+.cowork-panel__body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: var(--space-5);
 }
 
-.desk-panel__body--flush {
+.cowork-panel__body--flush {
   display: flex;
   flex-direction: column;
   padding: 0;
   overflow: hidden;
 }
 
-.desk-panel__empty {
+.cowork-panel__empty {
   padding: var(--space-5);
 }
 
-@keyframes desk-panel-in {
+@keyframes cowork-panel-in {
   from {
     opacity: 0;
     transform: translateX(12px);
@@ -729,17 +753,17 @@
 }
 
 @media (max-width: 1180px) {
-  .desk-shell--panel {
+  .cowork-shell--panel {
     grid-template-columns: minmax(0, 1fr) 400px;
   }
 }
 
 @media (max-width: 900px) {
-  .desk-shell--panel {
+  .cowork-shell--panel {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .desk-panel {
+  .cowork-panel {
     position: fixed;
     top: var(--app-titlebar-height);
     right: 0;
@@ -751,43 +775,43 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .desk-panel {
+  .cowork-panel {
     animation: none;
   }
 }
 
 /**
- * Files in the side panel (`desk/panel/desk-panel-files.tsx`): this week's files as rows, and
+ * Files in the side panel (`cowork/panel/cowork-panel-files.tsx`): this week's files as rows, and
  * one file with its preview on the raised surface and its two actions.
  */
-.desk-files,
-.desk-file {
+.cowork-files,
+.cowork-file {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
-.desk-files__lede,
-.desk-file__from,
-.desk-file__note,
-.desk-file__none {
+.cowork-files__lede,
+.cowork-file__from,
+.cowork-file__note,
+.cowork-file__none {
   margin: 0;
   font: var(--text-meta);
   color: var(--ink-secondary);
 }
 
-.desk-files__list {
+.cowork-files__list {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--border-subtle);
 }
 
-.desk-files__list > li {
+.cowork-files__list > li {
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-file-row {
+.cowork-file-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -801,17 +825,17 @@
   cursor: pointer;
 }
 
-.desk-file-row:hover {
+.cowork-file-row:hover {
   background: var(--surface-sunken);
 }
 
-.desk-file-row:focus-visible,
-.desk-file__back:focus-visible {
+.cowork-file-row:focus-visible,
+.cowork-file__back:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.desk-file__icon {
+.cowork-file__icon {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -823,7 +847,7 @@
   color: var(--ink-secondary);
 }
 
-.desk-file-row__text {
+.cowork-file-row__text {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -831,7 +855,7 @@
   min-width: 0;
 }
 
-.desk-file-row__text b {
+.cowork-file-row__text b {
   overflow: hidden;
   font: var(--text-body-strong);
   font-weight: 600;
@@ -839,19 +863,19 @@
   white-space: nowrap;
 }
 
-.desk-file-row__text span {
+.cowork-file-row__text span {
   font: var(--text-meta);
   color: var(--ink-secondary);
 }
 
-.desk-file-row__when {
+.cowork-file-row__when {
   flex: none;
   font: var(--text-meta);
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.desk-file__back {
+.cowork-file__back {
   display: inline-flex;
   align-self: flex-start;
   align-items: center;
@@ -865,25 +889,25 @@
   cursor: pointer;
 }
 
-.desk-file__head {
+.cowork-file__head {
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
-.desk-file__head > div {
+.cowork-file__head > div {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.desk-file__head b {
+.cowork-file__head b {
   font: var(--text-body-strong);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-.desk-file__head > div > span {
+.cowork-file__head > div > span {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -891,7 +915,7 @@
   color: var(--ink-muted);
 }
 
-.desk-file__preview {
+.cowork-file__preview {
   max-height: 480px;
   overflow: auto;
   border: 1px solid var(--border-subtle);
@@ -899,16 +923,16 @@
   background: var(--surface-raised);
 }
 
-.desk-file__none {
+.cowork-file__none {
   padding: var(--space-4);
 }
 
-.desk-file__from a {
+.cowork-file__from a {
   font-weight: 600;
   color: var(--ink-primary);
 }
 
-.desk-file__actions {
+.cowork-file__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -916,18 +940,18 @@
 }
 
 /**
- * The browser in the side panel (`desk/panel/desk-browser.tsx`): tabs on the sunken strip,
+ * The browser in the side panel (`cowork/panel/cowork-browser.tsx`): tabs on the sunken strip,
  * Back, Forward and the one address field, the bar saying who has the tab, and the page.
- * Electron lays the page over `.desk-browser__page--native` by its bounds.
+ * Electron lays the page over `.cowork-browser__page--native` by its bounds.
  */
-.desk-browser {
+.cowork-browser {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
 }
 
-.desk-browser__tabs {
+.cowork-browser__tabs {
   display: flex;
   flex: none;
   align-items: center;
@@ -938,7 +962,7 @@
   background: var(--surface-sunken);
 }
 
-.desk-browser__tab {
+.cowork-browser__tab {
   display: inline-flex;
   flex: 0 1 auto;
   align-items: center;
@@ -958,47 +982,47 @@
   cursor: pointer;
 }
 
-.desk-browser__tab[aria-selected="true"] {
+.cowork-browser__tab[aria-selected="true"] {
   border-color: var(--border-subtle);
   background: var(--surface-base);
   font-weight: 600;
   color: var(--ink-primary);
 }
 
-.desk-browser__tab:focus-visible,
-.desk-browser__pages button:focus-visible {
+.cowork-browser__tab:focus-visible,
+.cowork-browser__pages button:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.desk-browser__tab-title {
+.cowork-browser__tab-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.desk-browser__favicon {
+.cowork-browser__favicon {
   flex: none;
   border-radius: --theme(--radius-xs);
 }
 
-.desk-browser__live {
+.cowork-browser__live {
   flex: none;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--action-primary);
   box-shadow: 0 0 0 3px var(--surface-ai);
-  animation: desk-browser-live 1.6s var(--easing-standard) infinite;
+  animation: cowork-browser-live 1.6s var(--easing-standard) infinite;
 }
 
-@keyframes desk-browser-live {
+@keyframes cowork-browser-live {
   50% {
     opacity: 0.55;
   }
 }
 
-.desk-browser__bar {
+.cowork-browser__bar {
   display: flex;
   flex: none;
   align-items: center;
@@ -1007,13 +1031,13 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-browser__address {
+.cowork-browser__address {
   flex: 1 1 auto;
   min-width: 0;
   margin-left: 6px;
 }
 
-.desk-browser__address label {
+.cowork-browser__address label {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1025,12 +1049,12 @@
   color: var(--ink-muted);
 }
 
-.desk-browser__address label:focus-within {
+.cowork-browser__address label:focus-within {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 1px;
 }
 
-.desk-browser__address input {
+.cowork-browser__address input {
   flex: 1 1 auto;
   min-width: 0;
   border: 0;
@@ -1040,7 +1064,7 @@
   color: var(--ink-primary);
 }
 
-.desk-browser__agent {
+.cowork-browser__agent {
   display: flex;
   flex: none;
   flex-wrap: wrap;
@@ -1052,55 +1076,55 @@
   font: var(--text-meta);
 }
 
-.desk-browser__page {
+.cowork-browser__page {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: var(--space-5);
 }
 
-.desk-browser__page--native {
+.cowork-browser__page--native {
   overflow: hidden;
   padding: 0;
 }
 
-.desk-browser__new,
-.desk-browser__read {
+.cowork-browser__new,
+.cowork-browser__read {
   display: flex;
   flex-direction: column;
 }
 
-.desk-browser__new {
+.cowork-browser__new {
   gap: var(--space-5);
 }
 
-.desk-browser__read {
+.cowork-browser__read {
   gap: 10px;
 }
 
-.desk-browser__lede,
-.desk-browser__none {
+.cowork-browser__lede,
+.cowork-browser__none {
   margin: 0;
   font: var(--text-body);
   color: var(--ink-secondary);
 }
 
-.desk-browser__none {
+.cowork-browser__none {
   font: var(--text-meta);
 }
 
-.desk-browser__pages {
+.cowork-browser__pages {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--border-subtle);
 }
 
-.desk-browser__pages > li {
+.cowork-browser__pages > li {
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-browser__pages button {
+.cowork-browser__pages button {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1114,33 +1138,33 @@
   cursor: pointer;
 }
 
-.desk-browser__pages button:hover b {
+.cowork-browser__pages button:hover b {
   color: var(--ink-brand);
 }
 
-.desk-browser__pages b {
+.cowork-browser__pages b {
   font: var(--text-body-strong);
   font-weight: 600;
 }
 
-.desk-browser__pages span {
+.cowork-browser__pages span {
   font: var(--text-meta);
   color: var(--ink-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .desk-browser__live {
+  .cowork-browser__live {
     animation: none;
   }
 }
 
 /**
  * The account menu at the foot of the sidebar, the shortcuts list, the dialog layer and the
- * toast (`account-menu.tsx`, `desk-layer.tsx`, `desk-dialog.tsx`). Layout on design tokens;
+ * toast (`account-menu.tsx`, `cowork-layer.tsx`, `cowork-dialog.tsx`). Layout on design tokens;
  * the menu's trigger is reached by element order (its `div`, then its `button`), never by
  * the design system's class names.
  */
-.desk-account {
+.cowork-account {
   /* Round 12, item 3: the "Log in or sign up" block took too much vertical space. Trim its own
      top margin + padding (space-2 -> space-1) so the row sits closer under the theme switch. */
   margin-top: var(--space-1);
@@ -1148,20 +1172,20 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-.desk-account > div {
+.cowork-account > div {
   display: block;
 }
 
-.desk-account > div > button {
+.cowork-account > div > button {
   width: 100%;
   height: auto;
-  /* Round 12, item 3: shorter button — trim vertical padding (space-2 -> space-1), keep the
+  /* Round 12, item 3: shorter button - trim vertical padding (space-2 -> space-1), keep the
      horizontal padding so the avatar + label still breathe. */
   padding: var(--space-1) var(--space-2);
   justify-content: space-between;
 }
 
-.desk-account__label {
+.cowork-account__label {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -1169,37 +1193,37 @@
   text-align: left;
 }
 
-.desk-account__text {
+.cowork-account__text {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.desk-account__text b {
+.cowork-account__text b {
   font: var(--text-label);
   color: var(--ink-primary);
 }
 
-.desk-account__text span {
+.cowork-account__text span {
   font: var(--text-meta);
   font-weight: 400;
   color: var(--ink-muted);
 }
 
-.desk-dialog {
+.cowork-dialog {
   position: fixed;
   inset: 0;
   z-index: 60;
 }
 
-.desk-keys {
+.cowork-keys {
   display: flex;
   flex-direction: column;
   margin: 0 0 var(--space-3);
   border-top: 1px solid var(--border-subtle);
 }
 
-.desk-keys > div {
+.cowork-keys > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1208,18 +1232,18 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-keys dt {
+.cowork-keys dt {
   font: var(--text-body);
   color: var(--ink-primary);
 }
 
-.desk-keys dd {
+.cowork-keys dd {
   display: flex;
   gap: var(--space-1);
   margin: 0;
 }
 
-.desk-keys kbd {
+.cowork-keys kbd {
   min-width: 22px;
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
@@ -1230,13 +1254,13 @@
   color: var(--ink-secondary);
 }
 
-/* Search (desk/shell/search-dialog.tsx): a field and the places and chats it matches. */
-.desk-search {
+/* Search (cowork/shell/search-dialog.tsx): a field and the places and chats it matches. */
+.cowork-search {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
-.desk-search__field {
+.cowork-search__field {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1246,11 +1270,11 @@
   border-radius: var(--field-radius);
   color: var(--ink-muted);
 }
-.desk-search__field:focus-within {
+.cowork-search__field:focus-within {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: var(--focus-ring-width);
 }
-.desk-search__input {
+.cowork-search__input {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -1259,14 +1283,46 @@
   color: var(--ink-primary);
   font: var(--text-body);
 }
-.desk-search__results {
+/* Scope tabs (All / Chats / Artifacts / Skills / Projects / Scheduled): a horizontal row
+   under the field; the active tab reads as a soft filled pill. */
+.cowork-search__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.cowork-search__tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--control-radius);
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  cursor: pointer;
+}
+.cowork-search__tab:hover {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+.cowork-search__tab[aria-selected="true"] {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+.cowork-search__tab:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+.cowork-search__results {
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.desk-search__result {
+.cowork-search__result {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1277,25 +1333,72 @@
   color: var(--ink-primary);
   cursor: pointer;
 }
-.desk-search__result[aria-selected="true"] {
+.cowork-search__result[aria-selected="true"] {
   background: var(--surface-sunken);
 }
-.desk-search__meta,
-.desk-search__empty {
+.cowork-search__meta,
+.cowork-search__empty {
   font: var(--text-body-sm);
   color: var(--ink-muted);
 }
-.desk-search__empty {
+.cowork-search__empty {
   padding: var(--space-2) var(--space-3);
 }
 
-.desk-hint {
+/* History (/history): a flat, full-width clickable list - title left, relative time right,
+   hairline dividers, no cards (Claude-style). Rows link to the chat. */
+.cowork-history {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-history__row {
+  border-bottom: 1px solid var(--border-subtle);
+}
+.cowork-history__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-1);
+  color: var(--ink-primary);
+  text-decoration: none;
+  font: var(--text-body);
+}
+.cowork-history__link:hover {
+  color: var(--ink-primary);
+}
+.cowork-history__row:hover {
+  background: var(--surface-sunken);
+}
+.cowork-history__link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+  border-radius: var(--control-radius);
+}
+.cowork-history__what {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-history__when {
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.cowork-hint {
   margin: 0;
   font: var(--text-body-sm);
   color: var(--ink-muted);
 }
 
-.desk-toast {
+.cowork-toast {
   position: fixed;
   right: calc(20px + env(safe-area-inset-right, 0px));
   bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -1303,46 +1406,46 @@
   width: min(380px, calc(100vw - 40px));
 }
 
-.desk-toast > div {
+.cowork-toast > div {
   width: 100%;
   box-shadow: var(--shadow-md);
 }
 
 /**
- * Projects (`desk/projects/desk-projects.tsx`): the list of projects as rows, one project with
+ * Projects (`cowork/projects/cowork-projects.tsx`): the list of projects as rows, one project with
  * its folder ask, its chats and its files, and the name form of the project dialog.
  */
-.desk-projects,
-.desk-project-form {
+.cowork-projects,
+.cowork-project-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
-.desk-project-form {
+.cowork-project-form {
   gap: var(--space-4);
   margin: 0;
 }
 
-.desk-projects__lede {
+.cowork-projects__lede {
   max-width: 640px;
   margin: 0;
   font: var(--text-body);
   color: var(--ink-secondary);
 }
 
-.desk-projects__list {
+.cowork-projects__list {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--border-subtle);
 }
 
-.desk-projects__list > li {
+.cowork-projects__list > li {
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-project-row {
+.cowork-project-row {
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -1351,23 +1454,23 @@
   text-decoration: none;
 }
 
-.desk-project-row--tight {
+.cowork-project-row--tight {
   gap: var(--space-3);
   padding: var(--space-3) var(--space-2);
 }
 
-.desk-project-row:hover {
+.cowork-project-row:hover {
   background: var(--surface-sunken);
 }
 
-.desk-project-row:focus-visible,
-.desk-projects__back:focus-visible,
-.desk-projects__new:focus-visible {
+.cowork-project-row:focus-visible,
+.cowork-projects__back:focus-visible,
+.cowork-projects__new:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.desk-project-row__icon {
+.cowork-project-row__icon {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -1379,13 +1482,13 @@
   color: var(--ink-secondary);
 }
 
-.desk-project-row--tight .desk-project-row__icon {
+.cowork-project-row--tight .cowork-project-row__icon {
   width: 28px;
   height: 28px;
   background: none;
 }
 
-.desk-project-row__text {
+.cowork-project-row__text {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -1393,7 +1496,7 @@
   min-width: 0;
 }
 
-.desk-project-row__text b {
+.cowork-project-row__text b {
   overflow: hidden;
   font: var(--text-body-strong);
   font-weight: 600;
@@ -1401,7 +1504,7 @@
   white-space: nowrap;
 }
 
-.desk-project-row__text span {
+.cowork-project-row__text span {
   overflow: hidden;
   font: var(--text-meta);
   color: var(--ink-secondary);
@@ -1409,7 +1512,7 @@
   white-space: nowrap;
 }
 
-.desk-project-row__fig {
+.cowork-project-row__fig {
   flex: none;
   min-width: 72px;
   font: var(--text-meta);
@@ -1417,7 +1520,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.desk-project-row__when {
+.cowork-project-row__when {
   flex: none;
   min-width: 56px;
   font: var(--text-meta);
@@ -1426,8 +1529,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-.desk-projects__back,
-.desk-projects__new {
+.cowork-projects__back,
+.cowork-projects__new {
   display: inline-flex;
   align-self: flex-start;
   align-items: center;
@@ -1437,56 +1540,64 @@
   text-decoration: none;
 }
 
-.desk-projects__new {
+.cowork-projects__new {
   align-self: auto;
   color: var(--ink-brand);
 }
 
-.desk-projects__back:hover,
-.desk-projects__new:hover {
+.cowork-projects__back:hover,
+.cowork-projects__new:hover {
   text-decoration: underline;
 }
 
-.desk-projects__section {
+.cowork-projects__section {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.desk-projects__head {
+.cowork-projects__head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
 }
 
-.desk-projects__head h2 {
+.cowork-projects__head h2 {
   margin: 0;
   font: var(--text-body-strong);
   color: var(--ink-primary);
 }
 
-.desk-projects__files {
+.cowork-projects__files {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
 
-.desk-projects__files p {
+.cowork-projects__files p {
   margin: 0;
   font: var(--text-meta);
   color: var(--ink-secondary);
 }
 
 /**
- * The composer inside the Desk frame (`desk/composer/desk-composer.tsx`): the new chat's
+ * The composer inside the Cowork frame (`cowork/composer/cowork-composer.tsx`): the new chat's
  * one spoken line, the mic, Plan or Run and the model before Send, and the status line
  * under the field. The line is the only serif on the screen.
  */
-.desk-new {
+.cowork-new {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  /*
+    Round 32: center the hero (line + composer) in the available height rather
+    than pinning it to the top. The hero is content-light so it fits; justify
+    stays safe-start if it ever grows past the viewport (center + auto overflow
+    keeps a tall hero scrollable from the top instead of clipping its head).
+  */
+  justify-content: center;
+  overflow-y: auto;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -1498,7 +1609,7 @@
   available height (round 4, item 2). It keeps the old 720px measure and the
   gap between its own rows.
 */
-.desk-new__center {
+.cowork-new__center {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -1511,7 +1622,7 @@
 }
 
 /* A quiet one-line disclaimer pinned at the bottom of the home (round 4, item 3). */
-.desk-new__disclaimer {
+.cowork-new__disclaimer {
   flex: none;
   margin: 0;
   padding: var(--space-3) 0 var(--space-4);
@@ -1520,8 +1631,16 @@
   color: var(--ink-muted);
 }
 
+/*
+  Round 36 (item 4): the greeting <-> composer gap read too tight. Add ~30% more
+  space ONLY between those two (not composer <-> connect-provider). .cowork-new__center
+  has a flex gap of --space-5 (24px); the greeting's own margin-bottom (set on the
+  real .cowork-new__line rule below) stacks on top of that gap, so greeting->composer
+  becomes ~24px + 30% ~= 31px while every other center child-gap stays 24px.
+*/
+
 /* Round 7, item 7: the same quiet disclaimer under the IN-CHAT composer (the home one lives in SessionEmptyHero and only shows on the new-chat screen). Lighter top padding since it sits under the status chips, not a tall hero. */
-.desk-chat__disclaimer {
+.cowork-chat__disclaimer {
   margin: 0;
   padding: var(--space-2) 0 0;
   text-align: center;
@@ -1536,7 +1655,7 @@
   surface. Light and subtle: ~10% sky, fades in on focus-within, pointer-transparent, reduced-motion
   safe. Replaces the round-8 inner-wash overlay.
 */
-.desk-composer-field::before {
+.cowork-composer-field::before {
   content: "";
   position: absolute;
   inset: -5px;
@@ -1548,52 +1667,77 @@
   transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease);
   z-index: -1;
 }
-.desk-composer-field:focus-within::before {
+.cowork-composer-field:focus-within::before {
   opacity: 1;
 }
 /* Keep the field's own content above the overlay. */
-.desk-composer-field > * {
+.cowork-composer-field > * {
   position: relative;
   z-index: 1;
 }
 
-.desk-new__line {
-  margin: 0;
-  font: var(--text-voice-2);
-  font-family: var(--font-serif);
+.cowork-new__line {
+  /* Round 36 (item 4): add clearly perceptible air between the greeting and the
+     composer. The .cowork-new__center flex gap is --space-5 (20px here); a 0.3x
+     margin (6px) was too subtle to read, so use --space-4 (16px) margin-bottom
+     -> greeting->composer reads ~36px while other center child-gaps stay 20px. */
+  margin: 0 0 var(--space-4);
+  /*
+    Round 35, item 4: the greeting now matches the Trending AI section-header
+    STYLE -- sans (no serif), bold, tight tracking -- rather than the old big
+    serif, and is CENTER-aligned to the prompt box below (dropped the left inset
+    that aligned it to the composer's text edge). Kept at a hero size so it still
+    anchors the screen, just in the sans family/weight of the chart headers.
+  */
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--ink-primary);
 }
 
 /* The greeting block: the rotating warm line, then a rotating prompt-starter hint sub-line. */
-.desk-new__greeting {
+.cowork-new__greeting {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
-.desk-new__hint {
+.cowork-new__hint {
   margin: 0;
   font: var(--text-body-sm);
   color: var(--ink-secondary);
 }
 
-.desk-composer-tools {
+.cowork-composer-tools {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.desk-composer-status {
+.cowork-composer-status {
   margin-top: var(--space-2);
   padding: 0 var(--space-2);
 }
 
+/*
+  Round 33: a fixed-height stand-in while the status row's data resolves on a real
+  workspace, so the hero does not shift and no default values (Privacy Off, etc.)
+  flash before the true ones. Height matches one chip line.
+*/
+.cowork-composer-status--loading {
+  margin-top: var(--space-2);
+  padding: 0 var(--space-2);
+  height: 22px;
+}
+
 /**
- * Settings (`desk/settings/desk-settings.tsx`): the section list beside the section, each
+ * Settings (`cowork/settings/cowork-settings.tsx`): the section list beside the section, each
  * section a run of groups, each group rows of a title, a line about it and its control on
  * the right, with a hairline under every row. Under 900px the list is a row above.
  */
-.desk-settings {
+.cowork-settings {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
   gap: var(--space-10);
@@ -1601,7 +1745,7 @@
   padding: var(--space-2) 0 72px;
 }
 
-.desk-settings__nav {
+.cowork-settings__nav {
   position: sticky;
   top: 0;
   display: flex;
@@ -1609,14 +1753,14 @@
   gap: 2px;
 }
 
-.desk-settings__head {
+.cowork-settings__head {
   margin: 0;
   padding: 14px var(--space-3) 6px;
   font: var(--text-meta);
   color: var(--ink-muted);
 }
 
-.desk-settings__link {
+.cowork-settings__link {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1628,32 +1772,32 @@
   text-decoration: none;
 }
 
-.desk-settings__link:hover {
+.cowork-settings__link:hover {
   background: var(--surface-sunken);
 }
 
-.desk-settings__link[aria-current="page"] {
+.cowork-settings__link[aria-current="page"] {
   background: var(--surface-raised);
   box-shadow: 0 0 0 1px var(--border-subtle);
   font-weight: 600;
 }
 
-.desk-settings__link:focus-visible,
-.desk-settings__action:focus-visible {
+.cowork-settings__link:focus-visible,
+.cowork-settings__action:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.desk-settings__icon {
+.cowork-settings__icon {
   display: inline-flex;
   color: var(--ink-muted);
 }
 
-.desk-settings__link[aria-current="page"] .desk-settings__icon {
+.cowork-settings__link[aria-current="page"] .cowork-settings__icon {
   color: var(--ink-brand);
 }
 
-.desk-settings__main {
+.cowork-settings__main {
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
@@ -1661,26 +1805,26 @@
   max-width: 760px;
 }
 
-.desk-settings__lede {
+.cowork-settings__lede {
   margin: 0;
   font-size: 15px;
   line-height: 24px;
   color: var(--ink-secondary);
 }
 
-.desk-settings__group {
+.cowork-settings__group {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.desk-settings__rows {
+.cowork-settings__rows {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--border-subtle);
 }
 
-.desk-settings__row {
+.cowork-settings__row {
   display: flex;
   align-items: center;
   gap: var(--space-4) var(--space-6);
@@ -1688,7 +1832,7 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-settings__text {
+.cowork-settings__text {
   display: flex;
   flex: 1 1 260px;
   flex-direction: column;
@@ -1696,26 +1840,26 @@
   min-width: 0;
 }
 
-.desk-settings__title {
+.cowork-settings__title {
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
   color: var(--ink-primary);
 }
 
-.desk-settings__description {
+.cowork-settings__description {
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
 }
 
-.desk-settings__where {
+.cowork-settings__where {
   font-size: 13px;
   font-weight: 400;
   color: var(--ink-muted);
 }
 
-.desk-settings__control {
+.cowork-settings__control {
   display: flex;
   flex: 0 1 auto;
   align-items: center;
@@ -1724,13 +1868,13 @@
   min-width: 180px;
 }
 
-.desk-settings__radios {
+.cowork-settings__radios {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-5);
 }
 
-.desk-settings__folder {
+.cowork-settings__folder {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -1742,11 +1886,11 @@
   color: var(--ink-secondary);
 }
 
-.desk-settings__row--folder .desk-settings__control {
+.cowork-settings__row--folder .cowork-settings__control {
   min-width: 0;
 }
 
-.desk-settings__note {
+.cowork-settings__note {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1756,12 +1900,12 @@
   color: var(--ink-secondary);
 }
 
-.desk-settings__note svg {
+.cowork-settings__note svg {
   flex: none;
   color: var(--ink-muted);
 }
 
-.desk-settings__auto {
+.cowork-settings__auto {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -1769,14 +1913,14 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.desk-settings__actions {
+.cowork-settings__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2) var(--space-5);
 }
 
-.desk-settings__action {
+.cowork-settings__action {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -1785,12 +1929,12 @@
   text-decoration: none;
 }
 
-.desk-settings__action:hover {
+.cowork-settings__action:hover {
   text-decoration: underline;
 }
 
 /* Memory: the scope picker reuses the settings list; each scope ends with its count. */
-.desk-memory__count {
+.cowork-memory__count {
   margin-left: auto;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
@@ -1798,11 +1942,11 @@
 }
 
 /* Connectors: cards two to a row, one on a narrow window. */
-.desk-connectors__main {
+.cowork-connectors__main {
   max-width: 880px;
 }
 
-.desk-connectors {
+.cowork-connectors {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-3);
@@ -1811,12 +1955,12 @@
   list-style: none;
 }
 
-/* Desk screens that can show sample data: Skills, Scheduled, History, Model Guide. */
-.desk-preview--wide {
+/* Cowork screens that can show sample data: Skills, Scheduled, History, Model Guide. */
+.cowork-preview--wide {
   max-width: none;
 }
 
-.desk-preview__list {
+.cowork-preview__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -1825,13 +1969,13 @@
   list-style: none;
 }
 
-.desk-preview__wait {
+.cowork-preview__wait {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.desk-preview__meta {
+.cowork-preview__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1842,7 +1986,7 @@
   color: var(--ink-secondary);
 }
 
-.desk-preview__figure {
+.cowork-preview__figure {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -1850,35 +1994,43 @@
 /* The one column that wraps keeps a reading width. Without it, beside the side panel, the
    columns that hug their content took the row and "What" wrapped to a word per line; now
    the table scrolls sideways inside its frame instead. */
-.desk-preview__what {
+.cowork-preview__what {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 15rem;
 }
 
-.desk-preview__what span {
+.cowork-preview__what span {
   font-size: 13px;
   color: var(--ink-muted);
 }
 
 /* Skills: the filters above the list, and each row's name, tags and actions. */
-.desk-skills__filters {
+.cowork-skills__filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--space-3);
   align-items: end;
 }
 
-.desk-skills__row {
+.cowork-skills__row {
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--border-subtle);
+  /* Round 33: a card, not a flat hairline row -- surface + border + radius + hover lift. */
+  padding: var(--space-4);
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+  margin-bottom: var(--space-3);
+  transition: box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skills__row:hover {
+  box-shadow: 0 8px 22px -16px color-mix(in srgb, var(--redrob-black) 35%, transparent);
 }
 
-.desk-skills__name {
+.cowork-skills__name {
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
@@ -1886,53 +2038,143 @@
   text-decoration: none;
 }
 
-.desk-skills__name:hover {
+.cowork-skills__name:hover {
   text-decoration: underline;
 }
 
-.desk-skills__actions {
+.cowork-skills__actions {
   display: flex;
   flex-shrink: 0;
   gap: var(--space-2);
 }
 
+/*
+  Round 32: the "What's a skill?" explainer header for non-technical readers. A
+  quiet raised card so it reads as a friendly intro, not a warning banner. Opaque
+  --surface-sunken on the raised work area, so it sits a step in from the page.
+*/
+.cowork-skills__explainer {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border-radius: 12px;
+  background-color: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+}
+.cowork-skills__explainer-title {
+  margin: 0 0 var(--space-1);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+.cowork-skills__explainer-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+  max-width: 68ch;
+}
+
+/* Round 33: browse-by-category tiles (profession album art) + the quiet refine filters below. */
+.cowork-skills__browse-heading {
+  margin: var(--space-2) 0 var(--space-2);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-primary);
+}
+.cowork-skills__categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.cowork-skills__category {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: center;
+}
+.cowork-skills__category-art {
+  display: block;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skills__category-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cowork-skills__category:hover .cowork-skills__category-art {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent);
+}
+.cowork-skills__category[data-active="true"] .cowork-skills__category-art {
+  outline: 2px solid var(--spectrum-sky, #2b52ff);
+  outline-offset: 1px;
+}
+.cowork-skills__category-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+}
+.cowork-skills__category[data-active="true"] .cowork-skills__category-label {
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skills__category:hover .cowork-skills__category-art { transform: none; }
+  .cowork-skills__category-art { transition: none; }
+  .cowork-skills__row { transition: none; }
+}
+
 @media (max-width: 900px) {
-  .desk-account__text {
+  .cowork-account__text {
     display: none;
   }
 
-  .desk-settings {
+  .cowork-settings {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
 
-  .desk-settings__nav {
+  .cowork-settings__nav {
     position: static;
     flex-direction: row;
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  .desk-settings__head {
+  .cowork-settings__head {
     display: none;
   }
 
-  .desk-settings__link {
+  .cowork-settings__link {
     flex: none;
     white-space: nowrap;
   }
 
-  .desk-settings__row {
+  .cowork-settings__row {
     flex-wrap: wrap;
   }
 
-  .desk-settings__control {
+  .cowork-settings__control {
     justify-content: flex-start;
     flex-wrap: wrap;
     min-width: 0;
   }
 
-  .desk-settings__row--folder .desk-settings__control {
+  .cowork-settings__row--folder .cowork-settings__control {
     padding-left: 52px;
   }
 }
@@ -2030,6 +2272,33 @@ html[lang="ko"] {
  * unlayered `font-family` would beat the `:lang(ko)` rule and put Hangul back in
  * the Latin face. Smoothing is left to the platform, as the preflight asks.
  */
+
+/*
+  Round 35, item 1: chat replies render through .markdown-content with Tailwind
+  Typography `prose`, whose default list spacing (li margin 0.5em, and a tall
+  gap between items) reads "too spaced out" in a chat bubble -- the paragraph
+  line-height is fine, so this tightens ONLY the list rhythm, scoped to the chat
+  markdown. Lists sit closer to the surrounding text and each other; a paragraph
+  nested inside a list item loses its extra top/bottom margin so multi-line
+  bullets do not balloon.
+*/
+.markdown-content :is(ul, ol) {
+  /* Round 36 (item 1): the space BEFORE and AFTER the list read too wide (Felix
+     marked it); the between-bullet rhythm (li margin-block 0.15em) is already
+     right. Tighten only the list's own outer margin 0.5em -> 0.3em so the list
+     hugs its surrounding text a hair more without touching inter-item spacing. */
+  margin-block: 0.3em;
+}
+.markdown-content :is(ul, ol) > li {
+  margin-block: 0.15em;
+  padding-inline-start: 0.1em;
+}
+.markdown-content li > p {
+  margin-block: 0.1em;
+}
+.markdown-content li > :is(ul, ol) {
+  margin-block: 0.15em;
+}
 
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
@@ -2541,7 +2810,7 @@ select:disabled {
   border-radius: 6px;
   object-fit: contain;
 }
-/* Round 13, item 2: the brand marks are buttons now — a bare wrapper with a subtle hover affordance
+/* Round 13, item 2: the brand marks are buttons now - a bare wrapper with a subtle hover affordance
    so they read as clickable, and a focus ring for keyboard use. */
 .window-titlebar__brand-btn {
   display: inline-flex;
@@ -2675,7 +2944,7 @@ select:disabled {
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  /* Round 24: a taller featured banner (was 172px) — more vertical presence, like a storefront hero.
+  /* Round 24: a taller featured banner (was 172px) - more vertical presence, like a storefront hero.
      The title + sub sit centered in the extra height via margin-top:auto on the eyebrow block. */
   min-height: 210px;
   justify-content: flex-end;
@@ -2775,7 +3044,7 @@ select:disabled {
 /*
   Round 20: each shelf is ONE horizontal scroll-snap row (not a wrapping grid), like a music-app
   shelf. `.model-chart__shelf` is the positioning context for the two overlay chevrons; `.model-chart__row`
-  is the scroller. The native scrollbar is hidden — the row scrolls by chevron, wheel, trackpad, touch
+  is the scroller. The native scrollbar is hidden - the row scrolls by chevron, wheel, trackpad, touch
   and keyboard. Tiles are a fixed ~121px basis (round-19 was 151px; this is ~20% smaller) and snap to
   the row's start edge.
 */
@@ -2794,9 +3063,9 @@ select:disabled {
   scroll-padding-left: 2px;
   /* chevrons overlay the edges; a little inline padding keeps the first/last card off the very edge.
      Round 22: the TOP padding is 8px (not 2px) so the hover lift (translateY) has room inside this
-     overflow-y:hidden scroller — at 2px the lifted card's top border was clipped. */
+     overflow-y:hidden scroller - at 2px the lifted card's top border was clipped. */
   padding: 8px 2px 4px;
-  /* Hide the native scrollbar — the shelf scrolls by chevrons / wheel / trackpad / touch. */
+  /* Hide the native scrollbar - the shelf scrolls by chevrons / wheel / trackpad / touch. */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -2867,7 +3136,7 @@ select:disabled {
   no-backdrop-filter fallback below.
 */
 .model-chart__tile {
-  /* Round 17: an album card — a SQUARE art panel (.model-chart__card) with the caption BELOW it,
+  /* Round 17: an album card - a SQUARE art panel (.model-chart__card) with the caption BELOW it,
      like a track in a music app. The button itself is just the stack; the card carries the look. */
   display: flex;
   flex-direction: column;
@@ -2902,7 +3171,7 @@ select:disabled {
 }
 /*
   Round 25: the album art is now a REAL per-tile IMAGE (user's hand-built set), filling the square and
-  sitting above the glass backdrop. Decorative (aria-hidden) — the caption below carries the meaning.
+  sitting above the glass backdrop. Decorative (aria-hidden) - the caption below carries the meaning.
   object-fit:cover so the square crop is always full-bleed; it keeps the card's rounded corners via
   the card's overflow:hidden.
 */
@@ -2917,7 +3186,7 @@ select:disabled {
   transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
 }
 .model-chart__tile:hover .model-chart__card {
-  /* Round 22: subtler hover — a 2px lift (was 3), a lighter shadow, same accent border. */
+  /* Round 22: subtler hover - a 2px lift (was 3), a lighter shadow, same accent border. */
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -3019,7 +3288,7 @@ select:disabled {
 }
 
 /*
-  Round 26: the inner chart-detail page — a Spotify / Apple-Music style top-10 model list. A header
+  Round 26: the inner chart-detail page - a Spotify / Apple-Music style top-10 model list. A header
   (album-art cover + title + lede) over a ranked list of rows. One layout for every chart.
 */
 .chart-detail {
@@ -3161,7 +3430,7 @@ select:disabled {
   color: var(--ink-muted);
 }
 /*
-  Round 31: the Needle Test badge — a graded ring with clearer, Apple-Music-style grade colors
+  Round 31: the Needle Test badge - a graded ring with clearer, Apple-Music-style grade colors
   (green ace, blue strong, amber good, grey fair) so a strong result reads instantly. The caption
   sits beneath; the full explanation is in the on-hover tooltip.
 */
@@ -3227,7 +3496,7 @@ select:disabled {
   width: 100%;
 }
 /*
-  Round 34: Redrob Auto — the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
+  Round 34: Redrob Auto - the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
   the same height as and visually seamless with the ten models: "Featured" sits on the maker line,
   "Always the best" fills the Needle column, and the budget copy fills the cost column. A whisper of
   brand tint is the only thing that sets it apart.
@@ -3294,8 +3563,8 @@ select:disabled {
 @media (prefers-reduced-motion: reduce) {
   .model-chart__banner,
   .model-chart__tile,
-  .desk-shell__side-resizer::before,
-  .desk-composer-field::before {
+  .cowork-shell__side-resizer::before,
+  .cowork-composer-field::before {
     transition: none;
   }
 }

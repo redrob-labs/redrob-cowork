@@ -110,9 +110,9 @@ export function TutorialStep({ workspacePath, onStart, crashReports, onCrashRepo
                       data-testid="tutorial-crash-reports"
                     />
                     <span>
-                      <span className="block text-sm font-semibold text-foreground">{t("desk.settings_crash_reports")}</span>
+                      <span className="block text-sm font-semibold text-foreground">{t("cowork.settings_crash_reports")}</span>
                       <span className="mt-1 block text-sm leading-[20px] text-muted-foreground">
-                        {t("desk.settings_crash_reports_text")}
+                        {t("cowork.settings_crash_reports_text")}
                       </span>
                     </span>
                   </label>

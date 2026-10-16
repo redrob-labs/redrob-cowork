@@ -28,7 +28,7 @@ import {
 } from "../domains/onboarding/harness-availability-client";
 import { AttributionStep, type AttributionSource } from "../domains/onboarding/attribution-step";
 import { TutorialStep } from "../domains/onboarding/tutorial-step";
-import { syncCrashReports } from "../desk/settings/crash-reports";
+import { syncCrashReports } from "../cowork/settings/crash-reports";
 import { REDROB_CONSOLE_URL } from "../domains/settings/redrob-provider";
 import { connectRedrobKey } from "../domains/onboarding/redrob-key-connect";
 import {

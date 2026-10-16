@@ -40,8 +40,8 @@ import {
   startScheduler,
   updateSchedule,
   type ScheduleEngine,
-} from "./desk-schedules.js";
-import { DESK_RUN_AGENT } from "./redrob-desk-agents.js";
+} from "./cowork-schedules.js";
+import { COWORK_RUN_AGENT } from "./redrob-cowork-agents.js";
 import { ApiError, formatError } from "./errors.js";
 import { readJsoncFile, updateJsoncTopLevel, writeJsoncFile } from "./jsonc.js";
 import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
@@ -134,7 +134,7 @@ import {
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
-import { deskPrivacyLevel, syncEnginePrivacy, syncEnginePrivacyQuietly } from "./engine-privacy.js";
+import { coworkPrivacyLevel, syncEnginePrivacy, syncEnginePrivacyQuietly } from "./engine-privacy.js";
 import {
   applyTeamPolicy,
   describeTeamPolicyState,
@@ -1404,7 +1404,7 @@ function createScheduleEngine(config: ServerConfig): ScheduleEngine {
       const session = unwrapOpencodeResult(await opencode.session.create({ title: input.title || "Scheduled run" }), "/session");
       const result = await opencode.session.promptAsync({
         sessionID: session.id,
-        agent: DESK_RUN_AGENT,
+        agent: COWORK_RUN_AGENT,
         parts: [{ type: "text", text: input.prompt }],
       });
       if (result.error !== undefined) {
@@ -2753,7 +2753,7 @@ function createRoutes(
         refuseNewPrivacyLock(stored, next);
         requireClientScope(ctx, "owner");
       }
-      privacyLevelChanged = deskPrivacyLevel(stored) !== deskPrivacyLevel(next);
+      privacyLevelChanged = coworkPrivacyLevel(stored) !== coworkPrivacyLevel(next);
     }
     if (opencode) await refuseBlockedConnectors(config, workspace.id, opencode.mcp);
 
@@ -3522,7 +3522,7 @@ function createRoutes(
     return jsonResponse({ ok: true });
   });
 
-  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  // Scheduled playbooks (cowork-schedules.ts). They run here while the app is open.
   addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
     return jsonResponse(await readSchedules(config, workspace.id));

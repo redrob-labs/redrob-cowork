@@ -1,6 +1,6 @@
 import { ApiError } from "./errors.js";
 import { readRedrobWorkspaceConfig } from "./redrob-workspace-config-store.js";
-import { deskPrivacyLevel } from "./engine-privacy.js";
+import { coworkPrivacyLevel } from "./engine-privacy.js";
 import type { ServerConfig } from "./types.js";
 
 /**
@@ -12,7 +12,7 @@ import type { ServerConfig } from "./types.js";
  * not to happen, so voice is off there rather than quietly weaker than the setting says.
  */
 export async function voiceAllowed(config: ServerConfig, workspaceId: string): Promise<boolean> {
-  return deskPrivacyLevel(await readRedrobWorkspaceConfig(config, workspaceId)) !== "strict";
+  return coworkPrivacyLevel(await readRedrobWorkspaceConfig(config, workspaceId)) !== "strict";
 }
 
 export async function assertVoiceAllowed(config: ServerConfig, workspaceId: string): Promise<void> {

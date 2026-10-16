@@ -170,14 +170,14 @@ describe("push-to-talk transcription relay", () => {
     const { base, config } = await boot(engine.baseUrl);
     {
       const level = "strict";
-      await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level } }));
+      await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, coworkPrivacy: { level } }));
       const response = await transcribe(base, {});
       expect(response.status).toBe(403);
       expect(await response.json()).toMatchObject({ code: "voice_off_for_privacy" });
     }
     expect(engine.reached()).toBe(false);
 
-    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "high" } }));
+    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, coworkPrivacy: { level: "high" } }));
     expect((await transcribe(base, {})).status).toBe(200);
   });
 

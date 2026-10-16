@@ -39,7 +39,7 @@ import {
   type RuntimeOpencodeConfig,
 } from "./runtime-opencode-config-store.js";
 import { activeHarnessProviders } from "./harness-provider.js";
-import { deskAgents } from "./redrob-desk-agents.js";
+import { coworkAgents } from "./redrob-cowork-agents.js";
 
 const REDROB_AGENT_PROMPT = `You are Redrob Cowork.
 
@@ -165,7 +165,7 @@ export function buildRedrobRuntimeConfigObjectFromSnapshot(
         prompt: REDROB_AGENT_PROMPT,
         permission: REDROB_AGENT_PERMISSION,
       },
-      ...deskAgents({ prompt: REDROB_AGENT_PROMPT, permission: REDROB_AGENT_PERMISSION }),
+      ...coworkAgents({ prompt: REDROB_AGENT_PROMPT, permission: REDROB_AGENT_PERMISSION }),
     },
     // A `[path, options]` tuple carries only what that plugin reads; the engine
     // calls `plugin(input, options)` and the plugin falls back to its env var
