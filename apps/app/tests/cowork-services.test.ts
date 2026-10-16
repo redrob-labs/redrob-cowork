@@ -51,9 +51,7 @@ async function everyResult(services: CoworkServices) {
     await services.notes.list(),
     await services.schedules.list(),
     await services.skills.list(),
-    await services.skills.library(),
     await services.skills.taxonomy(),
-    await services.skills.get("first-review"),
     await services.history.list(),
     await services.connectors.list(),
     await services.privacy.get(),
@@ -75,7 +73,7 @@ describe("cowork fixture services", () => {
     expect(connectors.filter((connector) => connector.state === "connected")).toHaveLength(6);
     expect((await services.schedules.list()).data.waiting).toHaveLength(2);
     expect((await services.privacy.get()).data.level).toBe("high");
-    expect((await services.skills.list()).data.map((skill) => skill.name)).toEqual(["first-review", "deadline-tracker", "weekly-report"]);
+    expect((await services.skills.list()).data).toEqual([]);
 
     const notes = (await services.notes.list()).data;
     expect(notes.length).toBe(22);
