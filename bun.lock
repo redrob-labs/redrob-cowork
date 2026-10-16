@@ -1537,7 +1537,7 @@
 
     "electron": ["electron@43.2.0", "", { "dependencies": { "@electron-internal/extract-zip": "1.0.5", "@electron/get": "5.1.0", "@types/node": "24.13.3" }, "bin": { "electron": "cli.js", "install-electron": "install.js" } }, "sha512-80zvrgG7ZRXD+tD0IyLvrnN9n+veSxadMRsMaC9wKKP3iUbtC7rGM8+dVuCmOb0Rrwwv8ESW4awnUZh9Hbp1fA=="],
 
-    "electron-builder": ["electron-builder@26.15.3", "", { "dependencies": { "app-builder-lib": "26.15.3", "builder-util": "26.15.3", "builder-util-runtime": "9.7.0", "chalk": "4.1.2", "ci-info": "4.4.0", "dmg-builder": "26.15.3", "fs-extra": "10.1.0", "lazy-val": "1.0.5", "simple-update-notifier": "2.0.0", "yargs": "17.7.2" }, "bin": { "electron-builder": "./cli.js", "install-app-deps": "./install-app-deps.js" } }, "sha512-a1KM5heqS3gQCZzizXEI8RjJy3QVogULPcoworknt76uLDpBIW/HDGsMg/XgP0riP6PI9COsRvFITKKGDqA8fJxA=="],
+    "electron-builder": ["electron-builder@26.15.3", "", { "dependencies": { "app-builder-lib": "26.15.3", "builder-util": "26.15.3", "builder-util-runtime": "9.7.0", "chalk": "4.1.2", "ci-info": "4.4.0", "dmg-builder": "26.15.3", "fs-extra": "10.1.0", "lazy-val": "1.0.5", "simple-update-notifier": "2.0.0", "yargs": "17.7.2" }, "bin": { "electron-builder": "./cli.js", "install-app-deps": "./install-app-deps.js" } }, "sha512-a1KM5heqS3gQCZzizXEI8RjJy3QVogULPdeSknt76uLDpBIW/HDGsMg/XgP0riP6PI9COsRvFITKKGDqA8fJxA=="],
 
     "electron-builder-squirrel-windows": ["electron-builder-squirrel-windows@26.15.3", "", { "dependencies": { "app-builder-lib": "26.15.3", "builder-util": "26.15.3", "electron-winstaller": "5.4.0" } }, "sha512-Jc19XPV9y9+2bAdZPkXuVNGNIEFBq9poHC61l8Kv6FdK7DRG3+Ic0rerC0DXOaeHNz8yW0fg/JnF8GQROOF5MA=="],
 

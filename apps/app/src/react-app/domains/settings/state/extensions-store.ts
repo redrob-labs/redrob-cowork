@@ -1020,7 +1020,7 @@ export function createExtensionsStore(options: {
       // engine's own config discovery accepts. `.redrob` is tried FIRST: a user who creates
       // `.redrob/skills`, which is where our docs point them, otherwise gets a reveal on a folder
       // they never made.
-      const [redrobSkills, opencocoworkills, claucoworkills, legacySkills] = await Promise.all([
+      const [redrobSkills, opencodeSkills, claudeSkills, legacySkills] = await Promise.all([
         joinDesktopPath(root, ".redrob", "skills"),
         joinDesktopPath(root, ".opencode", "skills"),
         joinDesktopPath(root, ".claude", "skills"),
@@ -1035,8 +1035,8 @@ export function createExtensionsStore(options: {
         }
       };
       if (await tryOpen(redrobSkills)) return;
-      if (await tryOpen(opencocoworkills)) return;
-      if (await tryOpen(claucoworkills)) return;
+      if (await tryOpen(opencodeSkills)) return;
+      if (await tryOpen(claudeSkills)) return;
       if (await tryOpen(legacySkills)) return;
       // Nothing existed. Reveal the folder the user is meant to create, not the legacy one.
       await revealDesktopItemInDir(redrobSkills);

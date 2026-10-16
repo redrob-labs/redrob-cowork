@@ -1394,13 +1394,13 @@ async function collectProjectSkillRoots(projectDir) {
   let current = path.resolve(projectDir);
 
   while (true) {
-    const opencocoworkills = path.join(current, ".opencode", "skills");
+    const opencodeSkills = path.join(current, ".opencode", "skills");
     const legacySkills = path.join(current, ".opencode", "skill");
-    const claucoworkills = path.join(current, ".claude", "skills");
+    const claudeSkills = path.join(current, ".claude", "skills");
 
-    if (await isDirectory(opencocoworkills)) roots.push(opencocoworkills);
+    if (await isDirectory(opencodeSkills)) roots.push(opencodeSkills);
     if (await isDirectory(legacySkills)) roots.push(legacySkills);
-    if (await isDirectory(claucoworkills)) roots.push(claucoworkills);
+    if (await isDirectory(claudeSkills)) roots.push(claudeSkills);
 
     if (await pathExists(path.join(current, ".git"))) {
       break;
