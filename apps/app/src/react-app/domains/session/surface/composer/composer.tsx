@@ -29,9 +29,9 @@ import {
 } from "./slash-command";
 import { FILE_URL_RE, HTTP_URL_RE, type PastedTextChip } from "./pasted-text";
 import { dragEventHasFiles } from "./drag-files";
-import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
-import { DeskComposerStatus, DeskComposerTools } from "@/react-app/desk/composer/desk-composer";
-import { NEW_CHAT_KEY } from "@/react-app/desk/composer/composer-state";
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
+import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/composer/cowork-composer";
+import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
 
 type MentionItem = {
   id: string;
@@ -205,7 +205,7 @@ type ToolMenuLayout = {
 
 /**
  * Where the "+" panel opens: above the trigger, inside the work column. It used to be held inside the
- * window only, so with the Desk side panel open it ran across the panel. The column is the composer's
+ * window only, so with the Cowork side panel open it ran across the panel. The column is the composer's
  * `main`; without one (a bare test page) the window is the bound, as before.
  */
 export function measureToolMenuLayout(trigger: HTMLElement): ToolMenuLayout {
@@ -359,10 +359,10 @@ export function ReactSessionComposer(props: ComposerProps) {
   const mentionOpenNext = Boolean(mentionMatch);
   const mentionQuery = mentionMatch?.[1] ?? "";
   const nonDefaultAgents = useMemo(() => agents.filter(isNonDefaultAgent), [agents]);
-  // Inside the Desk frame Plan or Run picks the agent, so the agent picker steps aside.
-  const inDeskFrame = useInDeskFrame();
-  const deskChatKey = props.sessionId ?? NEW_CHAT_KEY;
-  const showAgentPicker = !inDeskFrame && props.selectedAgent !== null;
+  // Inside the Cowork frame Plan or Run picks the agent, so the agent picker steps aside.
+  const inCoworkFrame = useInCoworkFrame();
+  const coworkChatKey = props.sessionId ?? NEW_CHAT_KEY;
+  const showAgentPicker = !inCoworkFrame && props.selectedAgent !== null;
 
   useEffect(() => {
     setSlashOpen(slashOpenNext);
@@ -1219,7 +1219,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               }))}
               disabled={props.disabled}
               minHeightClass={props.twoLineDefault ? "min-h-[60px]" : undefined}
-              placeholder={props.placeholderOverride ?? (inDeskFrame ? t("desk.composer_placeholder") : t("composer.placeholder"))}
+              placeholder={props.placeholderOverride ?? (inCoworkFrame ? t("cowork.composer_placeholder") : t("composer.placeholder"))}
               onChange={props.onDraftChange}
               onSubmit={handleEditorSubmit}
               onExpandPastedText={handleExpandPastedText}
@@ -1569,7 +1569,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                   ) : null}
                 </div>
 
-                {inDeskFrame ? null : modelControls}
+                {inCoworkFrame ? null : modelControls}
                 {props.modelUnavailable ? (
                   <span className="max-w-[20rem] truncate text-xs font-medium text-destructive-ink">
                     {props.modelUnavailableMessage ?? t("models.model_unavailable_short")}
@@ -1583,13 +1583,13 @@ export function ReactSessionComposer(props: ComposerProps) {
                 - Idle: send arrow.
                 - Busy: stop icon in that same slot (Enter still queues;
                   Cmd/Ctrl+Enter still steers).
-                Inside the Desk frame the mic, Plan or Run and the model sit before it.
+                Inside the Cowork frame the mic, Plan or Run and the model sit before it.
               */}
               <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                {inDeskFrame ? (
-                  <DeskComposerTools chatKey={deskChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
+                {inCoworkFrame ? (
+                  <CoworkComposerTools chatKey={coworkChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
                     {modelControls}
-                  </DeskComposerTools>
+                  </CoworkComposerTools>
                 ) : null}
                 {props.busy && escapeArmed ? (
                   <span className="self-center pr-1 text-xs font-medium text-subtle-foreground max-lg:hidden">
@@ -1640,11 +1640,11 @@ export function ReactSessionComposer(props: ComposerProps) {
           each request carries the whole conversation, so that turn's own input already includes every
           earlier one. Shows nothing when either half is unknown rather than a made-up percentage.
         */}
-        {inDeskFrame ? <DeskComposerStatus chatKey={deskChatKey} showValues={Boolean(props.flush)} /> : null}
-        {inDeskFrame && !props.flush ? (
+        {inCoworkFrame ? <CoworkComposerStatus chatKey={coworkChatKey} showValues={Boolean(props.flush)} /> : null}
+        {inCoworkFrame && !props.flush ? (
           // Round 35, item 3: a quiet disclaimer under the IN-CHAT composer, matching the
           // new-chat home. The hero (flush) renders its own, so this is in-chat only.
-          <p className="desk-chat__disclaimer">{t("hero.disclaimer")}</p>
+          <p className="cowork-chat__disclaimer">{t("hero.disclaimer")}</p>
         ) : null}
         <ContextMeter
           compacting={props.compactingSession}

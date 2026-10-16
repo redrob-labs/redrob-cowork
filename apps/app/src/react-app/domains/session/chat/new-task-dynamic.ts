@@ -9,7 +9,7 @@
  *     shown as the quiet sub-line and seeded as the composer placeholder.
  *
  * There is no genuine per-user NAME signal on this surface -- the only connected
- * account label is the fixed brand string "Redrob" (desk.account_name), which is
+ * account label is the fixed brand string "Redrob" (cowork.account_name), which is
  * not the person's name -- so the greetings are deliberately name-less rather
  * than fabricating one. The "based on previous chats" steer (Q5b) is honoured by
  * biasing the starter hint toward the kind of work the person's recent session

@@ -175,7 +175,7 @@ describe("the model menu", () => {
   test("the Model Guide is profession-only now; the By-price tab and URL tab-switch were removed", () => {
     // Round 11 (Trending AI): the "By price" view and the header/tab strip were dropped, so the guide
     // no longer reads a `?tab=` from the URL — it is the profession chart only.
-    const source = readFileSync(fileURLToPath(new URL("../src/react-app/desk/preview/desk-guide.tsx", import.meta.url)), "utf8");
+    const source = readFileSync(fileURLToPath(new URL("../src/react-app/cowork/preview/cowork-guide.tsx", import.meta.url)), "utf8");
     expect(source).not.toContain('params.get("tab") === "price"');
     expect(source).not.toContain('useState<GuideTab>("profession")');
   });

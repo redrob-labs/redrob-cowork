@@ -101,7 +101,7 @@ export type RedrobSessionMessage = {
   parts: Part[];
 };
 
-/** When a scheduled run happens (apps/server/src/desk-schedules.ts). */
+/** When a scheduled run happens (apps/server/src/cowork-schedules.ts). */
 export type RedrobScheduleRule = {
   mode: "once" | "repeat";
   date?: string;

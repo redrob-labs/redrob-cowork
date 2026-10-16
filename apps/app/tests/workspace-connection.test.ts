@@ -5,16 +5,16 @@ import { join } from "node:path";
 import type { WorkspaceList } from "../src/app/lib/desktop";
 import { createRedrobServerClient, type RedrobServerClient } from "../src/app/lib/redrob-server";
 import { createWorkspaceServerClientResolver } from "../src/react-app/infra/workspace-server-client";
-import { createDeskServices } from "../src/react-app/desk/services/real-services";
+import { createCoworkServices } from "../src/react-app/cowork/services/real-services";
 import {
-  deriveDeskConnection,
-  deskChatsVersion,
-  publishDeskChatsRevision,
-  publishDeskConnection,
-  useDeskChatsRevision,
-  useDeskConnection,
-  type DeskChatsRevision,
-} from "../src/react-app/desk/shell/desk-connection";
+  deriveCoworkConnection,
+  coworkChatsVersion,
+  publishCoworkChatsRevision,
+  publishCoworkConnection,
+  useCoworkChatsRevision,
+  useCoworkConnection,
+  type CoworkChatsRevision,
+} from "../src/react-app/cowork/shell/cowork-connection";
 import type { RouteWorkspace } from "../src/react-app/shell/route-workspaces";
 import { subscribeActiveWorkspaceId, writeActiveWorkspaceId } from "../src/react-app/shell/session-memory";
 import {
@@ -27,8 +27,8 @@ import {
 
 /**
  * The always-mounted workspace connection (WorkspaceConnectionProvider) and the
- * sole Desk connection writer (DeskConnectionPublisher). Before these, only the
- * chat route published the Desk connection, so a cold landing on /skills had no
+ * sole Cowork connection writer (CoworkConnectionPublisher). Before these, only the
+ * chat route published the Cowork connection, so a cold landing on /skills had no
  * connection and the Skills screen showed the sample fixtures.
  *
  * MAJOR tests carry the four behaviours the change exists for. AUXILIARY tests
@@ -46,8 +46,8 @@ const originalFetch = globalThis.fetch;
 afterEach(() => {
   globalThis.window = originalWindow;
   globalThis.fetch = originalFetch;
-  useDeskConnection.setState({ client: null, opencode: null, workspaceId: null, workspaceRoot: null, chatsVersion: "" });
-  useDeskChatsRevision.setState({ workspaceRecordId: "", version: "", workspaceError: false });
+  useCoworkConnection.setState({ client: null, opencode: null, workspaceId: null, workspaceRoot: null, chatsVersion: "" });
+  useCoworkChatsRevision.setState({ workspaceRecordId: "", version: "", workspaceError: false });
 });
 
 function memoryStorage(): Storage {
@@ -95,8 +95,8 @@ function connected(outcome: WorkspaceConnectionRefreshOutcome) {
   return outcome;
 }
 
-/** The Desk connection a cold /skills landing publishes after one refresh with no chat route. */
-function coldDeskConnection(outcome: ReturnType<typeof connected>, persistedActiveId: string | null) {
+/** The Cowork connection a cold /skills landing publishes after one refresh with no chat route. */
+function coldCoworkConnection(outcome: ReturnType<typeof connected>, persistedActiveId: string | null) {
   const workspaces = outcome.listState.workspaces;
   const activeId = chooseDefaultWorkspaceId({
     workspaces,
@@ -106,8 +106,8 @@ function coldDeskConnection(outcome: ReturnType<typeof connected>, persistedActi
   });
   const workspace = selectActiveWorkspace(workspaces, activeId);
   const endpoint = createWorkspaceServerClientResolver({ baseUrl: outcome.baseUrl, token: outcome.token })(workspace);
-  const revision: DeskChatsRevision = { workspaceRecordId: "", version: "", workspaceError: false };
-  return { workspace, endpoint, desk: deriveDeskConnection({ workspace, endpoint, opencode: null, revision }) };
+  const revision: CoworkChatsRevision = { workspaceRecordId: "", version: "", workspaceError: false };
+  return { workspace, endpoint, cowork: deriveCoworkConnection({ workspace, endpoint, opencode: null, revision }) };
 }
 
 /** Records every fetch and answers each with an empty list. */
@@ -129,14 +129,14 @@ describe("MAJOR: cold-direct /skills reads the live connection", () => {
         refreshInput({ listWorkspaces: async () => ({ items: [{ id: "ws_local", workspaceType: "local", path: "/work/a" }] }) }),
       ),
     );
-    const { desk } = coldDeskConnection(outcome, "ws_local");
+    const { cowork } = coldCoworkConnection(outcome, "ws_local");
 
-    expect(desk.client).not.toBeNull();
-    expect(desk.workspaceId).toBe("ws_local");
-    expect(desk.workspaceRoot).toBe("/work/a");
+    expect(cowork.client).not.toBeNull();
+    expect(cowork.workspaceId).toBe("ws_local");
+    expect(cowork.workspaceRoot).toBe("/work/a");
 
     const calls = recordFetches();
-    const skills = await createDeskServices({ client: desk.client, workspaceId: desk.workspaceId }).skills.list();
+    const skills = await createCoworkServices({ client: cowork.client, workspaceId: cowork.workspaceId }).skills.list();
     expect(skills.preview).toBe(false);
     expect(calls.length).toBeGreaterThan(0);
     for (const call of calls) {
@@ -164,16 +164,16 @@ describe("MAJOR: cold-direct /skills reads the live connection", () => {
         }),
       ),
     );
-    const { workspace, endpoint, desk } = coldDeskConnection(outcome, "rem_team");
+    const { workspace, endpoint, cowork } = coldCoworkConnection(outcome, "rem_team");
 
     expect(workspace?.workspaceType).toBe("remote");
     expect(endpoint?.baseUrl).toBe(REMOTE_BASE);
     expect(endpoint?.token).toBe(REMOTE_TOKEN);
-    expect(desk.workspaceId).toBe("server-team");
-    expect(desk.workspaceRoot).toBeNull();
+    expect(cowork.workspaceId).toBe("server-team");
+    expect(cowork.workspaceRoot).toBeNull();
 
     const calls = recordFetches();
-    const skills = await createDeskServices({ client: desk.client, workspaceId: desk.workspaceId }).skills.list();
+    const skills = await createCoworkServices({ client: cowork.client, workspaceId: cowork.workspaceId }).skills.list();
     expect(skills.preview).toBe(false);
     expect(calls.length).toBeGreaterThan(0);
     for (const call of calls) {
@@ -186,7 +186,7 @@ describe("MAJOR: cold-direct /skills reads the live connection", () => {
 });
 
 describe("MAJOR: an active-workspace switch updates the published connection", () => {
-  test("a settings or onboarding write reaches subscribers and re-points the Desk connection", () => {
+  test("a settings or onboarding write reaches subscribers and re-points the Cowork connection", () => {
     installWindow();
     const workspaces = [
       { id: "ws_a", workspaceType: "local", path: "/work/a", displayNameResolved: "A" },
@@ -199,66 +199,66 @@ describe("MAJOR: an active-workspace switch updates the published connection", (
       seen.push(id);
       activeId = id ?? "";
     });
-    const publish = (revision: DeskChatsRevision) => {
+    const publish = (revision: CoworkChatsRevision) => {
       const workspace = selectActiveWorkspace(workspaces, activeId);
-      publishDeskConnection(deriveDeskConnection({ workspace, endpoint: resolve(workspace), opencode: null, revision }));
+      publishCoworkConnection(deriveCoworkConnection({ workspace, endpoint: resolve(workspace), opencode: null, revision }));
     };
-    const revisionA: DeskChatsRevision = { workspaceRecordId: "ws_a", version: "s1:One", workspaceError: false };
+    const revisionA: CoworkChatsRevision = { workspaceRecordId: "ws_a", version: "s1:One", workspaceError: false };
 
     publish(revisionA);
-    expect(useDeskConnection.getState().workspaceId).toBe("ws_a");
-    expect(useDeskConnection.getState().chatsVersion).toBe("s1:One");
+    expect(useCoworkConnection.getState().workspaceId).toBe("ws_a");
+    expect(useCoworkConnection.getState().chatsVersion).toBe("s1:One");
 
     writeActiveWorkspaceId("ws_b");
     publish(revisionA);
     unsubscribe();
 
     expect(seen).toEqual(["ws_b"]);
-    expect(useDeskConnection.getState().workspaceId).toBe("ws_b");
-    expect(useDeskConnection.getState().workspaceRoot).toBe("/work/b");
+    expect(useCoworkConnection.getState().workspaceId).toBe("ws_b");
+    expect(useCoworkConnection.getState().workspaceRoot).toBe("/work/b");
     // Workspace A's chats are not carried over to B.
-    expect(useDeskConnection.getState().chatsVersion).toBe("");
+    expect(useCoworkConnection.getState().chatsVersion).toBe("");
   });
 });
 
-describe("MAJOR: deleting the last workspace clears the Desk connection", () => {
+describe("MAJOR: deleting the last workspace clears the Cowork connection", () => {
   // Regression: a settings-side delete of the last workspace refreshes the provider
   // to an empty record list. selectActiveWorkspace must then return null (not fall
   // back to a stale first record), so a cold /skills publishes no client for the
   // deleted workspace and the Skills screen shows the real empty state.
-  test("an empty record list yields a null Desk connection, never the deleted record", async () => {
+  test("an empty record list yields a null Cowork connection, never the deleted record", async () => {
     const emptyWorkspace = selectActiveWorkspace([], "");
     expect(emptyWorkspace).toBeNull();
 
-    const desk = deriveDeskConnection({
+    const cowork = deriveCoworkConnection({
       workspace: emptyWorkspace,
       endpoint: createWorkspaceServerClientResolver({ baseUrl: LOCAL_BASE, token: LOCAL_TOKEN })(emptyWorkspace),
       opencode: null,
       revision: { workspaceRecordId: "", version: "", workspaceError: false },
     });
-    expect(desk.client).toBeNull();
-    expect(desk.workspaceId).toBeNull();
+    expect(cowork.client).toBeNull();
+    expect(cowork.workspaceId).toBeNull();
 
-    // With no client, the Desk services fall back to preview/fixtures, so the Skills
+    // With no client, the Cowork services fall back to preview/fixtures, so the Skills
     // screen renders its real empty state instead of a client for the deleted workspace.
-    const skills = await createDeskServices({ client: desk.client, workspaceId: desk.workspaceId }).skills.list();
+    const skills = await createCoworkServices({ client: cowork.client, workspaceId: cowork.workspaceId }).skills.list();
     expect(skills.preview).toBe(true);
   });
 });
 
 describe("MAJOR: chat create and rename still invalidate recent chats", () => {
-  test("the chat route's revision changes on create and rename and reaches the Desk connection", () => {
+  test("the chat route's revision changes on create and rename and reaches the Cowork connection", () => {
     const workspace = { id: "ws_a", workspaceType: "local", path: "/work/a" };
     const endpoint = createWorkspaceServerClientResolver({ baseUrl: LOCAL_BASE, token: LOCAL_TOKEN })(workspace);
     const versions: string[] = [];
     const step = (sessions: Array<{ id: string; title: string }>) => {
       // What SessionRoute does on each session-list change.
-      publishDeskChatsRevision({ workspaceRecordId: "ws_a", version: deskChatsVersion(sessions), workspaceError: false });
-      // What DeskConnectionPublisher does on each revision change.
-      publishDeskConnection(
-        deriveDeskConnection({ workspace, endpoint, opencode: null, revision: useDeskChatsRevision.getState() }),
+      publishCoworkChatsRevision({ workspaceRecordId: "ws_a", version: coworkChatsVersion(sessions), workspaceError: false });
+      // What CoworkConnectionPublisher does on each revision change.
+      publishCoworkConnection(
+        deriveCoworkConnection({ workspace, endpoint, opencode: null, revision: useCoworkChatsRevision.getState() }),
       );
-      versions.push(useDeskConnection.getState().chatsVersion);
+      versions.push(useCoworkConnection.getState().chatsVersion);
     };
 
     step([{ id: "s1", title: "First" }]);
@@ -266,7 +266,7 @@ describe("MAJOR: chat create and rename still invalidate recent chats", () => {
     step([{ id: "s2", title: "Renamed" }, { id: "s1", title: "First" }]);
 
     expect(versions).toEqual(["s1:First", "s2:New chat|s1:First", "s2:Renamed|s1:First"]);
-    // Each is a distinct recent-chats query key (use-desk-nav-data keys on chatsVersion).
+    // Each is a distinct recent-chats query key (use-cowork-nav-data keys on chatsVersion).
     expect(new Set(versions).size).toBe(3);
   });
 });
@@ -341,7 +341,7 @@ describe("AUXILIARY: refresh edges", () => {
   test("a load error withholds the engine only for its own workspace's revision", () => {
     const workspace = { id: "ws_a", workspaceType: "local", path: "/work/a" };
     const endpoint = { client: {} as RedrobServerClient, workspaceId: "ws_a" };
-    const other = deriveDeskConnection({
+    const other = deriveCoworkConnection({
       workspace,
       endpoint,
       opencode: null,
@@ -362,17 +362,17 @@ describe("AUXILIARY: wiring", () => {
       return /\.(ts|tsx)$/.test(name) ? [path] : [];
     });
 
-  test("DeskConnectionPublisher is the only caller of publishDeskConnection", () => {
+  test("CoworkConnectionPublisher is the only caller of publishCoworkConnection", () => {
     const callers = files(SRC)
-      .filter((path) => /publishDeskConnection\(/.test(readFileSync(path, "utf8").replace(/export function publishDeskConnection\(/, "")))
+      .filter((path) => /publishCoworkConnection\(/.test(readFileSync(path, "utf8").replace(/export function publishCoworkConnection\(/, "")))
       .map((path) => path.replace(/\\/g, "/").split("/src/")[1]);
-    expect(callers).toEqual(["react-app/shell/desk-connection-publisher.tsx"]);
+    expect(callers).toEqual(["react-app/shell/cowork-connection-publisher.tsx"]);
   });
 
   test("the provider and publisher wrap <Routes> in AppRoot, so /skills is covered", () => {
     const appRoot = read("react-app", "shell", "app-root.tsx");
     const provider = appRoot.indexOf("<WorkspaceConnectionProvider>");
-    const publisher = appRoot.indexOf("<DeskConnectionPublisher />");
+    const publisher = appRoot.indexOf("<CoworkConnectionPublisher />");
     const routes = appRoot.indexOf("<Routes>");
     const routesEnd = appRoot.indexOf("</Routes>");
     const providerEnd = appRoot.indexOf("</WorkspaceConnectionProvider>");
@@ -384,7 +384,7 @@ describe("AUXILIARY: wiring", () => {
 
   test("the chat route contributes only the field-scoped chats revision", () => {
     const route = read("react-app", "shell", "session-route.tsx");
-    expect(route).not.toContain("publishDeskConnection");
-    expect(route).toContain("publishDeskChatsRevision(");
+    expect(route).not.toContain("publishCoworkConnection");
+    expect(route).toContain("publishCoworkChatsRevision(");
   });
 });

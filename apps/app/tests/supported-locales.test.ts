@@ -313,7 +313,7 @@ describe("supported locales", () => {
       /npm(?!\.)/g,
       // v-prefixed semantic version placeholders left after {version} strip.
       /\bv\{version\}/g,
-      // Privacy placeholders, quoted exactly as the AI sees them (desk/privacy/redact.ts).
+      // Privacy placeholders, quoted exactly as the AI sees them (cowork/privacy/redact.ts).
       /\[(EMAIL|RRN|BRN|CARD|PHONE|ACCOUNT|ADDRESS|NAME|PERSON|ORG|PLACE)_\d+\]/g,
     ];
 

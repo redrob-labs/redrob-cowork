@@ -149,7 +149,7 @@ export async function startRecording(onLimit: () => void): Promise<Recording> {
       const blob = new Blob(chunks, { type: recorder.mimeType });
       if (blob.size === 0) return null;
       const format = recordingFormat(recorder.mimeType);
-      if (!format) throw new Error(t("desk.mic_reason_device"));
+      if (!format) throw new Error(t("cowork.mic_reason_device"));
       return { audio: base64Of(new Uint8Array(await blob.arrayBuffer())), format };
     },
     cancel: stop,

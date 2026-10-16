@@ -4,7 +4,7 @@ import { Zap } from "lucide-react";
 
 import type { ComposerAttachment } from "@/app/types";
 import { t } from "@/i18n";
-import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
 import { NewTaskComposer, type NewTaskComposerContext } from "./new-task-composer";
 import {
   greetingKeyFor,
@@ -67,7 +67,7 @@ export type SessionEmptyHeroProps = {
  */
 export function SessionEmptyHero(props: SessionEmptyHeroProps) {
   const [prompt, setPrompt] = useState("");
-  const inDeskFrame = useInDeskFrame();
+  const inCoworkFrame = useInCoworkFrame();
   const suggestions = SUGGESTIONS.map((suggestion) => ({
     id: suggestion.id,
     title: t(suggestion.titleKey),
@@ -108,7 +108,7 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
       onRunTask={submit}
       busy={props.busy ?? false}
       context={props.composer ?? null}
-      placeholderOverride={inDeskFrame ? starterHint : undefined}
+      placeholderOverride={inCoworkFrame ? starterHint : undefined}
     />
   );
 
@@ -130,18 +130,18 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
     </button>
   ) : null;
 
-  // The Desk's new chat (01-new-chat): a centered greeting (round 35: sans, matching the Trending AI
+  // The Cowork's new chat (01-new-chat): a centered greeting (round 35: sans, matching the Trending AI
   // section-header style), then the composer whose placeholder is the rotating starter hint (round 35,
   // item 4 -- the hint moved from a sub-line INTO the input), then a quiet disclaimer (item 4 round 34).
-  if (inDeskFrame) {
+  if (inCoworkFrame) {
     return (
-      <div className="desk-new">
-        <div className="desk-new__center">
-          <h2 className="desk-new__line">{greeting}</h2>
+      <div className="cowork-new">
+        <div className="cowork-new__center">
+          <h2 className="cowork-new__line">{greeting}</h2>
           {composer}
           {connectProvider}
         </div>
-        <p className="desk-new__disclaimer">{t("hero.disclaimer")}</p>
+        <p className="cowork-new__disclaimer">{t("hero.disclaimer")}</p>
       </div>
     );
   }

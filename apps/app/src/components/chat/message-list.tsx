@@ -138,11 +138,11 @@ import { CHAT_COLUMN } from "./chat-column"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
-import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame"
-import { hasDeskBlocks, parseDeskBlocks } from "@/react-app/desk/thread/desk-blocks"
-import { DeskAnswerFooter, DeskBlocksView, DeskMemoryNote, DeskRunStatus } from "@/react-app/desk/thread/desk-thread"
-import { memorySavedFrom } from "@/react-app/desk/thread/thread-logic"
-import { useFrameStore } from "@/react-app/desk/store/frame-store"
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
+import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/cowork-blocks"
+import { CoworkAnswerFooter, CoworkBlocksView, CoworkMemoryNote, CoworkRunStatus } from "@/react-app/cowork/thread/cowork-thread"
+import { memorySavedFrom } from "@/react-app/cowork/thread/thread-logic"
+import { useFrameStore } from "@/react-app/cowork/store/frame-store"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
 
@@ -532,8 +532,8 @@ function AnswerOptionChips({
 const AssistantMessage = React.memo(
   ({ message, isLastMessage, isStreaming, hideReasoning }: AssistantMessageProps) => {
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
-    // Inside the Desk frame, Plan's and Cross-check's fenced blocks render as the design system's.
-    const inDeskFrame = useInDeskFrame()
+    // Inside the Cowork frame, Plan's and Cross-check's fenced blocks render as the design system's.
+    const inCoworkFrame = useInCoworkFrame()
     const assistantRenderGroups = React.useMemo(
       () => {
         const groups = getAssistantRenderGroups(message.parts, showThinking)
@@ -564,12 +564,12 @@ const AssistantMessage = React.memo(
               const parsed = streamingMarker
                 ? { body: groupText, options: [] as string[] }
                 : parseAnswerOptions(groupText)
-              const blocks = inDeskFrame ? parseDeskBlocks(parsed.body, { streaming: isStreaming }) : null
-              const deskBlocks = blocks && hasDeskBlocks(blocks) ? blocks : null
-              const body = deskBlocks ? deskBlocks.prose : parsed.body
+              const blocks = inCoworkFrame ? parseCoworkBlocks(parsed.body, { streaming: isStreaming }) : null
+              const coworkBlocks = blocks && hasCoworkBlocks(blocks) ? blocks : null
+              const body = coworkBlocks ? coworkBlocks.prose : parsed.body
               return (
                 <React.Fragment key={`text-${index}`}>
-                  {deskBlocks && !body ? null : <MessageContent
+                  {coworkBlocks && !body ? null : <MessageContent
                     // Round 32/34 (Claude-style): the assistant reply is plain prose on
                     // the page surface -- NO bubble. The DS MessageContent base paints a
                     // filled bubble (bg-secondary rounded-lg p-2); round 33 added
@@ -586,7 +586,7 @@ const AssistantMessage = React.memo(
                   >
                     {body}
                   </MessageContent>}
-                  {deskBlocks ? <DeskBlocksView blocks={deskBlocks} isLatest={isLastMessage} /> : null}
+                  {coworkBlocks ? <CoworkBlocksView blocks={coworkBlocks} isLatest={isLastMessage} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -753,8 +753,8 @@ const UserMessage = React.memo(
   ({ message, isStreaming }: UserMessageProps) => {
     const { onRevertToUserMessage, onForkAtMessage, onEditUserMessage, highlightQuery, sessionId } = useMessageList()
     const messageText = React.useMemo(() => getMessagesText([message]), [message])
-    // Inside the Desk frame a prompt worth repeating can become a skill.
-    const inDeskFrame = useInDeskFrame()
+    // Inside the Cowork frame a prompt worth repeating can become a skill.
+    const inCoworkFrame = useInCoworkFrame()
     const openModal = useFrameStore((state) => state.openModal)
     const inlineParts = React.useMemo(
       () => message.parts.filter((part) => (part.type === "text" && Boolean(part.text)) || isFileUIPart(part)),
@@ -828,12 +828,12 @@ const UserMessage = React.memo(
                         </Button>
                       </MessageAction>
                     ) : null}
-                    {inDeskFrame && messageText ? (
-                      <MessageAction tooltip={t("desk.skill_save_from_message")}>
+                    {inCoworkFrame && messageText ? (
+                      <MessageAction tooltip={t("cowork.skill_save_from_message")}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={t("desk.skill_save_from_message")}
+                          aria-label={t("cowork.skill_save_from_message")}
                           onClick={() => openModal({ kind: "skill", instructions: messageText })}
                         >
                           <BookmarkPlus />
@@ -1150,7 +1150,7 @@ function MessageGroup({
   isStreaming,
 }: AssistantMessageGroupProps) {
   const { onRevertToUserMessage, onForkAtMessage, onRetryMessage, showThinking } = useMessageList()
-  const inDeskFrame = useInDeskFrame()
+  const inCoworkFrame = useInCoworkFrame()
   const lastItem = items[items.length - 1]
   // Branch/revert must target a real server-side message id. Synthetic
   // client-side messages (e.g. session errors) don't exist on the server and
@@ -1203,9 +1203,9 @@ function MessageGroup({
   const renderableItems = getRenderableMessages(items)
   const lastTextMessage = getLastTextPart(lastItem.message)
   const mcpAppParts = collectMcpAppParts(items)
-  // Inside the Desk frame: notes the run saved to memory, and a receipt under a finished
+  // Inside the Cowork frame: notes the run saved to memory, and a receipt under a finished
   // answer (not under Plan's questions or plan, which wait on the person).
-  const memoryNotes = inDeskFrame
+  const memoryNotes = inCoworkFrame
     ? items.flatMap((item) =>
       item.message.role === "assistant"
         ? item.message.parts.flatMap((part) => {
@@ -1215,9 +1215,9 @@ function MessageGroup({
         : []
     )
     : []
-  const lastBlocks = inDeskFrame && lastTextMessage ? parseDeskBlocks(getMessagesText([lastTextMessage])) : null
-  const showDeskReceipt = Boolean(
-    inDeskFrame && lastTextMessage && lastRealItem && !isStreaming && !lastBlocks?.questions && !lastBlocks?.plan
+  const lastBlocks = inCoworkFrame && lastTextMessage ? parseCoworkBlocks(getMessagesText([lastTextMessage])) : null
+  const showCoworkReceipt = Boolean(
+    inCoworkFrame && lastTextMessage && lastRealItem && !isStreaming && !lastBlocks?.questions && !lastBlocks?.plan
   )
 
   // Leading messages without prose (tool/reasoning steps) render inside a
@@ -1383,12 +1383,12 @@ function MessageGroup({
       />
       {memoryNotes.map((text, index) => (
         <div key={`memory-${index}`} className={CHAT_COLUMN}>
-          <DeskMemoryNote text={text} />
+          <CoworkMemoryNote text={text} />
         </div>
       ))}
-      {showDeskReceipt && lastRealItem ? (
+      {showCoworkReceipt && lastRealItem ? (
         <div className={CHAT_COLUMN}>
-          <DeskAnswerFooter
+          <CoworkAnswerFooter
             messageId={lastRealItem.message.id}
             model={renderableItems.map((item) => readMessageUsage(item.message)?.routedModel).findLast(Boolean)}
           />
@@ -1583,7 +1583,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
 export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const showLoading = shouldShowMessageListLoading(status, messages.length)
-  const inDeskFrame = useInDeskFrame()
+  const inCoworkFrame = useInCoworkFrame()
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
   /*
     Which rows a context compaction owns. The engine's summary arrives as real messages - a marked user
@@ -1651,10 +1651,10 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
         )
       })}
 
-      {showLoading && !inDeskFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
-      {showLoading && inDeskFrame ? (
+      {showLoading && !inCoworkFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
+      {showLoading && inCoworkFrame ? (
         <div className={CHAT_COLUMN}>
-          <DeskRunStatus label={liveActionLabel} />
+          <CoworkRunStatus label={liveActionLabel} />
         </div>
       ) : null}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}

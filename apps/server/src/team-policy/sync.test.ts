@@ -105,7 +105,7 @@ const signed = async (version: number, overrides = {}) => ({
   body: { version, jws: await signTestPolicy(samplePolicy({ version, ...overrides })) },
 });
 
-const privacy = async () => (await readRedrobWorkspaceConfig(config, workspace.id)).deskPrivacy as Record<string, unknown>;
+const privacy = async () => (await readRedrobWorkspaceConfig(config, workspace.id)).coworkPrivacy as Record<string, unknown>;
 const teamNotes = async () => (await listMemories(config)).filter((memory) => memory.tags?.includes("team-policy"));
 
 describe("following the team policy from the console", () => {

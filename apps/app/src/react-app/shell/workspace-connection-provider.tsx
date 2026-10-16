@@ -83,7 +83,7 @@ export type WorkspaceRefreshParticipant = {
   onSettled?: (result: { routeReady: boolean }) => void;
 };
 
-/** What the provider shares with the chat route and the Desk publisher. */
+/** What the provider shares with the chat route and the Cowork publisher. */
 export type WorkspaceConnectionValue = {
   /** Redrob client for the local server; null while disconnected or in a gap. */
   client: RedrobServerClient | null;

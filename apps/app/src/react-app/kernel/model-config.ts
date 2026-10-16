@@ -28,7 +28,7 @@ const hasOwn = <K extends PropertyKey>(
 ): value is Record<K, unknown> =>
   Object.prototype.hasOwnProperty.call(value, key);
 
-export function sessionModelOverridesKey(workspaceId: string): string {
+export function sessionModelOverricoworkey(workspaceId: string): string {
   return `${SESSION_MODEL_PREF_KEY}.${workspaceId}`;
 }
 

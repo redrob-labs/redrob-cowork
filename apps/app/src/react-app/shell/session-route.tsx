@@ -9,19 +9,19 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/ui/sonner";
-import { deskChatsVersion, publishDeskChatsRevision } from "@/react-app/desk/shell/desk-connection";
-import { ensurePersonalWorkspaceOnce } from "@/react-app/desk/shell/personal-workspace";
-import { useInDeskFrame } from "@/react-app/desk/shell/desk-frame";
-import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useDeskComposerStore } from "@/react-app/desk/composer/composer-state";
-import { skillRunPrompt } from "@/react-app/desk/skills/skills";
-import { useDeskStartStore, type PendingDeskChat } from "@/react-app/desk/skills/start-chat";
-import { syncCrashReports } from "@/react-app/desk/settings/crash-reports";
-import { useCheckStore } from "@/react-app/desk/thread/check-store";
-import { deskSystemText } from "@/react-app/desk/thread/memory-off";
-import { memoryContext, notesCacheFor } from "@/react-app/desk/thread/memory-context";
-import { toNote } from "@/react-app/desk/services/real-services";
-import { isPlanRunPrompt } from "@/react-app/desk/thread/thread-logic";
-import { useDeskCrossCheck } from "@/react-app/desk/thread/use-desk-cross-check";
+import { coworkChatsVersion, publishCoworkChatsRevision } from "@/react-app/cowork/shell/cowork-connection";
+import { ensurePersonalWorkspaceOnce } from "@/react-app/cowork/shell/personal-workspace";
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
+import { NEW_CHAT_KEY, memoryFor, modeFor, resolvePromptAgent, useCoworkComposerStore } from "@/react-app/cowork/composer/composer-state";
+import { skillRunPrompt } from "@/react-app/cowork/skills/skills";
+import { useCoworkStartStore, type PendingCoworkChat } from "@/react-app/cowork/skills/start-chat";
+import { syncCrashReports } from "@/react-app/cowork/settings/crash-reports";
+import { useCheckStore } from "@/react-app/cowork/thread/check-store";
+import { coworkSystemText } from "@/react-app/cowork/thread/memory-off";
+import { memoryContext, notesCacheFor } from "@/react-app/cowork/thread/memory-context";
+import { toNote } from "@/react-app/cowork/services/real-services";
+import { isPlanRunPrompt } from "@/react-app/cowork/thread/thread-logic";
+import { useCoworkCrossCheck } from "@/react-app/cowork/thread/use-cowork-cross-check";
 import type {
   AgentPartInput,
   FilePartInput,
@@ -163,7 +163,7 @@ import { buildCommandPaletteSessions } from "./command-palette-sessions";
 import { SessionSearchDialog } from "./session-search-dialog";
 import type { SessionMessageFetcher } from "@/react-app/domains/session/search/session-search";
 import { useBootState } from "./boot-state";
-import { useFrameStore } from "@/react-app/desk/store/frame-store";
+import { useFrameStore } from "@/react-app/cowork/store/frame-store";
 import {
   forgetWorkspaceMemory,
   readLastSessionFor,
@@ -532,8 +532,8 @@ export function SessionRoute() {
   // Agent selection is persisted in local prefs (like the model variant) so
   // it survives reloads instead of silently falling back to "build" (#2101).
   const selectedAgent = local.prefs.selectedAgent;
-  // Inside the Desk frame the chat's Plan or Run decides the agent a prompt goes to.
-  const inDeskFrame = useInDeskFrame();
+  // Inside the Cowork frame the chat's Plan or Run decides the agent a prompt goes to.
+  const inCoworkFrame = useInCoworkFrame();
   const setSelectedAgent = useCallback(
     (agent: string | null) => {
       local.setPrefs((previous) => ({ ...previous, selectedAgent: agent }));
@@ -1080,25 +1080,25 @@ export function SessionRoute() {
               cacheKey: targetSessionId,
               runtimeKey: environmentRuntimeKey,
             });
-            const deskChats = useDeskComposerStore.getState().chats;
+            const coworkChats = useCoworkComposerStore.getState().chats;
             // Inside the frame the chat's saved notes ride in the system text, or the memory
             // rule when memory is off. A workspace other than Personal is a project.
-            const deskMemory = memoryFor(deskChats, targetSessionId, Boolean(selectedWorkspace && selectedWorkspace.kind !== "personal"));
-            const notesContext = inDeskFrame && deskMemory !== "none" && client
+            const coworkMemory = memoryFor(coworkChats, targetSessionId, Boolean(selectedWorkspace && selectedWorkspace.kind !== "personal"));
+            const notesContext = inCoworkFrame && coworkMemory !== "none" && client
               ? memoryContext(
                   await notesCacheFor(client, async () => (await client.listMemories()).map(toNote)).get().catch(() => []),
-                  { memory: deskMemory, projectId: selectedWorkspaceId || null },
+                  { memory: coworkMemory, projectId: selectedWorkspaceId || null },
                 ).text
               : null;
             // Notes go out the same way the message does: private details as placeholders.
-            const deskNotes = notesContext ? sendable(notesContext) : null;
-            const deskSystem = inDeskFrame
-              ? deskSystemText(deskMemory, envSystemContext || undefined, deskNotes)
+            const coworkNotes = notesContext ? sendable(notesContext) : null;
+            const coworkSystem = inCoworkFrame
+              ? coworkSystemText(coworkMemory, envSystemContext || undefined, coworkNotes)
               : envSystemContext;
-            const system = deskSystem;
+            const system = coworkSystem;
             // The map back to the real values stays on this computer, for showing the chat.
             // A Run prompt's answer is what Cross-check reads, once it arrives.
-            if (inDeskFrame && modeFor(deskChats, targetSessionId, local.prefs.deskNewChatMode) === "run") {
+            if (inCoworkFrame && modeFor(coworkChats, targetSessionId, local.prefs.coworkNewChatMode) === "run") {
               useCheckStore.getState().expect(targetSessionId, {
                 question: sendable(text),
                 planned: isPlanRunPrompt(text),
@@ -1111,8 +1111,8 @@ export function SessionRoute() {
               parts,
               model: sendModel ?? undefined,
               agent: resolvePromptAgent({
-                inFrame: inDeskFrame,
-                mode: modeFor(useDeskComposerStore.getState().chats, targetSessionId, local.prefs.deskNewChatMode),
+                inFrame: inCoworkFrame,
+                mode: modeFor(useCoworkComposerStore.getState().chats, targetSessionId, local.prefs.coworkNewChatMode),
                 selectedAgent,
               }) ?? undefined,
               ...(sendVariant ? { variant: sendVariant } : {}),
@@ -1247,7 +1247,7 @@ export function SessionRoute() {
     hasUsableModel,
     handleApplyEnvironmentChanges,
     environmentRuntimeKey,
-    inDeskFrame,
+    inCoworkFrame,
     local,
     listAgents,
     listSlashCommands,
@@ -1563,7 +1563,7 @@ export function SessionRoute() {
    * is not a session the user has to manage.
    */
   // The redrob-server client, named apart: the variant runner below shadows `client` with the engine one.
-  const deskServerClient = client;
+  const coworkServerClient = client;
   const handleVariantRun = useCallback(async (
     command:
       | FanOutCommand
@@ -1700,7 +1700,7 @@ export function SessionRoute() {
       }
     }
     return slots.length;
-  }, [deskServerClient, endpointForWorkspace, inDeskFrame, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
+  }, [coworkServerClient, endpointForWorkspace, inCoworkFrame, loading, local.prefs.defaultModel, providerCatalog, selectedSessionId, selectedWorkspaceId, workspaces]);
 
   /**
    * Keep the chosen answer by continuing in its fork, and delete the rest.
@@ -2316,7 +2316,7 @@ export function SessionRoute() {
             // One-step run: the session surface sends the seeded draft itself.
             markComposerAutoSend(session.id);
             // Plan or Run and the memory picked on the new chat screen belong to this chat now.
-            useDeskComposerStore.getState().claimNewChat(session.id);
+            useCoworkComposerStore.getState().claimNewChat(session.id);
           }
           writeLastSessionFor(targetWorkspaceId, session.id);
           rememberPendingCreatedSession(targetWorkspaceId, session.id);
@@ -2375,7 +2375,7 @@ export function SessionRoute() {
           // One-step run: the session surface sends the seeded draft itself.
           markComposerAutoSend(session.id);
           // Plan or Run and the memory picked on the new chat screen belong to this chat now.
-          useDeskComposerStore.getState().claimNewChat(session.id);
+          useCoworkComposerStore.getState().claimNewChat(session.id);
         }
         writeActiveWorkspaceId(workspaceId || null);
         writeLastSessionFor(workspaceId, session.id);
@@ -2395,16 +2395,16 @@ export function SessionRoute() {
   };
 
   // A skill asked for a chat from its own screen: start it here, where chats are made.
-  const startPendingChat = useEffectEvent((pending: PendingDeskChat) => {
+  const startPendingChat = useEffectEvent((pending: PendingCoworkChat) => {
     if (!workspaces.some((item) => item.id === pending.workspaceId)) return;
-    useDeskStartStore.getState().clear();
-    useDeskComposerStore.getState().setMode(NEW_CHAT_KEY, pending.mode);
+    useCoworkStartStore.getState().clear();
+    useCoworkComposerStore.getState().setMode(NEW_CHAT_KEY, pending.mode);
     createTaskWithPrompt(pending.workspaceId, pending.prompt);
   });
-  const pendingDeskChat = useDeskStartStore((state) => state.pending);
+  const pendingCoworkChat = useCoworkStartStore((state) => state.pending);
   useEffect(() => {
-    if (pendingDeskChat) startPendingChat(pendingDeskChat);
-  }, [pendingDeskChat, workspaces]);
+    if (pendingCoworkChat) startPendingChat(pendingCoworkChat);
+  }, [pendingCoworkChat, workspaces]);
 
   const handleChatFirstTask = useCallback((prompt: string, attachments?: ComposerAttachment[]) => {
     void (async () => {
@@ -2447,28 +2447,28 @@ export function SessionRoute() {
   }), [handleCreateWorkspace]);
   useControlAction(createWorkspaceControlAction);
 
-  // The Desk menu lists this workspace's recent chats. Only this route loads the
+  // The Cowork menu lists this workspace's recent chats. Only this route loads the
   // session lists, so it contributes the chats revision (plus whether the
-  // workspace has a load error); DeskConnectionPublisher is the sole writer of
-  // the Desk connection snapshot and composes it with the app-wide connection.
-  const deskChatsRevision = useMemo(
-    () => deskChatsVersion(sessionsByWorkspaceId[selectedWorkspaceId] ?? []),
+  // workspace has a load error); CoworkConnectionPublisher is the sole writer of
+  // the Cowork connection snapshot and composes it with the app-wide connection.
+  const coworkChatsRevision = useMemo(
+    () => coworkChatsVersion(sessionsByWorkspaceId[selectedWorkspaceId] ?? []),
     [sessionsByWorkspaceId, selectedWorkspaceId],
   );
   useEffect(() => {
-    publishDeskChatsRevision({
+    publishCoworkChatsRevision({
       workspaceRecordId: selectedWorkspaceId,
-      version: deskChatsRevision,
+      version: coworkChatsRevision,
       workspaceError: Boolean(selectedWorkspaceError),
     });
-  }, [deskChatsRevision, selectedWorkspaceError, selectedWorkspaceId]);
+  }, [coworkChatsRevision, selectedWorkspaceError, selectedWorkspaceId]);
   // The local server (not a remote workspace's) holds the Personal workspace.
   useEffect(() => ensurePersonalWorkspaceOnce(client), [client]);
 
-  useDeskCrossCheck({
+  useCoworkCrossCheck({
     client: opencodeClient,
     directory: selectedWorkspaceRoot || undefined,
-    levels: local.prefs.deskCrossCheck,
+    levels: local.prefs.coworkCrossCheck,
   });
 
   return (

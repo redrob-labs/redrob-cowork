@@ -214,8 +214,8 @@ interface ModelSelectProps {
   behaviorOptions?: { value: string | null; label: string }[];
 }
 
-/** The Desk work column (AppShell's `main`), or the default clipping ancestors outside the Desk frame. */
-function deskWorkColumn(): Element | "clipping-ancestors" {
+/** The Cowork work column (AppShell's `main`), or the default clipping ancestors outside the Cowork frame. */
+function coworkWorkColumn(): Element | "clipping-ancestors" {
   if (typeof document === "undefined") return "clipping-ancestors";
   return document.getElementById("rr-shell-main") ?? "clipping-ancestors";
 }
@@ -464,8 +464,8 @@ export function ModelSelect({
         // only painted/filtered surface is the ModelMenu's own rounded card.
         className="flex max-h-(--available-height) w-auto flex-row gap-1.5 overflow-visible border-0 rounded-none bg-transparent p-0 shadow-none ring-0 backdrop-blur-none backdrop-saturate-100"
         align="start"
-        // Inside the Desk frame the menu stays in the work column; it used to run over the side panel.
-        collisionBoundary={open ? deskWorkColumn() : undefined}
+        // Inside the Cowork frame the menu stays in the work column; it used to run over the side panel.
+        collisionBoundary={open ? coworkWorkColumn() : undefined}
       >
         <ModelMenu
           rows={curated}

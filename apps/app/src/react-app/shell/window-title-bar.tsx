@@ -5,7 +5,7 @@ import { IconButton, icons } from "@redrob-labs/ui";
 import type { WindowControlAction, WindowState } from "@/app/lib/desktop-types";
 
 import { t } from "@/i18n";
-import { useFrameStore } from "../desk/store/frame-store";
+import { useFrameStore } from "../cowork/store/frame-store";
 import { resolveExtensionIconSrc } from "../design-system/extension-icon-src";
 import { openDesktopUrl } from "@/app/lib/desktop";
 import { isDesktopRuntime } from "@/app/lib/runtime-env";
@@ -130,7 +130,7 @@ const REDROB_GROUP_MARK_SRC = resolveExtensionIconSrc("/brand/redrob-group.svg")
 const REDROB_COWORK_MARK_SRC = resolveExtensionIconSrc("/brand/redrob-cowork.svg");
 
 // Round 13, item 2: the Group mark links to the Redrob console; the system browser on desktop, a
-// new tab on web (same policy as desk-connectors' openExternal, kept local so the title bar does
+// new tab on web (same policy as cowork-connectors' openExternal, kept local so the title bar does
 // not pull in that screen's module).
 const REDROB_CONSOLE_URL = "https://console.redrob.ai";
 function openExternalUrl(url: string) {

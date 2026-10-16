@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Ranks every task from a snapshot and writes the research the app ships,
-// apps/app/src/react-app/desk/guide/model-guide.json. Method: README.md beside this file.
+// apps/app/src/react-app/cowork/guide/model-guide.json. Method: README.md beside this file.
 //
 //   node scripts/model-guide/build.mjs [--snapshot 2026-10-08] [--out path]
 
@@ -25,7 +25,7 @@ const snapshot = await readJson(path.join(here, "snapshots", `${snapshotName}.js
 const { models, imageModels } = await readJson(path.join(here, "config/models.json"));
 const { professions } = await readJson(path.join(here, "config/tasks.json"));
 const method = await readJson(path.join(here, "config/method.json"));
-const outFile = arg("--out") || path.join(repo, "apps/app/src/react-app/desk/guide/model-guide.json");
+const outFile = arg("--out") || path.join(repo, "apps/app/src/react-app/cowork/guide/model-guide.json");
 const date = snapshot.date;
 
 const round = (x, d = 1) => Math.round(x * 10 ** d) / 10 ** d;

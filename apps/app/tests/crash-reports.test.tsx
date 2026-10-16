@@ -4,8 +4,8 @@ import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { TutorialStep } from "../src/react-app/domains/onboarding/tutorial-step";
-import { syncCrashReports } from "../src/react-app/desk/settings/crash-reports";
-import { GeneralView, type GeneralActions } from "../src/react-app/desk/settings/desk-settings";
+import { syncCrashReports } from "../src/react-app/cowork/settings/crash-reports";
+import { GeneralView, type GeneralActions } from "../src/react-app/cowork/settings/cowork-settings";
 
 const src = (path: string) => readFileSync(join(import.meta.dir, "..", "src", path), "utf8");
 

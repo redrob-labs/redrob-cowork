@@ -2,8 +2,8 @@
  * The workspace's privacy level, carried to the engine.
  *
  * Personal details are masked in Redrob Code (`privacy.mask_pii`), in one place for every provider
- * and every app that runs on the engine. Cowork keeps no masker of its own: the Desk privacy page
- * sets a level per workspace (`deskPrivacy.level`, lockable by a team policy), and that level is
+ * and every app that runs on the engine. Cowork keeps no masker of its own: the Cowork privacy page
+ * sets a level per workspace (`coworkPrivacy.level`, lockable by a team policy), and that level is
  * translated to the engine's switch here.
  *
  *   off       -> off     nothing is touched
@@ -17,21 +17,21 @@
  */
 import { ApiError } from "./errors.js";
 import { type RedrobAuthInput, putRedrobEnginePrivacy } from "./redrob-auth.js";
-import { DESK_PRIVACY_CONFIG_KEY } from "./team-lock.js";
+import { COWORK_PRIVACY_CONFIG_KEY } from "./team-lock.js";
 
 export type EnginePrivacyMode = "off" | "regex" | "model";
 
 const LEVELS = ["off", "standard", "high", "strict"] as const;
-export type DeskPrivacyLevel = (typeof LEVELS)[number];
+export type CoworkPrivacyLevel = (typeof LEVELS)[number];
 
-/** The level under `deskPrivacy`; "standard" where nothing or something unknown is set. */
-export function deskPrivacyLevel(redrob: Record<string, unknown> | null | undefined): DeskPrivacyLevel {
-  const value = redrob?.[DESK_PRIVACY_CONFIG_KEY];
+/** The level under `coworkPrivacy`; "standard" where nothing or something unknown is set. */
+export function coworkPrivacyLevel(redrob: Record<string, unknown> | null | undefined): CoworkPrivacyLevel {
+  const value = redrob?.[COWORK_PRIVACY_CONFIG_KEY];
   const level = typeof value === "object" && value !== null ? (value as { level?: unknown }).level : undefined;
   return LEVELS.find((entry) => entry === level) ?? "standard";
 }
 
-export function engineModeForLevel(level: DeskPrivacyLevel): EnginePrivacyMode {
+export function engineModeForLevel(level: CoworkPrivacyLevel): EnginePrivacyMode {
   switch (level) {
     case "off":
       return "off";
@@ -48,7 +48,7 @@ export function engineModeForLevel(level: DeskPrivacyLevel): EnginePrivacyMode {
  * when it is not reachable) so a config write can be refused before anything is stored.
  */
 export async function syncEnginePrivacy(input: RedrobAuthInput, redrob: Record<string, unknown>): Promise<EnginePrivacyMode> {
-  const mode = engineModeForLevel(deskPrivacyLevel(redrob));
+  const mode = engineModeForLevel(coworkPrivacyLevel(redrob));
   await putRedrobEnginePrivacy(input, mode);
   return mode;
 }

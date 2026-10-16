@@ -1,6 +1,6 @@
 # Model Guide research
 
-These scripts produce `apps/app/src/react-app/desk/guide/model-guide.json`, which holds the rankings behind the
+These scripts produce `apps/app/src/react-app/cowork/guide/model-guide.json`, which holds the rankings behind the
 guide's "By profession" view.
 
 ```bash

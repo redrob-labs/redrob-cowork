@@ -57,7 +57,7 @@ const DEVELOPER_ONLY = new Set([
   "react-app/shell/dev-profiler.tsx",
   "react-app/shell/react-render-watchdog-overlay.tsx",
   // The design-system gallery at #/__ds, routed only when import.meta.env.DEV.
-  "react-app/desk/ds-story.tsx",
+  "react-app/cowork/ds-story.tsx",
 ]);
 
 /**

@@ -520,10 +520,10 @@ export type DesktopCommandMap = {
   // Window / OS utilities (dunder commands)
   __openPath: { args: [target: string]; result: unknown };
   __revealItemInDir: { args: [target: string]; result: unknown };
-  /** A workspace-relative file under a local workspace root; refused outside the folders Desk may use. */
+  /** A workspace-relative file under a local workspace root; refused outside the folders Cowork may use. */
   __openWorkspaceFile: { args: [root: string, relativePath: string]; result: string | undefined };
   __revealWorkspaceFile: { args: [root: string, relativePath: string]; result: string | undefined };
-  /** Keep the computer from sleeping during a Desk run; answers whether it is being kept awake. */
+  /** Keep the computer from sleeping during a Cowork run; answers whether it is being kept awake. */
   __setKeepAwake: { args: [on: boolean]; result: boolean };
   __getFileIcon: { args: [target: string, size?: "small" | "normal" | "large"]; result: string | null };
   __applyBrandAppName: { args: [appName: string | null]; result: { ok: true; appName: string } };

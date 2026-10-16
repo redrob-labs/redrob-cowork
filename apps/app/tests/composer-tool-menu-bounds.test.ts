@@ -4,7 +4,7 @@ import { measureToolMenuLayout } from "../src/react-app/domains/session/surface/
 
 /**
  * The composer's "+" panel opens inside the work column. It used to be held only inside the window, so
- * with the Desk side panel open it ran across the panel (seen at 1180px with the panel open).
+ * with the Cowork side panel open it ran across the panel (seen at 1180px with the panel open).
  */
 // No DOM in this suite: a bare HTMLElement class is enough for the `instanceof` checks.
 const g = globalThis as { HTMLElement?: unknown };

@@ -16,7 +16,7 @@ const indexSchema = z.object({
   ),
 });
 
-/** One catalogue entry as the Desk library lists it; the catalogue has no profession/task/language. */
+/** One catalogue entry as the Cowork library lists it; the catalogue has no profession/task/language. */
 export type PublicCatalogueSummary = {
   name: string;
   description: string;

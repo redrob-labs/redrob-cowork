@@ -84,7 +84,7 @@ import { NukeDialog } from "@/react-app/domains/settings/modals/nuke-dialog";
 import { useDebugViewModel } from "@/react-app/domains/settings/state/debug-view-model";
 import { useElectronUpdaterState } from "@/react-app/domains/settings/state/electron-updater-state";
 import { useBootState } from "./boot-state";
-import { useFrameStore } from "@/react-app/desk/store/frame-store";
+import { useFrameStore } from "@/react-app/cowork/store/frame-store";
 import { SettingsShell } from "@/react-app/domains/settings/shell/settings-shell";
 import { SettingsContent } from "@/react-app/domains/settings/shell/panel";
 import { createExtensionsStore, useExtensionsStoreSnapshot } from "@/react-app/domains/settings/state/extensions-store";
@@ -1908,7 +1908,7 @@ function SettingsRouteContent(props: SettingsSurfaceProps = {}) {
     }
     await refreshRouteState();
     // The always-mounted WorkspaceConnectionProvider owns the records /skills and
-    // the other Desk screens read; it refreshes on this event, so without the
+    // the other Cowork screens read; it refreshes on this event, so without the
     // dispatch a settings-side delete would leave it (and /skills) holding the
     // deleted workspace until some unrelated refresh fired.
     if (typeof window !== "undefined") {

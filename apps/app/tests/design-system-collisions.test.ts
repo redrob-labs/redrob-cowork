@@ -174,7 +174,7 @@ describe("the design system and the app keep separate vocabularies", () => {
           the app's scale and given a thin overlay scrollbar; the DS panel exposes
           no size/scrollbar props.
         - rr-shell__top / rr-shell__symbol: the shell's top header is hidden on the
-          empty new-chat home (nothing to put there); gated by desk-shell--bare-top.
+          empty new-chat home (nothing to put there); gated by cowork-shell--bare-top.
         - rr-shell__brand / rr-shell__product / rr-mark: the sidebar brand lockup
           (enlarged rounded mark + the "Redrob Cowork" wordmark in the DS font);
           the wordmark itself comes from the AppShell `product` prop, these rules

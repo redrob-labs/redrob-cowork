@@ -7,7 +7,7 @@ type Bounds = { x: number; y: number; width: number; height: number };
 /**
  * Lays Electron's native browser page over `contentRef` while `enabled`: shows it at the
  * element's bounds, follows them as they change, hides it under an open dialog, and hides it
- * when disabled or unmounted. Shared by the old panel's `BrowserPanelContent` and the Desk
+ * when disabled or unmounted. Shared by the old panel's `BrowserPanelContent` and the Cowork
  * panel's browser.
  */
 export function useNativeBrowserBounds(contentRef: React.RefObject<HTMLElement | null>, enabled: boolean) {

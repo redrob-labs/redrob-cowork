@@ -148,7 +148,7 @@ function SidePanelTab({ tab, active, onSelect, onClose }: SidePanelTabProps) {
 
 type BrowserPanelContentProps = {
   tab: BrowserPanelTab;
-  /** Without it there is no close button: the Desk side panel closes from its own header. */
+  /** Without it there is no close button: the Cowork side panel closes from its own header. */
   onClose?: () => void;
 };
 

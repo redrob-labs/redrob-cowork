@@ -1394,13 +1394,13 @@ async function collectProjectSkillRoots(projectDir) {
   let current = path.resolve(projectDir);
 
   while (true) {
-    const opencodeSkills = path.join(current, ".opencode", "skills");
+    const opencocoworkills = path.join(current, ".opencode", "skills");
     const legacySkills = path.join(current, ".opencode", "skill");
-    const claudeSkills = path.join(current, ".claude", "skills");
+    const claucoworkills = path.join(current, ".claude", "skills");
 
-    if (await isDirectory(opencodeSkills)) roots.push(opencodeSkills);
+    if (await isDirectory(opencocoworkills)) roots.push(opencocoworkills);
     if (await isDirectory(legacySkills)) roots.push(legacySkills);
-    if (await isDirectory(claudeSkills)) roots.push(claudeSkills);
+    if (await isDirectory(claucoworkills)) roots.push(claucoworkills);
 
     if (await pathExists(path.join(current, ".git"))) {
       break;
@@ -1987,17 +1987,17 @@ const desktopCommandHandlers = {
       }
       return `Could not find "${target}" on disk.`;
   },
-  // The Desk side panel's Open and Show in folder: a workspace-relative file, only inside a
+  // The Cowork side panel's Open and Show in folder: a workspace-relative file, only inside a
   // local workspace (or a folder one authorizes). Never a path the renderer made up.
   "__openWorkspaceFile": async (event, ...args) => {
       const target = await authorizedWorkspaceFile(args[0], args[1]);
-      if (!target) return "This file is outside the folders Desk may use.";
+      if (!target) return "This file is outside the folders Cowork may use.";
       if (!existsSync(target)) return "This file is no longer there.";
       return shell.openPath(target);
   },
   "__revealWorkspaceFile": async (event, ...args) => {
       const target = await authorizedWorkspaceFile(args[0], args[1]);
-      if (!target) return "This file is outside the folders Desk may use.";
+      if (!target) return "This file is outside the folders Cowork may use.";
       if (!existsSync(target)) return "This file is no longer there.";
       shell.showItemInFolder(target);
       return undefined;
