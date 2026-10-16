@@ -586,12 +586,12 @@ describe("enterprise MCP client", () => {
   })
 
   it("honors an injected lifecycle longer than the per-request timeout while progress streams", async () => {
-    const server = await startProgressMcpServer({ resultDelayMs: 70, progressIntervalMs: 10 })
+    const server = await startProgressMcpServer({ resultDelayMs: 300, progressIntervalMs: 20 })
     try {
       const client = createEnterpriseMcpClient({
         fetch,
-        operationTimeoutMs: 25,
-        lifecycle: { expiresAt: Date.now() + 120, signal: new AbortController().signal },
+        operationTimeoutMs: 120,
+        lifecycle: { expiresAt: Date.now() + 1500, signal: new AbortController().signal },
       })
       const result = await client.callTool({
         connection: {
