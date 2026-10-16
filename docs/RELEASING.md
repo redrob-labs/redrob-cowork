@@ -42,7 +42,7 @@ pnpm release:review         # sanity: placeholders intact, opencode pin present
    `prerelease=true` flags it). From that moment the desktop updater serves the
    new version: it reads published releases from the GitHub Releases API at
    runtime — prereleases and drafts are excluded, so a rollback demotion removes
-   a version immediately. `download-aliases` then adds the version-less copies.
+   a version immediately.
 
 ## Prerequisites
 

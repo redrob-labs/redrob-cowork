@@ -4,18 +4,19 @@
  *
  * The launcher installs an asset only when its name is
  *
- *     <stem>-<version>-<os>-<arch>[-portable].<ext>
+ *     <stem>-<version>-<os>-<arch>[-portable|-setup].<ext>
  *
  * with stem `redrob-cowork`, a version that starts with a digit (no leading
- * `v`), one of the os-arch tokens in LAUNCHER_TOKENS, and an extension it knows
- * how to install (.dmg, .AppImage, .tar.gz, .deb, .rpm, .msi,
+ * `v`), one of the os-arch tokens in LAUNCHER_TOKENS, and a suffix it knows
+ * how to install (.dmg, .AppImage, .tar.gz, .deb, .rpm, .msi, -setup.exe,
  * -portable.zip). electron-builder cannot produce those tokens by itself: its
  * `${os}` is mac/linux/win and its `${arch}` is x64/arm64, and a Windows `zip`
  * target carries no `-portable` marker. So the packager writes
  *
- *     redrob-cowork-<version>-<eb os>-<eb arch>.<ext>
+ *     redrob-cowork-<version>-<eb os>-<eb arch>[-setup].<ext>
  *
- * (artifactName in apps/desktop/electron-builder.yml) and this script, run
+ * (artifactName in apps/desktop/electron-builder.yml; the NSIS target adds
+ * `-setup`, which the launcher requires on a Windows installer) and this script, run
  * right after packaging, renames every asset into the launcher's shape and
  * rewrites the electron-updater manifests (latest*.yml) that point at them by
  * name, so self-update keeps working under the new names. `check` is the gate
@@ -65,6 +66,7 @@ export const LAUNCHER_TOKENS = [
 /** Suffixes the launcher installs (PackageKind::suffix), longest first. */
 export const INSTALLABLE_SUFFIXES = [
   "-portable.zip",
+  "-setup.exe",
   ".AppImage",
   ".tar.gz",
   ".msi",
@@ -128,9 +130,13 @@ export function launcherAssetName(name) {
   if (!split) throw new Error(`Unrecognised asset extension: ${name}`);
   let { base, ext } = split;
   let portable = false;
+  let setup = false;
   if (base.endsWith("-portable")) {
     base = base.slice(0, -"-portable".length);
     portable = true;
+  } else if (base.endsWith("-setup")) {
+    base = base.slice(0, -"-setup".length);
+    setup = true;
   }
   const rest = base.slice(PREFIX.length);
   // rest = <version>-<os>-<arch>; os and arch never contain '-', versions may.
@@ -146,7 +152,10 @@ export function launcherAssetName(name) {
   if (!arch) throw new Error(`Unknown arch token "${builderArch}" for ${os} in ${name}`);
   // A Windows zip is the unpacked app, which is what the launcher calls portable.
   if (os === "windows" && (ext === ".zip" || ext === ".zip.blockmap")) portable = true;
-  return `${PREFIX}${version}-${os}-${arch}${portable ? "-portable" : ""}${ext}`;
+  // A Windows exe is the NSIS installer, which the launcher only recognises as `-setup.exe`.
+  if (os === "windows" && (ext === ".exe" || ext === ".exe.blockmap")) setup = true;
+  const marker = portable ? "-portable" : setup ? "-setup" : "";
+  return `${PREFIX}${version}-${os}-${arch}${marker}${ext}`;
 }
 
 /**

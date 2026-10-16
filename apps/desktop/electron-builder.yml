@@ -12,3 +12,7 @@ linux:
 # maps them to the launcher's (macos/windows, x86_64/aarch64, -portable for a Windows zip)
 # right after packaging and rewrites latest*.yml to match.
 artifactName: redrob-cowork-${version}-${os}-${arch}.${ext}
+# The launcher recognises a Windows installer only by the `-setup.exe` suffix, so the NSIS
+# target carries the marker from the packager on (the rename step keeps it in place).
+nsis:
+  artifactName: redrob-cowork-${version}-${os}-${arch}-setup.${ext}
