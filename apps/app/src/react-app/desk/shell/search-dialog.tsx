@@ -18,9 +18,19 @@ export const SEARCH_TABS = ["all", "chats", "artifacts", "skills", "projects", "
 /** One of the search scopes above. */
 export type SearchTab = (typeof SEARCH_TABS)[number];
 
+/** Literal i18n key per scope, so the audit sees a static t() call (no runtime template key). */
+const SEARCH_TAB_LABEL_KEYS: Record<SearchTab, string> = {
+  all: "titlebar.search_tab_all",
+  chats: "titlebar.search_tab_chats",
+  artifacts: "titlebar.search_tab_artifacts",
+  skills: "titlebar.search_tab_skills",
+  projects: "titlebar.search_tab_projects",
+  scheduled: "titlebar.search_tab_scheduled",
+};
+
 /** The localized tab label for a scope. */
 export function searchTabLabel(tab: SearchTab): string {
-  return t(`titlebar.search_tab_${tab}`);
+  return t(SEARCH_TAB_LABEL_KEYS[tab]);
 }
 
 /** One search hit: its id, display label, optional meta line, and the route it opens. */
@@ -89,9 +99,19 @@ export function searchResultsForTab(tab: SearchTab, query: string, data: SearchD
   return (q ? out.filter((result) => matches(q, result.label)) : out).slice(0, RESULT_LIMIT);
 }
 
+/** Literal i18n key per scope for the empty-state line, so the audit sees a static t() call. */
+const SEARCH_EMPTY_LABEL_KEYS: Record<SearchTab, string> = {
+  all: "titlebar.search_empty_all",
+  chats: "titlebar.search_empty_chats",
+  artifacts: "titlebar.search_empty_artifacts",
+  skills: "titlebar.search_empty_skills",
+  projects: "titlebar.search_empty_projects",
+  scheduled: "titlebar.search_empty_scheduled",
+};
+
 /** The empty-state line for a tab when it has no (matching) items. */
 function emptyLabel(tab: SearchTab): string {
-  return t(`titlebar.search_empty_${tab}`);
+  return t(SEARCH_EMPTY_LABEL_KEYS[tab]);
 }
 
 /**
