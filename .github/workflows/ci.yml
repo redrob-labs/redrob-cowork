@@ -1,0 +1,75 @@
+# The one pull-request CI: a seconds-long scripts job and one tests job.
+# No push or schedule triggers. Releases live in release-macos-aarch64.yml.
+
+name: ci
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: i18n audit
+        run: node scripts/i18n-audit.mjs --ci
+
+      - name: Retired product name is gone
+        run: node scripts/check-brand.mjs
+
+      - name: Shipped modules parse
+        run: node scripts/check-syntax.mjs
+
+      - name: redrob-ui-mcp syntax + dry-run publish
+        working-directory: packages/redrob-ui-mcp
+        run: |
+          node --check index.mjs
+          npm publish --dry-run --access public
+
+  tests:
+    name: tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.4.0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
