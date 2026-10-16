@@ -357,9 +357,7 @@ export function createEnterpriseMcpClient(options: EnterpriseMcpClientOptions): 
             [MCP_APP_EXTENSION]: { mimeTypes: [MCP_APP_MIME_TYPE] },
           },
         },
-        // Note: @modelcontextprotocol/sdk negotiates the protocol version during initialize;
-        // it is not a Client constructor option (ClientOptions has no `protocolVersion`). The
-        // fallback is still recorded in the audit log above via protocolVersionFallback.
+        protocolVersion: ENTERPRISE_MCP_PROTOCOL_VERSION_FALLBACK,
       },
     )
     input.session.transport = input.session.createTransport()
