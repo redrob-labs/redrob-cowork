@@ -6,6 +6,7 @@
  * instead of owning the process lifecycle.
  */
 import { resolveServerConfig, type CliArgs } from "./config.js";
+import { startCoworkAppBridge, type CoworkAppBridge } from "./cowork-app-bridge.js";
 import { startSharedEngineForConfig, type SharedEngineStart } from "./engine-startup.js";
 import { createServerLogger, startServer, syncAllWorkspacesRuntimeMcpToEngine } from "./server.js";
 import type { EngineExecutionSnapshot } from "./shared-engine.js";
@@ -50,10 +51,16 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
 
   let engine: SharedEngineStart | null = null;
   let server: ServeResult | null = null;
+  let appBridge: CoworkAppBridge | null = null;
   let stopPromise: Promise<void> | null = null;
 
   const releaseResources = async (): Promise<void> => {
     const errors: unknown[] = [];
+
+    // Unregister the app bridge first so the daemon stops routing tool calls here.
+    const bridge = appBridge;
+    appBridge = null;
+    if (bridge) await bridge.stop();
 
     const started = engine;
     engine = null;
@@ -138,6 +145,10 @@ export async function startEmbeddedServer(options: EmbeddedServerOptions): Promi
       });
     });
   }
+
+  // Hand the shared daemon's agent this server's tasks. Optional: without a daemon the
+  // server runs as before, so this never fails startup.
+  appBridge = await startCoworkAppBridge({ config, serverUrl, logger });
 
   const started = engine;
   return {

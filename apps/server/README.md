@@ -142,3 +142,18 @@ Approvals endpoints:
 - `POST /approvals/:id` with `{ "reply": "allow" | "deny" }`
 
 Set `REDROB_APPROVAL_MODE=auto` to auto-approve during local development.
+
+## Control from Redrob Code
+
+While the server runs next to a Redrob Code daemon it registers itself as app `cowork`, so the
+daemon's agent can drive tasks from any Redrob surface, a phone chat included. The tools are served
+over MCP on loopback only and call the same routes the desktop UI uses; they disappear when the
+server stops. Without a daemon the server runs as before.
+
+- `list_tasks` - one line per task: id, title, status, desk, workspace, last update.
+- `get_task` - a task's title, status, desk and its last few messages (at most 4000 characters).
+- `create_task` - a new task with a title and a first prompt, optionally filed under a desk; answers its id.
+- `send_message` - a follow-up message into an existing task.
+- `list_desks` - the desks per workspace with how many tasks each holds.
+- `list_approvals` - the approval requests waiting for a human.
+- `approve` - allow or deny one pending approval request.
