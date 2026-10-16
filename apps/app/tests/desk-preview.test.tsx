@@ -316,7 +316,7 @@ describe("Scheduled", () => {
 describe("History", () => {
   test("a flat clickable list of everything Cowork did, newest first, from the sample entries", async () => {
     const html = route("/history", await seeded());
-    // Round 39: the table is gone — each entry is a full-width row linking to its chat.
+    // Round 39: the table is gone - each entry is a full-width row linking to its chat.
     expect(html).toContain("desk-history");
     expect(html).not.toContain("<table");
     expect(html).not.toContain("Everything Cowork did, in order");
@@ -346,7 +346,7 @@ describe("Model Guide", () => {
     expect(html).not.toContain('aria-controls="panel-profession"');
     expect(html).not.toContain("By price");
     expect(html).not.toContain("every message goes to Redrob Auto");
-    // The chart home — banner carousel + the two tile sections — renders directly, not the ranking.
+    // The chart home - banner carousel + the two tile sections - renders directly, not the ranking.
     expect(html).toContain('class="model-chart"');
     expect(html).toContain('class="model-chart__banner"');
     expect(html).toContain('class="model-chart__tile"');

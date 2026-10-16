@@ -15,16 +15,19 @@ const RESULT_LIMIT = 8;
 
 /** The search scopes, in the order the tab strip shows them. "all" is places + chats. */
 export const SEARCH_TABS = ["all", "chats", "artifacts", "skills", "projects", "scheduled"] as const;
+/** One of the search scopes above. */
 export type SearchTab = (typeof SEARCH_TABS)[number];
 
+/** The localized tab label for a scope. */
 export function searchTabLabel(tab: SearchTab): string {
   return t(`titlebar.search_tab_${tab}`);
 }
 
+/** One search hit: its id, display label, optional meta line, and the route it opens. */
 export type SearchResult = { id: string; label: string; meta?: string; path: string };
 
 /** Everything the per-type tabs can draw on. All lists arrive newest/natural order; the
- *  functions below sort and filter. Empty arrays are fine — the tab then shows its empty line. */
+ *  functions below sort and filter. Empty arrays are fine - the tab then shows its empty line. */
 export type SearchData = {
   chats: readonly Chat[];
   projects: readonly Project[];

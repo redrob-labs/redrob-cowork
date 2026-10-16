@@ -178,7 +178,7 @@ function ShowMoreSessionsButton({
   );
 }
 
-/** Glyph-lane activity only — never used for unread / completion. */
+/** Glyph-lane activity only - never used for unread / completion. */
 function SessionLoadingIndicator({ status, isActiveWork }: SessionLoadingIndicatorProps) {
   if (!isActiveWork) return <SidebarGlyphSlot />;
 
@@ -2251,7 +2251,7 @@ function SessionMenuItem({
   const unreadIds = useUnreadSessionIds();
   const isSelected = ctx.selectedSessionId === session.id;
   const displayTitle = getDisplaySessionTitle(session.title);
-  const itemTitle = workspaceName ? `${displayTitle} — ${workspaceName}` : displayTitle;
+  const itemTitle = workspaceName ? `${displayTitle} - ${workspaceName}` : displayTitle;
   const hasChildren = (tree.descendantCountBySessionId.get(session.id) ?? 0) > 0;
   const isExpanded = ctx.expandedSessionIds.has(session.id) || forcedExpandedSessionIds.has(session.id);
   const sessionActivityStatus = ctx.sessionStatusById?.[session.id];
@@ -2326,7 +2326,7 @@ function SessionMenuItem({
   } as const;
 
   // Pinned/archived rows identify their workspace via the tooltip title
-  // only — no workspace color dot in these sections.
+  // only - no workspace color dot in these sections.
   const leading = (
     <SessionLoadingIndicator status={sessionActivityStatus} isActiveWork={resolvedActiveWork} />
   );

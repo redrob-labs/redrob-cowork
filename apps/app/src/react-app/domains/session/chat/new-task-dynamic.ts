@@ -21,6 +21,7 @@
 
 export type TimeOfDay = "morning" | "afternoon" | "evening" | "night";
 
+/** The time-of-day bucket for `date`, by local clock hour (morning 5-12, afternoon 12-17, evening 17-22, else night). */
 export function timeOfDay(date: Date): TimeOfDay {
   const h = date.getHours();
   if (h >= 5 && h < 12) return "morning";
@@ -40,6 +41,7 @@ export const GREETING_KEYS = {
   night: "hero.greeting_night",
 } as const;
 
+/** Time-neutral warm greeting i18n keys the seed rotates through after the first paint. */
 export const GREETING_NEUTRAL_KEYS: readonly string[] = [
   "hero.greeting_neutral_1",
   "hero.greeting_neutral_2",
@@ -117,9 +119,6 @@ export const STARTER_GROUPS: Record<string, readonly string[]> = {
     "hero.starter_general_6",
   ],
 };
-
-/** Flat list of every starter key, for coverage checks and the neutral rotation. */
-export const ALL_STARTER_KEYS: readonly string[] = Object.values(STARTER_GROUPS).flat();
 
 /** Keyword hints that map a recent session TITLE to a starter group. */
 const GROUP_HINTS: Record<string, readonly string[]> = {

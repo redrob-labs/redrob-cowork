@@ -27,6 +27,7 @@ export function skillPath(name: string): string {
   return `/skill/${encodeURIComponent(name)}`;
 }
 
+/** The localized label for where a skill came from (library, team, or the person's own). */
 export function originLabel(origin: SkillOrigin): string {
   switch (origin) {
     case "library":
@@ -38,6 +39,7 @@ export function originLabel(origin: SkillOrigin): string {
   }
 }
 
+/** A small tone-coded badge naming a skill's origin. */
 export function OriginBadge(props: { origin: SkillOrigin }) {
   return (
     <Badge size="sm" tone={props.origin === "team" ? "info" : props.origin === "mine" ? "success" : "neutral"}>
@@ -116,6 +118,7 @@ export function teamStatusText(state: TeamSkillsState | null): string | null {
   return null;
 }
 
+/** The profession/task/language dropdowns, the search box and the installed-only switch. */
 export function SkillFiltersView(props: {
   filters: SkillFilters;
   installedOnly: boolean;
@@ -180,6 +183,7 @@ export function SkillFiltersView(props: {
   );
 }
 
+/** Props for the skills list: the rows, taxonomy, filter/empty flags, and the add/remove/use handlers. */
 export type SkillsViewProps = {
   rows: SkillRow[];
   taxonomy: SkillTaxonomy | null;

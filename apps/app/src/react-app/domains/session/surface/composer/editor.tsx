@@ -847,7 +847,7 @@ function SyncPlugin(props: {
     // triggers Lexical's reconciliation cycle which can normalise the DOM
     // selection and reset the cursor (e.g. after a multi-line paste the
     // cursor jumps to position 0 instead of staying after the pasted
-    // content). The read() above already gave us `currentText` — reuse it.
+    // content). The read() above already gave us `currentText` - reuse it.
     if (!forceRebuild && currentText === props.value) return;
     editor.update(() => {
       // Double-check inside the update in case another queued update
@@ -855,7 +855,7 @@ function SyncPlugin(props: {
       if (!forceRebuild && serializePromptFromRoot() === props.value) return;
       setPrompt(props.value, props.mentions, props.pastedText, props.attachments);
       // $getRoot().selectEnd() doesn't work when the last node is a
-      // token (chip) — Lexical can't position a cursor inside a token,
+      // token (chip) - Lexical can't position a cursor inside a token,
       // so the selection collapses to position 0. Use element-level
       // selection instead: place the cursor *after* the last child of
       // the last paragraph.
@@ -890,7 +890,7 @@ function SubmitPlugin(props: { onSubmit: (options: { queue: boolean }) => void |
         // must always fall through to the editor so the composition can
         // commit.
         if (event?.isComposing === true || event?.keyCode === 229) return false;
-        // Shift+Enter inserts a newline — let the editor handle it.
+        // Shift+Enter inserts a newline - let the editor handle it.
         if (event?.shiftKey) return false;
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) return false;
@@ -1263,7 +1263,7 @@ export const LexicalPromptEditor = forwardRef<LexicalPromptEditorHandle, EditorP
       {/*
         Tight start, bounded growth:
         - min-h holds the editor to a single-line look until the user starts typing.
-        - max-h caps the composer — long pastes / multi-paragraph drafts scroll
+        - max-h caps the composer - long pastes / multi-paragraph drafts scroll
           inside the editor instead of pushing the transcript out of view.
       */}
       <div className="relative">

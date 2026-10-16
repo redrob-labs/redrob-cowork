@@ -83,7 +83,7 @@ export type RedrobWorkExtensionLifecycle = {
 };
 
 // ---------------------------------------------------------------------------
-// Enablement — declarative conditions for extension "active" state
+// Enablement - declarative conditions for extension "active" state
 // ---------------------------------------------------------------------------
 
 export type EnablementConditionType =
@@ -96,7 +96,7 @@ export type EnablementConditionType =
 
 export type EnablementCondition = {
   type: EnablementConditionType;
-  /** What to check — MCP server name, plugin id, env key, etc. */
+  /** What to check - MCP server name, plugin id, env key, etc. */
   ref: string;
   /** Human-readable label shown in the UI. */
   label: string;

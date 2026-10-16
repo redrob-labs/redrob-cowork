@@ -332,7 +332,7 @@
 
 /*
   Round 12 (revised): the Desk sidebar as an Apple-Music-style FLOATING POPUP CARD. Per the
-  reference it is not a flush rail — it is a rounded rectangle inset from the window on all sides,
+  reference it is not a flush rail - it is a rounded rectangle inset from the window on all sides,
   with a soft shadow and a more vibrant translucent gradient tint.
 
   How it floats inside a CSS-grid column: the DS lays `.rr-shell__side` as the first grid column, so
@@ -413,7 +413,7 @@
   Round 19: `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
   work subtree's overflow. `--bare-top` is the EMPTY CHAT HOME, which has no scrolling transcript and
   needs overflow:visible so an upward status popover isn't clipped (see the rule further down). A tall
-  SCROLLING screen that merely has no header — Trending AI — must keep its scroll container, so it uses
+  SCROLLING screen that merely has no header - Trending AI - must keep its scroll container, so it uses
   this instead. Reusing `--bare-top` there turned #rr-shell-main to overflow:visible and clipped the
   lower shelves (the "missing scrollbar"). Same header-hide, different overflow contract.
 */
@@ -486,7 +486,7 @@
 }
 /*
   Round 11, item 4: the handle keeps its 8px hit area, but on hover/drag it draws only a thin
-  2px line centred in that area (via ::before) instead of filling the whole 8px with colour — the
+  2px line centred in that area (via ::before) instead of filling the whole 8px with colour - the
   old full-width 35% fill read as a border that thickened too much. Lower opacity too.
 */
 .desk-shell__side-resizer::before {
@@ -508,7 +508,7 @@
   Round 8, item 7: the title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS
   64px mini-rail. When the shell carries desk-shell--side-hidden, drop to a SINGLE 1fr column so the
   work fills the whole width. (A two-track `0 minmax(0,1fr)` left the sidebar's `display:none` grid
-  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track — the whole
+  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track - the whole
   page measured 0 wide. One column has nowhere else to flow.)
 */
 .desk-shell--side-hidden .rr-shell--norail {
@@ -523,7 +523,7 @@
   Round 9, item 3: the account block (the "Log in or sign up" / profile row) is the VERY
   bottom section, with the theme switch directly ABOVE it. DOM order in the DS foot is
   aside (account) then theme, and the DS pins theme to the bottom with `margin-top:auto`.
-  To make account last we flip the visual order with `order` (the foot is a flex column —
+  To make account last we flip the visual order with `order` (the foot is a flex column -
   `margin-top:auto` already works on it) and move the auto margin onto the theme row so the
   free space collapses above the pair, dropping theme + account to the bottom together.
   Result top-to-bottom: [free space] -> theme -> account.
@@ -531,7 +531,7 @@
 .desk-shell .rr-shell__theme {
   order: 0;
   margin-top: auto;
-  /* Round 11, item 12: pull the account block closer to the theme row — trim the DS theme row's
+  /* Round 11, item 12: pull the account block closer to the theme row - trim the DS theme row's
      own bottom padding so the gap above "Log in or sign up" is smaller. */
   padding-bottom: var(--space-1);
 }
@@ -545,7 +545,7 @@
 
 /*
   Round 11, item 6: the chat-session header (the DS shell top bar carrying the "New session" title +
-  Invite + panel button) was taller than the app chrome. Match the 48px chrome height — the DS default
+  Invite + panel button) was taller than the app chrome. Match the 48px chrome height - the DS default
   is padding var(--space-3) top+bottom with no fixed height, which read as too thick. Fix the strip to
   48px with tighter vertical padding (border-box so the 1px bottom border is included).
 */
@@ -1179,7 +1179,7 @@
 .desk-account > div > button {
   width: 100%;
   height: auto;
-  /* Round 12, item 3: shorter button — trim vertical padding (space-2 -> space-1), keep the
+  /* Round 12, item 3: shorter button - trim vertical padding (space-2 -> space-1), keep the
      horizontal padding so the avatar + label still breathe. */
   padding: var(--space-1) var(--space-2);
   justify-content: space-between;
@@ -1345,7 +1345,7 @@
   padding: var(--space-2) var(--space-3);
 }
 
-/* History (/history): a flat, full-width clickable list — title left, relative time right,
+/* History (/history): a flat, full-width clickable list - title left, relative time right,
    hairline dividers, no cards (Claude-style). Rows link to the chat. */
 .desk-history {
   display: flex;
@@ -2810,7 +2810,7 @@ select:disabled {
   border-radius: 6px;
   object-fit: contain;
 }
-/* Round 13, item 2: the brand marks are buttons now — a bare wrapper with a subtle hover affordance
+/* Round 13, item 2: the brand marks are buttons now - a bare wrapper with a subtle hover affordance
    so they read as clickable, and a focus ring for keyboard use. */
 .window-titlebar__brand-btn {
   display: inline-flex;
@@ -2944,7 +2944,7 @@ select:disabled {
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  /* Round 24: a taller featured banner (was 172px) — more vertical presence, like a storefront hero.
+  /* Round 24: a taller featured banner (was 172px) - more vertical presence, like a storefront hero.
      The title + sub sit centered in the extra height via margin-top:auto on the eyebrow block. */
   min-height: 210px;
   justify-content: flex-end;
@@ -3044,7 +3044,7 @@ select:disabled {
 /*
   Round 20: each shelf is ONE horizontal scroll-snap row (not a wrapping grid), like a music-app
   shelf. `.model-chart__shelf` is the positioning context for the two overlay chevrons; `.model-chart__row`
-  is the scroller. The native scrollbar is hidden — the row scrolls by chevron, wheel, trackpad, touch
+  is the scroller. The native scrollbar is hidden - the row scrolls by chevron, wheel, trackpad, touch
   and keyboard. Tiles are a fixed ~121px basis (round-19 was 151px; this is ~20% smaller) and snap to
   the row's start edge.
 */
@@ -3063,9 +3063,9 @@ select:disabled {
   scroll-padding-left: 2px;
   /* chevrons overlay the edges; a little inline padding keeps the first/last card off the very edge.
      Round 22: the TOP padding is 8px (not 2px) so the hover lift (translateY) has room inside this
-     overflow-y:hidden scroller — at 2px the lifted card's top border was clipped. */
+     overflow-y:hidden scroller - at 2px the lifted card's top border was clipped. */
   padding: 8px 2px 4px;
-  /* Hide the native scrollbar — the shelf scrolls by chevrons / wheel / trackpad / touch. */
+  /* Hide the native scrollbar - the shelf scrolls by chevrons / wheel / trackpad / touch. */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -3136,7 +3136,7 @@ select:disabled {
   no-backdrop-filter fallback below.
 */
 .model-chart__tile {
-  /* Round 17: an album card — a SQUARE art panel (.model-chart__card) with the caption BELOW it,
+  /* Round 17: an album card - a SQUARE art panel (.model-chart__card) with the caption BELOW it,
      like a track in a music app. The button itself is just the stack; the card carries the look. */
   display: flex;
   flex-direction: column;
@@ -3171,7 +3171,7 @@ select:disabled {
 }
 /*
   Round 25: the album art is now a REAL per-tile IMAGE (user's hand-built set), filling the square and
-  sitting above the glass backdrop. Decorative (aria-hidden) — the caption below carries the meaning.
+  sitting above the glass backdrop. Decorative (aria-hidden) - the caption below carries the meaning.
   object-fit:cover so the square crop is always full-bleed; it keeps the card's rounded corners via
   the card's overflow:hidden.
 */
@@ -3186,7 +3186,7 @@ select:disabled {
   transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
 }
 .model-chart__tile:hover .model-chart__card {
-  /* Round 22: subtler hover — a 2px lift (was 3), a lighter shadow, same accent border. */
+  /* Round 22: subtler hover - a 2px lift (was 3), a lighter shadow, same accent border. */
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -3288,7 +3288,7 @@ select:disabled {
 }
 
 /*
-  Round 26: the inner chart-detail page — a Spotify / Apple-Music style top-10 model list. A header
+  Round 26: the inner chart-detail page - a Spotify / Apple-Music style top-10 model list. A header
   (album-art cover + title + lede) over a ranked list of rows. One layout for every chart.
 */
 .chart-detail {
@@ -3430,7 +3430,7 @@ select:disabled {
   color: var(--ink-muted);
 }
 /*
-  Round 31: the Needle Test badge — a graded ring with clearer, Apple-Music-style grade colors
+  Round 31: the Needle Test badge - a graded ring with clearer, Apple-Music-style grade colors
   (green ace, blue strong, amber good, grey fair) so a strong result reads instantly. The caption
   sits beneath; the full explanation is in the on-hover tooltip.
 */
@@ -3496,7 +3496,7 @@ select:disabled {
   width: 100%;
 }
 /*
-  Round 34: Redrob Auto — the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
+  Round 34: Redrob Auto - the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
   the same height as and visually seamless with the ten models: "Featured" sits on the maker line,
   "Always the best" fills the Needle column, and the budget copy fills the cost column. A whisper of
   brand tint is the only thing that sets it apart.

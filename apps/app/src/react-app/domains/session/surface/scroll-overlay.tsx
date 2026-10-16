@@ -76,6 +76,8 @@ type SessionScrollOverlayProps = {
   onJumpToStartOfMessage: (behavior?: ScrollBehavior) => void;
 };
 
+/** The single jump chevron over the transcript: jump-to-start when the latest turn's top is
+ *  clipped, otherwise jump-to-latest when scrolled up; nothing when neither applies. */
 export const SessionScrollOverlay = memo(function SessionScrollOverlay({
   sessionId,
   isStreaming,

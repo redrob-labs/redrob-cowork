@@ -29,7 +29,7 @@ type TitleBarPlatform = "windows" | "linux";
  * implements `__windowControl` / `__windowState`; `DesktopCommandMap` in
  * `@redrob/types/desktop-ipc` is their shared declaration. We narrow the bridge
  * to just these two commands here rather than reach across to the whole command
- * map — the shapes match that declaration verbatim.
+ * map - the shapes match that declaration verbatim.
  */
 type WindowBridge = {
   invokeDesktop?: {
@@ -93,7 +93,7 @@ function useWindowState(): WindowState {
  *
  * This app runs on a HASH router, where `history.state.idx` never advances past 0, so we cannot
  * read reachability off it. Instead we fold each navigation (its type + the location key) into an
- * ordered key-stack with a pointer — see `history-reach.ts`, which is pure and unit-tested.
+ * ordered key-stack with a pointer - see `history-reach.ts`, which is pure and unit-tested.
  */
 export function useHistoryReach(): { canGoBack: boolean; canGoForward: boolean } {
   const location = useLocation();
@@ -171,7 +171,7 @@ function WindowTitleBarView({ platform }: { platform: TitleBarPlatform }) {
       {/*
         Round 10, item 4: the Redrob GROUP mark then the Redrob COWORK mark dock to the RIGHT with
         the search bar, just before the window buttons: [Group] [Cowork] [Search] [buttons]. The nav
-        cluster stays far left. (Both marks share one glyph as a placeholder — see the consts above.)
+        cluster stays far left. (Both marks share one glyph as a placeholder - see the consts above.)
       */}
       <div className="window-titlebar__right titlebar-no-drag">
         {/*

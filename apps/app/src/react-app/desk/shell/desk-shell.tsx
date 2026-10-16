@@ -31,7 +31,7 @@ export type DeskShellProps = Pick<
   /**
    * Hide the shell's top header like `bareTop`, but WITHOUT the chat-home's overflow:visible override.
    * `bareTop` is scoped to the empty chat home, where it also opens the work subtree's overflow so an
-   * upward status popover isn't clipped — correct there (no transcript to scroll), wrong for a tall
+   * upward status popover isn't clipped - correct there (no transcript to scroll), wrong for a tall
    * scrolling page like Trending AI, where it turned the scroll container off and clipped the lower
    * shelves. A screen that only wants the empty header gone keeps its own scroll with this instead.
    */

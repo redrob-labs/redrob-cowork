@@ -181,7 +181,7 @@ describe("formatNavTime", () => {
 });
 
 describe("DeskShell", () => {
-  test("inside a chat, the side panel button is rendered — gated on the chat header (round 14, item C)", () => {
+  test("inside a chat, the side panel button is rendered - gated on the chat header (round 14, item C)", () => {
     // The off-chat render test below proves it hides with no chat header. Here we assert the gate
     // itself in source: the panel IconButton is wrapped in `chatHeader ? (…) : null`, so it appears
     // only inside a chat. (A static renderToStaticMarkup does not reliably reflect the frame-store

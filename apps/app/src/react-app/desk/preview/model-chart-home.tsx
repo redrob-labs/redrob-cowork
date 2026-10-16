@@ -20,7 +20,7 @@ import { guideProfessions } from "../guide/model-guide";
 
 /**
  * The plural "who" for a profession tile, keyed by the research profession id. The tile reads
- * "For {who}" (round 21) — a music-app shelf voice. HR is a mass noun ("For HR teams", not "For HRs");
+ * "For {who}" (round 21) - a music-app shelf voice. HR is a mass noun ("For HR teams", not "For HRs");
  * sales is irregular ("For Salespeople"). Any id not listed falls back to the research label with a
  * plain "s", so a new profession still reads sensibly without a code change.
  */
@@ -73,7 +73,7 @@ function orderByRank<T>(items: readonly T[], idOf: (item: T) => string, order: r
 
 /**
  * The output shelf's tiles (round 21), in rough AI-usage popularity order. This is the CHART's own
- * editorial list — broader than the research re-rank select (`guideOutputs`) — so it adds Code, Voice
+ * editorial list - broader than the research re-rank select (`guideOutputs`) - so it adds Code, Voice
  * and Video as decorative modalities beside the five researched ones. Code leads (the biggest
  * professional AI use), then documents and graphics, then the newer modalities. Each tile still opens
  * the output view like the others.
@@ -84,9 +84,9 @@ function chartOutputs(): Array<{ value: string; label: string }> {
 
 /**
  * The Model Chart landing, in the spirit of a music-chart app (Spotify / Apple Music): rotating
- * editorial banners, then square "artist" tiles across four shelves — professions, skills, output
+ * editorial banners, then square "artist" tiles across four shelves - professions, skills, output
  * types and countries. Each tile wears a tasteful scatter of model-provider marks as soft album art
- * behind frosted glass (varied per tile, spread evenly across the labs — decoupled from the ranking),
+ * behind frosted glass (varied per tile, spread evenly across the labs - decoupled from the ranking),
  * a bold label and one punchy line. Picking a tile opens that chart's ranking (the existing
  * ModelGuide), so this is a browse layer ON TOP of the researched data, not a replacement for it.
  */
@@ -137,7 +137,7 @@ export function albumArtBase(section: ArtSection, id: string): string | null {
 
 /**
  * The square album art: the real image for this tile, retina-served from @2x/@3x. Decorative
- * (aria-hidden) — the caption below carries the meaning. Renders nothing when the tile has no image,
+ * (aria-hidden) - the caption below carries the meaning. Renders nothing when the tile has no image,
  * leaving the glass gradient as the backdrop.
  */
 function AlbumArt({ section, id, alt }: { section: ArtSection; id: string; alt: string }) {
@@ -163,7 +163,7 @@ function AlbumArt({ section, id, alt }: { section: ArtSection; id: string; alt: 
 /**
  * The Skills shelf (round 22): rebuilt as the top 20 things people actually use AI for, ranked by
  * real-world adoption (McKinsey / IBM / Gartner-cited 2026 use-case surveys) rather than the old
- * legal/finance sample tasks. Decoupled from the Skills fixture — this is an editorial "what AI is
+ * legal/finance sample tasks. Decoupled from the Skills fixture - this is an editorial "what AI is
  * used for" shelf. Each tile drills into the leading profession's ranking for now (the model ranking
  * is a later session); the label and blurb are localized `chart_skill_*` / `chart_blurb_skill_*` keys.
  */
@@ -178,7 +178,7 @@ function skillTiles(research: GuideResearch, locale: Language): Array<{ id: Skil
 
 /**
  * The Countries shelf (round 21): the top 8 countries BUILDING their own frontier models, in rough
- * AI-dominance order — US and China lead, then France (Mistral), the UK (DeepMind), Canada (Cohere),
+ * AI-dominance order - US and China lead, then France (Mistral), the UK (DeepMind), Canada (Cohere),
  * South Korea (HyperCLOVA / EXAONE), Israel (AI21) and the UAE (Falcon / Jais). The tile drills into
  * the nearest ranked working language (research ranks en / ko / hi only); the four without a ranked
  * language of their own map to English as the lingua-franca ranking. Blurbs are about who builds the
@@ -218,7 +218,7 @@ const BANNER_MS = 5000;
 
 /**
  * A tiny deterministic string hash (FNV-1a-ish). Seeded "randomness" so every component gets its own
- * liquid-glass variation that is STABLE across re-renders, reloads and tests — never Math.random().
+ * liquid-glass variation that is STABLE across re-renders, reloads and tests - never Math.random().
  */
 function seedHash(seed: string): number {
   let h = 2166136261;
@@ -231,7 +231,7 @@ function seedHash(seed: string): number {
 
 /**
  * Per-component glass variation as CSS custom properties, derived from a seed. Varies the two blobs'
- * positions and sizes, the blur radius, a hue shift and the highlight angle — all within tasteful
+ * positions and sizes, the blur radius, a hue shift and the highlight angle - all within tasteful
  * bounds so each tile looks a little different but still on-brand. The CSS reads these with fallbacks,
  * so a component with no style still renders the round-11 default.
  */
@@ -258,7 +258,7 @@ function outputBlurb(value: string): string {
 }
 
 /**
- * The punchy, Apple-Music-editorial line under a tile label — unique per card, under 10 words. Keyed
+ * The punchy, Apple-Music-editorial line under a tile label - unique per card, under 10 words. Keyed
  * by the segment and the tile id (e.g. `desk.chart_blurb_profession_lawyer`); falls back to a tasteful
  * generic line when a specific one is not written, so a new profession/output never shows a key.
  */
@@ -275,7 +275,7 @@ function professionBlurb(id: string): string {
 
 /**
  * The featured banners (round 24): rebuilt from scratch. Three HAND-PICKED, DIVERSE flagship AI use
- * cases — Writing (text), Coding (build), Image generation (visual) — rather than auto-generated
+ * cases - Writing (text), Coding (build), Image generation (visual) - rather than auto-generated
  * "Best for X" lines off the research. Each is a localized `chart_feature_*` title + sub written in a
  * movie/album marketing voice, under one "Featured" eyebrow, and drills into its matching output
  * ranking. Deliberately 3 (not 5), so the rail reads as a curated spotlight.
@@ -298,7 +298,7 @@ function buildBanners(_research: GuideResearch, _locale: Language): Banner[] {
   ];
 }
 
-/** How far from the end counts as "at the edge" — a px tolerance so sub-pixel scroll never leaves a
+/** How far from the end counts as "at the edge" - a px tolerance so sub-pixel scroll never leaves a
  * chevron showing with nothing left to reveal. */
 const SHELF_EDGE_EPSILON = 2;
 
@@ -353,7 +353,7 @@ function useShelfScroll() {
 }
 
 /**
- * One Trending-AI shelf: a heading above a SINGLE horizontal scroll-snap row of tiles (round 20 — the
+ * One Trending-AI shelf: a heading above a SINGLE horizontal scroll-snap row of tiles (round 20 - the
  * shelves used to wrap into a grid). When the row overflows, a left and a right chevron fade in on
  * hover and page it by ~one viewport; each hides at its scroll extreme. The row also scrolls by wheel,
  * trackpad, touch and keyboard, so the chevrons are an affordance, not the only way.

@@ -37,6 +37,7 @@ export type DeskNavInput = {
   toHref?: (path: string) => string;
 };
 
+/** How many recent chats the menu shows under "Recent". */
 export const RECENT_CHAT_COUNT = 5;
 
 const hashHref = (path: string) => `#${path}`;

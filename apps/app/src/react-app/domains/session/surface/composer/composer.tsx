@@ -136,8 +136,8 @@ function isNonDefaultAgent(agent: Agent) {
 /**
  * Extract external file/URL drops from a clipboard. Only used when the user
  * drag-drops a file reference from another app (Finder / browser), which sets
- * the text/uri-list MIME type explicitly. Plain text pastes — even ones that
- * contain absolute paths like "/Users/..." — are NEVER treated as links here
+ * the text/uri-list MIME type explicitly. Plain text pastes - even ones that
+ * contain absolute paths like "/Users/..." - are NEVER treated as links here
  * because that intercepted real text pastes and made composer paste feel
  * broken. Plain text goes straight into the editor via Lexical's default.
  */
@@ -826,7 +826,7 @@ export function ReactSessionComposer(props: ComposerProps) {
   }, [props.onDraftChange]);
 
   const handleKeyDownCapture: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    // IME composition guard — block Enter while IME is mid-character.
+    // IME composition guard - block Enter while IME is mid-character.
     const imeActive =
       imeComposingRef.current ||
       (event.nativeEvent as KeyboardEvent).isComposing === true ||
@@ -1148,7 +1148,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         wide window.
       */}
       <div className={props.flush ? "" : CHAT_COLUMN}>
-        {/* Main composer panel — also the drop target. The whole panel accepts a
+        {/* Main composer panel - also the drop target. The whole panel accepts a
             drag, not just the text area: a file dropped on the action row or the
             padding is the same intent, and a highlight that only lights up over
             the caret line reads as "drop not supported here". */}
@@ -1188,7 +1188,7 @@ export function ReactSessionComposer(props: ComposerProps) {
           {renderSlashMenu()}
 
           {/*
-            The pasted-text chip used to render twice — once inline inside
+            The pasted-text chip used to render twice - once inline inside
             the Lexical editor (via ComposerPastedTextNode) and again as a
             separate rail here above the composer. Keep only the inline
             chip; its pill already shows label + line count, and the user
@@ -1275,7 +1275,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                           }
                         : undefined,
                   });
-                  // Intentionally no preventDefault — the notice is advisory,
+                  // Intentionally no preventDefault - the notice is advisory,
                   // the paste still goes through the editor.
                 }
               }}
@@ -1292,7 +1292,7 @@ export function ReactSessionComposer(props: ComposerProps) {
               }}
             />
 
-            {/* Action row — tools, attachments, model, and send stay on one line */}
+            {/* Action row - tools, attachments, model, and send stay on one line */}
             <div className="mt-2 flex items-center gap-1.5">
               <div className="flex min-w-0 flex-1 items-center gap-1.5">
                 <input

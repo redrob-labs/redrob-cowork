@@ -362,7 +362,7 @@ export function SessionPage(props: SessionPageProps) {
   // The startup skeleton (animate-pulse rows) is a COLD-BOOT affordance for the
   // very first paint, before the app has anything to show. It keyed only off
   // transient signals (clientConnected / startupPhase), which also dip for a
-  // frame during an in-app route change (e.g. clicking Conversations) — and
+  // frame during an in-app route change (e.g. clicking Conversations) - and
   // because Conversations and the other desk screens are separate route
   // elements, SessionPage REMOUNTS on that navigation, so a per-instance latch
   // would reset every time. Latch "the app has booted at least once" at MODULE
@@ -1228,7 +1228,7 @@ export function SessionPage(props: SessionPageProps) {
             // OS window-title-bar (window-title-bar.tsx) stays and keeps the drag region and controls;
             // a minimal drag strip stands in only where that bar is absent (web/mac titlebar-drag).
             // In the Desk frame the chat header is rendered once by the shell's top bar (round 7, item
-            // 6) so the title shares a row with Invite + the side panel — drop the local header too.
+            // 6) so the title shares a row with Invite + the side panel - drop the local header too.
             <div className="mac:titlebar-drag h-0 shrink-0" aria-hidden="true" />
           ) : (
           <header className="z-10 flex h-9 shrink-0 items-center justify-between border-b border-border px-3 max-lg:h-12 lg:px-6 mac:titlebar-drag  mac:backdrop-blur-2xl mac:backdrop-saturate-150 @container/titlebar">
@@ -1509,7 +1509,7 @@ export function SessionPage(props: SessionPageProps) {
                       </div>
                     </div>
                   ) : showWorkspaceSetupEmptyState ? (
-                    // Chat-first: no workspace yet — the composer creates a
+                    // Chat-first: no workspace yet - the composer creates a
                     // default chat workspace instead of asking where to put it.
                     <SessionEmptyHero
                       providerCount={providerCount}

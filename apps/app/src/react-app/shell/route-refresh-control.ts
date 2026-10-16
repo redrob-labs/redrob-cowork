@@ -125,6 +125,7 @@ export function planRouteWorkspaceLoads(
   return [selectedId];
 }
 
+/** Creates a refresh lifecycle: one in-flight slot, monotonic generations, supersede support. */
 export function createRouteRefreshLifecycle(): RouteRefreshLifecycle {
   let latestGeneration = 0;
   let inFlightGeneration = 0;
