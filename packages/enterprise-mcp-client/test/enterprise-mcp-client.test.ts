@@ -611,12 +611,12 @@ describe("enterprise MCP client", () => {
   })
 
   it("still stops a progressing provider at the injected absolute lifecycle", async () => {
-    const server = await startProgressMcpServer({ resultDelayMs: 160, progressIntervalMs: 10 })
+    const server = await startProgressMcpServer({ resultDelayMs: 2000, progressIntervalMs: 20 })
     try {
       const client = createEnterpriseMcpClient({
         fetch,
-        operationTimeoutMs: 25,
-        lifecycle: { expiresAt: Date.now() + 80, signal: new AbortController().signal },
+        operationTimeoutMs: 120,
+        lifecycle: { expiresAt: Date.now() + 400, signal: new AbortController().signal },
       })
       const startedAt = Date.now()
       await assert.rejects(
@@ -634,8 +634,8 @@ describe("enterprise MCP client", () => {
           && error.operationPhase === "tool-execution",
       )
       const elapsedMs = Date.now() - startedAt
-      assert.ok(elapsedMs >= 60, `expected lifecycle timeout to outlast per-request timeout, got ${elapsedMs}ms`)
-      assert.ok(elapsedMs < 500, `expected lifecycle timeout before the provider result, got ${elapsedMs}ms`)
+      assert.ok(elapsedMs >= 300, `expected lifecycle timeout to outlast per-request timeout, got ${elapsedMs}ms`)
+      assert.ok(elapsedMs < 1500, `expected lifecycle timeout before the provider result, got ${elapsedMs}ms`)
     } finally {
       await server.close()
     }
