@@ -5,7 +5,8 @@
  * `packages/sdk/js/src/daemon.ts`, folded into one file so an app needs nothing from npm beyond
  * `@redrob-labs/sdk` (already published; only `connectOrStart` is used), `@modelcontextprotocol/sdk`
  * and `zod`. Do not edit here; change it upstream and copy the file again. Protocol:
- * redrob-code `docs/APP-BRIDGE.md`.
+ * redrob-code `docs/APP-BRIDGE.md`. Local delta: daemon calls default to `loopbackFetch` (this repo bans bare
+ * `fetch` in apps/server/src; the daemon is always 127.0.0.1).
  */
 import { randomUUID } from "node:crypto"
 import http from "node:http"
@@ -16,6 +17,7 @@ import type { AnySchema } from "@modelcontextprotocol/sdk/server/zod-compat.js"
 import { parseWithCompat, toJsonSchemaCompat } from "@modelcontextprotocol/sdk/server/zod-json-schema-compat.js"
 import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolResult } from "@modelcontextprotocol/sdk/types.js"
 import { connectOrStart, type DaemonConnection, type DaemonOptions } from "@redrob-labs/sdk/daemon"
+import { loopbackFetch } from "./server-fetch.js"
 
 /** A JSON Schema object describing the tool's arguments (`type: "object"`). */
 export type JsonSchema = { readonly type: "object"; readonly [key: string]: unknown }
@@ -267,7 +269,7 @@ const apps = {
   async register(
     connection: DaemonConnection,
     input: AppRegisterInput,
-    fetchImpl: typeof fetch = fetch,
+    fetchImpl: typeof fetch = loopbackFetch,
   ): Promise<AppRegistration> {
     const response = await fetchImpl(`${appsBase(connection)}/register`, {
       method: "POST",
@@ -285,7 +287,7 @@ const apps = {
   },
 
   /** `POST /v1/apps/:id/heartbeat`. Resolves to undefined on 404: the registration is gone, register again. */
-  async heartbeat(connection: DaemonConnection, id: string, fetchImpl: typeof fetch = fetch): Promise<BridgedApp | undefined> {
+  async heartbeat(connection: DaemonConnection, id: string, fetchImpl: typeof fetch = loopbackFetch): Promise<BridgedApp | undefined> {
     const response = await fetchImpl(`${appsBase(connection)}/${encodeURIComponent(id)}/heartbeat`, {
       method: "POST",
       headers: connection.headers,
@@ -296,7 +298,7 @@ const apps = {
   },
 
   /** `DELETE /v1/apps/:id`. */
-  async unregister(connection: DaemonConnection, id: string, fetchImpl: typeof fetch = fetch): Promise<void> {
+  async unregister(connection: DaemonConnection, id: string, fetchImpl: typeof fetch = loopbackFetch): Promise<void> {
     const response = await fetchImpl(`${appsBase(connection)}/${encodeURIComponent(id)}`, {
       method: "DELETE",
       headers: connection.headers,
@@ -305,7 +307,7 @@ const apps = {
   },
 
   /** `GET /v1/apps`. */
-  async list(connection: DaemonConnection, fetchImpl: typeof fetch = fetch): Promise<BridgedAppList> {
+  async list(connection: DaemonConnection, fetchImpl: typeof fetch = loopbackFetch): Promise<BridgedAppList> {
     const response = await fetchImpl(appsBase(connection), { headers: connection.headers })
     if (!response.ok) return refuse(response, "list bridged apps")
     return (await response.json()) as BridgedAppList
@@ -327,9 +329,9 @@ type AppBridge = {
 async function bridgeApp(
   connection: DaemonConnection,
   input: AppRegisterInput,
-  options: { readonly fetch?: typeof fetch } = {},
+  options: { readonly fetchImpl?: typeof fetch } = {},
 ): Promise<AppBridge> {
-  const fetchImpl = options.fetch ?? fetch
+  const fetchImpl = options.fetchImpl ?? loopbackFetch
   const registration = await apps.register(connection, input, fetchImpl)
   let id = registration.id
   const every = Math.max(5_000, Math.floor(registration.ttlMs / 3))
