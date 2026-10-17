@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { parseCliArgs, printHelp, resolveServerConfig } from "./config.js";
+import { startCoworkAppBridge, type CoworkAppBridge } from "./cowork-app-bridge.js";
 import { startSharedEngineForConfig, type SharedEngineStart } from "./engine-startup.js";
 import { createServerLogger, startServer, syncAllWorkspacesRuntimeMcpToEngine } from "./server.js";
 import { ensureLocalWorkspaceFiles } from "./workspace-init.js";
@@ -55,6 +56,10 @@ if (engine) {
 const url = `http://${config.host}:${server.port}`;
 logger.log("info", `Redrob Cowork server listening on ${url}`);
 
+// Hand the shared daemon's agent this server's tasks. Optional: without a daemon the
+// server runs as before.
+const appBridge: CoworkAppBridge | null = await startCoworkAppBridge({ config, serverUrl, logger });
+
 if (config.tokenSource === "generated") {
   logger.log("info", `Client token: ${config.token}`);
 }
@@ -81,6 +86,8 @@ if (args.verbose) {
 
 const shutdown = async () => {
   workerActivityHeartbeat?.stop();
+  // Unregister the app bridge first so the daemon stops routing tool calls here.
+  await appBridge?.stop();
   // Detach from the shared daemon; it keeps serving other apps and exits on its own
   // once nobody is attached.
   await engine?.stop().catch(() => undefined);
