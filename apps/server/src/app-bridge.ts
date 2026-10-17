@@ -19,6 +19,13 @@ import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolResult } fr
 import { connectOrStart, type DaemonConnection, type DaemonOptions } from "@redrob-labs/sdk/daemon"
 import { loopbackFetch } from "./server-fetch.js"
 
+/**
+ * The call shape the bridge needs from `fetch`. Structural on purpose: `typeof fetch` in
+ * recent lib.dom typings also demands `preconnect`, which `loopbackFetch` and test doubles
+ * do not carry, and the release build (tsc -p apps/server) rejected them for it.
+ */
+export type AppBridgeFetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
+
 /** A JSON Schema object describing the tool's arguments (`type: "object"`). */
 export type JsonSchema = { readonly type: "object"; readonly [key: string]: unknown }
 
@@ -269,7 +276,7 @@ const apps = {
   async register(
     connection: DaemonConnection,
     input: AppRegisterInput,
-    fetchImpl: typeof fetch = loopbackFetch,
+    fetchImpl: AppBridgeFetch = loopbackFetch,
   ): Promise<AppRegistration> {
     const response = await fetchImpl(`${appsBase(connection)}/register`, {
       method: "POST",
@@ -287,7 +294,7 @@ const apps = {
   },
 
   /** `POST /v1/apps/:id/heartbeat`. Resolves to undefined on 404: the registration is gone, register again. */
-  async heartbeat(connection: DaemonConnection, id: string, fetchImpl: typeof fetch = loopbackFetch): Promise<BridgedApp | undefined> {
+  async heartbeat(connection: DaemonConnection, id: string, fetchImpl: AppBridgeFetch = loopbackFetch): Promise<BridgedApp | undefined> {
     const response = await fetchImpl(`${appsBase(connection)}/${encodeURIComponent(id)}/heartbeat`, {
       method: "POST",
       headers: connection.headers,
@@ -298,7 +305,7 @@ const apps = {
   },
 
   /** `DELETE /v1/apps/:id`. */
-  async unregister(connection: DaemonConnection, id: string, fetchImpl: typeof fetch = loopbackFetch): Promise<void> {
+  async unregister(connection: DaemonConnection, id: string, fetchImpl: AppBridgeFetch = loopbackFetch): Promise<void> {
     const response = await fetchImpl(`${appsBase(connection)}/${encodeURIComponent(id)}`, {
       method: "DELETE",
       headers: connection.headers,
@@ -307,7 +314,7 @@ const apps = {
   },
 
   /** `GET /v1/apps`. */
-  async list(connection: DaemonConnection, fetchImpl: typeof fetch = loopbackFetch): Promise<BridgedAppList> {
+  async list(connection: DaemonConnection, fetchImpl: AppBridgeFetch = loopbackFetch): Promise<BridgedAppList> {
     const response = await fetchImpl(appsBase(connection), { headers: connection.headers })
     if (!response.ok) return refuse(response, "list bridged apps")
     return (await response.json()) as BridgedAppList
@@ -329,7 +336,7 @@ type AppBridge = {
 async function bridgeApp(
   connection: DaemonConnection,
   input: AppRegisterInput,
-  options: { readonly fetchImpl?: typeof fetch } = {},
+  options: { readonly fetchImpl?: AppBridgeFetch } = {},
 ): Promise<AppBridge> {
   const fetchImpl = options.fetchImpl ?? loopbackFetch
   const registration = await apps.register(connection, input, fetchImpl)
