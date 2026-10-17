@@ -133,7 +133,7 @@ const apply = (call: Awaited<ReturnType<typeof startPolicyServer>>["owner"], jws
   call("POST", "/workspace/workspace/team-policy", { policy: jws, ...(accountId ? { accountId } : {}) });
 
 const privacyOf = async (call: Awaited<ReturnType<typeof startPolicyServer>>["owner"]) =>
-  (await call("GET", "/workspace/workspace/config")).body.redrob?.deskPrivacy;
+  (await call("GET", "/workspace/workspace/config")).body.redrob?.coworkPrivacy;
 
 const teamNotes = async (call: Awaited<ReturnType<typeof startPolicyServer>>["owner"]) =>
   ((await call("GET", "/memory")).body.memories as Array<{ id: string; content: string; tags: string[] }>).filter(
@@ -158,7 +158,7 @@ describe("applying a team policy in redrob-server", () => {
       });
       const notes = await teamNotes(owner);
       expect(notes.map((note) => note.content)).toEqual(["House style: numbered clauses"]);
-      expect(notes[0]!.tags).toEqual(expect.arrayContaining(["desk-locked", "desk-scope:team", "team-policy:acc_vectors"]));
+      expect(notes[0]!.tags).toEqual(expect.arrayContaining(["cowork-locked", "cowork-scope:team", "team-policy:acc_vectors"]));
       expect(await readFile(join(workspace, ".opencode", "commands", "weekly-update.md"), "utf8")).toContain(
         "Write this week's update.",
       );
@@ -265,13 +265,13 @@ describe("what a locked team policy holds", () => {
       const before = await privacyOf(owner);
       for (const call of [owner, collaborator]) {
         const patched = await call("PATCH", "/workspace/workspace/config", {
-          redrob: { deskPrivacy: { ...before, level: "off", locked: false } },
+          redrob: { coworkPrivacy: { ...before, level: "off", locked: false } },
         });
         expect(patched.status).toBe(403);
         expect(patched.body.code).toBe("team_policy_locked");
 
         const imported = await call("POST", "/workspace/workspace/import", {
-          redrob: { deskPrivacy: { level: "off", names: [], locked: false } },
+          redrob: { coworkPrivacy: { level: "off", names: [], locked: false } },
         });
         expect(imported.status).toBe(403);
         expect(imported.body.code).toBe("team_policy_locked");
@@ -279,7 +279,7 @@ describe("what a locked team policy holds", () => {
       expect(await privacyOf(owner)).toEqual(before);
 
       // Other config still changes as usual.
-      const unrelated = await owner("PATCH", "/workspace/workspace/config", { redrob: { deskTheme: "dark" } });
+      const unrelated = await owner("PATCH", "/workspace/workspace/config", { redrob: { coworkTheme: "dark" } });
       expect(unrelated.status).toBe(200);
     } finally {
       server.stop(true);
@@ -291,7 +291,7 @@ describe("what a locked team policy holds", () => {
     try {
       await apply(owner, await signTestPolicy(samplePolicy({ privacy: { ...samplePolicy().privacy, locked: false } })));
       const patched = await owner("PATCH", "/workspace/workspace/config", {
-        redrob: { deskPrivacy: { level: "strict", names: [], locked: false } },
+        redrob: { coworkPrivacy: { level: "strict", names: [], locked: false } },
       });
       expect(patched.status).toBe(200);
       // The policy's level went to the engine when it was applied; the owner's change went after it.
@@ -342,7 +342,7 @@ describe("leaving a team", () => {
 
       // The person may now change the setting themselves.
       expect(
-        (await owner("PATCH", "/workspace/workspace/config", { redrob: { deskPrivacy: { level: "standard", names: [], locked: false } } }))
+        (await owner("PATCH", "/workspace/workspace/config", { redrob: { coworkPrivacy: { level: "standard", names: [], locked: false } } }))
           .status,
       ).toBe(200);
 

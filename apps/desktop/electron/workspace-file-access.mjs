@@ -10,9 +10,9 @@ export function isPathInside(root, target, pathApi = path) {
 
 /**
  * The absolute file a workspace-relative path names, for Open and Show in folder from the
- * Desk side panel. Null unless `root` is absolute and inside one of `knownRoots` (the local
+ * Cowork side panel. Null unless `root` is absolute and inside one of `knownRoots` (the local
  * workspaces and the folders they authorize) and the file resolves inside `root`, so a
- * renderer cannot open or reveal anything outside the folders Desk may use.
+ * renderer cannot open or reveal anything outside the folders Cowork may use.
  */
 export function resolveWorkspaceFile({ root, relativePath, knownRoots, pathApi = path }) {
   const rootValue = String(root ?? "").trim();

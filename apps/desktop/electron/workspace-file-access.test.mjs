@@ -32,7 +32,7 @@ test("a relative escape with .. is rejected", () => {
   assert.equal(resolveWorkspaceFile({ root: "C:\\w", relativePath: "..\\..\\Windows\\system.ini", knownRoots: ["C:\\w"], pathApi: win }), null);
 });
 
-test("an absolute file path, or a root Desk does not know, is rejected", () => {
+test("an absolute file path, or a root Cowork does not know, is rejected", () => {
   assert.equal(resolveWorkspaceFile({ root: "/home/x/seorin", relativePath: "/etc/passwd", knownRoots: ["/home/x/seorin"], pathApi: posix }), null);
   assert.equal(resolveWorkspaceFile({ root: "C:\\w", relativePath: "D:\\x.txt", knownRoots: ["C:\\w"], pathApi: win }), null);
   assert.equal(resolveWorkspaceFile({ root: "/etc", relativePath: "passwd", knownRoots: ["/home/x/seorin"], pathApi: posix }), null);

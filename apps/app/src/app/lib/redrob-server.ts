@@ -101,7 +101,7 @@ export type RedrobSessionMessage = {
   parts: Part[];
 };
 
-/** When a scheduled run happens (apps/server/src/desk-schedules.ts). */
+/** When a scheduled run happens (apps/server/src/cowork-schedules.ts). */
 export type RedrobScheduleRule = {
   mode: "once" | "repeat";
   date?: string;
@@ -167,39 +167,25 @@ export type RedrobSkillMetadata = {
   source?: "team" | "library";
 };
 
+/** `user` is the engine's own config dir (~/.config/redrob/skills), where Redrob writes; `global` is another dir, read-only. */
+export type RedrobSkillScope = "project" | "user" | "global";
+
 export type RedrobSkillItem = {
   name: string;
   path: string;
   description: string;
-  scope: "project" | "global";
+  scope: RedrobSkillScope;
   trigger?: string;
   error?: string;
   metadata?: RedrobSkillMetadata;
 };
 
-/** Where a library answer came from: the Console, or the copy bundled with redrob-server. */
-export type RedrobLibrarySource = "console" | "snapshot";
-
-export type RedrobLibrarySkillSummary = {
-  name: string;
-  description: string;
-  profession: string;
-  task: string;
-  language: string;
-  family: string;
-  version: number;
-};
-
-export type RedrobLibrarySkill = RedrobLibrarySkillSummary & { body: string; source: RedrobLibrarySource };
-
-export type RedrobLibraryFilter = { profession?: string; task?: string; language?: string; q?: string };
-
 export type RedrobSkillLabel = { en: string; ko: string };
 
+/** The profession/task/language vocabulary the skill dialog and filters are built from. */
 export type RedrobSkillTaxonomy = {
   professions: Array<{ id: string; label: RedrobSkillLabel; tasks: Array<{ id: string; label: RedrobSkillLabel }> }>;
   languages: Array<{ id: string; label: RedrobSkillLabel }>;
-  source: RedrobLibrarySource;
 };
 
 /** GET /workspace/:id/skills/team: what the last check of the Console installed. */
@@ -977,7 +963,7 @@ function buildAuthHeaders(token?: string, hostToken?: string, extra?: Record<str
 
 // Use Tauri's fetch when running in the desktop app to avoid CORS issues.
 // Stream URLs (SSE) bypass the plugin because its `fetch_read_body` IPC call
-// blocks until the body closes — that freezes the webview for infinite bodies.
+// blocks until the body closes - that freezes the webview for infinite bodies.
 const REDROB_STREAM_URL_RE = /\/events(\b|\?)|\/event-stream\b|\/stream\b/;
 
 function isStreamUrl(url: string): boolean {
@@ -1631,21 +1617,6 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         { token, hostToken },
       );
     },
-    listLibrarySkills: (workspaceId: string, filter: RedrobLibraryFilter = {}) => {
-      const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => Boolean(value))).toString();
-      return requestJson<{ version: string; skills: RedrobLibrarySkillSummary[]; source: RedrobLibrarySource }>(
-        baseUrl,
-        `/workspace/${workspaceId}/skills/library${query ? `?${query}` : ""}`,
-        { token, hostToken },
-      );
-    },
-    getSkillTaxonomy: (workspaceId: string) =>
-      requestJson<RedrobSkillTaxonomy>(baseUrl, `/workspace/${workspaceId}/skills/library/taxonomy`, { token, hostToken }),
-    getLibrarySkill: (workspaceId: string, name: string) =>
-      requestJson<RedrobLibrarySkill>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}`, {
-        token,
-        hostToken,
-      }),
     installLibrarySkill: (workspaceId: string, name: string) =>
       requestJson<RedrobSkillItem>(baseUrl, `/workspace/${workspaceId}/skills/library/${encodeURIComponent(name)}/install`, {
         token,
@@ -2025,7 +1996,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
 
     // Redrob Key, owned by Redrob Code (host-auth only). The value is written
     // straight through to the engine's auth store and never persisted by Work,
-    // so there is no getter for it — only whether the engine holds one.
+    // so there is no getter for it - only whether the engine holds one.
     //
     // Connect and disconnect both reload the engine before answering (the engine
     // resolves the credential once when it builds provider state), so they use
@@ -2104,7 +2075,7 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         timeoutMs: timeouts.config,
       }),
 
-    // User-level env vars (host-auth only — desktop shell is the sole caller).
+    // User-level env vars (host-auth only - desktop shell is the sole caller).
     // See apps/server/src/env-file.ts and apps/app/pr/environment-variables.md.
     listUserEnvKeys: () =>
       requestJson<{ keys: string[] }>(

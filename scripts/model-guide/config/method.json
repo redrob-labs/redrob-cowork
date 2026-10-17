@@ -106,7 +106,7 @@
   ]
  },
  "harnesses": {
-  "redrob-desk": {
+  "redrob-cowork": {
    "planned": [
     "ui-ux-design",
     "html-generation",

@@ -22,27 +22,29 @@ import {
   type RedrobControlAction,
 } from "./control/control-provider";
 import { RedrobContextPublisher } from "./redrob-context-publisher";
+import { CoworkConnectionPublisher } from "./cowork-connection-publisher";
+import { WorkspaceConnectionProvider } from "./workspace-connection-provider";
 import { SessionRoute } from "./session-route";
 import { SettingsRoute } from "./settings-route";
 import { ShellConfigProvider } from "./shell-config";
 import { WelcomeRoute } from "./welcome-route";
-import { DsStory } from "../desk/ds-story";
-import { SaveAsProjectAction } from "../desk/projects/project-dialog";
-import { DeskShell } from "../desk/shell/desk-shell";
-import { DeskLayer } from "../desk/shell/desk-layer";
-import { deskRoutes } from "../desk/shell/desk-routes";
-import { DeskSettingsGate } from "../desk/settings/desk-settings";
+import { DsStory } from "../cowork/ds-story";
+import { SaveAsProjectAction } from "../cowork/projects/project-dialog";
+import { CoworkShell } from "../cowork/shell/cowork-shell";
+import { CoworkLayer } from "../cowork/shell/cowork-layer";
+import { coworkRoutes } from "../cowork/shell/cowork-routes";
+import { CoworkSettingsGate } from "../cowork/settings/cowork-settings";
 import { WindowTitleBar } from "./window-title-bar";
 import { GlobalTooltipLayer } from "./global-tooltip-layer";
 
 /**
- * The working chat (the session page) inside the Desk frame, with the old sidebar left to
+ * The working chat (the session page) inside the Cowork frame, with the old sidebar left to
  * the shell. New chat is current until a chat is open; then that chat is marked in Recent.
  */
 function ChatRoute() {
   const { sessionId } = useParams<{ sessionId?: string }>();
   return (
-    <DeskShell
+    <CoworkShell
       current={sessionId ? null : "chat"}
       chatId={sessionId ?? null}
       bareTop={!sessionId}
@@ -53,7 +55,7 @@ function ChatRoute() {
       <DevProfiler id="SessionRoute">
         <SessionRoute />
       </DevProfiler>
-    </DeskShell>
+    </CoworkShell>
   );
 }
 
@@ -106,6 +108,10 @@ export function AppRoot() {
           <RedrobRouteControlActions />
           <RedrobContextPublisher />
           <EvalRelaunchControlActions />
+          {/* Always mounted across every route, /skills included: the app-wide
+              workspace connection and the sole Cowork connection writer. */}
+          <WorkspaceConnectionProvider>
+            <CoworkConnectionPublisher />
             <Routes>
               <Route
                 path="/welcome"
@@ -116,7 +122,7 @@ export function AppRoot() {
                 }
               />
 
-              {deskRoutes(<ChatRoute />)}
+              {coworkRoutes(<ChatRoute />)}
               <Route
                 path="/workspace/:workspaceId/extensions/*"
                 element={
@@ -136,7 +142,7 @@ export function AppRoot() {
               <Route
                 path="/workspace/:workspaceId/settings/*"
                 element={
-                  <DeskSettingsGate
+                  <CoworkSettingsGate
                     developer={
                       <DevProfiler id="SettingsRoute">
                         <SettingsRoute />
@@ -148,7 +154,7 @@ export function AppRoot() {
               <Route
                 path="/settings/*"
                 element={
-                  <DeskSettingsGate
+                  <CoworkSettingsGate
                     developer={
                       <DevProfiler id="SettingsRoute">
                         <SettingsRoute />
@@ -159,7 +165,8 @@ export function AppRoot() {
               />
               {import.meta.env.DEV ? <Route path="/__ds" element={<DsStory />} /> : null}
             </Routes>
-          <DeskLayer />
+          </WorkspaceConnectionProvider>
+          <CoworkLayer />
           <LoadingOverlay />
         </RedrobControlProvider>
         </AppMenuProvider>

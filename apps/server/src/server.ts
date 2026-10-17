@@ -1,4 +1,4 @@
-import { readFile, writeFile, rm, stat } from "node:fs/promises";
+import { mkdir, readFile, writeFile, rm, stat } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { createRedrobClient } from "@redrob-labs/sdk/v2/client";
@@ -27,7 +27,9 @@ import {
   parseMcpAppSandboxCsp,
 } from "./mcp-app-sandbox.js";
 import { exportExtensions } from "./extensions-export.js";
-import { deleteSkill, listSkills, renderSkillContentForResponse, upsertSkill } from "./skills.js";
+import { createSkill, deleteSkill, globalSkillsDir, installGlobalSkill, listSkills, renderSkillContentForResponse, upsertSkill, upsertUserSkill } from "./skills.js";
+import { publicCatalogue } from "./skill-library/public-catalogue.js";
+import { buildFrontmatter } from "./frontmatter.js";
 import { deleteCommand, listCommands, repairCommands, upsertCommand } from "./commands.js";
 import {
   addSchedule,
@@ -38,8 +40,8 @@ import {
   startScheduler,
   updateSchedule,
   type ScheduleEngine,
-} from "./desk-schedules.js";
-import { DESK_RUN_AGENT } from "./redrob-desk-agents.js";
+} from "./cowork-schedules.js";
+import { COWORK_RUN_AGENT } from "./redrob-cowork-agents.js";
 import { ApiError, formatError } from "./errors.js";
 import { readJsoncFile, updateJsoncTopLevel, writeJsoncFile } from "./jsonc.js";
 import { recordAudit, readAuditEntries, readLastAudit } from "./audit.js";
@@ -132,7 +134,7 @@ import {
 } from "./redrob-workspace-config-store.js";
 import { deleteMemory, findMemory, isLockedMemory, listMemories, saveMemory, updateMemory } from "./local-memory-store.js";
 import { carriesLockTag, redrobAfterImport, setsPrivacyLock, touchesPrivacyLock } from "./team-lock.js";
-import { deskPrivacyLevel, syncEnginePrivacy, syncEnginePrivacyQuietly } from "./engine-privacy.js";
+import { coworkPrivacyLevel, syncEnginePrivacy, syncEnginePrivacyQuietly } from "./engine-privacy.js";
 import {
   applyTeamPolicy,
   describeTeamPolicyState,
@@ -537,7 +539,7 @@ async function resolveOpenAiRealtimeApiKey(env: EnvService): Promise<string> {
  * Credentials for the Redrob Models voice broker.
  *
  * `REDROB_MODELS_API_KEY` is the canonical name: it names what it authenticates and pairs with
- * `REDROB_MODELS_BASE_URL`. `REDROB_CLOUD_API_KEY` is a legacy alias and has to stay readable —
+ * `REDROB_MODELS_BASE_URL`. `REDROB_CLOUD_API_KEY` is a legacy alias and has to stay readable -
  * it is the name this store has persisted since the OpenWork rebrand, so it is what an existing
  * install actually carries on disk. The cloud-removal sweep (`10b401c`) deleted the two lines that
  * read it, on the strength of the name alone, which left the broker branch unreachable for every
@@ -1402,7 +1404,7 @@ function createScheduleEngine(config: ServerConfig): ScheduleEngine {
       const session = unwrapOpencodeResult(await opencode.session.create({ title: input.title || "Scheduled run" }), "/session");
       const result = await opencode.session.promptAsync({
         sessionID: session.id,
-        agent: DESK_RUN_AGENT,
+        agent: COWORK_RUN_AGENT,
         parts: [{ type: "text", text: input.prompt }],
       });
       if (result.error !== undefined) {
@@ -2751,7 +2753,7 @@ function createRoutes(
         refuseNewPrivacyLock(stored, next);
         requireClientScope(ctx, "owner");
       }
-      privacyLevelChanged = deskPrivacyLevel(stored) !== deskPrivacyLevel(next);
+      privacyLevelChanged = coworkPrivacyLevel(stored) !== coworkPrivacyLevel(next);
     }
     if (opencode) await refuseBlockedConnectors(config, workspace.id, opencode.mcp);
 
@@ -2769,7 +2771,7 @@ function createRoutes(
       const logicalUpdates: Record<string, unknown> = { ...topLevelUpdates };
 
       // Per-provider merge: record values upsert, explicit `null` deletes
-      // (mergeRuntimeProviderUpdate) — so clients can remove runtime-managed
+      // (mergeRuntimeProviderUpdate) - so clients can remove runtime-managed
       // providers (e.g. cloud imports) without read-modify-write races.
       const providerUpdate = isRecord(provider) ? provider : {};
       if (Object.keys(providerUpdate).length) {
@@ -2941,6 +2943,55 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
+  // The public skill library (console.redrob.ai/skills) is read by the app directly; the server only
+  // installs. Registered before /skills/:name so "library" is never read as a skill name.
+  // Installs a catalogue skill into the workspace, tagged metadata.source "library"; never overwrites.
+  addRoute(routes, "POST", "/workspace/:id/skills/library/:name/install", "client", async (ctx) => {
+    ensureWritable(config);
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const name = String(ctx.params.name ?? "").trim();
+    const skill = name ? await publicCatalogue.get(name) : null;
+    if (!skill) {
+      throw new ApiError(404, "skill_not_found", `Skill not in the library: ${name}`);
+    }
+    // Installed once, globally, into the engine's config dir: every Redrob app and folder sees it.
+    if ((await listSkills(workspace.path, true)).some((item) => item.name === name)) {
+      throw new ApiError(409, "skill_exists", `A skill named ${name} is already installed`);
+    }
+    const skillDir = join(globalSkillsDir(), name);
+    await requireApproval(ctx, {
+      workspaceId: workspace.id,
+      action: "skills.upsert",
+      summary: `Install library skill ${name}`,
+      paths: [join(skillDir, "SKILL.md")],
+    });
+    const { frontmatter: data, body } = skill;
+    const priorMetadata = typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata) ? data.metadata : {};
+    const content = buildFrontmatter({ ...data, metadata: { ...priorMetadata, source: "library" } }) + body.replace(/^\n/, "");
+    // SKILL.md plus the rest of the skill's files (references, examples, scripts).
+    const extras = await Promise.all(
+      skill.files.filter((file) => file !== "SKILL.md").map(async (file) => ({ path: file, content: await publicCatalogue.readFile(name, file) })),
+    );
+    const result = await installGlobalSkill(name, [{ path: "SKILL.md", content }, ...extras]);
+    await recordAudit(workspace.path, {
+      id: shortId(),
+      workspaceId: workspace.id,
+      actor: ctx.actor ?? { type: "remote" },
+      action: "skills.upsert",
+      target: result.path,
+      summary: `Installed library skill ${name}`,
+      timestamp: Date.now(),
+    });
+    emitReloadEvent(ctx.reloadEvents, workspace, "skills", {
+      type: "skill",
+      name,
+      action: result.action,
+      path: result.path,
+    });
+    return jsonResponse({ name, path: result.path, description: skill.description, scope: "user", metadata: { source: "library" } });
+  });
+
   addRoute(routes, "GET", "/workspace/:id/skills/:name", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
     const includeGlobal = ctx.url.searchParams.get("includeGlobal") === "true";
@@ -2970,9 +3021,9 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "skills.upsert",
       summary: `Upsert skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
+      paths: [join(globalSkillsDir(), name, "SKILL.md"), join(workspace.path, ".opencode", "skills", name, "SKILL.md")],
     });
-    const result = await upsertSkill(workspace.path, { name, content, description });
+    const result = await upsertUserSkill(workspace.path, { name, content, description });
     await recordAudit(workspace.path, {
       id: shortId(),
       workspaceId: workspace.id,
@@ -2988,7 +3039,7 @@ function createRoutes(
       action: result.action,
       path: result.path,
     });
-    return jsonResponse({ name, path: result.path, description: description ?? "", scope: "project" });
+    return jsonResponse({ name, path: result.path, description: description ?? "", scope: result.scope });
   });
 
   addRoute(routes, "DELETE", "/workspace/:id/skills/:name", "client", async (ctx) => {
@@ -3003,7 +3054,7 @@ function createRoutes(
       workspaceId: workspace.id,
       action: "skills.delete",
       summary: `Delete skill ${name}`,
-      paths: [join(workspace.path, ".opencode", "skills", name)],
+      paths: [join(workspace.path, ".opencode", "skills", name), join(globalSkillsDir(), name)],
     });
     const result = await deleteSkill(workspace.path, name);
     await recordAudit(workspace.path, {
@@ -3340,7 +3391,7 @@ function createRoutes(
     return jsonResponse({ items });
   });
 
-  // Toggle `enabled` on a workspace MCP. Strict body validation — `Boolean(body.enabled)`
+  // Toggle `enabled` on a workspace MCP. Strict body validation - `Boolean(body.enabled)`
   // would silently disable on `{}` or coerce `"false"` to true.
   addRoute(routes, "POST", "/workspace/:id/mcp/:name/enabled", "client", async (ctx) => {
     ensureWritable(config);
@@ -3471,7 +3522,7 @@ function createRoutes(
     return jsonResponse({ ok: true });
   });
 
-  // Scheduled playbooks (desk-schedules.ts). They run here while the app is open.
+  // Scheduled playbooks (cowork-schedules.ts). They run here while the app is open.
   addRoute(routes, "GET", "/workspace/:id/schedules", "client", async (ctx) => {
     const workspace = await resolveWorkspace(config, ctx.params.id);
     return jsonResponse(await readSchedules(config, workspace.id));
@@ -4494,7 +4545,7 @@ async function withEngineMcpRegistrationLock<Result>(
 
 // POST one MCP entry to the engine, retrying once on 5xx/network errors
 // (the engine is often mid-rebuild right after a dispose). 4xx responses
-// are not retried — they won't change.
+// are not retried - they won't change.
 async function postMcpEntryWithRetry(
   config: ServerConfig,
   workspace: WorkspaceInfo,

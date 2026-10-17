@@ -129,7 +129,7 @@ export async function saveMemory(config: ServerConfig, draft: MemoryDraft): Prom
 }
 
 /** A note that came with a team file. It is read-only here: the team file is where it changes. */
-export const LOCKED_MEMORY_TAG = "desk-locked";
+export const LOCKED_MEMORY_TAG = "cowork-locked";
 
 export function isLockedMemory(memory: Pick<Memory, "tags">): boolean {
   return memory.tags?.includes(LOCKED_MEMORY_TAG) ?? false;

@@ -39,7 +39,7 @@ type RedrobKeyStepProps = {
    */
   skipLabel?: string;
   skipDescription?: string;
-  /** Plainer words for the paste path, for Desk Settings, where no developer words appear. */
+  /** Plainer words for the paste path, for Cowork Settings, where no developer words appear. */
   copy?: { getKey: string; label: string; placeholder: string };
 };
 

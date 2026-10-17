@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
-import { readStoredPrivacy } from "@/react-app/desk/privacy/privacy-store";
+import { readStoredPrivacy } from "@/react-app/cowork/privacy/privacy-store";
 
 /**
  * Read a reply aloud.

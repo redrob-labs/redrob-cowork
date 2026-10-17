@@ -14,7 +14,7 @@ Object.defineProperty(globalThis, "window", {
   configurable: true,
 });
 
-const { guideProfessions, guideUse, loadGuideResearch } = await import("../src/react-app/desk/guide/model-guide");
+const { guideProfessions, guideUse, loadGuideResearch } = await import("../src/react-app/cowork/guide/model-guide");
 const { markNewChatUsesDefault, takeNewChatUsesDefault } = await import("../src/react-app/kernel/model-config");
 
 type Research = Awaited<ReturnType<typeof loadGuideResearch>>;
@@ -34,7 +34,7 @@ function find(research: Research, match: (pick: Research["professions"][number][
 describe("Use for new chats", () => {
   test("a Redrob Cowork pick names the Redrob model and the ranked level", async () => {
     const research = await loadGuideResearch();
-    const pick = find(research, (k) => k.harness === "redrob-desk" && k.steps[0]?.model === "claude-opus-5-5");
+    const pick = find(research, (k) => k.harness === "redrob-cowork" && k.steps[0]?.model === "claude-opus-5-5");
     expect(pick).toBeDefined();
     const use = pick ? guideUse(research, pick, null) : null;
     expect(use).toEqual({
@@ -48,7 +48,7 @@ describe("Use for new chats", () => {
 
   test("the level the reader tried wins over the ranked one", async () => {
     const research = await loadGuideResearch();
-    const pick = find(research, (k) => k.harness === "redrob-desk" && k.steps[0]?.model === "claude-opus-5-5");
+    const pick = find(research, (k) => k.harness === "redrob-cowork" && k.steps[0]?.model === "claude-opus-5-5");
     const low = pick?.efforts?.find((level) => level.label === "Low") ?? null;
     expect(low).not.toBeNull();
     const use = pick ? guideUse(research, pick, low) : null;
@@ -57,14 +57,14 @@ describe("Use for new chats", () => {
 
   test("a model Redrob runs at its provider default sends no level", async () => {
     const research = await loadGuideResearch();
-    const pick = find(research, (k) => k.harness === "redrob-desk" && k.steps[0]?.model === "gpt-6-astra");
+    const pick = find(research, (k) => k.harness === "redrob-cowork" && k.steps[0]?.model === "gpt-6-astra");
     const use = pick ? guideUse(research, pick, null) : null;
     expect(use).toMatchObject({ ok: true, model: { providerID: "redrob", modelID: "gpt-6-astra" }, variant: null, effort: null });
   });
 
   test("a text-then-image pick starts the chat on its text model", async () => {
     const research = await loadGuideResearch();
-    const pick = find(research, (k) => k.harness === "redrob-desk" && k.steps.length > 1);
+    const pick = find(research, (k) => k.harness === "redrob-cowork" && k.steps.length > 1);
     const use = pick ? guideUse(research, pick, null) : null;
     expect(use?.ok).toBe(true);
     expect(use?.ok && use.model.modelID).not.toBe("openai/gpt-5.4-image-2");

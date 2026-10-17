@@ -165,14 +165,14 @@ describe("read-aloud speech relay", () => {
     const { base, config } = await boot(engine.baseUrl);
     {
       const level = "strict";
-      await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level } }));
+      await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, coworkPrivacy: { level } }));
       const response = await speak(base, { text: "Hello" });
       expect(response.status).toBe(403);
       expect(await response.json()).toMatchObject({ code: "voice_off_for_privacy" });
     }
     expect(engine.requests.some((request) => request.pathname === "/redrob/speech")).toBe(false);
 
-    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, deskPrivacy: { level: "high" } }));
+    await writeRedrobWorkspaceConfig(config, "ws_1", (current) => ({ ...current, coworkPrivacy: { level: "high" } }));
     expect((await speak(base, { text: "Hello" })).status).toBe(200);
   });
 

@@ -178,7 +178,7 @@ function ShowMoreSessionsButton({
   );
 }
 
-/** Glyph-lane activity only — never used for unread / completion. */
+/** Glyph-lane activity only - never used for unread / completion. */
 function SessionLoadingIndicator({ status, isActiveWork }: SessionLoadingIndicatorProps) {
   if (!isActiveWork) return <SidebarGlyphSlot />;
 
@@ -1071,9 +1071,10 @@ export function AppSidebar(props: AppSidebarProps) {
     <SidebarContext.Provider value={contextValue}>
       <Sidebar
         collapsible="offcanvas"
-        // Redrob Cowork is the design system's Desk product: the rail carries
-        // the Desk wash (index.css, `[data-product]`).
-        data-product="desk"
+        // Redrob Cowork is the design system's Cowork product: the rail carries
+        // the Cowork wash (index.css, `[data-product]`). DS 1.6.0 renamed the
+        // product token from "cowork" to "cowork".
+        data-product="cowork"
         className="border-e-0 group-data-[side=left]:border-e-0 mac:**:data-[sidebar=sidebar]:bg-transparent"
       >
         <div className="hidden h-12 mac:block mac:titlebar-drag"/>
@@ -2250,7 +2251,7 @@ function SessionMenuItem({
   const unreadIds = useUnreadSessionIds();
   const isSelected = ctx.selectedSessionId === session.id;
   const displayTitle = getDisplaySessionTitle(session.title);
-  const itemTitle = workspaceName ? `${displayTitle} — ${workspaceName}` : displayTitle;
+  const itemTitle = workspaceName ? `${displayTitle} - ${workspaceName}` : displayTitle;
   const hasChildren = (tree.descendantCountBySessionId.get(session.id) ?? 0) > 0;
   const isExpanded = ctx.expandedSessionIds.has(session.id) || forcedExpandedSessionIds.has(session.id);
   const sessionActivityStatus = ctx.sessionStatusById?.[session.id];
@@ -2325,7 +2326,7 @@ function SessionMenuItem({
   } as const;
 
   // Pinned/archived rows identify their workspace via the tooltip title
-  // only — no workspace color dot in these sections.
+  // only - no workspace color dot in these sections.
   const leading = (
     <SessionLoadingIndicator status={sessionActivityStatus} isActiveWork={resolvedActiveWork} />
   );
