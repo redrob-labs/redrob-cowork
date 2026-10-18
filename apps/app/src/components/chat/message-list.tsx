@@ -20,7 +20,6 @@ import {
   Undo2,
   Volume2,
 } from "lucide-react"
-import { PaperGrainGradient } from "@redrob/ui/react"
 import {
   DynamicToolUIPart,
   isFileUIPart,
@@ -97,6 +96,7 @@ import {
   MessageContent,
 } from "@/components/ui/message"
 import { Tool } from "@/components/ui/tool"
+import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader/RedrobLiquidLoader"
 import { CapabilityCallLine } from "@/components/chat/capability-call-line"
 import {
   isLiveStepAtBottom,
@@ -939,19 +939,15 @@ MessageComponent.displayName = "MessageComponent"
 const LoadingMessage = React.memo(({ label }: { label?: string }) => (
   <Message className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}>
     <div className="group flex w-full flex-col gap-0">
-      <div className="flex items-center gap-1.5 px-1 py-1 text-sm text-muted-foreground">
-        <div style={{ width: 20, height: 20, borderRadius: "50%", overflow: "hidden" }}>
-          <PaperGrainGradient
-            speed={12}
-            softness={0.1}
-            intensity={1}
-            noise={0.05}
-            shape="sphere"
-            colors={["#818cf8", "#fb7185", "#fbbf24", "#34d399"]}
-            colorBack="#ffffff00"
-            style={{ backgroundColor: "#818cf8", width: "100%", height: "100%", borderRadius: "50%" }}
-          />
-        </div>
+      {/*
+        The primary "assistant is thinking" moment: the Redrob Liquid Loader (the brand mark
+        melting through its three raked bars) replaces the former PaperGrainGradient orb.
+        Rendered at the brand's 96px animated-symbol minimum so the mark stays legible; the
+        label sits beneath it so the loader reads as the main moment, not a tiny inline speck.
+        Small inline tool rows keep the DS three-bar DotMatrixLoader.
+      */}
+      <div className="flex flex-col items-start gap-1.5 px-1 py-2 text-sm text-muted-foreground">
+        <RedrobLiquidLoader size={96} label={label ?? t("session.assistant_thinking")} />
         <span>{label ?? t("session.assistant_thinking")}</span>
       </div>
     </div>
