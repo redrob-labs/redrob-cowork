@@ -2386,6 +2386,39 @@ html[lang="ko"] {
   }
 }
 
+/*
+  uiux-refresh round 3 (item 4): the in-chat "working" label shimmer. A ChatGPT-style colour
+  sweep moves a lighter band across the grey label text, clipped to the glyphs. Base is the muted
+  ink; the sweep is a brighter tint. Held still (plain grey) under reduced motion.
+*/
+@keyframes redrob-text-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.redrob-shimmer-text {
+  background: linear-gradient(
+    100deg,
+    var(--ink-muted, #8A90A8) 35%,
+    var(--ink-primary, #1A2450) 50%,
+    var(--ink-muted, #8A90A8) 65%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: redrob-text-shimmer 1.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No sweep for motion-sensitive readers: a steady grey label. */
+  .redrob-shimmer-text {
+    animation: none;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--ink-muted, #8A90A8);
+  }
+}
+
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
   background: transparent !important;

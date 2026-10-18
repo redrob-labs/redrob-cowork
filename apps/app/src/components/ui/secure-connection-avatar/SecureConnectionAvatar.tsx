@@ -14,11 +14,12 @@ export type SecureConnectionAvatarProps = {
  * so the surrounding `.cowork-account__avatar-placeholder` supplies the 32x32 circular
  * frame and the `var(--surface-sunken)` background (unchanged from before).
  *
- * The storm artwork is ALWAYS shown, including under the OS reduced-motion preference: the
- * component honors reduced motion itself by holding a static still frame (no travel), so a
- * motion-sensitive reader sees the mark without the animation rather than losing it to a
- * glyph. It also pauses while the document is hidden on its own. The neutral `User` glyph
- * remains only as the fallback for a runtime without custom-element support or a load failure.
+ * The storm artwork is ALWAYS shown AND ALWAYS animated, including under the OS reduced-motion
+ * preference. The vendored component normally self-suppresses motion under reduced-motion, but
+ * per product direction (round 3) its internal reduced-motion check is neutralized in the
+ * vendored .js (search `redrob-always-animate`) so the particle flurry keeps running regardless.
+ * It still pauses while the document is hidden. The neutral `User` glyph remains only as the
+ * fallback for a runtime without custom-element support or a load failure.
  *
  * The component class extends `HTMLElement`, so it must only be evaluated in the browser.
  * It is registered via a browser-guarded dynamic import inside an effect rather than a
@@ -46,14 +47,14 @@ export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
     }
   }, [])
 
-  // Fallback only when the custom element is unavailable (unsupported runtime / load failure);
-  // reduced motion no longer falls back here — the component shows a static still instead.
+  // Fallback only when the custom element is unavailable (unsupported runtime / load failure).
+  // Reduced motion does NOT fall back here and does not stop the animation (see the JS patch).
   if (!ready) {
     return <User size={16} strokeWidth={2} aria-hidden="true" />
   }
 
-  // The element fills the 32x32 circular placeholder; the frame clips it to a circle. Under
-  // reduced motion the component itself holds a static still frame rather than animating.
+  // The element fills the 32x32 circular placeholder; the frame clips it to a circle. It animates
+  // regardless of the OS reduced-motion setting, by product direction (round 3).
   return (
     <secure-connection-avatar
       aria-label={label}

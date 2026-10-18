@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AnswerReceipt,
   ApprovalStep,
@@ -220,20 +220,38 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
 }
 
 /**
- * While a run works: what it is doing now. This is the Cowork frame's "assistant is thinking"
- * moment, so it carries the Redrob Liquid Loader (the brand mark melting through its three raked
- * bars) rather than the DS three-bar TaskStatus. Rendered at the brand's 96px animated-symbol
- * minimum with the live action label beside it. The loader follows reduced motion and pauses
- * while the document is hidden on its own.
+ * While a run works: what it is doing now. The Cowork frame's "assistant is thinking" moment.
+ * It carries the Redrob Liquid Loader at a small inline size beside a label that is slightly
+ * smaller than the chat text and grey (Claude-like), with a ChatGPT-style colour-sweep shimmer
+ * over the text, and a mm:ss elapsed timer on the right counting since the run row appeared.
  */
 export function CoworkRunStatus(props: { label: string | null }) {
   const label = props.label ?? t("cowork.thread_working");
+  const elapsed = useElapsedClock();
   return (
-    <div className="flex items-center gap-3 py-1 text-sm text-muted-foreground">
-      <RedrobLiquidLoader size={96} label={label} />
-      <span>{label}</span>
+    <div className="flex items-center gap-2 py-1">
+      {/* Small inline loader (down from the 96px thinking-block size) so the row reads as a line. */}
+      <RedrobLiquidLoader size={22} label={label} />
+      {/* Grey, slightly-smaller-than-chat (text-xs vs text-sm) label with a sweeping shimmer. */}
+      <span className="redrob-shimmer-text text-xs">{label}</span>
+      {/* Elapsed mm:ss, tabular so the digits do not jitter as they tick. */}
+      <span className="text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
     </div>
   );
+}
+
+/** mm:ss elapsed since this hook first mounted, ticking once a second. */
+function useElapsedClock(): string {
+  const startRef = useRef<number>(Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  const totalSeconds = Math.max(0, Math.floor((now - startRef.current) / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 /** A note the run saved to memory. It can be removed from Memory, not from here. */
