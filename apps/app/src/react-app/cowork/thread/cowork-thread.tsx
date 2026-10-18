@@ -134,6 +134,22 @@ function CoworkPlan(props: { plan: PlanDoc; isLatest: boolean }) {
     thread.sendText(planRunPrompt(text)).catch(() => setStage("draft"));
   };
 
+  // Round 6: auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
+  // -> artifact without a manual Run click (Felix: "run till execution is complete automatically").
+  // Fires exactly once per plan: only when this is the latest turn, still a draft, the thread is
+  // idle (the plan finished streaming), and the user has not edited it (an edit means they want to
+  // review first). autoRanRef guards against a second fire on re-render.
+  const autoRanRef = useRef(false);
+  useEffect(() => {
+    if (autoRanRef.current) return;
+    if (!thread || thread.busy) return;
+    if (!props.isLatest || stage !== "draft" || edited.current) return;
+    autoRanRef.current = true;
+    run();
+    // run/thread are stable enough for this one-shot; deps kept minimal intentionally.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.isLatest, stage, thread?.busy]);
+
   return (
     <div ref={root}>
       <PlanDocument
