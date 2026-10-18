@@ -98,7 +98,6 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey }: 
   const durations = parts.map((part) => trackToolCallDuration(part))
   const visible = expanded ? parts.slice(0, ROW_CAP) : []
   const hidden = parts.length - visible.length
-  const failedCount = parts.filter((part) => part.state === "output-error").length
 
   return (
     <div className="w-full" data-unified-activity={activityKey}>
@@ -122,9 +121,6 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey }: 
         </span>
         {isStreaming ? (
           <span className="shrink-0 text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
-        ) : null}
-        {!isStreaming && failedCount > 0 ? (
-          <span className="shrink-0 text-xs text-muted-foreground">{failedCount} failed</span>
         ) : null}
       </button>
 

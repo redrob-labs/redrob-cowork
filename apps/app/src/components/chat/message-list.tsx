@@ -570,11 +570,13 @@ const AssistantMessage = React.memo(
     const inCoworkFrame = useInCoworkFrame()
     const assistantRenderGroups = React.useMemo(
       () => {
-        // Round 4: in the Cowork frame, fold reasoning + all tools into one in-place activity row.
-        const groups = getAssistantRenderGroups(message.parts, showThinking, inCoworkFrame)
+        // Per-message grouping stays per-kind here; the unified Cowork activity row is assembled
+        // once at the GROUP level (MessageGroup) over the whole run, not per message - a run spans
+        // several assistant messages, so folding per message produced one stray row per message.
+        const groups = getAssistantRenderGroups(message.parts, showThinking)
         return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
       },
-      [hideReasoning, inCoworkFrame, message.parts, showThinking]
+      [hideReasoning, message.parts, showThinking]
     )
 
     return (
@@ -637,19 +639,6 @@ const AssistantMessage = React.memo(
               )
             }
 
-            if (group.kind === "activity") {
-              return (
-                <div key={`activity-${index}`} className="w-full">
-                  <UnifiedActivity
-                    parts={group.parts}
-                    reasoning={group.reasoning}
-                    isStreaming={isStreaming}
-                    activityKey={`${message.id}-activity-${index}`}
-                  />
-                </div>
-              )
-            }
-
             if (group.kind === "tool-aggregate") {
               return (
                 <div key={`tool-aggregate-${index}`} className="w-full">
@@ -658,11 +647,16 @@ const AssistantMessage = React.memo(
               )
             }
 
-            return (
-              <div key={`tool-${index}`} className="w-full">
-                <ToolMessage part={group.part} />
-              </div>
-            )
+            if (group.kind === "tool") {
+              return (
+                <div key={`tool-${index}`} className="w-full">
+                  <ToolMessage part={group.part} />
+                </div>
+              )
+            }
+
+            // The "activity" kind is only produced at the group level (MessageGroup), never here.
+            return null
           })}
         </div>
       </Message>
@@ -1325,6 +1319,26 @@ function MessageGroup({
     ))
     : []
 
+  // Round 4: in the Cowork frame, a LIVE run renders as one in-place UnifiedActivity row instead
+  // of the per-message step list - all of the step messages' tool parts flattened into one group,
+  // plus their reasoning as the live/context text. (A finished run keeps the existing
+  // CompletedStepRun fold; only the live moment is unified.)
+  const liveActivityToolParts: AnyToolPart[] = []
+  let liveActivityReasoning = ""
+  for (const item of stepItems) {
+    if (item.message.role !== "assistant" || isSessionErrorMessage(item.message)) continue
+    for (const group of getAssistantRenderGroups(item.message.parts, showThinking)) {
+      if (group.kind === "tool-aggregate") liveActivityToolParts.push(...group.parts)
+      else if (group.kind === "tool") liveActivityToolParts.push(group.part)
+      else if (group.kind === "reasoning" && group.text.trim()) {
+        liveActivityReasoning += liveActivityReasoning ? `\n\n${group.text}` : group.text
+      }
+    }
+  }
+  const useUnifiedLiveActivity =
+    inCoworkFrame && isLiveGroup && stepItems.length > 0
+    && (liveActivityToolParts.length > 0 || liveActivityReasoning.trim().length > 0)
+
   const renderItem = (item: UIMessageWithIndex, groupIndex: number, hideReasoning?: boolean) => {
     const isLastMessage = item.index === messages.length - 1
 
@@ -1381,7 +1395,16 @@ function MessageGroup({
           message use, so a step row is spaced identically whether or not a
           message boundary happens to fall between it and the previous row. */}
       {stepItems.length > 0 ? (
-        collapseSteps ? (
+        useUnifiedLiveActivity ? (
+          <div className={CHAT_COLUMN}>
+            <UnifiedActivity
+              parts={liveActivityToolParts}
+              reasoning={liveActivityReasoning}
+              isStreaming
+              activityKey={`${lastItem.message.id}-live-activity`}
+            />
+          </div>
+        ) : collapseSteps ? (
           <CompletedStepRun label={stepRunLabel}>
             <div data-scrollable="" className="flex max-h-[520px] flex-col gap-2 overflow-y-auto overscroll-y-contain">
               {renderItems(stepItems, 0)}

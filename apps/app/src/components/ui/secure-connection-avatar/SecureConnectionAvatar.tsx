@@ -53,13 +53,15 @@ export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
     return <User size={16} strokeWidth={2} aria-hidden="true" />
   }
 
-  // The element fills the 32x32 circular placeholder; the frame clips it to a circle. It animates
-  // The element fills the 32x32 circular placeholder; the frame clips it to a circle. It animates
-  // regardless of the OS reduced-motion setting, by product direction (round 3).
+  // The element fills the 32x32 circular placeholder edge to edge; the frame clips it to a circle.
+  // The vendored custom element's shadow :host hard-codes width:128px with aspect-ratio:1, so we
+  // override with an explicit 100% width AND height (not just width) - width alone let aspect-ratio
+  // keep the old 128px height, which centred a smaller square and left the top/bottom/side gaps.
+  // It animates regardless of the OS reduced-motion setting, by product direction (round 3).
   return (
     <secure-connection-avatar
       aria-label={label}
-      style={{ width: "100%", height: "100%", display: "block" }}
+      style={{ width: "100%", height: "100%", display: "block", aspectRatio: "auto" }}
     />
   )
 }
