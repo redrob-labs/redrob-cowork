@@ -14,27 +14,21 @@ export type SecureConnectionAvatarProps = {
  * so the surrounding `.cowork-account__avatar-placeholder` supplies the 32x32 circular
  * frame and the `var(--surface-sunken)` background (unchanged from before).
  *
- * The component respects reduced motion and pauses while the document is hidden on its
- * own. We additionally keep the neutral `User` glyph as the fallback for the OS
- * reduced-motion preference (a still glyph is calmer than a paused 3D still) and for a
- * runtime without custom-element support.
+ * The storm artwork is ALWAYS shown, including under the OS reduced-motion preference: the
+ * component honors reduced motion itself by holding a static still frame (no travel), so a
+ * motion-sensitive reader sees the mark without the animation rather than losing it to a
+ * glyph. It also pauses while the document is hidden on its own. The neutral `User` glyph
+ * remains only as the fallback for a runtime without custom-element support or a load failure.
  *
  * The component class extends `HTMLElement`, so it must only be evaluated in the browser.
  * It is registered via a browser-guarded dynamic import inside an effect rather than a
  * top-level side-effect import, so non-DOM test environments never touch `HTMLElement`.
  */
 export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
-  // True when the OS asks for reduced motion; we then show the still glyph instead of the loop.
-  const [reduceMotion, setReduceMotion] = useState(false)
   // True only once the custom element is actually defined, so an unsupported runtime falls back.
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setReduceMotion(query.matches)
-    const onChange = (event: MediaQueryListEvent) => setReduceMotion(event.matches)
-    query.addEventListener("change", onChange)
-
     let cancelled = false
     // Browser-only dynamic import: registers <secure-connection-avatar> as a side effect.
     if (typeof window.customElements !== "undefined") {
@@ -49,16 +43,17 @@ export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
     }
     return () => {
       cancelled = true
-      query.removeEventListener("change", onChange)
     }
   }, [])
 
-  // Fallback: the neutral person glyph, matching the prior placeholder exactly.
-  if (reduceMotion || !ready) {
+  // Fallback only when the custom element is unavailable (unsupported runtime / load failure);
+  // reduced motion no longer falls back here — the component shows a static still instead.
+  if (!ready) {
     return <User size={16} strokeWidth={2} aria-hidden="true" />
   }
 
-  // The element fills the 32x32 circular placeholder; the frame clips it to a circle.
+  // The element fills the 32x32 circular placeholder; the frame clips it to a circle. Under
+  // reduced motion the component itself holds a static still frame rather than animating.
   return (
     <secure-connection-avatar
       aria-label={label}
