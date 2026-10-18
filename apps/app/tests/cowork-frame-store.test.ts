@@ -55,10 +55,10 @@ describe("cowork frame store: toast", () => {
 });
 
 describe("cowork frame store: panel", () => {
-  test("first open shows Files, reopen returns to the last tab", () => {
+  test("first open shows Artifacts, reopen returns to the last tab", () => {
     const store = createFrameStore({ storage: () => null });
     store.getState().openPanel();
-    expect(store.getState().panel).toMatchObject({ open: true, tab: "files", lastTab: "files" });
+    expect(store.getState().panel).toMatchObject({ open: true, tab: "artifacts", lastTab: "artifacts" });
 
     store.getState().openPanel("browser");
     store.getState().closePanel();
