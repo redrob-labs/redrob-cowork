@@ -139,3 +139,13 @@ nsis:
   allowToChangeInstallationDirectory: true
   # Per-user by default, so no UAC prompt is needed for the common case.
   perMachine: false
+  # uiux-refresh round 3 (presentation only): the redesigned installer UI. The warm copy,
+  # the install status metaphors and the uninstaller feedback page live in build/installer.nsh;
+  # the branded Welcome/Finish sidebar bitmaps are build/installerSidebar.bmp +
+  # build/uninstallerSidebar.bmp (see build/README-installer-art.md). Name the entry warmly in
+  # Add/Remove Programs too.
+  uninstallDisplayName: Redrob Cowork
+  # Enable these once the branded 164x314 24-bit BMPs are exported into build/ (they would
+  # otherwise fail packaging if referenced while missing). See build/README-installer-art.md.
+  # installerSidebar: build/installerSidebar.bmp
+  # uninstallerSidebar: build/uninstallerSidebar.bmp
