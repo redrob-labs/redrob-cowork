@@ -500,6 +500,12 @@ type AssistantMessageProps = {
   isLastStep: boolean
   /** Set when the turn's collapsed step run shows this reasoning instead. */
   hideReasoning?: boolean
+  /**
+   * Set while the unified live activity row stands in for this turn's steps: hide reasoning AND
+   * every tool/tool-aggregate group so the answer text renders alone and the steps are not drawn
+   * twice (once in the row, once here).
+   */
+  hideSteps?: boolean
 }
 
 /**
@@ -564,7 +570,7 @@ const AssistantAnswerText = React.memo(
 AssistantAnswerText.displayName = "AssistantAnswerText"
 
 const AssistantMessage = React.memo(
-  ({ message, isLastMessage, isStreaming, hideReasoning }: AssistantMessageProps) => {
+  ({ message, isLastMessage, isStreaming, hideReasoning, hideSteps }: AssistantMessageProps) => {
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
     // Inside the Cowork frame, Plan's and Cross-check's fenced blocks render as the design system's.
     const inCoworkFrame = useInCoworkFrame()
@@ -574,9 +580,13 @@ const AssistantMessage = React.memo(
         // once at the GROUP level (MessageGroup) over the whole run, not per message - a run spans
         // several assistant messages, so folding per message produced one stray row per message.
         const groups = getAssistantRenderGroups(message.parts, showThinking)
+        if (hideSteps) {
+          // The live activity row already shows reasoning + every tool call; keep only text/file.
+          return groups.filter((group) => group.kind === "text" || group.kind === "file")
+        }
         return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
       },
-      [hideReasoning, message.parts, showThinking]
+      [hideReasoning, hideSteps, message.parts, showThinking]
     )
 
     return (
@@ -933,10 +943,12 @@ type MessageComponentProps = {
   isStreaming: boolean
   isLastStep: boolean
   hideReasoning?: boolean
+  /** Hide reasoning + tool groups because the unified live activity row already shows them. */
+  hideSteps?: boolean
 }
 
 const MessageComponent = React.memo(
-  ({ message, isLastMessage, isStreaming, isLastStep, hideReasoning }: MessageComponentProps) => {
+  ({ message, isLastMessage, isStreaming, isLastStep, hideReasoning, hideSteps }: MessageComponentProps) => {
     if (isSessionErrorMessage(message)) {
       return <ErrorMessage error={getMessagesText([message]) || "Session failed"} />
     }
@@ -953,6 +965,7 @@ const MessageComponent = React.memo(
           isStreaming={isStreaming}
           isLastStep={isLastStep}
           hideReasoning={hideReasoning}
+          hideSteps={hideSteps}
         />
       )
     }
@@ -1320,12 +1333,13 @@ function MessageGroup({
     : []
 
   // Round 4: in the Cowork frame, a LIVE run renders as one in-place UnifiedActivity row instead
-  // of the per-message step list - all of the step messages' tool parts flattened into one group,
-  // plus their reasoning as the live/context text. (A finished run keeps the existing
-  // CompletedStepRun fold; only the live moment is unified.)
+  // of the per-message step list. Scan EVERY message in the group (not just the leading step
+  // messages) for tool parts + reasoning, because a live turn's reasoning and tool calls arrive
+  // interleaved in the same message as the answer and would otherwise fall into proseItems and
+  // render as separate lines - which is exactly the per-line layout this replaces.
   const liveActivityToolParts: AnyToolPart[] = []
   let liveActivityReasoning = ""
-  for (const item of stepItems) {
+  for (const item of items) {
     if (item.message.role !== "assistant" || isSessionErrorMessage(item.message)) continue
     for (const group of getAssistantRenderGroups(item.message.parts, showThinking)) {
       if (group.kind === "tool-aggregate") liveActivityToolParts.push(...group.parts)
@@ -1336,10 +1350,10 @@ function MessageGroup({
     }
   }
   const useUnifiedLiveActivity =
-    inCoworkFrame && isLiveGroup && stepItems.length > 0
+    inCoworkFrame && isLiveGroup
     && (liveActivityToolParts.length > 0 || liveActivityReasoning.trim().length > 0)
 
-  const renderItem = (item: UIMessageWithIndex, groupIndex: number, hideReasoning?: boolean) => {
+  const renderItem = (item: UIMessageWithIndex, groupIndex: number, hideReasoning?: boolean, hideSteps?: boolean) => {
     const isLastMessage = item.index === messages.length - 1
 
     return (
@@ -1350,6 +1364,7 @@ function MessageGroup({
           isStreaming={isLastMessage && isStreaming}
           isLastStep={groupIndex === items.length - 1}
           hideReasoning={hideReasoning}
+          hideSteps={hideSteps}
         />
       </div>
     )
@@ -1358,7 +1373,7 @@ function MessageGroup({
   // Consecutive step messages that contain nothing but command/edit/read/
   // search tool calls merge into one aggregate line (Paper "Recurring
   // actions"); any prose, reasoning, or other tool breaks the run.
-  const renderItems = (slice: UIMessageWithIndex[], offset: number, hideReasoning?: boolean) => {
+  const renderItems = (slice: UIMessageWithIndex[], offset: number, hideReasoning?: boolean, hideSteps?: boolean) => {
     const nodes: React.ReactNode[] = []
     let run: { parts: AnyToolPart[]; key: string } | null = null
     const flush = () => {
@@ -1373,8 +1388,10 @@ function MessageGroup({
       run = null
     }
     slice.forEach((item, sliceIndex) => {
+      // Under hideSteps (live unified row) the tool calls belong to the activity row, so do not
+      // aggregate them into a separate line here - just render the message's non-step content.
       const aggregateParts =
-        item.message.role === "assistant" && !isSessionErrorMessage(item.message)
+        !hideSteps && item.message.role === "assistant" && !isSessionErrorMessage(item.message)
           ? getAggregateOnlyParts(item.message, showThinking)
           : null
       if (aggregateParts) {
@@ -1383,7 +1400,7 @@ function MessageGroup({
         return
       }
       flush()
-      nodes.push(renderItem(item, offset + sliceIndex, hideReasoning))
+      nodes.push(renderItem(item, offset + sliceIndex, hideReasoning, hideSteps))
     })
     flush()
     return nodes
@@ -1394,17 +1411,22 @@ function MessageGroup({
       {/* The scroll area keeps the same 8px rhythm the parts inside a single
           message use, so a step row is spaced identically whether or not a
           message boundary happens to fall between it and the previous row. */}
-      {stepItems.length > 0 ? (
-        useUnifiedLiveActivity ? (
-          <div className={CHAT_COLUMN}>
-            <UnifiedActivity
-              parts={liveActivityToolParts}
-              reasoning={liveActivityReasoning}
-              isStreaming
-              activityKey={`${lastItem.message.id}-live-activity`}
-            />
-          </div>
-        ) : collapseSteps ? (
+      {useUnifiedLiveActivity ? (
+        <div className={CHAT_COLUMN}>
+          <UnifiedActivity
+            parts={liveActivityToolParts}
+            reasoning={liveActivityReasoning}
+            isStreaming
+            /* Stable key for the whole turn so the row (and its timer) never remounts per tool. */
+            activityKey={`${items[0]?.message.id ?? "live"}-activity`}
+            /* Continuous elapsed from the run's server start, not from this render's mount. */
+            startedAt={stepsStartedAt}
+          />
+        </div>
+      ) : null}
+      {/* The step scroll area is skipped entirely while the unified live row stands in for it. */}
+      {!useUnifiedLiveActivity && stepItems.length > 0 ? (
+        collapseSteps ? (
           <CompletedStepRun label={stepRunLabel}>
             <div data-scrollable="" className="flex max-h-[520px] flex-col gap-2 overflow-y-auto overscroll-y-contain">
               {renderItems(stepItems, 0)}
@@ -1432,7 +1454,11 @@ function MessageGroup({
           <McpAppFrame part={part} />
         </Message>
       ))}
-      {renderItems(proseItems, stepItems.length, collapseSteps)}
+      {/* While the unified live row stands in, hide the reasoning/tool rows the prose messages
+          would otherwise render (they are already folded into the row above); the answer text
+          still renders. hideReasoning=true drops reasoning groups, and the tool/aggregate groups
+          are the activity's job now. */}
+      {renderItems(proseItems, stepItems.length, collapseSteps, useUnifiedLiveActivity)}
       {/* Paper artifact strip: one FILES row per turn, at the end. */}
       <ArtifactList
         messages={items.map((item) => item.message)}

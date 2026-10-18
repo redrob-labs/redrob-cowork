@@ -29,6 +29,12 @@ type UnifiedActivityProps = {
   isStreaming: boolean
   /** Stable key for persisting the expand state across re-renders. */
   activityKey: string
+  /**
+   * Server timestamp (ms) when the run started, so the elapsed timer counts the WHOLE turn
+   * continuously instead of resetting each time a new tool part remounts the row. Falls back to
+   * first-mount time when not given.
+   */
+  startedAt?: number | null
 }
 
 /** The first sentence of the reasoning, trimmed of markdown emphasis, for a short "thinking" line. */
@@ -56,16 +62,19 @@ function rowStatus(part: AnyToolPart): "running" | "failed" | "done" {
   return "done"
 }
 
-/** mm:ss-ish elapsed: "34s" / "1m 23s", ticking while streaming. */
-function useElapsed(active: boolean): string {
-  const startRef = React.useRef<number>(Date.now())
+/** mm:ss-ish elapsed: "34s" / "1m 23s", ticking while streaming. Anchored to `startedAt` (the
+ * run's server start) when given, so it does NOT reset when the row remounts on a new tool part. */
+function useElapsed(active: boolean, startedAt?: number | null): string {
+  // A stable anchor: the server start when known, else this component's first mount - captured once.
+  const firstMountRef = React.useRef<number>(Date.now())
+  const anchor = startedAt ?? firstMountRef.current
   const [now, setNow] = React.useState(() => Date.now())
   React.useEffect(() => {
     if (!active) return
     const id = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(id)
   }, [active])
-  const total = Math.max(0, Math.floor((now - startRef.current) / 1000))
+  const total = Math.max(0, Math.floor((now - anchor) / 1000))
   const m = Math.floor(total / 60)
   const s = total % 60
   return m > 0 ? `${m}m ${s}s` : `${s}s`
@@ -79,13 +88,13 @@ function useElapsed(active: boolean): string {
  * reference, with faint reasoning context at the top. When the turn ends the row stays, collapsed,
  * as the past-tense "what it did" summary (kept per the locked calibration).
  */
-export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey }: UnifiedActivityProps) {
+export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, startedAt }: UnifiedActivityProps) {
   const [expanded, setExpandedState] = React.useState(() => expandedByKey.get(activityKey) ?? false)
   const setExpanded = (value: boolean) => {
     expandedByKey.set(activityKey, value)
     setExpandedState(value)
   }
-  const elapsed = useElapsed(isStreaming)
+  const elapsed = useElapsed(isStreaming, startedAt)
   const lead = reasoningLead(reasoning)
 
   // Header: live current-activity label while streaming; past-tense summary once done.
