@@ -218,7 +218,8 @@ function CheckChip(props: {
   if (props.running || !props.verdict || !props.report) {
     return (
       <span className={`${chipBase} text-dls-text-muted`}>
-        {props.icon}
+        {/* Small inline loader on the LEFT while the check runs, so the chip reads as in-progress. */}
+        {props.running ? <RedrobLiquidLoader size={14} label={props.name} /> : props.icon}
         <span>{props.name}</span>
       </span>
     );

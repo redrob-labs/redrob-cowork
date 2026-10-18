@@ -7,6 +7,8 @@ import {
   isGlobToolPart,
   isGrepToolPart,
   isReadToolPart,
+  isWebFetchToolPart,
+  isWebSearchToolPart,
   isWriteToolPart,
 } from "@/lib/build-in-tools"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
@@ -26,6 +28,9 @@ export function getToolFamily(part: AnyToolPart): ToolFamily | null {
   if (isEditToolPart(part) || isWriteToolPart(part) || isApplyPatchToolPart(part)) return "edit"
   if (isReadToolPart(part)) return "read"
   if (isGrepToolPart(part) || isGlobToolPart(part)) return "search"
+  // Round 6: web search + web fetch fold into the "search" family too, so a research run's many
+  // "Web search ..." calls collapse into one aggregate line instead of a stack of per-call rows.
+  if (isWebSearchToolPart(part) || isWebFetchToolPart(part)) return "search"
   return null
 }
 

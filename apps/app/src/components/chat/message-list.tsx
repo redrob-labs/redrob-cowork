@@ -1690,20 +1690,22 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
     : null
 
   /*
-    Round 4: in the Cowork frame the running turn's loader is the inline UnifiedActivity row, which
-    appears as soon as the latest assistant message has any tool or reasoning part. Until then
-    (the model is thinking but has emitted nothing yet) the bottom CoworkRunStatus still stands in,
-    so there is exactly one loader - never both.
+    Round 6: the running turn's loader is the inline UnifiedActivity row, which the live MessageGroup
+    shows as soon as ANY assistant message in the live run has a tool or reasoning part. The bottom
+    CoworkRunStatus must suppress on the SAME condition, or the two loaders drift apart and both show
+    (the dual-loader bug): when the model opens a fresh empty step message, scanning only the LAST
+    message said "nothing inline yet" while the row was still up from earlier parts. So scan the whole
+    trailing run of assistant messages (the live group), not just the last one.
   */
-  const latestAssistant = React.useMemo(() => {
+  const hasInlineActivity = React.useMemo(() => {
+    if (!inCoworkFrame || !isStreaming) return false
     for (let i = messages.length - 1; i >= 0; i -= 1) {
-      if (messages[i]?.role === "assistant") return messages[i]
+      const message = messages[i]
+      if (message?.role !== "assistant") break // stop at the user turn that opened this run
+      if (message.parts.some((part) => isToolUIPart(part) || isReasoningUIPart(part))) return true
     }
-    return undefined
-  }, [messages])
-  const hasInlineActivity = inCoworkFrame && isStreaming && Boolean(
-    latestAssistant?.parts.some((part) => isToolUIPart(part) || isReasoningUIPart(part)),
-  )
+    return false
+  }, [inCoworkFrame, isStreaming, messages])
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
