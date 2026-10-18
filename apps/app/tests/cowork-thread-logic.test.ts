@@ -454,3 +454,58 @@ describe("approvals and memory", () => {
     expect(receiptItems({ planned: false, fact: "off", challenge: "off" }).map((item) => item.label)).toEqual(["레드롭 자동", "확인하지 않음"]);
   });
 });
+
+describe("cross-check verdict words (factConfidence / challengeOutcome)", () => {
+  // Imported lazily via require to avoid touching the large import block above.
+  const { factConfidence, challengeOutcome } = require("../src/react-app/cowork/thread/thread-logic");
+
+  test("fact: all holds, nothing missed -> highly confident (agree)", () => {
+    const v = factConfidence({ claims: [{ verdict: "holds", claim: "a" }, { verdict: "holds", claim: "b" }], missed: [] });
+    expect(v.tone).toBe("agree");
+  });
+
+  test("fact: four holds + one wrong -> 0.8 -> mostly correct (mild)", () => {
+    const v = factConfidence({
+      claims: [
+        { verdict: "holds", claim: "a" },
+        { verdict: "holds", claim: "b" },
+        { verdict: "holds", claim: "c" },
+        { verdict: "holds", claim: "d" },
+        { verdict: "wrong", claim: "e" },
+      ],
+      missed: [],
+    });
+    expect(v.tone).toBe("mild");
+  });
+
+  test("fact: mostly wrong -> low confidence (differ)", () => {
+    const v = factConfidence({
+      claims: [{ verdict: "wrong", claim: "a" }, { verdict: "wrong", claim: "b" }, { verdict: "holds", claim: "c" }],
+      missed: [{ text: "missed one" }],
+    });
+    expect(v.tone).toBe("differ");
+  });
+
+  test("fact: no claims -> highly confident (nothing to doubt)", () => {
+    expect(factConfidence({ claims: [], missed: [] }).tone).toBe("agree");
+  });
+
+  test("challenge: all held -> holds up (agree)", () => {
+    const v = challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }] });
+    expect(v.tone).toBe("agree");
+  });
+
+  test("challenge: a point broke -> challenged (differ)", () => {
+    const v = challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "broke", text: "b" }] });
+    expect(v.tone).toBe("differ");
+  });
+
+  test("challenge: one of four changed, none broke -> mostly holds (mild)", () => {
+    const v = challengeOutcome({
+      claim: "x",
+      rounds: [],
+      verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }, { kind: "held", text: "c" }, { kind: "changed", text: "d" }],
+    });
+    expect(v.tone).toBe("mild");
+  });
+});

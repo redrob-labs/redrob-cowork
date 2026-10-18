@@ -108,6 +108,50 @@ export function challengeChanges(result: CheckResult | undefined): number {
   return (result?.challenge?.verdict ?? []).filter((verdict) => verdict.kind !== "held").length;
 }
 
+/** The tone + word a finished check shows ON its chip, so the verdict reads without opening it. */
+export type CheckVerdict = { tone: "agree" | "mild" | "differ"; label: string };
+
+/**
+ * Fact-check confidence as one word, from the claim verdicts + anything missed. "holds" claims are
+ * full credit, "partly" half, "wrong" none; each missed point is a full miss. The band:
+ *   >=0.9 and nothing missed -> Highly confident (agree)
+ *   >=0.7                    -> Mostly correct   (mild)
+ *   >=0.4                    -> Some concerns    (differ)
+ *   <0.4                     -> Low confidence   (differ)
+ * No claims at all reads as Highly confident (nothing to doubt).
+ */
+export function factConfidence(fact: CheckResult["fact"]): CheckVerdict {
+  if (!fact) return { tone: "agree", label: t("cowork.thread_fact_verdict_high") };
+  const total = fact.claims.length + fact.missed.length;
+  if (total === 0) return { tone: "agree", label: t("cowork.thread_fact_verdict_high") };
+  const credit = fact.claims.reduce(
+    (sum, claim) => sum + (claim.verdict === "holds" ? 1 : claim.verdict === "partly" ? 0.5 : 0),
+    0,
+  );
+  const ratio = credit / total; // missed points are in the denominator but earn no credit
+  if (ratio >= 0.9 && fact.missed.length === 0) return { tone: "agree", label: t("cowork.thread_fact_verdict_high") };
+  if (ratio >= 0.7) return { tone: "mild", label: t("cowork.thread_fact_verdict_mostly") };
+  if (ratio >= 0.4) return { tone: "differ", label: t("cowork.thread_fact_verdict_some") };
+  return { tone: "differ", label: t("cowork.thread_fact_verdict_low") };
+}
+
+/**
+ * Challenge outcome as one word after the debate, from how many verdict points broke/changed vs
+ * held: nothing moved -> Holds up; a few changed -> Mostly holds; several moved -> Weakened; any
+ * point broke -> Challenged. No verdict points reads as Holds up.
+ */
+export function challengeOutcome(challenge: CheckResult["challenge"]): CheckVerdict {
+  const verdicts = challenge?.verdict ?? [];
+  if (verdicts.length === 0) return { tone: "agree", label: t("cowork.thread_chal_verdict_holds") };
+  const broke = verdicts.filter((verdict) => verdict.kind === "broke").length;
+  const changed = verdicts.filter((verdict) => verdict.kind === "changed").length;
+  if (broke > 0) return { tone: "differ", label: t("cowork.thread_chal_verdict_challenged") };
+  if (changed === 0) return { tone: "agree", label: t("cowork.thread_chal_verdict_holds") };
+  const movedRatio = changed / verdicts.length;
+  if (movedRatio <= 0.34) return { tone: "mild", label: t("cowork.thread_chal_verdict_mostly") };
+  return { tone: "differ", label: t("cowork.thread_chal_verdict_weakened") };
+}
+
 /**
  * The receipt under a finished answer: who answered, whether it followed a plan, and what the
  * checks found. An answer no check ran on says so: "Not checked, a quick answer".

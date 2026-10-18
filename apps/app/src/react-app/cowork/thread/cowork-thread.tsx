@@ -1,7 +1,6 @@
 /** @jsxImportSource react */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  AnswerReceipt,
   ApprovalStep,
   Button,
   ChallengeReport,
@@ -15,6 +14,7 @@ import {
 
 import { t } from "../../../i18n";
 import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader/RedrobLiquidLoader";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { useCoworkComposerStore } from "../composer/composer-state";
 import { useCheckStore, type AnswerChecks } from "./check-store";
 import type { ChallengeData, CoworkBlocks, FactCheckData, PlanDoc, PlanQuestionData } from "./cowork-blocks";
@@ -22,11 +22,13 @@ import { useCoworkThread } from "./cowork-thread-context";
 import {
   answersSummary,
   answersToPrompt,
+  challengeOutcome,
+  factConfidence,
   planRunPrompt,
   planStatus,
   planToText,
-  receiptItems,
   type ApprovalActions,
+  type CheckVerdict,
   type PlanAnswers,
   type PlanStage,
 } from "./thread-logic";
@@ -167,13 +169,13 @@ function CoworkPlan(props: { plan: PlanDoc; isLatest: boolean }) {
 
 /** The blocks in an assistant answer, as the design system draws them. */
 export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean }) {
-  const { questions, plan, check } = props.blocks;
+  const { questions, plan } = props.blocks;
+  // Fact check + Challenge no longer render inline here; they appear as verdict CHIPS in the
+  // answer footer (CoworkAnswerFooterView), and their full report opens in a popover on click.
   return (
     <>
       {questions ? <CoworkQuestions questions={questions} isLatest={props.isLatest} /> : null}
       {plan ? <CoworkPlan plan={plan} isLatest={props.isLatest} /> : null}
-      {check?.fact ? <FactCheckReport {...factReportProps(check.fact)} /> : null}
-      {check?.challenge ? <ChallengeReport {...challengeReportProps(check.challenge)} /> : null}
     </>
   );
 }
@@ -190,30 +192,101 @@ export function canRetryChecks(checks: AnswerChecks | undefined): boolean {
   return Boolean(checks?.request) && (checks?.fact === "failed" || checks?.challenge === "failed");
 }
 
+/** The tone classes for a verdict chip: agree (green), mild (amber), differ (muted/strong). */
+function verdictToneClass(tone: CheckVerdict["tone"]): string {
+  // Each pairs a text colour with the matching icon; backgrounds come from the chip base below.
+  if (tone === "agree") return "text-[color:var(--ds-success,#1a7f52)]";
+  if (tone === "mild") return "text-[color:var(--ds-warning,#9a6b00)]";
+  return "text-[color:var(--ds-danger,#a1432b)]"; // differ
+}
+
+/**
+ * A finished cross-check as a single CHIP: an icon, the check's name, and the one-word verdict in
+ * its tone colour. Clicking opens the full report in a popover (not inline in the chat). While a
+ * check is still running it shows a muted "running" chip with no popover.
+ */
+function CheckChip(props: {
+  icon: ReactNode;
+  name: string;
+  running: boolean;
+  verdict: CheckVerdict | null;
+  report: ReactNode | null;
+}) {
+  // Base chip styling shared by the running and finished states (pill, border, hover).
+  const chipBase =
+    "inline-flex items-center gap-1.5 rounded-full border border-dls-border bg-dls-surface px-3 py-1 text-xs";
+  if (props.running || !props.verdict || !props.report) {
+    return (
+      <span className={`${chipBase} text-dls-text-muted`}>
+        {props.icon}
+        <span>{props.name}</span>
+      </span>
+    );
+  }
+  return (
+    <Popover>
+      {/* The chip is the trigger; clicking opens the report popover, so no inline report is drawn. */}
+      <PopoverTrigger className={`${chipBase} cursor-pointer text-dls-text transition-colors hover:bg-dls-surface-hover`}>
+        {props.icon}
+        <span>{props.name}</span>
+        {/* The verdict word, coloured by tone - this is the "result in the chip itself". */}
+        <span className={verdictToneClass(props.verdict.tone)}>{props.verdict.label}</span>
+      </PopoverTrigger>
+      {/* The full report, wide enough for the claims list / debate, scrollable if long. */}
+      <PopoverContent className="max-h-[70vh] w-[min(32rem,90vw)] overflow-y-auto p-3">
+        {props.report}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined; model?: string; onRetry?: () => void }) {
   const { checks } = props;
   const result = checks?.result;
+  const factState = checks?.fact ?? "off";
+  const challengeState = checks?.challenge ?? "off";
+  const showFact = factState === "running" || (factState === "done" && Boolean(result?.fact));
+  const showChallenge = challengeState === "running" || (challengeState === "done" && Boolean(result?.challenge));
+  // The model chip ("Redrob Auto") is intentionally dropped from the receipt row per round 5.
   return (
     <div className="flex w-full flex-col gap-3">
-      <AnswerReceipt
-        items={receiptItems({
-          model: props.model,
-          planned: checks?.planned ?? false,
-          fact: checks?.fact ?? "off",
-          challenge: checks?.challenge ?? "off",
-          result,
-        })}
-      />
+      {checks?.planned || showFact || showChallenge ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {checks?.planned ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-dls-border bg-dls-surface px-3 py-1 text-xs text-dls-text-muted">
+              {t("cowork.thread_receipt_plan")}
+            </span>
+          ) : null}
+          {showFact ? (
+            <CheckChip
+              icon={<span aria-hidden="true">{/* fact icon is inside the report; chip keeps it textual */}</span>}
+              name={t("cowork.thread_fact_title")}
+              running={factState === "running"}
+              verdict={factState === "done" && result?.fact ? factConfidence(result.fact) : null}
+              report={factState === "done" && result?.fact ? <FactCheckReport {...factReportProps(result.fact)} /> : null}
+            />
+          ) : null}
+          {showChallenge ? (
+            <CheckChip
+              icon={<span aria-hidden="true" />}
+              name={t("cowork.thread_challenge_title")}
+              running={challengeState === "running"}
+              verdict={challengeState === "done" && result?.challenge ? challengeOutcome(result.challenge) : null}
+              report={
+                challengeState === "done" && result?.challenge ? (
+                  <ChallengeReport {...challengeReportProps(result.challenge)} />
+                ) : null
+              }
+            />
+          ) : null}
+        </div>
+      ) : null}
       {props.onRetry && canRetryChecks(checks) ? (
         <div>
           <Button size="sm" variant="ghost" onClick={props.onRetry}>
             {t("cowork.thread_check_retry")}
           </Button>
         </div>
-      ) : null}
-      {checks?.fact === "done" && result?.fact ? <FactCheckReport {...factReportProps(result.fact)} /> : null}
-      {checks?.challenge === "done" && result?.challenge ? (
-        <ChallengeReport {...challengeReportProps(result.challenge)} />
       ) : null}
     </div>
   );
