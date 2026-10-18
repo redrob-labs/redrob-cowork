@@ -51,6 +51,8 @@ describe("classifyStep", () => {
       kind: "web",
       label: "browser.open_url",
       url: "https://law.go.kr/x",
+      // A browser capability always navigates, so the panel may open (item 7a).
+      navigation: true,
     });
     expect(classifyStep(toolPart("redrob_execute", { id: "settings.panel.open" }))?.kind).toBe("model");
   });
@@ -65,12 +67,14 @@ describe("classifyStep", () => {
     expect(classifyStep(toolPart("navigate_page", { url: "https://a.example" }))?.kind).toBe("web");
   });
 
-  test("web fetch and search are web; a url that is not a web address is dropped", () => {
+  test("web fetch and search are web; navigation is set for a fetch with a url, not a bare search", () => {
+    // A webfetch with a url navigates (opens the panel); a bare websearch (query, no url) does not (item 7a).
     expect(classifyStep(toolPart("webfetch", { url: "https://federalreserve.gov/rates" }))).toMatchObject({
       kind: "web",
       url: "https://federalreserve.gov/rates",
+      navigation: true,
     });
-    expect(classifyStep(toolPart("websearch", { query: "court holidays" }))).toEqual({ kind: "web", label: "websearch" });
+    expect(classifyStep(toolPart("websearch", { query: "court holidays" }))).toEqual({ kind: "web", label: "websearch", navigation: false });
     expect(classifyStep(toolPart("webfetch", { url: "file:///etc/passwd" }))?.url).toBeUndefined();
   });
 
@@ -129,6 +133,7 @@ describe("reduceRunEvent", () => {
         label: "browser.open_url",
         kind: "web",
         url: "https://law.go.kr/lsInfoP.do?lsiSeq=1",
+        navigation: true,
         chatTitle: "Notice by email - valid?",
       },
       { type: "step.started", runId: "chat-1", label: "write", kind: "files", chatTitle: "Notice by email - valid?" },
@@ -152,7 +157,7 @@ describe("reduceRunEvent", () => {
       { type: "step.started", runId: "chat-1", label: "edit", kind: "files" },
     ]);
     expect(replay([partEvent(toolPart("webfetch", { url: "https://a.example" }, "completed", "w1"))]).emitted).toEqual([
-      { type: "step.started", runId: "chat-1", label: "webfetch", kind: "web", url: "https://a.example" },
+      { type: "step.started", runId: "chat-1", label: "webfetch", kind: "web", url: "https://a.example", navigation: true },
     ]);
   });
 
@@ -176,7 +181,7 @@ describe("the frame's response to Cowork events", () => {
     now: Date.UTC(2026, 8, 28, 10),
     ...patch,
   });
-  const web: CoworkRunEvent = { type: "step.started", runId: "chat-1", label: "open", kind: "web", url: "https://law.go.kr/a/b", chatTitle: "Notice" };
+  const web: CoworkRunEvent = { type: "step.started", runId: "chat-1", label: "open", kind: "web", url: "https://law.go.kr/a/b", navigation: true, chatTitle: "Notice" };
 
   function targets() {
     const frame = createFrameStore({ storage: () => null });
@@ -208,6 +213,15 @@ describe("the frame's response to Cowork events", () => {
     expect(frame.getState().browser.cowork).toBe("reading");
     expect(pages.getState().reading).toEqual({ runId: "chat-1", url: "https://law.go.kr/a/b" });
     expect(pages.getState().pages).toMatchObject([{ host: "law.go.kr", chatId: "chat-1", chatTitle: "Notice" }]);
+  });
+
+  test("a bare web SEARCH (no navigation, no url) does not open the browser panel (item 7a)", () => {
+    const { frame, pages, run } = targets();
+    // A websearch step: kind web, navigation false, no url. It must not pop the panel or mark reading.
+    run({ type: "step.started", runId: "chat-1", label: "websearch", kind: "web", navigation: false });
+    expect(frame.getState().panel.open).toBe(false);
+    expect(frame.getState().browser.cowork).toBe("done");
+    expect(pages.getState().pages).toHaveLength(0);
   });
 
   test("a step in another chat records its page but leaves the panel alone", () => {

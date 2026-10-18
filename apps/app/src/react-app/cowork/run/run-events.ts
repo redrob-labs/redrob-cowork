@@ -7,10 +7,13 @@ import type { OpencodeEvent } from "../../../app/types";
 
 export type StepKind = "web" | "files" | "model" | "approval";
 
-export type StepInfo = { kind: StepKind; label: string; url?: string };
+/** `navigation` is set only on a `web` step that actually opens/fetches a page (a real address,
+ *  or a browser/devtools/page tool) as opposed to a bare web SEARCH (a query with no url). The
+ *  panel pops only for a navigation step; a search alone no longer opens the browser (item 7a). */
+export type StepInfo = { kind: StepKind; label: string; url?: string; navigation?: boolean };
 
 export type CoworkRunEvent =
-  | { type: "step.started"; runId: string; label: string; kind: StepKind; url?: string; chatTitle?: string }
+  | { type: "step.started"; runId: string; label: string; kind: StepKind; url?: string; navigation?: boolean; chatTitle?: string }
   | { type: "run.answered"; runId: string }
   | { type: "file.written"; name: string; chatId: string };
 
@@ -52,6 +55,22 @@ function isWebTool(tool: string, input: UnknownRecord | undefined): boolean {
   return tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool) || FETCH_TOOLS.has(tool);
 }
 
+/**
+ * Whether a web tool is a real page open/fetch rather than a bare search. A browser capability,
+ * a `browser_*`/chrome-devtools/page tool always navigates; a fetch/search tool navigates only
+ * when it carries a url. A pure `websearch` (a query, no url) is NOT navigation (item 7a).
+ */
+function isNavigationTool(tool: string, input: UnknownRecord | undefined): boolean {
+  if (tool.endsWith("redrob_execute")) return stringField(input, "id")?.startsWith("browser.") ?? false;
+  if (tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool)) return true;
+  return FETCH_TOOLS.has(tool) && webUrl(input) !== undefined;
+}
+
+/** Whether a classified step opens the browser panel: a `web` step that is a navigation (item 7a). */
+export function isNavigationWebStep(step: Pick<StepInfo, "kind" | "navigation">): boolean {
+  return step.kind === "web" && step.navigation === true;
+}
+
 function webUrl(input: UnknownRecord | undefined): string | undefined {
   const url = stringField(input, "url") ?? stringField(recordField(input, "args"), "url");
   return url && /^https?:\/\//i.test(url) ? url : undefined;
@@ -72,7 +91,8 @@ export function classifyStep(part: unknown): StepInfo | null {
   const label = stringField(recordField(part, "state"), "title") ?? stringField(input, "id") ?? tool;
   if (isWebTool(tool, input)) {
     const url = webUrl(input);
-    return url ? { kind: "web", label, url } : { kind: "web", label };
+    const navigation = isNavigationTool(tool, input);
+    return url ? { kind: "web", label, url, navigation } : { kind: "web", label, navigation };
   }
   if (FILE_TOOLS.has(tool)) return { kind: "files", label };
   return { kind: "model", label };
@@ -108,6 +128,7 @@ function started(state: RunEventsState, runId: string, step: StepInfo): CoworkRu
     label: step.label,
     kind: step.kind,
     ...(step.url ? { url: step.url } : {}),
+    ...(step.navigation ? { navigation: true } : {}),
     ...(title ? { chatTitle: title } : {}),
   };
 }
