@@ -711,7 +711,12 @@ export function SessionPage(props: SessionPageProps) {
   useEffect(() => {
     const sessionId = props.selectedSessionId ?? null;
     if (sawSessionRunRef.current.sessionId !== sessionId) sawSessionRunRef.current = { sessionId, ran: false };
-    if (selectedSessionStatus !== "idle") sawSessionRunRef.current.ran = true;
+    // Only a genuinely RUN-ACTIVE status counts as "this session ran while watched". error and
+    // compacting are not runs, so reopening an old errored/compacting chat must not latch ran=true
+    // and then open Artifacts when that chat's existing targets hydrate (0 -> N).
+    if (selectedSessionStatus === "thinking" || selectedSessionStatus === "responding" || selectedSessionStatus === "waiting") {
+      sawSessionRunRef.current.ran = true;
+    }
     const prev = prevArtifactCountRef.current;
     const sameSession = prev.sessionId === sessionId;
     const increased = sameSession && artifactTargetCount > prev.count;

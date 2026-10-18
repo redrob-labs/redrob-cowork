@@ -158,10 +158,12 @@ describe("answers, plan and run", () => {
     expect(text).toContain("2. Draft the notice.");
     expect(text).toContain("- Write the notice (Redrob Auto)");
     const prompt = planRunPrompt(text);
-    expect(prompt.startsWith("Run this plan.")).toBe(true);
+    expect(prompt.startsWith("\u2060Run this plan.")).toBe(true); // zero-width provenance sentinel then the visible prompt
     expect(prompt).toContain("\n\n# End the Seorin MSA");
     expect(isPlanRunPrompt(prompt)).toBe(true);
     expect(isPlanRunPrompt("Run the tests")).toBe(false);
+    // A human who literally types the run wording is NOT an internal plan-run (no sentinel).
+    expect(isPlanRunPrompt("Run this plan. Write the final deliverable to a file.")).toBe(false);
   });
 
   test("Run and Keep move the plan; a run that finished is done", () => {
@@ -451,7 +453,7 @@ describe("approvals and memory", () => {
 
   test("Korean strings come through t()", () => {
     setLocale("ko");
-    expect(planRunPrompt("x").startsWith("이 계획대로 실행해 주세요.")).toBe(true);
+    expect(planRunPrompt("x").startsWith("\u2060이 계획대로 실행해 주세요.")).toBe(true);
     expect(receiptItems({ planned: false, fact: "off", challenge: "off" }).map((item) => item.label)).toEqual(["레드롭 자동", "확인하지 않음"]);
   });
 });
