@@ -1,12 +1,14 @@
 ; Redrob Cowork - Windows installer / uninstaller UI (NSIS, assisted mode).
 ;
 ; uiux-refresh round 3: redesigned to match the approved browser preview. This file is
-; PRESENTATION ONLY - warm copy, branded page text, friendly-but-informative status metaphors,
-; and an optional uninstaller feedback page that opens a web form in the browser. It does NOT
-; change any build, signing, publish, or install LOGIC: electron-builder still drives the real
-; copy/shortcut/registry work through its own assistedInstaller sections. The branded sidebar
-; bitmaps (build/installerSidebar.bmp, build/uninstallerSidebar.bmp, 164x314, 24-bit) are picked
-; up automatically by electron-builder when present; see build/README-installer-art.md.
+; PRESENTATION ONLY - warm copy, branded page text, and friendly-but-informative status
+; metaphors. It does NOT change any build, signing, publish, or install LOGIC: electron-builder
+; still drives the real copy/shortcut/registry work through its own assistedInstaller sections.
+; The branded sidebar bitmaps (build/installerSidebar.bmp, build/uninstallerSidebar.bmp,
+; 164x314, 24-bit) are picked up automatically by electron-builder when present; see
+; build/README-installer-art.md.
+;
+; No feedback step: the current OS installer/uninstaller flow has none, and it stays that way.
 
 ; --- Warm welcome / finish copy (overrides the stock MUI strings) -----------------------------
 !macro customHeader
@@ -34,37 +36,6 @@
   DetailPrint "Handing the keys to the launcher (linking Redrob Launcher)"
   DetailPrint "Tidying up (finishing touches)"
 !macroend
-
-; --- Optional uninstaller feedback step -------------------------------------------------------
-; Shown after the uninstall welcome page. It gathers nothing locally (no backend): it only offers
-; to open a web feedback form in the browser. Skipping it continues the uninstall unchanged.
-!macro customUnWelcomePage
-  !insertmacro MUI_UNPAGE_WELCOME
-  UnPage custom un.FeedbackPageCreate un.FeedbackPageLeave
-!macroend
-
-Function un.FeedbackPageCreate
-  !insertmacro MUI_HEADER_TEXT "Before you go, mind telling us why?" "Totally optional, and it helps us get better. Nothing is sent from here."
-  nsDialogs::Create 1018
-  Pop $0
-  ${If} $0 == error
-    Abort
-  ${EndIf}
-  ${NSD_CreateLabel} 0 0 100% 24u "If you have a minute, we'd genuinely love to hear what felt off. It opens a short form in your browser, nothing is collected inside this uninstaller."
-  Pop $1
-  ${NSD_CreateButton} 0 40u 60% 14u "Share feedback in the browser"
-  Pop $2
-  ${NSD_OnClick} $2 un.OpenFeedback
-  nsDialogs::Show
-FunctionEnd
-
-Function un.OpenFeedback
-  ; Opens the public feedback page in the default browser. No data leaves the installer itself.
-  ExecShell "open" "https://redrob.ai/cowork/feedback?from=uninstaller"
-FunctionEnd
-
-Function un.FeedbackPageLeave
-FunctionEnd
 
 ; --- Existing cleanup (unchanged): remove the brand shortcut we recorded at install -----------
 !macro customUnInstall
