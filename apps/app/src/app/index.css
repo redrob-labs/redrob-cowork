@@ -2303,6 +2303,24 @@ html[lang="ko"] {
   margin-block: 0.15em;
 }
 
+/*
+  uiux-refresh-oct-18-2026: the streaming typing cursor. While the assistant answer is being
+  revealed letter-by-letter (useSmoothReveal), message-list sets data-streaming-cursor on the
+  .markdown-content root. A steady (non-blinking) Redrob-Blue bar rides the end of the reveal,
+  attached to the LAST child's end so it sits inline after the final character rather than on a
+  new line. Steady by request; reduced motion is irrelevant here since it does not animate.
+*/
+.markdown-content[data-streaming-cursor] > :last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.5ch; /* A slim caret roughly half a character wide. */
+  height: 1em;
+  margin-left: 0.08em;
+  vertical-align: text-bottom;
+  background: var(--primary); /* Redrob Blue via the DS token chain (--primary -> --action-primary). */
+  border-radius: 1px;
+}
+
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
   background: transparent !important;

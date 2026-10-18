@@ -97,6 +97,7 @@ import {
 } from "@/components/ui/message"
 import { Tool } from "@/components/ui/tool"
 import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader/RedrobLiquidLoader"
+import { useSmoothReveal } from "@/components/chat/use-smooth-reveal"
 import { CapabilityCallLine } from "@/components/chat/capability-call-line"
 import {
   isLiveStepAtBottom,
@@ -529,6 +530,36 @@ function AnswerOptionChips({
   )
 }
 
+/**
+ * The assistant's answer prose. While the latest message is streaming, the text is revealed
+ * letter-by-letter at a smooth constant velocity with an opening burst (see useSmoothReveal),
+ * and a steady Redrob-Blue typing cursor rides the end of the reveal via the
+ * `data-streaming-cursor` hook on `.markdown-content`. Non-streaming messages render in full
+ * with no cursor, exactly as before.
+ */
+const AssistantAnswerText = React.memo(
+  ({ body, isStreaming, highlightQuery }: { body: string; isStreaming: boolean; highlightQuery?: string }) => {
+    const { revealed, revealing } = useSmoothReveal(body, isStreaming)
+    return (
+      <MessageContent
+        // Round 32/34 (Claude-style): the assistant reply is plain prose on the page surface
+        // -- NO bubble. Override the DS MessageContent base (bg-secondary rounded-lg p-2) here
+        // via the cn(base, className) twMerge: bg-transparent, no radius, no inset padding.
+        data-surface="ai"
+        // Shows the steady brand-blue typing cursor only while the reveal is behind the text.
+        data-streaming-cursor={revealing ? "" : undefined}
+        className="bg-transparent rounded-none p-0 text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
+        markdown
+        isStreaming={isStreaming}
+        highlightQuery={highlightQuery}
+      >
+        {revealed}
+      </MessageContent>
+    )
+  },
+)
+AssistantAnswerText.displayName = "AssistantAnswerText"
+
 const AssistantMessage = React.memo(
   ({ message, isLastMessage, isStreaming, hideReasoning }: AssistantMessageProps) => {
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
@@ -569,23 +600,13 @@ const AssistantMessage = React.memo(
               const body = coworkBlocks ? coworkBlocks.prose : parsed.body
               return (
                 <React.Fragment key={`text-${index}`}>
-                  {coworkBlocks && !body ? null : <MessageContent
-                    // Round 32/34 (Claude-style): the assistant reply is plain prose on
-                    // the page surface -- NO bubble. The DS MessageContent base paints a
-                    // filled bubble (bg-secondary rounded-lg p-2); round 33 added
-                    // data-surface="ai" + a text className but did NOT override that base,
-                    // so the grey bubble still rendered (Felix "still not done"). Override
-                    // the base here -- bg-transparent, no radius, no inset padding -- via
-                    // the cn(base, className) twMerge in MessageContent. The right-aligned
-                    // darker USER bubble now carries the "machine vs person" distinction.
-                    data-surface="ai"
-                    className="bg-transparent rounded-none p-0 text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
-                    markdown
-                    isStreaming={isStreaming}
-                    highlightQuery={highlightQuery}
-                  >
-                    {body}
-                  </MessageContent>}
+                  {coworkBlocks && !body ? null : (
+                    <AssistantAnswerText
+                      body={body}
+                      isStreaming={isStreaming}
+                      highlightQuery={highlightQuery}
+                    />
+                  )}
                   {coworkBlocks ? <CoworkBlocksView blocks={coworkBlocks} isLatest={isLastMessage} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
