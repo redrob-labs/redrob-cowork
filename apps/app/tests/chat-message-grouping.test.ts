@@ -98,7 +98,7 @@ describe("splitTurnAtAnswer", () => {
         bashPart("c1"),
         textPart("Let me also check something."),
         bashPart("c2"),
-        textPart("All done — here is the summary."),
+        textPart("All done - here is the summary."),
       ],
     };
 
@@ -109,7 +109,7 @@ describe("splitTurnAtAnswer", () => {
     expect(split?.answer.id).toBe("msg-1");
     expect(split?.answer.parts).toHaveLength(1);
     const answerPart = split?.answer.parts[0];
-    expect(answerPart?.type === "text" && answerPart.text).toBe("All done — here is the summary.");
+    expect(answerPart?.type === "text" && answerPart.text).toBe("All done - here is the summary.");
   });
 
   test("returns null for a pure prose message", () => {

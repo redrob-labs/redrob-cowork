@@ -3,12 +3,12 @@ import * as React from "react"
 /**
  * Letter-by-letter reveal pacing for streaming assistant text.
  *
- * A throttler can only ever reveal text the model has ALREADY emitted — it cannot outrun
+ * A throttler can only ever reveal text the model has ALREADY emitted - it cannot outrun
  * generation. So "start at 2x Claude, settle to 1x Claude" is implemented as a constant
  * target reading rate with an opening burst: at the start of a turn the model's first
  * tokens land before the reveal catches up (a backlog), so we reveal at 2x the base rate
  * to drain that backlog and feel instantly responsive, then decay smoothly to 1x the base
- * rate — roughly Claude's sustained painted pace — so the reveal never stalls waiting for
+ * rate - roughly Claude's sustained painted pace - so the reveal never stalls waiting for
  * tokens. When the model races far ahead a bounded extra catch-up keeps the lag from
  * growing without turning the reveal choppy; when streaming ends we snap to the full text.
  *

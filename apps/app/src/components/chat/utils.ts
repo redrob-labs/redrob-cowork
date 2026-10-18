@@ -343,7 +343,7 @@ export function getAssistantRenderGroups(
       }
       // Paper aggregation rule: consecutive command/edit/read/search calls
       // collapse into one aggregate group. Prose, files, and other tools
-      // break the run; reasoning does not — thinking models emit a
+      // break the run; reasoning does not - thinking models emit a
       // reasoning part before nearly every call, and letting it split the
       // run degrades every aggregate to a single call.
       if (isAggregatableToolPart(part)) {

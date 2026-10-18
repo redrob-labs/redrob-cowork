@@ -123,7 +123,7 @@ export function getAggregateRowLabel(part: AnyToolPart): string {
   return getToolActivityLabel(part)
 }
 
-/** Label for the single latest in-flight call — the self-replacing "Now:" line. */
+/** Label for the single latest in-flight call - the self-replacing "Now:" line. */
 export function getAggregateNowLabel(parts: AnyToolPart[]): string | null {
   for (let index = parts.length - 1; index >= 0; index -= 1) {
     const part = parts[index]
