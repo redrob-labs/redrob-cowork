@@ -556,7 +556,9 @@
   padding-block: 0;
 }
 
-/* Round 6, item 3: the not-connected account placeholder avatar (neutral person glyph). */
+/* Round 6, item 3: the not-connected account placeholder avatar (neutral person glyph).
+   uiux-refresh-oct-18-2026: now hosts the Secure-Connection storm avatar (web component).
+   overflow:hidden clips the square avatar to the circular frame; size + background unchanged. */
 .cowork-account__avatar-placeholder {
   display: inline-flex;
   align-items: center;
@@ -567,6 +569,7 @@
   border-radius: 999px;
   background: var(--surface-sunken);
   color: var(--ink-muted);
+  overflow: hidden; /* Clip the square storm avatar into the circular frame. */
 }
 
 /*

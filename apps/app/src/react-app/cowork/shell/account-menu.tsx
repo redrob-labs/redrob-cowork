@@ -2,8 +2,9 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "lucide-react";
 import { Menu, icons, type MenuItem } from "@redrob-labs/ui";
+
+import { SecureConnectionAvatar } from "../../../components/ui/secure-connection-avatar/SecureConnectionAvatar";
 
 import { t } from "../../../i18n";
 import { recheckRedrobKeyStatus } from "../../domains/billing/redrob-pay-sheet";
@@ -105,7 +106,13 @@ export function AccountLabel(props: { connected: boolean | null; link?: RedrobKe
         reads correctly as a placeholder whether or not a Redrob key is connected.
       */}
       <span className="cowork-account__avatar-placeholder" aria-hidden="true">
-        <User size={16} strokeWidth={2} />
+        {/*
+          The storm "thinking" avatar fills the 32x32 circular placeholder; the wrapper's
+          border-radius + overflow clip it to a circle, and the background stays
+          var(--surface-sunken) (size + background unchanged). The wrapper falls back to the
+          neutral User glyph under reduced motion or when custom elements are unsupported.
+        */}
+        <SecureConnectionAvatar label={title} />
       </span>
       <span className="cowork-account__text">
         <b>{title}</b>
