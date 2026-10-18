@@ -54,11 +54,16 @@ export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
   }
 
   // The element fills the 32x32 circular placeholder; the frame clips it to a circle. It animates
-  // regardless of the OS reduced-motion setting, by product direction (round 3).
+  // The element is rendered OVERSIZED (200% of the 32px frame) and the placeholder's
+  // overflow:hidden + border-radius circular mask clips it. The flurryplus storm throws particles
+  // outside the character box, so at the frame's own 32px the field is too sparse to read; drawing
+  // it at ~64px and masking back to the circle shows a denser, livelier crop of the same storm
+  // while keeping the avatar's 32px circular footprint unchanged. It animates regardless of the OS
+  // reduced-motion setting, by product direction (round 3).
   return (
     <secure-connection-avatar
       aria-label={label}
-      style={{ width: "100%", height: "100%", display: "block" }}
+      style={{ width: "200%", height: "200%", flex: "none", display: "block" }}
     />
   )
 }
