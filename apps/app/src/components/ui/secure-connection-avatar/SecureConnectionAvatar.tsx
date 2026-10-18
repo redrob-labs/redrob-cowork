@@ -9,15 +9,17 @@ export type SecureConnectionAvatarProps = {
 }
 
 /**
- * The sidebar account avatar: the Secure-Connection "thinking" storm, a self-contained
+ * The sidebar account avatar: the Secure-Connection "thinking" globe, a self-contained
  * animated web component (no deps/network, own shadow root). It is square and unmasked,
  * so the surrounding `.cowork-account__avatar-placeholder` supplies the 32x32 circular
- * frame and the `var(--surface-sunken)` background (unchanged from before).
+ * frame and the `var(--surface-sunken)` background (unchanged from before). The globe asset is
+ * designed FOR 32px (larger high-contrast grains, particles kept within a 326/768 radius so the
+ * circular mask leaves room) - it reads clearly at avatar size and fills the circle edge to edge.
  *
- * The storm artwork is ALWAYS shown AND ALWAYS animated, including under the OS reduced-motion
+ * The globe artwork is ALWAYS shown AND ALWAYS animated, including under the OS reduced-motion
  * preference. The vendored component normally self-suppresses motion under reduced-motion, but
  * per product direction (round 3) its internal reduced-motion check is neutralized in the
- * vendored .js (search `redrob-always-animate`) so the particle flurry keeps running regardless.
+ * vendored .js (search `redrob-always-animate`) so the particle sweep keeps running regardless.
  * It still pauses while the document is hidden. The neutral `User` glyph remains only as the
  * fallback for a runtime without custom-element support or a load failure.
  *
