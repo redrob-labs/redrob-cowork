@@ -1641,13 +1641,14 @@ export function SessionPage(props: SessionPageProps) {
             </ResizablePanel>
               {sidePanelOpen && !isMobile ? (
               <>
-                {/* Round 2 (item 3c): the side panel is resizable, but the handle was
-                    `hidden bg-transparent` so it had no visible grip and read as non-draggable.
-                    Show a visible seam + a grab-handle pill on lg (min 320px / max 70% below),
-                    with a cursor and hover highlight so it's discoverable. */}
+                {/* Round 2/3 (item 3c): the side panel IS inside this ResizablePanelGroup as a
+                    sibling after the main panel, so it can resize. It was not draggable because the
+                    handle was `hidden bg-transparent` (no grip) and lg-gated. Render it always
+                    (not lg-only), with a visible seam, a grab pill, a wider pointer hit area and a
+                    col-resize cursor. Bounds stay min 320px / max 70% (below). */}
                 <ResizableHandle
                   withHandle
-                  className="hidden bg-border/70 transition-colors hover:bg-border lg:flex cursor-col-resize"
+                  className="w-1.5 bg-border/60 transition-colors hover:bg-primary/40 data-[resize-handle-active]:bg-primary/60 cursor-col-resize"
                 />
                 <ResizablePanel
                   panelRef={browserPanelRef}

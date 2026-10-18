@@ -722,7 +722,8 @@
   }
 }
 
-/* Left-aligned tablist (round 2, item 3b): Artifacts | Files | Browser. */
+/* Left-aligned ICON tabs (round 3, item 1): Artifacts | Files | Browser, glyph-only with a
+   hover title. */
 .cowork-panel__tabs {
   display: flex;
   align-items: center;
@@ -735,11 +736,12 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  padding: 2px var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm, 6px);
-  font: var(--text-body);
-  font-size: 13px;
-  line-height: 20px;
   color: var(--ink-secondary);
   transition: background var(--duration-fast, 120ms), color var(--duration-fast, 120ms);
 }
@@ -750,15 +752,9 @@
 }
 
 .cowork-panel__tab[data-active] {
-  color: var(--ink-primary);
-  font-weight: 600;
-}
-
-.cowork-panel__title {
-  margin: 0;
-  font: var(--text-body-strong);
-  font-weight: 600;
-  color: var(--ink-primary);
+  /* Active icon tab: brand-tinted glyph on a soft brand wash. */
+  color: var(--primary, #2b52ff);
+  background: var(--surface-brand-subtle, rgba(43, 82, 255, 0.08));
 }
 
 .cowork-panel__actions {

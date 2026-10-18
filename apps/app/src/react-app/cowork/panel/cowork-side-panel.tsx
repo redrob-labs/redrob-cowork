@@ -20,11 +20,18 @@ const ICON = { width: 15, height: 15, "aria-hidden": true };
 /** The panel's three tabs, left to right: this chat's artifacts, the workspace files, the in-app browser. */
 const PANEL_TABS: readonly PanelTab[] = ["artifacts", "files", "browser"];
 
-/** The human label for a tab, used in its button and as the panel's aria-label. */
+/** The human label for a tab, used as the icon button's accessible name + hover title. */
 export function panelTabLabel(tab: PanelTab): string {
   if (tab === "artifacts") return t("cowork.panel_artifacts");
   if (tab === "browser") return t("cowork.panel_browser");
   return t("cowork.panel_files");
+}
+
+/** The glyph for a tab: sparkle for artifacts, folder for files, globe for the browser. */
+function panelTabIcon(tab: PanelTab): ReactNode {
+  if (tab === "artifacts") return icons.sparkle(ICON);
+  if (tab === "browser") return icons.globe(ICON);
+  return icons.folderOpen(ICON);
 }
 
 export type CoworkSidePanelViewProps = {
@@ -44,7 +51,8 @@ export function CoworkSidePanelView(props: CoworkSidePanelViewProps) {
   return (
     <aside className="cowork-panel" aria-label={panelTabLabel(props.tab)}>
       <div className="cowork-panel__top">
-        {/* Left-aligned tablist: the three tabs in order, replacing the old single switch button. */}
+        {/* Left-aligned icon tabs: one glyph per tab; the label rides as the hover title
+            (IconButton sets title + aria-label from `label`). Active tab is tinted. */}
         <div className="cowork-panel__tabs" role="tablist" aria-label={t("cowork.panel_artifacts")}>
           {PANEL_TABS.map((tab) => (
             <button
@@ -52,11 +60,13 @@ export function CoworkSidePanelView(props: CoworkSidePanelViewProps) {
               type="button"
               role="tab"
               aria-selected={props.tab === tab}
+              aria-label={panelTabLabel(tab)}
+              title={panelTabLabel(tab)}
               className="cowork-panel__tab"
               data-active={props.tab === tab ? "" : undefined}
               onClick={() => props.onSwitch(tab)}
             >
-              {panelTabLabel(tab)}
+              {panelTabIcon(tab)}
             </button>
           ))}
         </div>
