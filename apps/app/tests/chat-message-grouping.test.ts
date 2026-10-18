@@ -153,3 +153,55 @@ describe("message timestamps", () => {
     expect(getMessageCompleted(message)).toBeNull();
   });
 });
+
+describe("getAssistantRenderGroups unifyActivity (Cowork frame)", () => {
+  test("folds reasoning + every tool kind into one activity group", () => {
+    const search: DynamicToolUIPart = {
+      type: "dynamic-tool",
+      toolName: "websearch",
+      toolCallId: "s1",
+      state: "output-available",
+      input: { query: "US China AI race" },
+      output: "ok",
+    };
+    const groups = getAssistantRenderGroups(
+      [
+        reasoningPart("Researching the US-China AI race."),
+        bashPart("c1"),
+        editPart("c2", "/tmp/a.ts"),
+        search,
+      ],
+      true, // showThinking
+      true, // unifyActivity
+    );
+    expect(groups).toHaveLength(1);
+    expect(groups[0].kind).toBe("activity");
+    if (groups[0].kind === "activity") {
+      // All three tool calls (bash, edit, non-aggregatable websearch) are in the one group.
+      expect(groups[0].parts).toHaveLength(3);
+      expect(groups[0].reasoning).toContain("Researching the US-China AI race.");
+    }
+  });
+
+  test("keeps the answer text as its own group after the activity", () => {
+    const groups = getAssistantRenderGroups(
+      [reasoningPart("thinking"), bashPart("c1"), textPart("Here is the answer.")],
+      true,
+      true,
+    );
+    expect(groups).toHaveLength(2);
+    expect(groups[0].kind).toBe("activity");
+    expect(groups[1].kind).toBe("text");
+  });
+
+  test("off (bare surface) keeps the original per-kind grouping", () => {
+    const groups = getAssistantRenderGroups(
+      [reasoningPart("thinking"), bashPart("c1"), editPart("c2", "/tmp/a.ts")],
+      true,
+      false,
+    );
+    // reasoning is its own group, tools aggregate - no "activity" group exists.
+    expect(groups.some((g) => g.kind === "activity")).toBe(false);
+    expect(groups.some((g) => g.kind === "tool-aggregate")).toBe(true);
+  });
+});

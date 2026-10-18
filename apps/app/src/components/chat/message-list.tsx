@@ -23,6 +23,8 @@ import {
 import {
   DynamicToolUIPart,
   isFileUIPart,
+  isReasoningUIPart,
+  isToolUIPart,
   ToolUIPart,
   type FileUIPart,
   type UIMessage,
@@ -109,6 +111,7 @@ import { hasPreservedMcpAppResult, McpAppFrame } from "@/components/chat/mcp-app
 import { ReasoningBlock } from "@/components/chat/reasoning-block"
 import { SubagentRunLine } from "@/components/chat/subagent-run-line"
 import { ToolAggregateGroup } from "@/components/chat/tool-aggregate-group"
+import { UnifiedActivity } from "@/components/chat/unified-activity"
 import {
   isApplyPatchToolPart,
   isBashToolPart,
@@ -567,10 +570,11 @@ const AssistantMessage = React.memo(
     const inCoworkFrame = useInCoworkFrame()
     const assistantRenderGroups = React.useMemo(
       () => {
-        const groups = getAssistantRenderGroups(message.parts, showThinking)
+        // Round 4: in the Cowork frame, fold reasoning + all tools into one in-place activity row.
+        const groups = getAssistantRenderGroups(message.parts, showThinking, inCoworkFrame)
         return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
       },
-      [hideReasoning, message.parts, showThinking]
+      [hideReasoning, inCoworkFrame, message.parts, showThinking]
     )
 
     return (
@@ -629,6 +633,19 @@ const AssistantMessage = React.memo(
               return (
                 <div key={`file-${index}`} className="w-fit max-w-full">
                   <FileMessage part={group.part} tone="assistant" />
+                </div>
+              )
+            }
+
+            if (group.kind === "activity") {
+              return (
+                <div key={`activity-${index}`} className="w-full">
+                  <UnifiedActivity
+                    parts={group.parts}
+                    reasoning={group.reasoning}
+                    isStreaming={isStreaming}
+                    activityKey={`${message.id}-activity-${index}`}
+                  />
                 </div>
               )
             }
@@ -1623,6 +1640,22 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
     ? getActiveToolLabel(collectLatestAssistantToolParts(messages))
     : null
 
+  /*
+    Round 4: in the Cowork frame the running turn's loader is the inline UnifiedActivity row, which
+    appears as soon as the latest assistant message has any tool or reasoning part. Until then
+    (the model is thinking but has emitted nothing yet) the bottom CoworkRunStatus still stands in,
+    so there is exactly one loader - never both.
+  */
+  const latestAssistant = React.useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      if (messages[i]?.role === "assistant") return messages[i]
+    }
+    return undefined
+  }, [messages])
+  const hasInlineActivity = inCoworkFrame && isStreaming && Boolean(
+    latestAssistant?.parts.some((part) => isToolUIPart(part) || isReasoningUIPart(part)),
+  )
+
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
       {/*
@@ -1676,7 +1709,7 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
       })}
 
       {showLoading && !inCoworkFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
-      {showLoading && inCoworkFrame ? (
+      {showLoading && inCoworkFrame && !hasInlineActivity ? (
         <div className={CHAT_COLUMN}>
           <CoworkRunStatus label={liveActionLabel} />
         </div>
