@@ -12,7 +12,7 @@ import { toast } from "@/components/ui/sonner";
 import { coworkChatsVersion, publishCoworkChatsRevision } from "@/react-app/cowork/shell/cowork-connection";
 import { ensurePersonalWorkspaceOnce } from "@/react-app/cowork/shell/personal-workspace";
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
-import { NEW_CHAT_KEY, effectiveCoworkMode, isComplexPrompt, memoryFor, modeFor, resolvePromptAgent, useCoworkComposerStore } from "@/react-app/cowork/composer/composer-state";
+import { NEW_CHAT_KEY, effectiveCoworkMode, memoryFor, modeFor, resolvePromptAgent, useCoworkComposerStore } from "@/react-app/cowork/composer/composer-state";
 import { skillRunPrompt } from "@/react-app/cowork/skills/skills";
 import { useCoworkStartStore, type PendingCoworkChat } from "@/react-app/cowork/skills/start-chat";
 import { syncCrashReports } from "@/react-app/cowork/settings/crash-reports";
@@ -1096,9 +1096,14 @@ export function SessionRoute() {
               ? coworkSystemText(coworkMemory, envSystemContext || undefined, coworkNotes)
               : envSystemContext;
             const system = coworkSystem;
+            // Round 6: a complex Run prompt auto-upgrades to Plan so the model drafts a plan first,
+            // then the plan auto-runs (CoworkPlan auto-run). A plan being RUN is never upgraded
+            // (see effectiveCoworkMode), or the plan would loop back to the Plan agent forever.
+            const chosenCoworkMode = modeFor(coworkChats, targetSessionId, local.prefs.coworkNewChatMode);
+            const sendCoworkMode = effectiveCoworkMode(chosenCoworkMode, text, isPlanRunPrompt(text));
             // The map back to the real values stays on this computer, for showing the chat.
             // A Run prompt's answer is what Cross-check reads, once it arrives.
-            if (inCoworkFrame && modeFor(coworkChats, targetSessionId, local.prefs.coworkNewChatMode) === "run" && !isComplexPrompt(text)) {
+            if (inCoworkFrame && sendCoworkMode === "run") {
               useCheckStore.getState().expect(targetSessionId, {
                 question: sendable(text),
                 planned: isPlanRunPrompt(text),
@@ -1112,12 +1117,8 @@ export function SessionRoute() {
               model: sendModel ?? undefined,
               agent: resolvePromptAgent({
                 inFrame: inCoworkFrame,
-                // Round 6: a complex Run prompt auto-upgrades to Plan so the model drafts a plan
-                // first, then the plan auto-runs to an artifact (CoworkPlan auto-run).
-                mode: effectiveCoworkMode(
-                  modeFor(useCoworkComposerStore.getState().chats, targetSessionId, local.prefs.coworkNewChatMode),
-                  text,
-                ),
+                // The mode resolved above (complex Run -> Plan, plan runs left as Run).
+                mode: sendCoworkMode,
                 selectedAgent,
               }) ?? undefined,
               ...(sendVariant ? { variant: sendVariant } : {}),

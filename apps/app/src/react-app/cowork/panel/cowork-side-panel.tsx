@@ -1,10 +1,9 @@
 /** @jsxImportSource react */
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { EmptyState, IconButton, icons } from "@redrob-labs/ui";
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon";
-import { getArtifactsFromMessages, type ArtifactItem, canOpenArtifact, usePreviewArtifact } from "@/lib/artifacts";
-import { useOpenTargets } from "@/lib/target-provider";
+import { getArtifactsFromMessages, type ArtifactItem, canOpenArtifact } from "@/lib/artifacts";
 import { usePanelTabStore } from "../../domains/session/panel/panel-tab-store";
 import { isCollectibleArtifactTarget } from "../../domains/session/artifacts/open-target";
 
@@ -43,8 +42,8 @@ export type CoworkSidePanelViewProps = {
 
 /**
  * The panel beside the work: a header with three left-aligned tabs (Artifacts, Files, Browser)
- * and a close button, then the body. The header row is `h-9` with a bottom border so its rule
- * lines up with the main "New session" header across the seam (round 2, item 3a). Esc is left to
+ * and a close button, then the body. The header row is 48px with a bottom border so its rule
+ * lines up with the shell top bar across the seam (see .cowork-panel__top). Esc is left to
  * dialogs, so it does not close the panel.
  */
 export function CoworkSidePanelView(props: CoworkSidePanelViewProps) {
@@ -102,15 +101,17 @@ function CoworkPanelBrowser(props: { sessionKey: string }) {
   );
 }
 
-/** One artifact row: type icon + name; clicking opens it (preview, or the default app). */
+/**
+ * One artifact row: type icon + name; clicking opens it in the panel's file view. The panel lives
+ * in the Cowork shell, OUTSIDE the session surface's OpenTargetProvider, so the open-target hook
+ * would be a silent no-op here; the frame store's openFile (the same path a chat file chip takes)
+ * is the one that works.
+ */
 function CoworkArtifactRow(props: { artifact: ArtifactItem }) {
-  const previewArtifact = usePreviewArtifact();
-  const { onOpenTarget } = useOpenTargets();
+  const openFile = useFrameStore((state) => state.openFile);
   const open = () => {
     if (!canOpenArtifact(props.artifact)) return;
-    // Prefer the in-app preview; fall back to opening the target externally.
-    previewArtifact(props.artifact);
-    if (!onOpenTarget) return;
+    openFile(props.artifact.legacy_target.id);
   };
   return (
     <li>
@@ -135,9 +136,11 @@ function CoworkArtifactRow(props: { artifact: ArtifactItem }) {
  */
 function CoworkPanelArtifacts(props: { sessionKey: string }) {
   const targets = usePanelTabStore((state) => state.transcriptArtifactTargets[props.sessionKey]);
-  const artifacts = getArtifactsFromMessages([], (targets ?? []).filter(isCollectibleArtifactTarget), {
-    includeTargetFallbacks: true,
-  });
+  // Derived once per targets change, not on every panel render (the store re-renders this often).
+  const artifacts = useMemo(
+    () => getArtifactsFromMessages([], (targets ?? []).filter(isCollectibleArtifactTarget), { includeTargetFallbacks: true }),
+    [targets],
+  );
 
   if (artifacts.length === 0) {
     return (

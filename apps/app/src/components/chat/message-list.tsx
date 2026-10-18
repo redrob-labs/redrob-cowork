@@ -1697,15 +1697,21 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
     message said "nothing inline yet" while the row was still up from earlier parts. So scan the whole
     trailing run of assistant messages (the live group), not just the last one.
   */
+  const { showThinking } = useMessageList()
   const hasInlineActivity = React.useMemo(() => {
     if (!inCoworkFrame || !isStreaming) return false
     for (let i = messages.length - 1; i >= 0; i -= 1) {
       const message = messages[i]
       if (message?.role !== "assistant") break // stop at the user turn that opened this run
-      if (message.parts.some((part) => isToolUIPart(part) || isReasoningUIPart(part))) return true
+      // Mirror MessageGroup's row condition exactly: any tool part, or reasoning that has text AND
+      // is shown. A bare/empty reasoning part (how thinking starts streaming), or reasoning hidden by
+      // showThinking=false, puts up no row - suppressing the bottom loader then left NO loader.
+      if (message.parts.some((part) => isToolUIPart(part) || (showThinking && isReasoningUIPart(part) && part.text.trim().length > 0))) {
+        return true
+      }
     }
     return false
-  }, [inCoworkFrame, isStreaming, messages])
+  }, [inCoworkFrame, isStreaming, messages, showThinking])
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>

@@ -73,9 +73,11 @@ export function isComplexPrompt(text: string): boolean {
 /**
  * The mode a prompt actually runs in: the chosen mode, upgraded Run -> Plan when the prompt looks
  * complex. Only "run" is eligible (an explicit "plan" stays plan); keeps the manual toggle intact.
+ * `isPlanRun` marks a plan being RUN (thread-logic isPlanRunPrompt): never upgraded, since its
+ * prompt carries the whole plan (long, and says "plan") and upgrading it would loop plan -> plan.
  */
-export function effectiveCoworkMode(mode: ChatMode, text: string): ChatMode {
-  return mode === "run" && isComplexPrompt(text) ? "plan" : mode;
+export function effectiveCoworkMode(mode: ChatMode, text: string, isPlanRun = false): ChatMode {
+  return mode === "run" && !isPlanRun && isComplexPrompt(text) ? "plan" : mode;
 }
 
 /** "This project" only exists inside a project; elsewhere it reads as All my work. */

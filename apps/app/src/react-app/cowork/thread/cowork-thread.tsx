@@ -117,7 +117,12 @@ function editedPlanText(root: HTMLElement | null): string | null {
 }
 
 /** The plan: Run sends it to the run agent and switches the chat to Run; Keep keeps it here. */
-function CoworkPlan(props: { plan: PlanDoc; isLatest: boolean }) {
+function CoworkPlan(props: {
+  plan: PlanDoc;
+  isLatest: boolean;
+  /** Whether the plan may run itself once drafted; false while open questions sit beside it. */
+  autoRun: boolean;
+}) {
   const thread = useCoworkThread();
   const setMode = useCoworkComposerStore((state) => state.setMode);
   const [stage, setStage] = useState<PlanStage>("draft");
@@ -139,16 +144,21 @@ function CoworkPlan(props: { plan: PlanDoc; isLatest: boolean }) {
   // Fires exactly once per plan: only when this is the latest turn, still a draft, the thread is
   // idle (the plan finished streaming), and the user has not edited it (an edit means they want to
   // review first). autoRanRef guards against a second fire on re-render.
+  // sawDraftingRef: the plan must have been drafted WHILE this view was mounted (the thread was
+  // busy with it as the latest turn). Without it, reopening an old chat whose last turn is an
+  // unrun or kept plan (Keep is local state, lost on remount) would silently run that plan.
   const autoRanRef = useRef(false);
+  const sawDraftingRef = useRef(false);
+  if (props.isLatest && thread?.busy) sawDraftingRef.current = true;
   useEffect(() => {
-    if (autoRanRef.current) return;
+    if (autoRanRef.current || !props.autoRun || !sawDraftingRef.current) return;
     if (!thread || thread.busy) return;
     if (!props.isLatest || stage !== "draft" || edited.current) return;
     autoRanRef.current = true;
     run();
     // run/thread are stable enough for this one-shot; deps kept minimal intentionally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.isLatest, stage, thread?.busy]);
+  }, [props.autoRun, props.isLatest, stage, thread?.busy]);
 
   return (
     <div ref={root}>
@@ -191,7 +201,8 @@ export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolea
   return (
     <>
       {questions ? <CoworkQuestions questions={questions} isLatest={props.isLatest} /> : null}
-      {plan ? <CoworkPlan plan={plan} isLatest={props.isLatest} /> : null}
+      {/* A plan with unanswered questions beside it waits for the answers instead of auto-running. */}
+      {plan ? <CoworkPlan plan={plan} isLatest={props.isLatest} autoRun={!questions} /> : null}
     </>
   );
 }
@@ -222,10 +233,15 @@ function verdictToneClass(tone: CheckVerdict["tone"]): string {
  * check is still running it shows a muted "running" chip with no popover.
  */
 function CheckChip(props: {
-  icon: ReactNode;
+  /** Optional leading glyph; the chips currently stay textual (the report carries the icon). */
+  icon?: ReactNode;
+  /** The check's name, e.g. "Fact check". */
   name: string;
+  /** True while the check runs: a muted chip with a small loader and no popover. */
   running: boolean;
+  /** The one-word verdict and its tone, once the check is done. */
   verdict: CheckVerdict | null;
+  /** The full report the chip's popover shows, once the check is done. */
   report: ReactNode | null;
 }) {
   // Base chip styling shared by the running and finished states (pill, border, hover).
@@ -276,7 +292,6 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
           ) : null}
           {showFact ? (
             <CheckChip
-              icon={<span aria-hidden="true">{/* fact icon is inside the report; chip keeps it textual */}</span>}
               name={t("cowork.thread_fact_title")}
               running={factState === "running"}
               verdict={factState === "done" && result?.fact ? factConfidence(result.fact) : null}
@@ -285,7 +300,6 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
           ) : null}
           {showChallenge ? (
             <CheckChip
-              icon={<span aria-hidden="true" />}
               name={t("cowork.thread_challenge_title")}
               running={challengeState === "running"}
               verdict={challengeState === "done" && result?.challenge ? challengeOutcome(result.challenge) : null}

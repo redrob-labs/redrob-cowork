@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { effectiveCoworkMode, isComplexPrompt } from "../src/react-app/cowork/composer/composer-state";
+import { isPlanRunPrompt, planRunPrompt } from "../src/react-app/cowork/thread/thread-logic";
 
 describe("cowork complex-prompt auto-plan heuristic", () => {
   test("a short simple ask is NOT complex", () => {
@@ -30,5 +31,13 @@ describe("cowork complex-prompt auto-plan heuristic", () => {
     expect(effectiveCoworkMode("plan", "say hi")).toBe("plan");
     // A user on run with a simple ask stays on run.
     expect(effectiveCoworkMode("run", "ok")).toBe("run");
+  });
+
+  test("a plan being RUN is never upgraded back to Plan (no plan -> plan loop)", () => {
+    // The run prompt carries the whole plan and says "plan", so it always reads as complex.
+    const runPrompt = planRunPrompt("Step 1. Research the market.\nStep 2. Draft the report.");
+    expect(isPlanRunPrompt(runPrompt)).toBe(true);
+    expect(isComplexPrompt(runPrompt)).toBe(true);
+    expect(effectiveCoworkMode("run", runPrompt, isPlanRunPrompt(runPrompt))).toBe("run");
   });
 });

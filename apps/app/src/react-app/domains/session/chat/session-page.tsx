@@ -703,16 +703,24 @@ export function SessionPage(props: SessionPageProps) {
   // does not fire it, and only on an INCREASE (never on removal or on the initial load of a chat
   // that already had artifacts).
   const prevArtifactCountRef = useRef<{ sessionId: string | null; count: number }>({ sessionId: null, count: 0 });
+  // Whether the selected session has been seen RUNNING since it was opened. An existing chat's
+  // artifact targets sync in after it opens (0 -> N for the same session id), which would read as
+  // a "new" artifact; only a session that ran while open can produce a genuinely new one.
+  const sawSessionRunRef = useRef<{ sessionId: string | null; ran: boolean }>({ sessionId: null, ran: false });
+  const selectedSessionStatus = props.selectedSessionId ? props.sidebar.sessionStatusById[props.selectedSessionId] ?? "idle" : "idle";
   useEffect(() => {
     const sessionId = props.selectedSessionId ?? null;
+    if (sawSessionRunRef.current.sessionId !== sessionId) sawSessionRunRef.current = { sessionId, ran: false };
+    if (selectedSessionStatus !== "idle") sawSessionRunRef.current.ran = true;
     const prev = prevArtifactCountRef.current;
     const sameSession = prev.sessionId === sessionId;
     const increased = sameSession && artifactTargetCount > prev.count;
     prevArtifactCountRef.current = { sessionId, count: artifactTargetCount };
-    if (inCoworkFrame && increased && !panelRailActive) {
-      openArtifactRailPane();
-    }
-  }, [artifactTargetCount, inCoworkFrame, openArtifactRailPane, panelRailActive, props.selectedSessionId]);
+    if (!inCoworkFrame || !increased || !sawSessionRunRef.current.ran) return;
+    // In the Cowork frame the old rail never shows, and its toggle would land on Files (or CLOSE the
+    // panel when Files was already open), so open the frame panel straight on its Artifacts tab.
+    useFrameStore.getState().openPanel("artifacts");
+  }, [artifactTargetCount, inCoworkFrame, props.selectedSessionId, selectedSessionStatus]);
   const openVoiceRailPane = useCallback(() => {
     toggleCurrentSidePanel("voice");
   }, [toggleCurrentSidePanel]);
