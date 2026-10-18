@@ -25,6 +25,8 @@ import {
   answersToPrompt,
   approvalActions,
   isPlanRunPrompt,
+  isQuestionAnswerPrompt,
+  isSyntheticCoworkPrompt,
   memorySavedFrom,
   planRunPrompt,
   planStatus,
@@ -141,12 +143,29 @@ describe("parseCoworkBlocks", () => {
 describe("answers, plan and run", () => {
   const questions = parseCoworkBlocks(fence("redrob-questions", QUESTIONS)).questions ?? [];
 
-  test("answersToPrompt reads as the person's reply", () => {
+  test("answersToPrompt reads as the person's reply, behind the question-answer sentinel", () => {
+    // Item 10: the sent text is prefixed with the U+2060 U+FEFF provenance sentinel so the Cowork
+    // transcript can hide this synthetic send; the engine sees only the real answer after it.
+    const sentinel = "\u2060\ufeff";
     expect(answersToPrompt(questions, { q1: 1, q2: [0, 2] })).toBe(
-      "What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.",
+      `${sentinel}What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.`,
     );
-    expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe("Go ahead with what fits best.");
+    expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe(`${sentinel}Go ahead with what fits best.`);
     expect(answersSummary(questions, { q1: 0, q2: [1] })).toBe("Answered: A yes or no, The project's files");
+  });
+
+  test("synthetic Cowork sends are detectable and told apart by their sentinels (item 10)", () => {
+    const planRun = planRunPrompt("# A plan");
+    const answer = answersToPrompt(questions, { q1: 1, q2: [] });
+    // A plan-run is a plan-run, not a question-answer, and vice versa.
+    expect(isPlanRunPrompt(planRun)).toBe(true);
+    expect(isQuestionAnswerPrompt(planRun)).toBe(false);
+    expect(isQuestionAnswerPrompt(answer)).toBe(true);
+    expect(isPlanRunPrompt(answer)).toBe(false); // the question-answer sentinel must not read as a plan-run
+    // Both are synthetic machinery the transcript hides; an ordinary typed message is not.
+    expect(isSyntheticCoworkPrompt(planRun)).toBe(true);
+    expect(isSyntheticCoworkPrompt(answer)).toBe(true);
+    expect(isSyntheticCoworkPrompt("Just a normal message")).toBe(false);
   });
 
   test("Run sends the plan behind 'Run this plan.'", () => {

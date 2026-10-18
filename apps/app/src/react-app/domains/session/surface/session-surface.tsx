@@ -61,6 +61,7 @@ import { useSessionFindStore } from "./find-store";
 import { getSessionActivityStatusLabel, useSessionActivityStore, type SessionActivityStatus } from "@/react-app/domains/session/status/session-activity-store";
 import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permission-approval-modal";
 import { CoworkThreadContext, textDraft, type CoworkThread } from "@/react-app/cowork/thread/cowork-thread-context";
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
 import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
@@ -887,6 +888,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
     currentSnapshot,
     cachedRendered: rendered,
   });
+  // Item 10: inside the Cowork frame, synthetic plan-run / question-answer sends are hidden from
+  // the rendered transcript (the engine still gets them). Outside the frame the transcript is bare.
+  const inCoworkFrame = useInCoworkFrame();
   const revertMessageId = snapshot?.session.revert?.messageID ?? null;
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
@@ -916,8 +920,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
   }, [props.sessionId]);
 
   const baseRenderedMessages = useMemo(
-    () => deriveRenderedSessionMessages({ transcriptState, snapshot }),
-    [snapshot, transcriptState],
+    () => deriveRenderedSessionMessages({ transcriptState, snapshot, inCoworkFrame }),
+    [snapshot, transcriptState, inCoworkFrame],
   );
   const renderedMessages = useMemo(() => {
     if (evalMarkdownMessages.length === 0) return baseRenderedMessages;
@@ -2066,8 +2070,13 @@ export function SessionSurface(props: SessionSurfaceProps) {
                   </div>
                 )}
               </div>
-            ) : renderedMessages.length === 0 && effectiveActivityStatus !== "idle" ? (
+            ) : renderedMessages.length === 0 && effectiveActivityStatus !== "idle" && !inCoworkFrame ? (
               <div className="px-6 py-12">
+                {/* Item 5: this is the PaperGrainGradient orb ("gradient circle" loader). In the
+                    Cowork frame it painted for one frame right after send - before any message
+                    rendered - as a blink next to the globe CoworkRunStatus. The Cowork frame has
+                    its own single loader (CoworkRunStatus in MessageList), so suppress this orb
+                    there; the bare surface keeps it. */}
                 <AssistantWaitingCard label={getSessionActivityStatusLabel(effectiveActivityStatus)} />
               </div>
             ) : renderedMessages.length === 0 && snapshot && snapshot.messages.length === 0 && error ? (

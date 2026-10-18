@@ -33,7 +33,10 @@ export function answersToPrompt(questions: PlanQuestionData[], value: PlanAnswer
     const picks = chosen(question, value);
     return picks.length ? [`${question.question} ${sentence(picks.join(", "))}`] : [];
   });
-  return lines.length ? lines.join("\n") : t("cowork.thread_no_preference");
+  const body = lines.length ? lines.join("\n") : t("cowork.thread_no_preference");
+  // Item 10: prefix the sentinel so the transcript can hide this synthetic USER send (the engine
+  // still receives it). A distinct marker from the plan-run sentinel, so the two kinds are told apart.
+  return `${QUESTION_ANSWER_SENTINEL}${body}`;
 }
 
 /** The folded line once the questions are answered. */
@@ -73,6 +76,14 @@ export function planToText(plan: PlanDoc): string {
  */
 const PLAN_RUN_SENTINEL = "\u2060";
 
+/**
+ * A provenance sentinel for a synthetic QUESTION-ANSWER send (item 10): the choices the user made
+ * in the PlanQuestions card, sent to the engine as a reply. Distinct from the plan-run sentinel so
+ * the two synthetic kinds are told apart: U+2060 (word joiner) + U+FEFF (zero-width no-break
+ * space). Both render as nothing, so the engine sees only the real answer text after the prefix.
+ */
+const QUESTION_ANSWER_SENTINEL = "\u2060\ufeff";
+
 /** Run sends this, in Run mode, so the run agent gets the plan it is to follow. */
 export function planRunPrompt(planText: string): string {
   return `${PLAN_RUN_SENTINEL}${t("cowork.thread_run_prompt")}\n\n${planText.trim()}`;
@@ -80,7 +91,22 @@ export function planRunPrompt(planText: string): string {
 
 /** Whether a prompt is a plan being run (by its provenance sentinel), so its answer's receipt can say "Plan followed". */
 export function isPlanRunPrompt(prompt: string): boolean {
-  return prompt.startsWith(PLAN_RUN_SENTINEL);
+  // The question-answer sentinel starts with the same word joiner, so check it FIRST to avoid a
+  // question-answer send being misread as a plan-run.
+  return prompt.startsWith(PLAN_RUN_SENTINEL) && !prompt.startsWith(QUESTION_ANSWER_SENTINEL);
+}
+
+/** Whether a prompt is a synthetic question-answer send (item 10), by its provenance sentinel. */
+export function isQuestionAnswerPrompt(prompt: string): boolean {
+  return prompt.startsWith(QUESTION_ANSWER_SENTINEL);
+}
+
+/**
+ * Whether a prompt is any synthetic Cowork machinery send (a plan being run, or a question-answer
+ * reply) that the Cowork transcript should hide while the engine still receives it (item 10).
+ */
+export function isSyntheticCoworkPrompt(prompt: string): boolean {
+  return isPlanRunPrompt(prompt) || isQuestionAnswerPrompt(prompt);
 }
 
 export type PlanStage = "draft" | "kept" | "running" | "done";
