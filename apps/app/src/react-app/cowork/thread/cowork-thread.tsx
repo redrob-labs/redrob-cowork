@@ -8,13 +8,13 @@ import {
   FactCheckReport,
   PlanDocument,
   PlanQuestions,
-  TaskStatus,
   ThreadNote,
   type ChallengeReportProps,
   type FactCheckReportProps,
 } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
+import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader/RedrobLiquidLoader";
 import { useCoworkComposerStore } from "../composer/composer-state";
 import { useCheckStore, type AnswerChecks } from "./check-store";
 import type { ChallengeData, CoworkBlocks, FactCheckData, PlanDoc, PlanQuestionData } from "./cowork-blocks";
@@ -219,9 +219,21 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
   );
 }
 
-/** While a run works: what it is doing now. */
+/**
+ * While a run works: what it is doing now. This is the Cowork frame's "assistant is thinking"
+ * moment, so it carries the Redrob Liquid Loader (the brand mark melting through its three raked
+ * bars) rather than the DS three-bar TaskStatus. Rendered at the brand's 96px animated-symbol
+ * minimum with the live action label beside it. The loader follows reduced motion and pauses
+ * while the document is hidden on its own.
+ */
 export function CoworkRunStatus(props: { label: string | null }) {
-  return <TaskStatus state="running" label={props.label ?? t("cowork.thread_working")} />;
+  const label = props.label ?? t("cowork.thread_working");
+  return (
+    <div className="flex items-center gap-3 py-1 text-sm text-muted-foreground">
+      <RedrobLiquidLoader size={96} label={label} />
+      <span>{label}</span>
+    </div>
+  );
 }
 
 /** A note the run saved to memory. It can be removed from Memory, not from here. */

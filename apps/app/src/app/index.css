@@ -2306,10 +2306,14 @@ html[lang="ko"] {
 /*
   uiux-refresh-oct-18-2026: the streaming typing cursor. While the assistant answer is being
   revealed letter-by-letter (useSmoothReveal), message-list sets data-streaming-cursor on the
-  .markdown-content root. A steady (non-blinking) Redrob-Blue bar rides the end of the reveal,
-  attached to the LAST child's end so it sits inline after the final character rather than on a
-  new line. Steady by request; reduced motion is irrelevant here since it does not animate.
+  .markdown-content root. A blinking Redrob-Blue bar rides the end of the reveal, attached to
+  the LAST child's end so it sits inline after the final character rather than on a new line.
+  The blink is held steady under reduced motion.
 */
+@keyframes redrob-cursor-blink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
 .markdown-content[data-streaming-cursor] > :last-child::after {
   content: "";
   display: inline-block;
@@ -2319,6 +2323,13 @@ html[lang="ko"] {
   vertical-align: text-bottom;
   background: var(--primary); /* Redrob Blue via the DS token chain (--primary -> --action-primary). */
   border-radius: 1px;
+  animation: redrob-cursor-blink 1.06s steps(1, end) infinite; /* ~1s on/off blink. */
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Hold the caret steady (no blink) for motion-sensitive readers. */
+  .markdown-content[data-streaming-cursor] > :last-child::after {
+    animation: none;
+  }
 }
 
 .markdown-content [data-redrob-code-block] pre {
