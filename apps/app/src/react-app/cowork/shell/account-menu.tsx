@@ -110,7 +110,8 @@ export function AccountLabel(props: { connected: boolean | null; link?: RedrobKe
           The storm "thinking" avatar fills the 32x32 circular placeholder; the wrapper's
           border-radius + overflow clip it to a circle, and the background stays
           var(--surface-sunken) (size + background unchanged). The wrapper falls back to the
-          neutral User glyph under reduced motion or when custom elements are unsupported.
+          neutral User glyph only when custom elements are unsupported or fail to load; it keeps
+          animating under reduced motion by product direction (see SecureConnectionAvatar).
         */}
         <SecureConnectionAvatar label={title} />
       </span>

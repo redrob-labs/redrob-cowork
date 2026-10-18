@@ -749,12 +749,6 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-@media (max-width: 1024px) {
-  .cowork-panel__top {
-    /* The base is already 48px to match the shell top bar; no override needed here. */
-  }
-}
-
 /* Left-aligned ICON tabs (round 3, item 1): Artifacts | Files | Browser, glyph-only with a
    hover title. */
 .cowork-panel__tabs {
@@ -826,8 +820,8 @@
 
 @media (max-width: 1180px) {
   .cowork-shell--panel {
-    /* Still draggable in this range (round 3): use the width var, clamped a bit tighter so the
-       work column keeps room. */
+    /* Still draggable in this range (round 3): the same width var, with a narrower 400px default
+       so the work column keeps room before a width has been dragged. */
     grid-template-columns: minmax(0, 1fr) var(--app-panel-width, 400px);
   }
 }

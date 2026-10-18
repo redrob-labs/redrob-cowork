@@ -15,6 +15,7 @@ import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { t } from "@/i18n"
 import { cn } from "@/lib/utils"
 
+/** Most step rows the expanded table lists; the rest fold into a "+N more" line. */
 const ROW_CAP = 10
 
 /** Expansion persists per message while the session stays mounted (matches ToolAggregateGroup). */
@@ -56,6 +57,7 @@ function currentActivityLabel(parts: AnyToolPart[], reasoning: string): string {
   return reasoningLead(reasoning) ?? t("cowork.thread_working")
 }
 
+/** A step row's status dot: in flight, errored, or finished. */
 function rowStatus(part: AnyToolPart): "running" | "failed" | "done" {
   if (isToolPartInFlight(part)) return "running"
   if (part.state === "output-error") return "failed"
@@ -85,8 +87,9 @@ function useElapsed(active: boolean, startedAt?: number | null): string {
  * stack of per-tool and per-thinking lines, all of the turn's work folds into one row: the liquid
  * loader + a label that updates in place to the current activity (Claude-style), with an elapsed
  * timer while it runs. Clicking the row expands a steps table (status, action, duration) like the
- * reference, with faint reasoning context at the top. When the turn ends the row stays, collapsed,
- * as the past-tense "what it did" summary (kept per the locked calibration).
+ * reference, with faint reasoning context at the top. MessageGroup mounts it only while the run is
+ * live; once the turn ends the group falls back to the collapsed "Worked for ..." step run, so the
+ * non-streaming header branch below is a safe default for any other caller rather than a live path.
  */
 export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, startedAt }: UnifiedActivityProps) {
   const [expanded, setExpandedState] = React.useState(() => expandedByKey.get(activityKey) ?? false)
