@@ -4,6 +4,7 @@
  * can render it the same whether the data is real or sample. Also the small time and
  * privacy-label formatters the menu rows need.
  */
+import { createElement } from "react";
 import { icons, type AppShellNavItem, type IconComponent } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
@@ -123,7 +124,10 @@ export function buildCoworkNav(input: CoworkNavInput): AppShellNavItem[] {
     ...(recent.length
       ? [{
           id: "recent-view-all",
-          label: t("cowork.nav_recent_view_all"),
+          // Styled label (not a plain string): matches the "Recent" heading's font size, but
+          // bold and in a lighter/greyer tone than the heading. A span lets us style only this
+          // item's text, since AppShellNavItem has no className hook. See .cowork-nav-view-all.
+          label: createElement("span", { className: "cowork-nav-view-all" }, t("cowork.nav_recent_view_all")),
           href: toHref("/history"),
           current: input.current === "history",
         }]
