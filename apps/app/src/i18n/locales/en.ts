@@ -1527,7 +1527,7 @@ const en = {
   "cowork.thread_receipt_quick": "a quick answer",
   "cowork.thread_receipt_unchecked": "Not checked",
   "cowork.thread_reject": "Reject",
-  "cowork.thread_run_prompt": "Run this plan.",
+  "cowork.thread_run_prompt": "Run this plan. Write the final deliverable to a file so it opens as an artifact.",
   "cowork.thread_verdict_closed": "Couldn't open",
   "cowork.thread_verdict_fixed": "Fixed",
   "cowork.thread_verdict_holds": "Holds up",

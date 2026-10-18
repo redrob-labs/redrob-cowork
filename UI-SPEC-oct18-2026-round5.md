@@ -61,3 +61,8 @@ FRONTEND BUILD (no server):
 
 ## Gates (every commit)
 tsc 0; bun fail-set == baseline (2 pre-existing); i18n/brand/syntax 0; vite build 0. No dashes.
+
+## Status (round 5 complete)
+- C avatar swap: DONE (17c39eb2)
+- A cross-check verdict chips + popovers, drop model chip: DONE (ba8e5fa)
+- B plan->artifact auto-open + run-prompt string: DONE (this commit) - FULLY frontend, no server.

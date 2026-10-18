@@ -1517,7 +1517,7 @@ const ko = {
   "cowork.thread_receipt_quick": "간단한 답",
   "cowork.thread_receipt_unchecked": "확인하지 않음",
   "cowork.thread_reject": "거절",
-  "cowork.thread_run_prompt": "이 계획대로 실행해 주세요.",
+  "cowork.thread_run_prompt": "이 계획대로 실행해 주세요. 최종 결과물은 파일로 저장해 아티팩트로 열리게 해 주세요.",
   "cowork.thread_verdict_closed": "열 수 없음",
   "cowork.thread_verdict_fixed": "고침",
   "cowork.thread_verdict_holds": "맞음",

@@ -697,6 +697,22 @@ export function SessionPage(props: SessionPageProps) {
       toggleCurrentSidePanel("panel", FILES_TARGET);
     }
   }, [artifactFileTargets, hasArtifactTargets, openTab, panelRailActive, props.selectedSessionId, selectTab, sessionPanelState, setCurrentSidePanel, toggleCurrentSidePanel]);
+  // Round 5: in the Cowork frame, when a run produces a NEW artifact (the count for this session
+  // rises), auto-open the right panel on it - Claude-style, so a complex task's deliverable opens
+  // in the Artifact panel without the user hunting for it. Tracked per session so switching chats
+  // does not fire it, and only on an INCREASE (never on removal or on the initial load of a chat
+  // that already had artifacts).
+  const prevArtifactCountRef = useRef<{ sessionId: string | null; count: number }>({ sessionId: null, count: 0 });
+  useEffect(() => {
+    const sessionId = props.selectedSessionId ?? null;
+    const prev = prevArtifactCountRef.current;
+    const sameSession = prev.sessionId === sessionId;
+    const increased = sameSession && artifactTargetCount > prev.count;
+    prevArtifactCountRef.current = { sessionId, count: artifactTargetCount };
+    if (inCoworkFrame && increased && !panelRailActive) {
+      openArtifactRailPane();
+    }
+  }, [artifactTargetCount, inCoworkFrame, openArtifactRailPane, panelRailActive, props.selectedSessionId]);
   const openVoiceRailPane = useCallback(() => {
     toggleCurrentSidePanel("voice");
   }, [toggleCurrentSidePanel]);

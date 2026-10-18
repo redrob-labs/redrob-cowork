@@ -158,7 +158,8 @@ describe("answers, plan and run", () => {
     expect(text).toContain("2. Draft the notice.");
     expect(text).toContain("- Write the notice (Redrob Auto)");
     const prompt = planRunPrompt(text);
-    expect(prompt.startsWith("Run this plan.\n\n# End the Seorin MSA")).toBe(true);
+    expect(prompt.startsWith("Run this plan.")).toBe(true);
+    expect(prompt).toContain("\n\n# End the Seorin MSA");
     expect(isPlanRunPrompt(prompt)).toBe(true);
     expect(isPlanRunPrompt("Run the tests")).toBe(false);
   });
