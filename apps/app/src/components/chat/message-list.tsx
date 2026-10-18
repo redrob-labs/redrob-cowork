@@ -1625,7 +1625,14 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
-      {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
+      {/*
+        The in-list starter cards are the bare session surface's empty state. In the Cowork
+        frame the real home is session-empty-hero ("Let's make something good."), so these
+        cards are a second, redundant home -- and because the message list mounts empty for a
+        frame when a new chat opens, they FLASH on the way into a session. Gate them out of the
+        Cowork frame entirely so only the real home shows; the bare surface keeps them.
+      */}
+      {messages.length === 0 && !inCoworkFrame && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
 
       {items.map((item) => {
         if (isMessageGroup(item)) {

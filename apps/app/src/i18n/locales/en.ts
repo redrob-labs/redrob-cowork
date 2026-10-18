@@ -739,7 +739,7 @@ const en = {
   "dashboard.sandbox_checking_docker": "Checking Docker...",
   "dashboard.sandbox_get_ready_title": "Sandboxes need Docker",
   "dashboard.skills": "Skills",
-  "cowork.account_connected": "Successfully connected",
+  "cowork.account_connected": "Connection secure",
   "cowork.account_launcher": "Signed in with Redrob Launcher",
   "cowork.account_feedback": "Send feedback",
   "cowork.account_menu_label": "Settings and help",
