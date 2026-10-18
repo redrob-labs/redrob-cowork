@@ -230,17 +230,17 @@ export function CoworkRunStatus(props: { label: string | null }) {
   const elapsed = useElapsedClock();
   return (
     <div className="flex items-center gap-2 py-1">
-      {/* Small inline loader (down from the 96px thinking-block size) so the row reads as a line. */}
-      <RedrobLiquidLoader size={22} label={label} />
-      {/* Grey, slightly-smaller-than-chat (text-xs vs text-sm) label with a sweeping shimmer. */}
-      <span className="redrob-shimmer-text text-xs">{label}</span>
-      {/* Elapsed mm:ss, tabular so the digits do not jitter as they tick. */}
+      {/* Inline loader, a touch larger than before so it reads clearly beside the text. */}
+      <RedrobLiquidLoader size={32} label={label} />
+      {/* Grey label with a sweeping shimmer, at the chat body size. */}
+      <span className="redrob-shimmer-text text-sm">{label}</span>
+      {/* Elapsed time as '34s' / '1m 23s', tabular so the digits do not jitter as they tick. */}
       <span className="text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
     </div>
   );
 }
 
-/** mm:ss elapsed since this hook first mounted, ticking once a second. */
+/** Elapsed time since this hook first mounted, formatted '34s' or '1m 23s', ticking once a second. */
 function useElapsedClock(): string {
   const startRef = useRef<number>(Date.now());
   const [now, setNow] = useState(() => Date.now());
@@ -251,7 +251,8 @@ function useElapsedClock(): string {
   const totalSeconds = Math.max(0, Math.floor((now - startRef.current) / 1000));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  // Under a minute: just seconds ("34s"). A minute or more: "1m 23s".
+  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
 /** A note the run saved to memory. It can be removed from Memory, not from here. */

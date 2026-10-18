@@ -678,7 +678,37 @@
  */
 .cowork-shell--panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 440px;
+  /* Round 3 (item 1): the panel column is now DRAGGABLE - its width comes from the right-sidebar
+     width store (--app-panel-width, clamped 320-960), not a fixed 440px. */
+  grid-template-columns: minmax(0, 1fr) var(--app-panel-width, 440px);
+}
+
+/* The grip that resizes the right panel: an 8px hit strip straddling the panel's left edge,
+   drawing a thin 2px line on hover/drag (mirrors .cowork-shell__side-resizer). */
+.cowork-panel__resizer {
+  position: absolute;
+  top: var(--app-titlebar-height, 0px);
+  bottom: 0;
+  right: var(--app-panel-width, 440px);
+  width: 8px;
+  transform: translateX(4px);
+  cursor: col-resize;
+  z-index: 40;
+  background: transparent;
+}
+.cowork-panel__resizer::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: transparent;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-panel__resizer:hover::before,
+.cowork-panel__resizer:active::before {
+  background: color-mix(in srgb, var(--spectrum-sky) 22%, transparent);
 }
 
 .cowork-shell--panel > div {
@@ -709,16 +739,19 @@
   justify-content: space-between;
   gap: var(--space-2);
   box-sizing: border-box;
-  /* Round 2 (item 3a): match the main "New session" header row so the two bottom
-     borders line up across the seam. That header is h-9 (36px), h-12 (48px) on max-lg. */
-  height: 36px;
+  /* Round 3 (item: red line): in the Cowork frame the panel sits beside the SHELL top bar
+     (.rr-shell__top), not the 36px session header matched earlier - so the panel header must
+     be the shell top bar's height for the two bottom borders to meet. The shell top is content
+     sized by its size="sm" icon buttons (~28px) plus its block padding; 48px matches it here.
+     If the two rules ever drift again, nudge this value, it is the single knob for the seam. */
+  height: 48px;
   padding: 0 var(--space-2) 0 var(--space-3);
   border-bottom: 1px solid var(--border-subtle);
 }
 
 @media (max-width: 1024px) {
   .cowork-panel__top {
-    height: 48px; /* Matches the main header's max-lg h-12. */
+    /* The base is already 48px to match the shell top bar; no override needed here. */
   }
 }
 
@@ -793,13 +826,20 @@
 
 @media (max-width: 1180px) {
   .cowork-shell--panel {
-    grid-template-columns: minmax(0, 1fr) 400px;
+    /* Still draggable in this range (round 3): use the width var, clamped a bit tighter so the
+       work column keeps room. */
+    grid-template-columns: minmax(0, 1fr) var(--app-panel-width, 400px);
   }
 }
 
 @media (max-width: 900px) {
   .cowork-shell--panel {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Below 900px the panel is an overlay sheet; the resizer is hidden (too narrow to drag). */
+  .cowork-panel__resizer {
+    display: none;
   }
 
   .cowork-panel {

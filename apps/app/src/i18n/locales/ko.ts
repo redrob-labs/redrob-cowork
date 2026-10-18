@@ -1158,6 +1158,7 @@ const ko = {
   "cowork.privacy_standard": "표준",
   "cowork.privacy_strict": "엄격",
   "cowork.resize_sidebar": "드래그하여 사이드바 크기 조절",
+  "cowork.resize_panel": "드래그하여 패널 크기 조절",
   "cowork.project_chats_empty_text": "여기서 시작한 채팅은 이 프로젝트의 파일과 메모리를 봅니다.",
   "cowork.project_chats_empty_title": "아직 채팅이 없습니다",
   "cowork.project_chats_title": "채팅",

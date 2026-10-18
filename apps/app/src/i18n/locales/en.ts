@@ -1161,6 +1161,7 @@ const en = {
   "cowork.privacy_standard": "Standard",
   "cowork.privacy_strict": "Strict",
   "cowork.resize_sidebar": "Drag to resize the sidebar",
+  "cowork.resize_panel": "Drag to resize the panel",
   "cowork.project_chats_empty_text": "A chat started here sees this project's files and memory.",
   "cowork.project_chats_empty_title": "No chats here yet",
   "cowork.project_chats_title": "Chats",

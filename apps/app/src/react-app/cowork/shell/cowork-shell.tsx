@@ -101,6 +101,24 @@ export function CoworkShellView(props: CoworkShellViewProps) {
   const setSideWidth = useUiStateStore((state) => state.setWorkspaceLeftSidebarWidth);
   const setSideResizing = useUiStateStore((state) => state.setWorkspaceLeftSidebarResizing);
   const sideResizing = useUiStateStore((state) => state.workspaceLeftSidebarResizing);
+  // Round 3 (item 1): the RIGHT side panel is draggable too, mirroring the left resizer. Its width
+  // is the persisted right-sidebar width (clamped 320-960 in the store); the grip lives on its left
+  // edge and dragging LEFT widens it (the panel is anchored to the window's right).
+  const panelWidth = useUiStateStore((state) => state.workspaceRightSidebarExpandedWidth);
+  const setPanelWidth = useUiStateStore((state) => state.setWorkspaceRightSidebarExpandedWidth);
+  const startPanelResize = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = panelWidth;
+    const onMove = (move: PointerEvent) => setPanelWidth(startWidth - (move.clientX - startX));
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
   const startSideResize = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -128,7 +146,7 @@ export function CoworkShellView(props: CoworkShellViewProps) {
       <div
         className={shellClass}
         onClickCapture={keepSkipLinkOnScreen}
-        style={{ "--app-side-width": `${sideWidth}px` } as CSSProperties}
+        style={{ "--app-side-width": `${sideWidth}px`, "--app-panel-width": `${panelWidth}px` } as CSSProperties}
       >
         {sidebarOpen ? (
           <div
@@ -210,7 +228,20 @@ export function CoworkShellView(props: CoworkShellViewProps) {
         >
           {props.children}
         </AppShell>
-        {panelOpen ? <CoworkSidePanel chatId={props.chatId ?? null} /> : null}
+        {panelOpen ? (
+          <>
+            {/* Round 3 (item 1): the grip that resizes the right panel. Anchored to the panel's
+                left edge; dragging widens/narrows it via the clamped right-sidebar width store. */}
+            <div
+              className="cowork-panel__resizer"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label={t("cowork.resize_panel")}
+              onPointerDown={startPanelResize}
+            />
+            <CoworkSidePanel chatId={props.chatId ?? null} />
+          </>
+        ) : null}
       </div>
     </CoworkFrameContext>
   );
