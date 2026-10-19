@@ -105,7 +105,7 @@ export const RADAR: RadarEdition = {
         summary:
           "Albertans vote on Monday, Oct 19, in a referendum on separating from Canada. On the eve of the vote, labour leaders and the main federalist campaign held a unity rally, saying the Wainwright tragedy shows why the country should stay together. Some business leaders have warned about the economic risks of leaving.",
         summaryKo:
-          "앨버타 주민들이 10월 19일 월요일, 캐나다에서 분리할지를 묻는 주민투표에 나서요. 투표 전날 노동계 지도자들과 연방 잔류 진영은 통합 집회를 열고 웨인라이트 참사가 함께 남아야 할 이유를 보여 준다고 말했어요. 일부 기업 경영자들은 분리가 가져올 경제적 위험을 경고했어요.",
+          "앨버타 주민들이 10월 19일 월요일, 캐나다에서 분리할지를 묻는 주민투표에 나서요. 투표 전날 노동계 지도자들과 연방 잔류 진영은 단합 집회를 열고, 웨인라이트 참사가 캐나다가 함께해야 하는 이유를 보여 준다고 말했어요. 일부 기업 경영자들은 분리가 가져올 경제적 위험을 경고했어요.",
         source: "The Canadian Press",
         url: "https://ca.news.yahoo.com/ap-top-stories-october-19-233304540.html",
         publishedAt: "2026-10-18T23:33:00Z",
@@ -117,7 +117,7 @@ export const RADAR: RadarEdition = {
         summary:
           "Kenya's health director-general Patrick Amoth said on Oct 18 that one of 38 people tested that day was positive. The patient is a 49-year-old man who is not a health worker. The case adds to a regional outbreak that is still spreading.",
         summaryKo:
-          "케냐 보건부 패트릭 아모스 국장은 10월 18일 그날 검사한 38명 중 1명이 양성이었다고 밝혔어요. 환자는 의료진이 아닌 49세 남성이에요. 주변 지역으로 번지고 있는 유행에 확진자가 한 명 더 늘었어요.",
+          "케냐 보건부 패트릭 아모스 국장은 10월 18일, 이날 검사한 38명 중 1명이 양성이라고 밝혔어요. 환자는 의료진이 아닌 49세 남성이에요. 주변 지역으로 번지는 유행 속에 확진자가 한 명 더 늘었어요.",
         source: "The Straits Times (Reuters)",
         url: "https://www.straitstimes.com/world/kenya-confirms-eighth-ebola-case-as-regional-outbreak-spreads",
         publishedAt: "2026-10-18T22:10:00Z",
@@ -141,7 +141,7 @@ export const RADAR: RadarEdition = {
         summary:
           "McLaren is selling five working Formula One cars once driven by champions, including Lewis Hamilton and the late Ayrton Senna. One of them was also tested by actor Brad Pitt. The sale, through dealer Tom Hartley Jr, is expected to raise tens of millions of dollars.",
         summaryKo:
-          "맥라렌이 루이스 해밀턴과 고 아일톤 세나 등 챔피언들이 몰던 F1 머신 5대를 실제로 달릴 수 있는 상태로 내놓아요. 그중 한 대는 배우 브래드 피트가 시험 주행하기도 했어요. 딜러 톰 하틀리 주니어를 통한 판매로 수천만 달러가 모일 것으로 보여요.",
+          "맥라렌이 루이스 해밀턴과 고 아일톤 세나 등 챔피언들이 몰던 F1 머신 5대를 실제로 달릴 수 있는 상태로 내놓아요. 그중 한 대는 배우 브래드 피트가 시험 주행하기도 했어요. 판매는 딜러 톰 하틀리 주니어가 맡았고, 판매액은 수천만 달러에 이를 전망이에요.",
         source: "The Straits Times",
         url: "https://www.straitstimes.com/sport/formula-one/mclaren-to-sell-five-f1-cars-all-driven-by-champions-and-one-by-brad-pitt",
         publishedAt: "2026-10-18T22:10:00Z",
@@ -152,16 +152,16 @@ export const RADAR: RadarEdition = {
     summary:
       "The French unrest still fills your feeds and held three Weibo trending spots at once. Also going around: Airbnb checkout rulebooks, football clips and October sounds on TikTok.",
     summaryKo:
-      "피드는 여전히 프랑스 시위 이야기로 가득하고, 웨이보 검색어 세 자리를 한꺼번에 차지했어요. 에어비앤비 퇴실 규칙, 미식축구 영상, 틱톡의 10월 음원도 많이 돌고 있어요.",
+      "피드는 여전히 프랑스 시위 이야기로 가득하고, 관련 주제가 웨이보 실시간 검색어에 세 개나 올랐어요. 에어비앤비 퇴실 규칙, 미식축구 영상, 틱톡의 10월 음원도 많이 퍼지고 있어요.",
     stories: [
       {
         id: "social-weibo-france",
         headline: "France's unrest takes three spots on Weibo at once",
-        headlineKo: "프랑스 시위, 웨이보 검색어 세 자리 동시 차지",
+        headlineKo: "프랑스 시위, 웨이보 실시간 검색어 3개 차지",
         summary:
           "Chinese social media followed the French protests closely, with three related topics on Weibo's trending list at the same time. The image that spread furthest was the 143-year-old town hall in Limoges burning as its clock tower fell. A photo of someone dressed as Batman in Lyon's burned tourist office also travelled widely.",
         summaryKo:
-          "중국 소셜 미디어는 프랑스 시위를 자세히 지켜봤고, 웨이보 인기 검색어에 관련 주제가 동시에 세 개나 올랐어요. 가장 널리 퍼진 장면은 143년 된 리모주 시청이 불타며 시계탑이 무너지는 모습이었어요. 불탄 리옹 관광 안내소에 배트맨 차림으로 선 사람의 사진도 많이 공유됐어요.",
+          "중국 소셜 미디어도 프랑스 시위에 큰 관심을 보였고, 웨이보 인기 검색어에 관련 주제가 동시에 세 개나 올랐어요. 가장 널리 퍼진 장면은 143년 된 리모주 시청이 불타며 시계탑이 무너지는 모습이었어요. 불탄 리옹 관광 안내소에 배트맨 차림으로 선 사람의 사진도 많이 공유됐어요.",
         source: "Trending on Weibo",
         url: "https://www.trendingonweibo.com/hotwords/france-town-hall-unrest-weibo/",
         publishedAt: "2026-10-18T09:03:00Z",
@@ -173,7 +173,7 @@ export const RADAR: RadarEdition = {
         summary:
           "A wave of viral videos shows guests sharing receipts, doorbell camera clips and long rulebooks from short-term rental hosts. The checkout demands range from mowing the lawn to fines for leaving the dishwasher running. Short-term rentals are still doing well despite the backlash.",
         summaryKo:
-          "숙박객들이 단기 임대 숙소에서 받은 영수증, 현관 카메라 영상, 긴 규칙집을 공유하는 영상이 크게 퍼지고 있어요. 잔디 깎기부터 식기세척기를 켜 둔 채 나가면 내는 벌금까지 퇴실 요구도 가지각색이에요. 이런 반발에도 단기 임대 시장은 여전히 잘되고 있어요.",
+          "숙박객들이 단기 임대 숙소에서 받은 영수증, 현관 카메라 영상, 긴 규칙집을 공유하는 영상이 크게 퍼지고 있어요. 잔디 깎기부터 식기세척기를 켜 둔 채 나가면 내는 벌금까지 퇴실 요구도 가지각색이에요. 이런 반발에도 단기 임대 시장은 여전히 호황이에요.",
         source: "Forbes",
         url: "https://www.forbes.com/sites/maryroeloffs/2026/10/17/airbnb-hosts-shamed-over-outrageous-chores-but-short-term-rentals-are-thriving/",
         publishedAt: "2026-10-17T12:00:00Z",
@@ -197,7 +197,7 @@ export const RADAR: RadarEdition = {
         summary:
           "Video of a Duke football player pushing a female athletic trainer aside while a teammate lay injured spread widely on Saturday night. His attorney has since spoken up to defend him. The clip has started a debate about conduct on the field.",
         summaryKo:
-          "토요일 밤, 듀크대 미식축구 선수가 다친 동료 곁에 있던 여성 트레이너를 밀쳐 내는 영상이 크게 퍼졌어요. 이후 선수의 변호사가 나서서 그를 옹호했어요. 이 영상을 두고 경기장에서의 태도에 대한 논쟁이 일고 있어요.",
+          "토요일 밤, 듀크대 미식축구 선수가 다친 동료 곁의 여성 트레이너를 밀쳐 내는 영상이 크게 퍼졌어요. 이후 선수의 변호사가 나서서 그를 옹호했어요. 이 영상은 경기장 내 행동을 둘러싼 논쟁으로 번졌어요.",
         source: "Yardbarker",
         url: "https://www.yardbarker.com/college_football/articles/attorney_defends_duke_football_player_after_he_smacked_female_trainer_away/s1_17616_44443658",
         publishedAt: "2026-10-18T18:02:00Z",
