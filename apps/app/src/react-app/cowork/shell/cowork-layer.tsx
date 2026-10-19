@@ -10,6 +10,7 @@ import { isMacPlatform } from "../../../app/utils";
 import { t } from "../../../i18n";
 import { usePlatform } from "../../kernel/platform";
 import { SkillDialog } from "../skills/skill-dialog";
+import { consoleCatalogue } from "../skills/console-catalogue";
 import { ProjectDialog } from "../projects/project-dialog";
 import { useCoworkRunEvents } from "../run/use-cowork-run-events";
 import { isCoworkSettingsPath } from "../settings/settings-sections";
@@ -330,6 +331,22 @@ export function CoworkLayerView(props: CoworkLayerViewProps) {
   );
 }
 
+/**
+ * Round 10 (Skills flash fix): load the public skill catalogue once in the background after start,
+ * so the first visit to Skills or a skill page paints from memory instead of waiting on ~97 requests.
+ */
+function useWarmSkillCatalogue() {
+  useEffect(() => {
+    const warm = () => void consoleCatalogue.warm();
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(warm, 1500);
+    return () => window.clearTimeout(id);
+  }, []);
+}
+
 /** The frame's one layer over every screen: the open dialog and the toast. Mounted once. */
 export function CoworkLayer() {
   const modal = useFrameStore((state) => state.modal);
@@ -340,6 +357,7 @@ export function CoworkLayer() {
   useSearchShortcut();
   useToggleBrowserShortcut();
   useCoworkRunEvents();
+  useWarmSkillCatalogue();
 
   return (
     <CoworkLayerView

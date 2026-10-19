@@ -1,5 +1,5 @@
 import type { RedrobSkillItem } from "../../../app/lib/redrob-server";
-import type { CoworkSkill, LibrarySkill, SkillDraft, SkillFilters, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
+import type { CoworkSkill, LibrarySkill, SkillDetail, SkillDraft, SkillFilters, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
 
 /*
  * Skills are SKILL.md files (the agentskills.io specification) in the workspace's
@@ -224,6 +224,44 @@ export function tagLabels(tags: SkillTags, taxonomy: SkillTaxonomy | null, local
   const task = profession?.tasks.find((entry) => entry.id === tags.task);
   const language = taxonomy.languages.find((entry) => entry.id === tags.language);
   return [profession, task, language].flatMap((entry) => (entry ? [pick(entry.label)] : []));
+}
+
+/**
+ * Round 10 (flash fix): the marketplace paints only once the installed list has data AND the
+ * catalogue query has settled (loaded or failed). Painting earlier showed "Your skills" alone, or
+ * an empty page, for the frames before the catalogue arrived.
+ */
+export function marketplaceReady(installed: { hasData: boolean }, library: { isPending: boolean }): boolean {
+  return installed.hasData && !library.isPending;
+}
+
+/**
+ * Round 10 (flash fix): a skill page's first frame, built from what is already in memory - the
+ * catalogue entry (`consoleCatalogue.peek`) and the cached installed list - so opening a skill paints
+ * its real page at once instead of a slug title over a grey skeleton. Null when neither knows it.
+ */
+export function seedSkillDetail(
+  name: string,
+  catalogue: SkillDetail | null,
+  installed: readonly CoworkSkill[] | null,
+): SkillDetail | null {
+  const mine = installed?.find((skill) => skill.name === name) ?? null;
+  if (!mine) return catalogue ? { ...catalogue, installed: null } : null;
+  const display = {
+    ...(catalogue?.title ?? mine.title ? { title: catalogue?.title ?? mine.title } : {}),
+    ...(catalogue?.titleKo ?? mine.titleKo ? { titleKo: catalogue?.titleKo ?? mine.titleKo } : {}),
+    ...(catalogue?.summary ?? mine.summary ? { summary: catalogue?.summary ?? mine.summary } : {}),
+    ...(catalogue?.summaryKo ?? mine.summaryKo ? { summaryKo: catalogue?.summaryKo ?? mine.summaryKo } : {}),
+    ...(catalogue?.version ? { version: catalogue.version } : {}),
+  };
+  return {
+    ...display,
+    name,
+    description: mine.description,
+    tags: mine.tags,
+    body: catalogue?.body ?? "",
+    installed: { origin: mine.origin, scope: mine.scope },
+  };
 }
 
 /** What Run sends: the skill by name, and anything the person added. */

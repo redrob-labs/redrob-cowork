@@ -12,6 +12,7 @@ import { ScheduledScreen } from "../preview/cowork-scheduled";
 import { ProjectScreen, ProjectsScreen } from "../projects/cowork-projects";
 import { SkillScreen } from "../skills/cowork-skill";
 import { SkillsScreen } from "../skills/cowork-skills";
+import { WorkflowScreen } from "../skills/cowork-workflow";
 import { RouteReady } from "./route-ready";
 
 export { RouteReady };
@@ -59,6 +60,8 @@ export function coworkRoutes(chat: ReactNode) {
     <Route key="memory" path="/memory" element={ready(<CoworkMemoryScreen />)} />,
     <Route key="memory-scope" path="/memory/:scope" element={ready(<CoworkMemoryScreen />)} />,
     <Route key="skills" path="/skills" element={ready(<SkillsScreen />)} />,
+    // Round 10: a featured workflow (several skills for one job); an unknown id returns to Skills.
+    <Route key="workflow" path="/skills/workflow/:id" element={ready(<WorkflowScreen />)} />,
     <Route key="skill" path="/skill/:name" element={ready(<SkillScreen />)} />,
     // Playbooks became skills: old links land on Skills.
     <Route key="playbooks" path="/playbooks" element={<Navigate to="/skills" replace />} />,

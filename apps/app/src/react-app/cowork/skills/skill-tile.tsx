@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, icons } from "@redrob-labs/ui";
@@ -33,13 +33,15 @@ type SkillTileProps = {
   onAdd: (name: string) => void;
   /** Starts an installed skill when a workspace is connected. */
   onUse?: (name: string) => void;
+  /** Round 10: keeps element ids unique when one skill sits on two shelves (Your skills and Popular). */
+  shelf?: string;
 };
 
 /** App Store style skill lockup: icon, title, the full short description, then the action. */
-export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }: SkillTileProps) {
+export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse, shelf }: SkillTileProps) {
   const title = skillDisplayTitle(row, locale);
   const brief = skillBrief(row, locale);
-  const briefId = `skill-brief-${row.name}`;
+  const briefId = shelf ? `skill-brief-${shelf}-${row.name}` : `skill-brief-${row.name}`;
   return (
     <li className="cowork-skill-tile" data-skill={row.name}>
       <Link
@@ -88,12 +90,33 @@ type SkillShelfProps = Omit<SkillTileProps, "row"> & {
   rows: SkillRow[];
 };
 
-/** One horizontally scrolling marketplace shelf; edge chevrons appear on hover or keyboard focus. */
+/** One horizontally scrolling marketplace shelf of skill tiles. */
 export function SkillShelf({ id, rows, ...tileProps }: SkillShelfProps) {
+  return (
+    <MarketplaceShelf id={id} label={SHELF_LABEL[id]()} count={rows.length}>
+      {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
+    </MarketplaceShelf>
+  );
+}
+
+type MarketplaceShelfProps = {
+  /** Stable id for the heading's id. */
+  id: string;
+  /** Localized heading, also the list's name and the chevrons' context. */
+  label: string;
+  /** Item count, so the chevrons re-measure when it changes. */
+  count: number;
+  /** Round 10: `cards` for the square workflow covers, `tiles` (default) for skill circles. */
+  variant?: "tiles" | "cards";
+  /** The `<li>` items. */
+  children: ReactNode;
+};
+
+/** A horizontally scrolling shelf; edge chevrons appear on hover or keyboard focus. */
+export function MarketplaceShelf({ id, label, count, variant = "tiles", children }: MarketplaceShelfProps) {
   const scroller = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ canPrev: false, canNext: false });
   const headingId = `skill-shelf-${id}`;
-  const label = SHELF_LABEL[id]();
   const measure = useCallback(() => {
     const node = scroller.current;
     if (!node) return;
@@ -106,23 +129,24 @@ export function SkillShelf({ id, rows, ...tileProps }: SkillShelfProps) {
     const observer = new ResizeObserver(measure);
     observer.observe(node);
     return () => observer.disconnect();
-  }, [measure, rows.length]);
+  }, [measure, count]);
   const move = (direction: -1 | 1) => {
     const node = scroller.current;
     if (!node) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: reduced ? "auto" : "smooth" });
   };
+  const cards = variant === "cards";
 
   return (
-    <section className="cowork-skills__shelf" aria-labelledby={headingId}>
+    <section className={cards ? "cowork-skills__shelf cowork-skills__shelf--cards" : "cowork-skills__shelf"} aria-labelledby={headingId}>
       <div className="cowork-skills__shelf-heading">
         <h2 id={headingId}>{label}</h2>
       </div>
       <div className="cowork-skills__shelf-viewport">
         <ShelfChevron direction={-1} label={t("cowork.skills_scroll_left", { shelf: label })} show={edges.canPrev} onMove={move} />
-        <ul ref={scroller} className="cowork-skills__shelf-row" role="list" aria-label={label} onScroll={measure}>
-          {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
+        <ul ref={scroller} className={cards ? "cowork-skills__shelf-row cowork-skills__shelf-row--cards" : "cowork-skills__shelf-row"} role="list" aria-label={label} onScroll={measure}>
+          {children}
         </ul>
         <ShelfChevron direction={1} label={t("cowork.skills_scroll_right", { shelf: label })} show={edges.canNext} onMove={move} />
       </div>

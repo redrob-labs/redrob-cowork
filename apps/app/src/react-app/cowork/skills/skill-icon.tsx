@@ -6,8 +6,8 @@ import { skillTone } from "./skills";
 type SkillIconProps = {
   /** Stable skill id used to choose the same tone everywhere. */
   name: string;
-  /** Visual size for marketplace tile, detail hero, or compact row. */
-  size: "tile" | "hero" | "row";
+  /** Visual size for marketplace tile, detail hero, compact row, or `fill` (sized by its parent, e.g. a workflow mosaic cell). */
+  size: "tile" | "hero" | "row" | "fill";
   /** Optional square artwork; a failed image falls back to the tone. */
   src?: string;
 };
