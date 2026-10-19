@@ -101,7 +101,7 @@ export function CoworkFileView(props: CoworkFileViewProps) {
       <div className="cowork-file__head">
         <FileIcon file={file} />
         <div>
-          {/* Item 4: the panel header uses the same humanized title as the in-chat card
+          {/* The panel header uses the same humanized title as the in-chat card
               (prettyArtifactTitle), falling back to the raw filename when the path is empty. */}
           <b>{prettyArtifactTitle(file.path || file.name)}</b>
           <span>
@@ -134,16 +134,15 @@ export function CoworkFileView(props: CoworkFileViewProps) {
 type PreviewData = { kind: "text"; text: string } | { kind: "image"; data: ArrayBuffer; type: string | null } | { kind: "none" };
 
 /**
- * The file's preview, drawn by the artifact panel's previewers: a sample's own text, or the
- * file read from the workspace. Office files and spreadsheets say to open them in Office.
+ * The one query that reads a file for preview. The Files preview and the Artifacts list rows share
+ * it, so they share one cache entry of one shape and opening a row costs no second read.
  */
-export function CoworkFilePreview(props: { file: CoworkFile; client: CoworkFileClient | null; workspaceId: string | null }) {
-  const { file, client, workspaceId } = props;
+export function filePreviewQuery(file: CoworkFile, client: CoworkFileClient | null, workspaceId: string | null) {
   const kind = filePreviewKind(file.name);
-  const query = useQuery<PreviewData>({
-    queryKey: ["cowork-file-preview", workspaceId, file.id],
+  return {
+    queryKey: ["cowork-file-preview", workspaceId, file.id] as const,
     enabled: !file.body && Boolean(client && workspaceId && file.path) && kind !== "none",
-    queryFn: async () => {
+    queryFn: async (): Promise<PreviewData> => {
       if (!client || !workspaceId || !file.path) return { kind: "none" };
       if (kind === "image") {
         const result = await client.downloadWorkspaceFile(workspaceId, file.path);
@@ -153,7 +152,17 @@ export function CoworkFilePreview(props: { file: CoworkFile; client: CoworkFileC
     },
     retry: false,
     staleTime: 30_000,
-  });
+  };
+}
+
+/**
+ * The file's preview, drawn by the artifact panel's previewers: a sample's own text, or the
+ * file read from the workspace. Office files and spreadsheets say to open them in Office.
+ */
+export function CoworkFilePreview(props: { file: CoworkFile; client: CoworkFileClient | null; workspaceId: string | null }) {
+  const { file, client, workspaceId } = props;
+  const kind = filePreviewKind(file.name);
+  const query = useQuery(filePreviewQuery(file, client, workspaceId));
   const image = query.data?.kind === "image" ? query.data : null;
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   useEffect(() => {

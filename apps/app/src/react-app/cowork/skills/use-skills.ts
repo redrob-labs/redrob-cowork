@@ -46,7 +46,7 @@ export async function removeSkill(deps: SkillActionDeps, name: string): Promise<
 }
 
 /**
- * Round 10: a workflow's "Add all". Adds each name in turn, carries on past a failure, refreshes the
+ * A workflow's "Add all". Adds each name in turn, carries on past a failure, refreshes the
  * lists once and says what happened in one toast. Returns how many were added.
  */
 export async function installSkills(deps: SkillActionDeps, names: readonly string[]): Promise<{ added: number; failed: number }> {

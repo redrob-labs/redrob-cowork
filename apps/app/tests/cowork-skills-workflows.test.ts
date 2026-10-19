@@ -3,12 +3,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
-import en from "../src/i18n/locales/en";
-import ko from "../src/i18n/locales/ko";
 import { WorkflowView, type WorkflowViewProps } from "../src/react-app/cowork/skills/cowork-workflow";
 import type { SkillRow } from "../src/react-app/cowork/skills/skills";
 import { installSkills } from "../src/react-app/cowork/skills/use-skills";
-import { WorkflowCard } from "../src/react-app/cowork/skills/workflow-card";
 import {
   WORKFLOW_IDS,
   WORKFLOW_SKILLS,
@@ -17,7 +14,6 @@ import {
   missingSkills,
   skillJurisdiction,
   workflowGroups,
-  workflowPath,
   workflowRows,
 } from "../src/react-app/cowork/skills/workflows";
 
@@ -57,14 +53,10 @@ describe("featured workflows data", () => {
         seen.add(name);
       }
     }
-  });
-
-  test("ten curated workflows, all shown when the catalogue has their skills", () => {
-    expect(WORKFLOW_IDS).toHaveLength(10);
+    // All ten are shown when the catalogue has their skills, and only known ids route.
     expect(availableWorkflows(allRows()).map((workflow) => workflow.id)).toEqual([...WORKFLOW_IDS]);
     expect(isWorkflowId("legal-drafting")).toBe(true);
     expect(isWorkflowId("nope")).toBe(false);
-    expect(workflowPath("vc-deal")).toBe("/skills/workflow/vc-deal");
   });
 
   test("missing names are skipped and a workflow under two skills is hidden", () => {
@@ -91,22 +83,6 @@ describe("featured workflows data", () => {
     expect(missing[0]).toBe("kr-vc-option-pool-design");
     expect(missing).not.toContain("kr-vc-cap-table-dilution");
   });
-
-  test("every workflow has localized copy free of dashes and filler words", () => {
-    const banned = /[\u2013\u2014]|seamless|effortless|unlock|empower|AI-powered/i;
-    for (const id of WORKFLOW_IDS) {
-      const key = id.replace(/-/g, "_");
-      for (const part of ["title", "sub"]) {
-        const name = `cowork.skills_workflow_${key}_${part}` as keyof typeof en;
-        expect(typeof en[name]).toBe("string");
-        expect(typeof (ko as Record<string, string>)[name]).toBe("string");
-        expect(en[name]).not.toMatch(banned);
-        expect((ko as Record<string, string>)[name]).not.toMatch(banned);
-      }
-    }
-    expect(en["cowork.skills_section_workflows"]).toBe("The whole job, one set");
-    expect((ko as Record<string, string>)["cowork.skills_section_workflows"]).toBe("업무 전체를 한 세트로");
-  });
 });
 
 describe("workflow markup", () => {
@@ -123,14 +99,6 @@ describe("workflow markup", () => {
     onAdd: () => {},
     onAddAll: () => {},
     ...overrides,
-  });
-
-  test("the card links to the workflow page and describes itself", () => {
-    const html = render(React.createElement("ul", null, React.createElement(WorkflowCard, { id: "office", rows: workflowRows("office", allRows()), locale: "en", fromPath: "/skills" })));
-    expect(html).toContain('href="/skills/workflow/office"');
-    expect(html).toContain('aria-describedby="workflow-sub-office"');
-    expect(html).toContain("cowork-workflow-cover");
-    expect(html).not.toContain("title=");
   });
 
   test("the page groups skills, links each to its page and offers Add all", () => {

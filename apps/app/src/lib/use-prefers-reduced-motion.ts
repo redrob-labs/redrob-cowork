@@ -1,25 +1,20 @@
-import * as React from "react"
+import { useSyncExternalStore } from "react";
 
-const QUERY = "(prefers-reduced-motion: reduce)"
+const QUERY = "(prefers-reduced-motion: reduce)";
 
-/** Whether the OS asks for reduced motion right now (false where matchMedia is unavailable). */
-function readReducedMotion(): boolean {
-  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(QUERY).matches
+/** Whether the operating system asks for less motion right now; false outside a browser. */
+export function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && (window.matchMedia?.(QUERY).matches ?? false);
 }
 
-/**
- * Whether the OS asks for reduced motion, read on the first render (so no animated frame shows
- * first) and kept live when the setting changes.
- */
+function subscribe(onChange: () => void): () => void {
+  const media = typeof window !== "undefined" ? window.matchMedia?.(QUERY) : undefined;
+  if (!media) return () => {};
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+
+/** The reduced-motion preference as live React state, updating when the OS setting changes. */
 export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(readReducedMotion)
-  React.useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return
-    const query = window.matchMedia(QUERY)
-    setReduced(query.matches)
-    const onChange = (event: MediaQueryListEvent) => setReduced(event.matches)
-    query.addEventListener("change", onChange)
-    return () => query.removeEventListener("change", onChange)
-  }, [])
-  return reduced
+  return useSyncExternalStore(subscribe, prefersReducedMotion, () => false);
 }

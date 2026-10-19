@@ -332,7 +332,7 @@ export function CoworkLayerView(props: CoworkLayerViewProps) {
 }
 
 /**
- * Round 10 (Skills flash fix): load the public skill catalogue once in the background after start,
+ * Loads the public skill catalogue once in the background after start,
  * so the first visit to Skills or a skill page paints from memory instead of waiting on ~97 requests.
  */
 function useWarmSkillCatalogue() {

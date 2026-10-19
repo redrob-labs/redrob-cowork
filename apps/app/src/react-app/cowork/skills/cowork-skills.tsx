@@ -2,38 +2,23 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router";
-import { Badge, Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
+import { Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { openExternal } from "../connectors/cowork-connectors";
 import { PreviewPage } from "../preview/preview-note";
 import { previewKey } from "../preview/preview";
-import type { SkillOrigin, TeamSkillsState } from "../services/types";
+import type { TeamSkillsState } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { CONSOLE_SKILLS_URL, shouldRestoreListFocus } from "./skills";
+import { CONSOLE_SKILLS_URL, runSkill } from "./skills";
 import { installSkill } from "./use-skills";
-import { runSkill } from "./cowork-skill";
 import { useCoworkStartStore } from "./start-chat";
 import { consoleCatalogue } from "./console-catalogue";
 import { MarketplaceShelf, SkillShelf, SkillTile } from "./skill-tile";
 import { marketplaceSections, useMarketplaceRows } from "./use-marketplace";
 import { WorkflowShelf } from "./workflow-card";
-
-/** The localized label for where a skill came from. */
-export function originLabel(origin: SkillOrigin): string {
-  switch (origin) {
-    case "library": return t("cowork.skills_origin_library");
-    case "team": return t("cowork.skills_origin_team");
-    case "mine": return t("cowork.skills_origin_mine");
-  }
-}
-
-/** A small tone-coded badge naming a skill's origin. */
-export function OriginBadge(props: { /** Origin rendered by this badge. */ origin: SkillOrigin }) {
-  return <Badge size="sm" tone={props.origin === "team" ? "info" : props.origin === "mine" ? "success" : "neutral"}>{originLabel(props.origin)}</Badge>;
-}
 
 /** What the team check says when it is something to act on. */
 export function teamStatusText(state: TeamSkillsState | null): string | null {
@@ -44,13 +29,12 @@ export function teamStatusText(state: TeamSkillsState | null): string | null {
   return null;
 }
 
-
 /** The catalogue notice appears only after installed rows are ready; with nothing to show it stands in for the page. */
 export function shouldShowLibraryNotice(rows: readonly unknown[] | null, libraryError: boolean): boolean {
   return rows !== null && (libraryError || rows.length === 0);
 }
 
-/** Round 10: shaped like the page it stands in for - a row of square workflow cards, then a row of skill circles. */
+/** Shaped like the page it stands in for: a row of square workflow cards, then a row of skill circles. */
 function SkillsSkeleton() {
   return (
     <div className="cowork-skills__loading" aria-busy="true">
@@ -116,11 +100,12 @@ export function SkillsScreen() {
 
   useEffect(() => {
     const state = location.state as { fromSkill?: string; fromWorkflow?: string } | null;
-    if (!shouldRestoreListFocus(location.key, restoredFocusKey.current)) return;
+    // A history entry restores its originating control at most once.
+    if (location.key === restoredFocusKey.current) return;
     const target = state?.fromSkill
       ? document.querySelector<HTMLElement>(`[data-skill="${CSS.escape(state.fromSkill)}"] .cowork-skill-tile__link`)
       : state?.fromWorkflow
-        ? document.querySelector<HTMLElement>(`[data-workflow="${CSS.escape(state.fromWorkflow)}"] .cowork-workflow-tile__link`)
+        ? document.querySelector<HTMLElement>(`[data-workflow="${CSS.escape(state.fromWorkflow)}"] .cowork-workflow-card__link`)
         : null;
     if (!target) return;
     target.focus();

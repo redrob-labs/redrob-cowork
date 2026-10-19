@@ -126,8 +126,8 @@ export function buildCoworkNav(input: CoworkNavInput): AppShellNavItem[] {
           id: "recent-view-all",
           // Styled label (not a plain string): matches the "Recent" heading's font size, but
           // bold and in a lighter/greyer tone than the heading. A span lets us style only this
-          // item's text, since AppShellNavItem has no className hook. See .cowork-nav-view-all.
-          label: createElement("span", { className: "cowork-nav-view-all" }, t("cowork.nav_recent_view_all")),
+          // item's text, since AppShellNavItem has no className hook. See .cowork-nav__view-all.
+          label: createElement("span", { className: "cowork-nav__view-all" }, t("cowork.nav_recent_view_all")),
           href: toHref("/history"),
           current: input.current === "history",
         }]

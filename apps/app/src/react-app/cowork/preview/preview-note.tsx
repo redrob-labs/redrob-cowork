@@ -16,7 +16,7 @@ export function PreviewNote(props: { children: string }) {
 
 /**
  * A screen's column: the sample-data note first while the data is sample data, then the screen.
- * Round 10: the note shows only once a resolved result says `preview: true`; `undefined` means
+ * The note shows only once a resolved result says `preview: true`; `undefined` means
  * "not known yet", and painting the note then flashed it on every Skills visit.
  */
 export function PreviewPage(props: { note: string; wide?: boolean; preview?: boolean; children: ReactNode }) {

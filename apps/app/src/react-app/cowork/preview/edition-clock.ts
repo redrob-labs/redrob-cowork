@@ -6,8 +6,10 @@
  */
 import type { Language } from "../../../i18n";
 
+/** The localized pieces a clock string is assembled from. */
 type ClockParts = { weekday: string; month: string; day: string; hour: string; minute: string };
 
+/** Splits a date into localized parts on a 24-hour clock, in `timeZone` or the reader's own. */
 function clockParts(date: Date, locale: Language, timeZone?: string): ClockParts {
   const korean = locale === "ko";
   const parts = new Intl.DateTimeFormat(korean ? "ko" : "en", {

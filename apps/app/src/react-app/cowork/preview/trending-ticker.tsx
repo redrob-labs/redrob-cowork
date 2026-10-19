@@ -13,11 +13,13 @@ import {
   type TrendScope,
 } from "./chart-trending";
 import { formatEditionStamp, formatLiveClock } from "./edition-clock";
-import { useAutoRotate } from "./use-auto-rotate";
+import { useAutoRotate, useInteractionPause } from "./use-auto-rotate";
 import { useMinuteClock } from "./use-minute-clock";
 
+/** How long each term stays in the collapsed ticker. */
 const TICKER_MS = 3000;
 
+/** The tab name for a search scope. */
 function scopeLabel(scope: TrendScope): string {
   return scope === "korea" ? t("cowork.chart_trending_korea") : t("cowork.chart_trending_global");
 }
@@ -78,7 +80,7 @@ function TrendList(props: {
             className="model-chart__trending-row"
             onClick={() => props.onPick(item)}
           >
-            <span className="model-chart__trending-rank" data-top={item.rank <= 3 || undefined}>{item.rank}</span>
+            <span className="model-chart__trending-rank" data-top={item.rank <= 3 ? "" : undefined}>{item.rank}</span>
             <span className="model-chart__trending-item-label">{trendLabel(item, props.locale)}</span>
             <TrendMark item={item} />
           </button>
@@ -91,8 +93,8 @@ function TrendList(props: {
 export type TrendingTickerProps = {
   /** Bundled dated search edition. */
   data: TrendingEdition;
-  /** Localized date displayed beside the list title. */
-  edition: string;
+  /** Localized date of the bundled edition, read out in the trigger's accessible name. */
+  trendingEdition: string;
   /** Current application language. */
   locale: Language;
   /** Starts a normal chat for the selected search term. */
@@ -101,27 +103,20 @@ export type TrendingTickerProps = {
 
 /** Collapsed rotating search ticker plus its two-tab ranked list. */
 export function TrendingTicker(props: TrendingTickerProps) {
+  // The list opens on the reader's own scope, matching the ticker's order (Korea first for Korean).
+  const homeScope: TrendScope = props.locale === "ko" ? "korea" : "global";
   const [open, setOpen] = useState(false);
-  const [pointerInside, setPointerInside] = useState(false);
-  const [focusInside, setFocusInside] = useState(false);
-  const [scope, setScope] = useState<TrendScope>("korea");
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [scope, setScope] = useState<TrendScope>(homeScope);
   const panelRef = useRef<HTMLDivElement>(null);
+  const pause = useInteractionPause();
   const sequence = tickerSequence(props.data, props.locale);
-  const rotation = useAutoRotate({
-    count: sequence.length,
-    ms: TICKER_MS,
-    paused: pointerInside || focusInside || open,
-  });
+  const rotation = useAutoRotate({ count: sequence.length, ms: TICKER_MS, paused: pause.paused || open });
   const current = sequence[rotation.index] ?? sequence[0];
   const visibleItems = scope === "korea" ? props.data.korea : props.data.global;
 
-  const openAndFocus = () => {
-    setOpen(true);
-  };
   const select = (item: TrendItem) => {
     setOpen(false);
-    setScope("korea");
+    setScope(homeScope);
     props.onPick(item);
   };
   const moveRowFocus = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -141,33 +136,24 @@ export function TrendingTicker(props: TrendingTickerProps) {
 
   return (
     <div className="model-chart__trending">
-      <div
-        className="model-chart__trending-track"
-        onMouseEnter={() => setPointerInside(true)}
-        onMouseLeave={() => setPointerInside(false)}
-        onFocus={() => setFocusInside(true)}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) setFocusInside(false);
-        }}
-      >
+      <div className="model-chart__trending-track" {...pause.handlers}>
       <Popover
         open={open}
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
-          if (!nextOpen) setScope("korea");
+          if (!nextOpen) setScope(homeScope);
         }}
       >
         <PopoverTrigger
-          ref={triggerRef}
           className="model-chart__trending-trigger"
           openOnHover
           delay={250}
           closeDelay={300}
-          aria-label={t("cowork.chart_trending_trigger", { edition: props.edition })}
+          aria-label={t("cowork.chart_trending_trigger", { edition: props.trendingEdition })}
           onKeyDown={(event) => {
             if (event.key === "ArrowDown") {
               event.preventDefault();
-              openAndFocus();
+              setOpen(true);
             }
           }}
         >
@@ -180,13 +166,13 @@ export function TrendingTicker(props: TrendingTickerProps) {
             <span className="model-chart__trending-window" aria-hidden="true">
               <span key={current.item.id} className="model-chart__trending-entry">
                 <span className="model-chart__trending-scope">{scopeLabel(current.scope)}</span>
-                <span className="model-chart__trending-rank" data-top={current.item.rank <= 3 || undefined}>{current.item.rank}</span>
+                <span className="model-chart__trending-rank" data-top={current.item.rank <= 3 ? "" : undefined}>{current.item.rank}</span>
                 <span className="model-chart__trending-item-label">{trendLabel(current.item, props.locale)}</span>
                 <TrendMark item={current.item} compact />
               </span>
             </span>
           ) : null}
-          <ChevronDown className="model-chart__trending-chevron" data-open={open || undefined} aria-hidden />
+          <ChevronDown className="model-chart__trending-chevron" data-open={open ? "" : undefined} aria-hidden />
         </PopoverTrigger>
         <PopoverContent
           ref={panelRef}
@@ -196,12 +182,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
           sideOffset={8}
           initialFocus={() => panelRef.current?.querySelector<HTMLButtonElement>(".model-chart__trending-row") ?? true}
           aria-label={t("cowork.chart_trending_title")}
-          onMouseEnter={() => setPointerInside(true)}
-          onMouseLeave={() => setPointerInside(false)}
-          onFocus={() => setFocusInside(true)}
-          onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) setFocusInside(false);
-          }}
+          {...pause.handlers}
           onKeyDown={moveRowFocus}
         >
           <div className="model-chart__trending-heading">

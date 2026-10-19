@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 
 import { artifactPathMatches, latestLiveDraft, useLiveDraftStore } from "../src/react-app/cowork/panel/live-draft";
 
-// Round 7 C6: the file being written is shown live in the Artifacts panel.
+// The file being written is shown live in the Artifacts panel.
 
 const write = (state: string, filePath = "/w/reports/outlook.md", content = "# Outlook\n\nBody", id = "w1"): UIMessage["parts"][number] =>
   ({ type: "dynamic-tool", toolName: "write", toolCallId: id, state, input: { filePath, content } }) as unknown as UIMessage["parts"][number];

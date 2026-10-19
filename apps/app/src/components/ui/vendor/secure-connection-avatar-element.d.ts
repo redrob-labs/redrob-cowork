@@ -5,7 +5,7 @@
 // the module only needs a side-effect declaration plus the JSX intrinsic type.
 import type * as React from "react"
 
-declare module "*/secure-connection-avatar.js" {
+declare module "*/secure-connection-avatar-element.js" {
   // Side-effect only: importing the file defines the <secure-connection-avatar> custom element.
 }
 
@@ -15,8 +15,9 @@ declare module "react" {
       /**
        * The Secure-Connection "thinking" avatar: a self-contained animated web
        * component. Square and unmasked; apply a circular mask on a wrapper. The
-       * `paused` attribute holds a still pose; it respects reduced motion and
-       * suspends work while the document is hidden.
+       * `paused` attribute holds a still pose. It suspends work while the document
+       * is hidden; its reduced-motion check is patched out on purpose (always-animate
+       * is a product exception, see secure-connection-avatar.tsx).
        */
       "secure-connection-avatar": React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement> & {

@@ -2,7 +2,7 @@
 import * as React from "react"
 import { Globe } from "lucide-react"
 
-import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader/RedrobLiquidLoader"
+import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader"
 import { FileChip } from "@/components/chat/file-chip"
 import {
   getAggregateRowFile,

@@ -6,7 +6,8 @@ import { t, type Language } from "../../../i18n";
 import { TRENDING, type TrendItem } from "./chart-trending";
 import { TrendingTicker } from "./trending-ticker";
 import { RadarBanners } from "./radar-banners";
-import { interactionPaused, useAutoRotate } from "./use-auto-rotate";
+import { useAutoRotate, useInteractionPause } from "./use-auto-rotate";
+import { prefersReducedMotion } from "../../../lib/use-prefers-reduced-motion";
 import {
   CHART_OUTPUT_ORDER,
   COUNTRY_LABEL_KEY,
@@ -348,7 +349,7 @@ function useShelfScroll() {
   const scrollByPage = useCallback((direction: 1 | -1) => {
     const el = ref.current;
     if (!el) return;
-    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const reduced = prefersReducedMotion();
     // Page by ~one viewport width, keeping one card of overlap so nothing is skipped between pages.
     const amount = Math.max(el.clientWidth - 120, el.clientWidth * 0.85);
     el.scrollBy({ left: direction * amount, behavior: reduced ? "auto" : "smooth" });
@@ -415,78 +416,60 @@ export function ModelChartHome(props: {
   const countries = COUNTRY_TILES;
   // Picking a dot stops auto-rotation for the rest of the visit (the on-page pause, WCAG 2.2.2).
   const [bannerStopped, setBannerStopped] = useState(false);
-  const [bannerPointerInside, setBannerPointerInside] = useState(false);
-  const [bannerFocusInside, setBannerFocusInside] = useState(false);
-  const bannerRotation = useAutoRotate({
-    count: banners.length,
-    ms: BANNER_MS,
-    paused: interactionPaused({ pointerInside: bannerPointerInside, focusInside: bannerFocusInside, stopped: bannerStopped }),
-  });
+  const bannerPause = useInteractionPause();
+  const bannerRotation = useAutoRotate({ count: banners.length, ms: BANNER_MS, paused: bannerPause.paused || bannerStopped });
   const banner = banners[bannerRotation.index];
   return (
     <div className="model-chart">
       <div className="model-chart__hero">
-      <div className="model-chart__topbar">
-        <TrendingTicker
-          data={TRENDING}
-          edition={props.trendingEdition}
-          locale={props.locale}
-          onPick={props.onTrendPick}
-        />
-      </div>
-      {banner ? (
-        <section
-          className="model-chart__banners"
-          aria-label={t("cowork.chart_banners_label")}
-        >
-          <button
-            type="button"
-            className="model-chart__banner"
-            data-tone={banner.tone}
-            onMouseEnter={() => setBannerPointerInside(true)}
-            onMouseLeave={() => setBannerPointerInside(false)}
-            onFocus={() => setBannerFocusInside(true)}
-            onBlur={() => setBannerFocusInside(false)}
-            onClick={() => props.onOpen(banner.pick)}
+        <div className="model-chart__topbar">
+          <TrendingTicker
+            data={TRENDING}
+            trendingEdition={props.trendingEdition}
+            locale={props.locale}
+            onPick={props.onTrendPick}
+          />
+        </div>
+        {banner ? (
+          <section
+            className="model-chart__banners"
+            aria-label={t("cowork.chart_banners_label")}
+            {...bannerPause.handlers}
           >
-            <span className="model-chart__glass" style={glassStyle(`banner-${banner.id}`)} aria-hidden="true" />
-            <img className="model-chart__banner-art" src={`/brand/banner-art/${banner.art}.png`} alt="" aria-hidden="true" loading="lazy" draggable={false} />
-            <span className="model-chart__banner-scrim" aria-hidden="true" />
-            <span className="model-chart__banner-eyebrow">{banner.eyebrow}</span>
-            <span className="model-chart__banner-title">{banner.title}</span>
-            <span className="model-chart__banner-sub">{banner.sub}</span>
-          </button>
-          <div className="model-chart__dots">
-            <div
-              className="model-chart__dots-tabs"
-              role="tablist"
-              aria-label={t("cowork.chart_banners_label")}
-              onMouseEnter={() => setBannerPointerInside(true)}
-              onMouseLeave={() => setBannerPointerInside(false)}
-              onFocus={() => setBannerFocusInside(true)}
-              onBlur={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) setBannerFocusInside(false);
-              }}
+            <button
+              type="button"
+              className="model-chart__banner"
+              data-tone={banner.tone}
+              onClick={() => props.onOpen(banner.pick)}
             >
-              {banners.map((b, index) => (
-                <button
-                  key={b.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={index === bannerRotation.index}
-                  aria-label={b.title}
-                  className="model-chart__dot"
-                  data-on={index === bannerRotation.index ? "true" : undefined}
-                  onClick={() => {
-                    setBannerStopped(true);
-                    bannerRotation.setIndex(index);
-                  }}
-                />
-              ))}
+              <span className="model-chart__glass" style={glassStyle(`banner-${banner.id}`)} aria-hidden="true" />
+              <img className="model-chart__banner-art" src={`/brand/banner-art/${banner.art}.png`} alt="" aria-hidden="true" loading="lazy" draggable={false} />
+              <span className="model-chart__banner-scrim" aria-hidden="true" />
+              <span className="model-chart__banner-eyebrow">{banner.eyebrow}</span>
+              <span className="model-chart__banner-title">{banner.title}</span>
+              <span className="model-chart__banner-sub">{banner.sub}</span>
+            </button>
+            <div className="model-chart__dots">
+              <div className="model-chart__dots-tabs" role="tablist" aria-label={t("cowork.chart_banners_label")}>
+                {banners.map((b, index) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === bannerRotation.index}
+                    aria-label={b.title}
+                    className="model-chart__dot"
+                    data-on={index === bannerRotation.index ? "true" : undefined}
+                    onClick={() => {
+                      setBannerStopped(true);
+                      bannerRotation.setIndex(index);
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      ) : null}
+          </section>
+        ) : null}
       </div>
 
       <RadarBanners locale={props.locale} />

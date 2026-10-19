@@ -1,8 +1,6 @@
 /**
- * Round 10 (R6): the short plain-text preview an artifact row shows under its name.
- *
- * Felix: a 2-line preview that is NOT cut off at the end with "...". So the preview is built to
- * end cleanly instead of being clipped by CSS: markdown syntax is stripped, a leading heading that
+ * The short plain-text preview an artifact row shows under its name: two lines that are never cut
+ * off with "...". The preview is built to end cleanly instead of being clipped by CSS: markdown syntax is stripped, a leading heading that
  * only repeats the file's title is skipped, and the text is cut on a whole sentence when one fits
  * the budget, otherwise on a whole word - never mid-word, never with an ellipsis glyph.
  */

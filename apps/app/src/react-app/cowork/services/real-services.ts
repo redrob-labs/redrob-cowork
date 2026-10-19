@@ -14,7 +14,7 @@ import { connectorsFromMcp, type CoworkMcpStatusMap } from "../connectors/connec
 import { COWORK_OUTBOX, coworkFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/cowork-files";
 import { chatDefaults, type CoworkServices } from "./cowork-services";
 import { createFixtureCoworkServices } from "./fixture-services";
-import { consoleCatalogue } from "../skills/console-catalogue";
+import { catalogueDisplay, consoleCatalogue } from "../skills/console-catalogue";
 import { canEditSkill, canRemoveSkill, coworkSkillFrom, skillBody, skillContent, tagsOf } from "../skills/skills";
 import { HISTORY_LIMIT, HISTORY_STEPS_LIMIT, historyEntryFrom } from "../history/history";
 import { boardFromState } from "../scheduled/schedules";
@@ -69,7 +69,7 @@ function scopeTags(scope: MemoryNoteScope, tags: string[] | null = null): string
 }
 
 function toChat(session: Session, projectId: string): Chat {
-  // Round 9: a "```redrob-questions" title reads as untitled until the repair renames the chat.
+  // A "```redrob-questions" title reads as untitled until the repair renames the chat.
   return { id: session.id, title: shownChatTitle(session.title), projectId, updatedAt: session.time.updated, ...chatDefaults(projectId) };
 }
 
@@ -192,7 +192,7 @@ export function createRealCoworkServices(deps: RealCoworkServicesDeps): CoworkSe
     // Console's public catalogue, read by the browser directly; no server call.
     skills: {
       list: async () => real(await listInstalled()),
-      library: async (filters = {}) => real(await consoleCatalogue.list(filters)),
+      library: async () => real(await consoleCatalogue.list()),
       // The public catalogue carries no profession/task/language.
       taxonomy: async () => real({ professions: [], languages: [] }),
       get: async (name) => {
@@ -200,16 +200,10 @@ export function createRealCoworkServices(deps: RealCoworkServicesDeps): CoworkSe
         if (installed) {
           const { content } = await client.getSkill(workspaceId, name, { includeGlobal: true });
           const catalogue = consoleCatalogue.peek(name);
+          // Catalogue fields fill gaps; the installed skill's own title and summary win, as in the list.
           return real({
-            ...(catalogue
-              ? {
-                  title: catalogue.title,
-                  titleKo: catalogue.titleKo,
-                  summary: catalogue.summary,
-                  summaryKo: catalogue.summaryKo,
-                  version: catalogue.version,
-                }
-              : {}),
+            ...(catalogue ? catalogueDisplay(catalogue) : {}),
+            ...catalogueDisplay(installed),
             name,
             description: installed.description,
             tags: installed.tags,

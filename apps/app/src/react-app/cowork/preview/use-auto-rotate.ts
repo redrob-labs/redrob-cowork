@@ -1,5 +1,8 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type FocusEvent, type SetStateAction } from "react";
 
+import { usePrefersReducedMotion } from "../../../lib/use-prefers-reduced-motion";
+
+/** What a rotating collection needs to schedule its next step. */
 export type AutoRotateOptions = {
   /** Number of entries in the rotating collection. */
   count: number;
@@ -9,23 +12,13 @@ export type AutoRotateOptions = {
   paused: boolean;
 };
 
+/** The current entry and a way for manual controls to pick one. */
 export type AutoRotateState = {
   /** Current zero-based entry index. */
   index: number;
   /** Lets manual controls select a specific entry. */
   setIndex: Dispatch<SetStateAction<number>>;
-  /** True when the operating system asks for less motion. */
-  reducedMotion: boolean;
 };
-
-/**
- * Whether a rotating surface with no visible pause control should hold still: while the pointer or
- * keyboard focus is inside it, and for good once the reader has picked an entry themselves. Picking
- * an entry is the on-page way to stop the motion (WCAG 2.2.2); reduced motion is handled by the hook.
- */
-export function interactionPaused(state: { pointerInside: boolean; focusInside: boolean; stopped: boolean }): boolean {
-  return state.pointerInside || state.focusInside || state.stopped;
-}
 
 /** Pure wraparound step used by every rotating surface. */
 export function nextAutoRotateIndex(index: number, count: number): number {
@@ -36,9 +29,7 @@ export function nextAutoRotateIndex(index: number, count: number): number {
 export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
   const [index, setIndex] = useState(0);
   const [hidden, setHidden] = useState(() => typeof document !== "undefined" && document.hidden);
-  const [reducedMotion, setReducedMotion] = useState(
-    () => typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false),
-  );
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     setIndex((current) => (options.count > 0 ? current % options.count : 0));
@@ -52,15 +43,6 @@ export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const media = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (!media) return;
-    const onChange = () => setReducedMotion(media.matches);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, []);
-
-  useEffect(() => {
     if (options.paused || hidden || reducedMotion || options.count <= 1) return;
     const timer = window.setTimeout(
       () => setIndex((current) => nextAutoRotateIndex(current, options.count)),
@@ -69,5 +51,32 @@ export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
     return () => window.clearTimeout(timer);
   }, [hidden, options.count, options.ms, options.paused, reducedMotion, index]);
 
-  return { index, setIndex, reducedMotion };
+  return { index, setIndex };
+}
+
+/** Pointer and focus handlers to spread on each element whose hover or focus should hold rotation. */
+export type InteractionPauseHandlers = {
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onFocus: () => void;
+  onBlur: (event: FocusEvent<HTMLElement>) => void;
+};
+
+/**
+ * Holds a rotating surface still while the pointer or keyboard focus is inside it, which is the
+ * on-page pause for a surface with no visible pause control (WCAG 2.2.2). Focus moving between
+ * children of the same element does not count as leaving it.
+ */
+export function useInteractionPause(): { paused: boolean; handlers: InteractionPauseHandlers } {
+  const [pointerInside, setPointerInside] = useState(false);
+  const [focusInside, setFocusInside] = useState(false);
+  const handlers = useMemo<InteractionPauseHandlers>(() => ({
+    onMouseEnter: () => setPointerInside(true),
+    onMouseLeave: () => setPointerInside(false),
+    onFocus: () => setFocusInside(true),
+    onBlur: (event) => {
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusInside(false);
+    },
+  }), []);
+  return { paused: pointerInside || focusInside, handlers };
 }

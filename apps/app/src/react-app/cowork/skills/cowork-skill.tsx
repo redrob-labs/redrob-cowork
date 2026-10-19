@@ -1,8 +1,8 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
-import { Badge, Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
+import { Link, useNavigate, useParams } from "react-router";
+import { Badge, Button, EmptyState, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { PreviewPage, PreviewState } from "../preview/preview-note";
@@ -12,43 +12,17 @@ import type { CoworkResult, CoworkSkill, SkillDetail, SkillTaxonomy } from "../s
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { OriginBadge, originLabel } from "./cowork-skills";
 import { CATALOGUE_CACHE_MS, consoleCatalogue } from "./console-catalogue";
-import { canEditSkill, canRemoveSkill, languageTagLabel, seedSkillDetail, skillBrief, skillDisplayTitle, skillRunPrompt, skillShelf, tagLabels } from "./skills";
-import { SHELF_LABEL } from "./skill-tile";
+import { canEditSkill, canRemoveSkill, languageTagLabel, runSkill, seedSkillDetail, skillBrief, skillDisplayTitle, skillShelf, tagLabels } from "./skills";
+import { HeroSkeleton, OriginBadge, SHELF_LABEL, originLabel } from "./skill-tile";
 import { SkillIcon } from "./skill-icon";
-import { useCoworkStartStore, type PendingCoworkChat } from "./start-chat";
+import { useCoworkStartStore } from "./start-chat";
+import { useBackToList } from "./use-back-to-list";
 import { installSkill, removeSkill } from "./use-skills";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
 
-/** Run a skill in a new Plan chat when a workspace is connected. */
-export function runSkill(
-  deps: { workspaceId: string | null; request: (chat: PendingCoworkChat) => void; navigate: (path: string) => void },
-  name: string,
-): boolean {
-  if (!deps.workspaceId) return false;
-  deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name), mode: "plan" });
-  deps.navigate("/chat");
-  return true;
-}
-
-export type EscapeToListState = {
-  /** Whether a frame modal currently owns Escape. */
-  modalOpen: boolean;
-  /** Whether the schedule dialog currently owns Escape. */
-  scheduling: boolean;
-};
-
-/** Pure guard for when Escape may return from a detail page to the marketplace. */
-export function shouldEscapeToList(
-  event: { key: string; defaultPrevented: boolean; targetTag?: string; contentEditable?: boolean },
-  state: EscapeToListState,
-): boolean {
-  if (event.key !== "Escape" || event.defaultPrevented || state.modalOpen || state.scheduling || event.contentEditable) return false;
-  return !["INPUT", "TEXTAREA", "SELECT"].includes(event.targetTag ?? "");
-}
-
+/** Inputs of the skill product page. */
 export type SkillViewProps = {
   /** Detail payload rendered by the product page. */
   skill: SkillDetail;
@@ -127,17 +101,15 @@ export function SkillScreen() {
   const { services, scope } = usePreviewServices();
   const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const request = useCoworkStartStore((state) => state.request);
-  const modal = useFrameStore((state) => state.modal);
   const openModal = useFrameStore((state) => state.openModal);
   const showToast = useFrameStore((state) => state.showToast);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const location = useLocation();
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const [scheduling, setScheduling] = useState(false);
   const [busy, setBusy] = useState(false);
-  // Round 10 (flash fix): paint the real page at once from the catalogue and the cached installed
-  // list; the server answer replaces it when it lands.
+  // Paint the real page at once from the catalogue and the cached installed list; the server
+  // answer replaces it when it lands.
   const query = useQuery({
     queryKey: [...previewKey(scope, "skills"), "one", name],
     queryFn: () => services.skills.get(name),
@@ -151,18 +123,12 @@ export function SkillScreen() {
   });
   const taxonomy = useQuery({ queryKey: previewKey(scope, "taxonomy"), queryFn: () => services.skills.taxonomy(), staleTime: 5 * 60_000 });
   const skill = query.data?.data ?? null;
-  // Round 10: "is a project connected" comes from the installed list, the same signal the Skills page
-  // uses, so the note does not appear on one page and vanish on the next (a library skill's own
+  // "Is a project connected" comes from the installed list, the same signal the Skills page uses, so the note does not appear on one page and vanish on the next (a library skill's own
   // detail is real catalogue data even without a project). Undefined until it resolves.
   const installedList = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, gcTime: CATALOGUE_CACHE_MS });
   const preview = installedList.data?.preview;
   const installed = skill?.installed ?? null;
-  const locationState = location.state as { fromPath?: string } | null;
-  const backPath = locationState?.fromPath ?? "/skills";
-  const returnToList = useCallback(() => {
-    if (locationState?.fromPath) navigate(-1);
-    else navigate(backPath, { replace: true, state: { fromSkill: name } });
-  }, [backPath, locationState?.fromPath, name, navigate]);
+  const { backPath, back: returnToList } = useBackToList({ restoreKey: "fromSkill", restoreValue: name, blocked: scheduling });
   const deps = { skills: services.skills, queryClient, scope, showToast };
   const act = async (run: typeof installSkill, then?: () => void) => {
     setBusy(true);
@@ -171,17 +137,7 @@ export function SkillScreen() {
     if (ok) then?.();
   };
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      if (!shouldEscapeToList({ key: event.key, defaultPrevented: event.defaultPrevented, targetTag: target?.tagName, contentEditable: Boolean(target?.isContentEditable || target?.closest("[contenteditable]")) }, { modalOpen: modal !== null, scheduling })) return;
-      returnToList();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [modal, returnToList, scheduling]);
-
-  // Round 10: no raw slug in the header while the page is still loading.
+  // No raw slug in the header while the page is still loading.
   const title = skill ? skillDisplayTitle(skill, locale) : query.isLoading ? "" : t("cowork.nav_skills");
   const real = preview === false;
 
@@ -198,7 +154,7 @@ export function SkillScreen() {
       ) : null}
     >
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
-        <PreviewState query={query} loading={<SkillDetailSkeleton />}>
+        <PreviewState query={query} loading={<HeroSkeleton art="circle" />}>
           {(data) => data ? (
             <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} canRun={real && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onRun={() => void runSkill({ workspaceId, request, navigate }, name)} onAdd={() => void act(installSkill)} />
           ) : <EmptyState title={t("cowork.skill_not_found_title")} description={t("cowork.skill_not_found_text")} />}
@@ -209,19 +165,3 @@ export function SkillScreen() {
   );
 }
 
-/** Round 10: a deep link before anything is cached paints the hero's shape, not a block of grey lines. */
-export function SkillDetailSkeleton() {
-  return (
-    <div className="cowork-skill-detail" aria-busy="true">
-      <span className="sr-only">{t("cowork.skills_loading_label")}</span>
-      <div className="cowork-skill-hero">
-        <Skeleton variant="circle" width={128} height={128} />
-        <div className="cowork-skill-hero__content">
-          <Skeleton variant="text" width={320} />
-          <Skeleton variant="text" width={180} />
-          <Skeleton variant="rect" width={96} height={32} />
-        </div>
-      </div>
-    </div>
-  );
-}

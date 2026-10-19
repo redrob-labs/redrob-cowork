@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { ARTIFACT_PREVIEW_BUDGET, artifactPreview, plainMarkdown } from "../src/react-app/cowork/panel/artifact-preview";
 
-// Round 10 (R6): artifact row previews end cleanly - a whole sentence or word, never "...".
+// Artifact row previews end cleanly - a whole sentence or word, never "...".
 
 describe("plainMarkdown", () => {
   test("strips markdown syntax and keeps reading text", () => {

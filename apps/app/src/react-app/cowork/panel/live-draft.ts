@@ -2,7 +2,7 @@ import type { UIMessage } from "ai";
 import { create } from "zustand";
 
 /**
- * Round 7 C6: the deliverable being written, shown live in the side panel's Artifacts tab.
+ * The deliverable being written, shown live in the side panel's Artifacts tab.
  *
  * The engine sends a `write` tool part with its WHOLE `content` once the call starts running (the
  * file body is not streamed in pieces), then settles it when the file is on disk - often within
@@ -21,11 +21,13 @@ export type LiveDraft = {
   settled: boolean;
 };
 
+/** The fields of a transcript tool part this module reads; looser than the SDK type on purpose. */
 type ToolPartLike = { type: string; toolName?: unknown; toolCallId?: unknown; state?: unknown; input?: unknown };
 
 /** The write tools whose input carries the whole file body (edit / apply_patch carry diffs). */
 const FULL_WRITE_TOOL = /(^|[._:/-])write$/i;
 
+/** The draft a tool part describes when it is a full-file write with a path and a body, else null. */
 function fullWriteOf(part: ToolPartLike): LiveDraft | null {
   if (part.type !== "dynamic-tool" || typeof part.toolName !== "string" || !FULL_WRITE_TOOL.test(part.toolName)) return null;
   if (part.state === "output-error") return null;
@@ -70,6 +72,7 @@ export function artifactPathMatches(artifactPath: string, writePath: string): bo
   return a === w || w.endsWith(`/${a}`) || a.endsWith(`/${w}`);
 }
 
+/** The live-draft store's state and actions. */
 type LiveDraftState = {
   /** The live draft per side-panel session key; absent when nothing is being written. */
   drafts: Record<string, LiveDraft>;
@@ -81,6 +84,7 @@ type LiveDraftState = {
   finish(sessionKey: string, callId: string): void;
 };
 
+/** The file each chat is writing right now, published by the thread and read by the side panel. */
 export const useLiveDraftStore = create<LiveDraftState>()((set, get) => ({
   drafts: {},
   done: {},

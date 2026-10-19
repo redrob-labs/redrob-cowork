@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { mergeTabOrder } from "../src/react-app/cowork/panel/cowork-browser";
 
-// Round 10 (R5): dragging browser tabs stores the full tab order (the store refuses a partial one).
+// Dragging browser tabs stores the full tab order (the store refuses a partial one).
 
 describe("mergeTabOrder", () => {
   const all = [

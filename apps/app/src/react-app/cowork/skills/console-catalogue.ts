@@ -1,5 +1,4 @@
-import type { LibrarySkill, SkillDetail, SkillFilters } from "../services/types";
-import { matchesFilters } from "./skills";
+import type { LibrarySkill, SkillDetail, SkillDisplayFields } from "../services/types";
 
 /*
  * The public Redrob Console skill catalogue, read by the browser directly. It is static
@@ -11,20 +10,34 @@ import { matchesFilters } from "./skills";
 
 export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
 
-/** How long the catalogue and the Skills queries keep their data (round 10: one value for both). */
+/** How long the catalogue and the Skills queries keep their data; one value for both. */
 export const CATALOGUE_CACHE_MS = 30 * 60_000;
 
 /** One catalogue skill with its instructions and localized marketplace display fields. */
-export type ConsoleSkill = {
+export type ConsoleSkill = SkillDisplayFields & {
   name: string;
-  title?: string;
-  titleKo?: string;
-  summary?: string;
-  summaryKo?: string;
+  /** Catalogue release version from the SKILL.md frontmatter, when supplied. */
   version?: string;
   description: string;
+  /** The SKILL.md instructions, after the frontmatter. */
   body: string;
 };
+
+/** A catalogue skill's display fields and version, with absent ones left out rather than undefined. */
+export function catalogueDisplay({ title, titleKo, summary, summaryKo, version }: SkillDisplayFields & { version?: string }): SkillDisplayFields & { version?: string } {
+  return {
+    ...(title ? { title } : {}),
+    ...(titleKo ? { titleKo } : {}),
+    ...(summary ? { summary } : {}),
+    ...(summaryKo ? { summaryKo } : {}),
+    ...(version ? { version } : {}),
+  };
+}
+
+/** A catalogue skill as the detail screen reads it: not installed, no tags. */
+export function catalogueDetail(skill: ConsoleSkill): SkillDetail {
+  return { name: skill.name, description: skill.description, tags: {}, body: skill.body, installed: null, ...catalogueDisplay(skill) };
+}
 
 type CatalogueOptions = {
   fetchImpl?: typeof fetch;
@@ -51,7 +64,7 @@ export function parseConsoleFrontmatter(content: string): { data: Record<string,
 export function createConsoleCatalogue(options: CatalogueOptions = {}) {
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   const baseUrl = options.baseUrl ?? CONSOLE_CATALOGUE_BASE_URL;
-  // Round 10: matches the Skills queries' 30-minute gcTime, so a cached page and the catalogue expire together.
+  // Matches the Skills queries' gcTime, so a cached page and the catalogue expire together.
   const ttlMs = options.ttlMs ?? CATALOGUE_CACHE_MS;
   const failureTtlMs = options.failureTtlMs ?? 60_000;
   const now = options.now ?? Date.now;
@@ -73,11 +86,7 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
         name,
         description: data.description,
         body: body.trim(),
-        ...(data.title ? { title: data.title } : {}),
-        ...(data.title_ko ? { titleKo: data.title_ko } : {}),
-        ...(data.summary ? { summary: data.summary } : {}),
-        ...(data.summary_ko ? { summaryKo: data.summary_ko } : {}),
-        ...(data.version ? { version: data.version } : {}),
+        ...catalogueDisplay({ title: data.title, titleKo: data.title_ko, summary: data.summary, summaryKo: data.summary_ko, version: data.version }),
       };
     } catch {
       return null;
@@ -105,54 +114,25 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
     return inFlight;
   };
 
-  const displayFields = ({ title, titleKo, summary, summaryKo }: ConsoleSkill) => ({
-    ...(title ? { title } : {}),
-    ...(titleKo ? { titleKo } : {}),
-    ...(summary ? { summary } : {}),
-    ...(summaryKo ? { summaryKo } : {}),
-  });
-
   return {
-    /** The library, filtered; only `q` can match because the catalogue carries no tags. */
-    list: async (filters: SkillFilters = {}): Promise<LibrarySkill[]> => {
+    /** The whole library; rejects when the catalogue cannot be reached. */
+    list: async (): Promise<LibrarySkill[]> => {
       const currentSnapshot = await current();
       if (!currentSnapshot.ok) throw new Error("The skill catalogue is not available");
-      return currentSnapshot.skills
-        .map((skill) => ({ name: skill.name, description: skill.description, tags: {}, ...displayFields(skill) }))
-        .filter((skill) => matchesFilters(skill, filters));
+      return currentSnapshot.skills.map(({ name, description, title, titleKo, summary, summaryKo }) => ({ name, description, tags: {}, ...catalogueDisplay({ title, titleKo, summary, summaryKo }) }));
     },
     /** One library skill with its body, as the detail screen shows it; null when unavailable. */
     get: async (name: string): Promise<SkillDetail | null> => {
       const currentSnapshot = await current();
       if (!currentSnapshot.ok) return null;
       const skill = currentSnapshot.skills.find((item) => item.name === name);
-      return skill
-        ? {
-            name,
-            description: skill.description,
-            tags: {},
-            body: skill.body,
-            installed: null,
-            ...displayFields(skill),
-            ...(skill.version ? { version: skill.version } : {}),
-          }
-        : null;
+      return skill ? catalogueDetail(skill) : null;
     },
     /** Cached catalogue detail only; never starts network work. */
     peek: (name: string): SkillDetail | null => {
       if (!snapshot?.ok) return null;
       const skill = snapshot.skills.find((item) => item.name === name);
-      return skill
-        ? {
-            name,
-            description: skill.description,
-            tags: {},
-            body: skill.body,
-            installed: null,
-            ...displayFields(skill),
-            ...(skill.version ? { version: skill.version } : {}),
-          }
-        : null;
+      return skill ? catalogueDetail(skill) : null;
     },
     /** Loads the catalogue in the background so Skills paints from memory; never throws. */
     warm: async (): Promise<void> => {

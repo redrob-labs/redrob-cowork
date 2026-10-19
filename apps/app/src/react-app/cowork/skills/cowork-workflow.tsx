@@ -1,17 +1,18 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router";
-import { Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
+import { Link, Navigate, useNavigate, useParams } from "react-router";
+import { Button, EmptyState, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { PreviewPage } from "../preview/preview-note";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { runSkill, shouldEscapeToList } from "./cowork-skill";
-import { skillBrief, skillDisplayTitle, skillPath, type SkillRow } from "./skills";
+import { runSkill, skillBrief, skillDisplayTitle, skillPath, type SkillRow } from "./skills";
 import { SkillIcon } from "./skill-icon";
+import { HeroSkeleton } from "./skill-tile";
+import { useBackToList } from "./use-back-to-list";
 import { useCoworkStartStore } from "./start-chat";
 import { useMarketplaceRows } from "./use-marketplace";
 import { installSkill, installSkills } from "./use-skills";
@@ -20,10 +21,13 @@ import { isWorkflowId, jurisdictionLabel, missingSkills, workflowGroups, workflo
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
 
+/** Inputs of the workflow page. */
 export type WorkflowViewProps = {
+  /** Which featured workflow this page shows. */
   id: WorkflowId;
   /** The workflow's available rows, curated order. */
   rows: readonly SkillRow[];
+  /** Current locale for titles, summaries and group order. */
   locale: string;
   /** Whether this workspace can add library skills. */
   canAdd: boolean;
@@ -33,8 +37,11 @@ export type WorkflowViewProps = {
   addingAll: boolean;
   /** Back target; the Skills page by default. */
   backPath: string;
+  /** Returns to the list without adding a duplicate history entry. */
   onBack: () => void;
+  /** Adds one library skill by name. */
   onAdd: (name: string) => void;
+  /** Adds every listed skill that is not installed yet. */
   onAddAll: (names: string[]) => void;
   /** Starts an installed skill when a workspace is connected. */
   onUse?: (name: string) => void;
@@ -101,59 +108,26 @@ export function WorkflowView({ id, rows, locale, canAdd, busy, addingAll, backPa
   );
 }
 
-function WorkflowSkeleton() {
-  return (
-    <div className="cowork-skill-detail" aria-busy="true">
-      <span className="sr-only">{t("cowork.skills_loading_label")}</span>
-      <div className="cowork-skill-hero">
-        <Skeleton variant="rect" width={128} height={128} />
-        <div className="cowork-skill-hero__content">
-          <Skeleton variant="text" width={320} />
-          <Skeleton variant="text" width={120} />
-          <Skeleton variant="rect" width={120} height={32} />
-        </div>
-      </div>
-      <Skeleton variant="text" lines={4} />
-    </div>
-  );
-}
-
 /** `/skills/workflow/:id`: one featured workflow and the skills it is made of. */
 export function WorkflowScreen() {
   const { id = "" } = useParams<{ id: string }>();
   return isWorkflowId(id) ? <WorkflowScreenFor id={id} /> : <Navigate to="/skills" replace />;
 }
 
+/** The workflow page for a known id; reads the shared marketplace rows. */
 function WorkflowScreenFor({ id }: { id: WorkflowId }) {
   const { services, scope, rows, preview } = useMarketplaceRows();
   const queryClient = useQueryClient();
   const showToast = useFrameStore((state) => state.showToast);
-  const modal = useFrameStore((state) => state.modal);
   const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const request = useCoworkStartStore((state) => state.request);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const navigate = useNavigate();
-  const location = useLocation();
   const [busy, setBusy] = useState<string | null>(null);
   const [addingAll, setAddingAll] = useState(false);
-  const locationState = location.state as { fromPath?: string } | null;
-  const backPath = locationState?.fromPath ?? "/skills";
-  const back = useCallback(() => {
-    if (locationState?.fromPath) navigate(-1);
-    else navigate(backPath, { replace: true, state: { fromWorkflow: id } });
-  }, [backPath, id, locationState?.fromPath, navigate]);
+  const { backPath, back } = useBackToList({ restoreKey: "fromWorkflow", restoreValue: id });
   const deps = { skills: services.skills, queryClient, scope, showToast };
   const real = preview === false;
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      if (!shouldEscapeToList({ key: event.key, defaultPrevented: event.defaultPrevented, targetTag: target?.tagName, contentEditable: Boolean(target?.isContentEditable || target?.closest("[contenteditable]")) }, { modalOpen: modal !== null, scheduling: false })) return;
-      back();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [back, modal]);
 
   const members = rows ? workflowRows(id, rows) : null;
   const canUse = real && Boolean(workspaceId);
@@ -161,7 +135,7 @@ function WorkflowScreenFor({ id }: { id: WorkflowId }) {
   return (
     <CoworkShell current="skills" title={workflowTitle(id)}>
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
-        {members === null ? <WorkflowSkeleton /> : members.length === 0 ? (
+        {members === null ? <HeroSkeleton art="rect" list /> : members.length === 0 ? (
           <EmptyState title={t("cowork.skills_library_offline_title")} description={t("cowork.skills_library_offline_text")} />
         ) : (
           <WorkflowView

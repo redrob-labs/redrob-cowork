@@ -8,9 +8,12 @@
  */
 import type { Language } from "../../../i18n";
 
+/** The two radar banners: the news front page and what social media is talking about. */
 export type RadarFeed = "news" | "social";
+/** Both feeds, in banner order. */
 export const RADAR_FEEDS: readonly RadarFeed[] = ["news", "social"];
 
+/** One sourced story on a radar subpage. */
 export type RadarStory = {
   /** Stable identifier, unique across the edition. */
   id: string;
@@ -30,6 +33,7 @@ export type RadarStory = {
   publishedAt: string;
 };
 
+/** One feed's overview and stories. */
 export type RadarSection = {
   /** One to three short sentences on the day, shown in full on the banner and as the subpage lede, in English. */
   summary: string;
@@ -39,6 +43,7 @@ export type RadarSection = {
   stories: readonly RadarStory[];
 };
 
+/** A whole dated radar edition: both feeds. */
 export type RadarEdition = {
   /** ISO time this edition was put together. */
   asOf: string;
@@ -48,6 +53,7 @@ export type RadarEdition = {
   social: RadarSection;
 };
 
+/** The bundled edition the radar banners and subpages show; a scheduled job may rewrite it. */
 export const RADAR: RadarEdition = {
   asOf: "2026-10-19T09:00:00+09:00",
   news: {
