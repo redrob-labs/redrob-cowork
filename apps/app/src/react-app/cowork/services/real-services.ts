@@ -69,7 +69,7 @@ function scopeTags(scope: MemoryNoteScope, tags: string[] | null = null): string
 }
 
 function toChat(session: Session, projectId: string): Chat {
-  // Round 9: a "```redrob-questions" title reads as untitled until the repair renames the chat.
+  // A "```redrob-questions" title reads as untitled until the repair renames the chat.
   return { id: session.id, title: shownChatTitle(session.title), projectId, updatedAt: session.time.updated, ...chatDefaults(projectId) };
 }
 

@@ -8,7 +8,14 @@ import { MarketplaceShelf } from "./skill-tile";
 import { workflowOrderedRows, workflowPath, workflowSub, workflowTitle, type WorkflowId } from "./workflows";
 
 /** A workflow's cover: its first four skills' circles in a 2x2 grid on a square card. Decorative. */
-export function WorkflowMosaic(props: { rows: readonly SkillRow[]; locale: string; size: "card" | "hero" }) {
+export function WorkflowMosaic(props: {
+  /** The workflow's available rows; the first four in page order fill the grid. */
+  rows: readonly SkillRow[];
+  /** Current locale, which decides the page order. */
+  locale: string;
+  /** `card` on the shelf, `hero` on the workflow page. */
+  size: "card" | "hero";
+}) {
   const covers = workflowOrderedRows(props.rows, props.locale).slice(0, 4);
   return (
     <span className="cowork-workflow-card__cover" data-size={props.size} aria-hidden="true">
@@ -21,10 +28,13 @@ export function WorkflowMosaic(props: { rows: readonly SkillRow[]; locale: strin
   );
 }
 
+/** Inputs of one workflow card on the shelf. */
 type WorkflowCardProps = {
+  /** Which featured workflow this card opens. */
   id: WorkflowId;
   /** The workflow's available rows. */
   rows: readonly SkillRow[];
+  /** Current locale for the cover order. */
   locale: string;
   /** Path restored when the workflow page closes. */
   fromPath: string;

@@ -48,9 +48,9 @@ export type SearchData = {
   skills: readonly CoworkSkill[];
   schedules: readonly Schedule[];
   artifacts: readonly CoworkFile[];
-  /** Round 10: installed skills plus the whole public catalogue (all of it, not only what is added). */
+  /** Installed skills plus the whole public catalogue (all of it, not only what is added). */
   catalogue?: readonly SkillRow[];
-  /** Round 10: the featured workflows available in that catalogue. */
+  /** The featured workflows available in that catalogue. */
   workflows?: ReadonlyArray<{ id: WorkflowId; rows: SkillRow[] }>;
 };
 
@@ -58,8 +58,8 @@ export type SearchData = {
 const SKILL_RESULT_LIMIT = 24;
 
 /**
- * Round 10: every skill (installed or in the catalogue) and every featured workflow as a search hit.
- * A skill opens its own page (it used to open /skills); a workflow opens its workflow page. Titles,
+ * Every skill (installed or in the catalogue) and every featured workflow as a search hit.
+ * A skill opens its own page; a workflow opens its workflow page. Titles,
  * Korean titles, summaries and the stable name all match.
  */
 export function skillSearchResults(data: SearchData, locale: string = currentLocale()): SearchResult[] {
@@ -99,7 +99,7 @@ function matches(query: string, label: string, terms = ""): boolean {
 }
 
 /** The "All" tab: places by name, then chats by title, newest first. Kept as a stable
- *  exported helper (its unit test and callers rely on this exact shape). Round 10: with a query,
+ *  exported helper (its unit test and callers rely on this exact shape). With a query,
  *  `more` (workflows and skills) follows the chats, so a skill is findable from All too. */
 export function searchResults(query: string, chats: readonly Chat[], more: readonly SearchResult[] = []): SearchResult[] {
   const q = query.trim().toLowerCase();

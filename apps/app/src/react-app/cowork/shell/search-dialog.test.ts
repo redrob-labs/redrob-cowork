@@ -85,11 +85,11 @@ describe("Cowork search tabs", () => {
     expect(searchResultsForTab("artifacts", "anything", empty)).toEqual([]);
   });
 
-  test("round 10: a skill result opens that skill's page, not /skills", () => {
+  test("a skill result opens that skill's page, not /skills", () => {
     expect(searchResultsForTab("skills", "nda", data).map((r) => r.path)).toEqual(["/skill/nda-review"]);
   });
 
-  test("round 10: every catalogue skill and workflow is searchable and opens its page", () => {
+  test("every catalogue skill and workflow is searchable and opens its page", () => {
     const names = Array.from({ length: 96 }, (_, i) => `catalogue-skill-${i}`);
     const lib = (name: string, title?: string, titleKo?: string): SkillRow => ({ name, ...(title ? { title } : {}), ...(titleKo ? { titleKo } : {}), description: "", tags: {}, origin: "library", installed: null });
     const catalogue = [...names.map((name) => lib(name)), lib("us-lawyer-nda", "US NDA", "미국 비밀유지계약"), lib("kr-lawyer-nda", "Korean NDA", "비밀유지계약서")];
@@ -108,7 +108,7 @@ describe("Cowork search tabs", () => {
     expect(searchResultsForTab("all", title, full).map((r) => r.path)).toContain("/skills/workflow/legal-drafting");
   });
 
-  test("round 10: an empty All query still lists only places and chats", () => {
+  test("an empty All query still lists only places and chats", () => {
     const lib: SkillRow = { name: "pdf", title: "PDF production", description: "", tags: {}, origin: "library", installed: null };
     const all = searchResultsForTab("all", "", { ...data, catalogue: [lib] });
     expect(all.some((r) => r.id.startsWith("skill-"))).toBe(false);

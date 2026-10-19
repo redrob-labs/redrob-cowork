@@ -101,7 +101,7 @@ export function CoworkFileView(props: CoworkFileViewProps) {
       <div className="cowork-file__head">
         <FileIcon file={file} />
         <div>
-          {/* Item 4: the panel header uses the same humanized title as the in-chat card
+          {/* The panel header uses the same humanized title as the in-chat card
               (prettyArtifactTitle), falling back to the raw filename when the path is empty. */}
           <b>{prettyArtifactTitle(file.path || file.name)}</b>
           <span>

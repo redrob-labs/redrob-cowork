@@ -26,7 +26,7 @@ const CLOSE_ICON = { width: 12, height: 12, "aria-hidden": true };
 const BAR_ICON = { width: 15, height: 15, "aria-hidden": true };
 
 /**
- * Round 10 (R5): every panel tab id in the order to store, after the browser tabs were dragged into
+ * Every panel tab id in the order to store, after the browser tabs were dragged into
  * `browserOrder`. The store's reorder wants ALL of the session's tabs (it refuses a partial list),
  * and the browser view only shows browser tabs, so the other tabs keep their slots and the browser
  * slots take the new order. Pure.
@@ -124,9 +124,9 @@ export type CoworkBrowserViewProps = {
   /** Where Electron lays the page; only rendered while a page is showing. */
   contentRef?: Ref<HTMLDivElement>;
   onSelectTab: (id: string) => void;
-  /** Round 10: close one tab (its x, a middle click, or Ctrl/Cmd+W). */
+  /** Closes one tab (its x, a middle click, or Ctrl/Cmd+W). */
   onCloseTab: (id: string) => void;
-  /** Round 10: the tabs' new order after a drag, as ids. */
+  /** The tabs' new order after a drag, as ids. */
   onReorderTabs: (ids: string[]) => void;
   onNewTab: () => void;
   onBack: () => void;
@@ -151,7 +151,7 @@ export function CoworkBrowserView(props: CoworkBrowserViewProps) {
   return (
     <div className="cowork-browser">
       <div className="cowork-browser__tabs">
-        {/* Round 10 (R5): tabs drag to reorder (motion's Reorder, x axis), close with the x, a
+        {/* Tabs drag to reorder (motion's Reorder, x axis), close with the x, a
             middle click, or Ctrl/Cmd+W on a focused tab. The page is a native view laid over the
             panel, so a drag stays inside this strip. */}
         <Reorder.Group

@@ -40,7 +40,7 @@ function RadarBanner(props: {
       aria-labelledby={titleId}
       aria-describedby={summaryId}
     >
-      {/* Round 10: white liquid glass. The tint layer is the soft colour the frosted surface sits over. */}
+      {/* White liquid glass. The tint layer is the soft colour the frosted surface sits over. */}
       <span className="cowork-radar-tint" aria-hidden="true" />
       <RadarMark feed={props.feed} />
       <span id={titleId} className="model-chart__banner-title">{radarTitle(props.feed)}</span>

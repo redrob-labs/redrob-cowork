@@ -2,7 +2,7 @@ import { t } from "../../../i18n";
 import { skillDisplayTitle, type SkillRow } from "./skills";
 
 /*
- * Round 10: featured WORKFLOWS on the Skills page. A workflow is one job (for example drafting a
+ * Featured WORKFLOWS on the Skills page. A workflow is one job (for example drafting a
  * lawyer's contracts) made of several catalogue skills to pick from. The public catalogue
  * (console.redrob.ai/skills/index.json) carries no grouping, so the groups are curated here, on the
  * frontend, by stable skill name. Not every catalogue skill belongs to a workflow: only coherent jobs
@@ -13,6 +13,7 @@ import { skillDisplayTitle, type SkillRow } from "./skills";
  * not have is skipped, and a workflow with fewer than two available skills is hidden.
  */
 
+/** Every featured workflow, in shelf order. */
 export const WORKFLOW_IDS = [
   "legal-drafting",
   "vc-deal",
@@ -25,6 +26,7 @@ export const WORKFLOW_IDS = [
   "legal-company",
   "vc-fund",
 ] as const;
+/** One of `WORKFLOW_IDS`. */
 export type WorkflowId = (typeof WORKFLOW_IDS)[number];
 
 /** Shelf order follows WORKFLOW_IDS; each list is in the order the workflow page shows it. */
@@ -139,14 +141,17 @@ const WORKFLOW_TEXT: Record<WorkflowId, { title: () => string; sub: () => string
   "vc-fund": { title: () => t("cowork.skills_workflow_vc_fund_title"), sub: () => t("cowork.skills_workflow_vc_fund_sub") },
 };
 
+/** Narrows a route param to a known workflow id. */
 export function isWorkflowId(id: string): id is WorkflowId {
   return (WORKFLOW_IDS as readonly string[]).includes(id);
 }
 
+/** The workflow's localized title. */
 export function workflowTitle(id: WorkflowId): string {
   return WORKFLOW_TEXT[id].title();
 }
 
+/** The workflow's localized one-line description. */
 export function workflowSub(id: WorkflowId): string {
   return WORKFLOW_TEXT[id].sub();
 }
@@ -156,6 +161,7 @@ export function workflowPath(id: WorkflowId): string {
   return `/skills/workflow/${encodeURIComponent(id)}`;
 }
 
+/** The country a skill's law is written for. */
 export type Jurisdiction = "us" | "kr";
 
 /** Which country's law a skill is written for, from its stable name; null when it is not country-specific. */
@@ -182,6 +188,7 @@ export function availableWorkflows(rows: readonly SkillRow[]): Array<{ id: Workf
   });
 }
 
+/** One heading's worth of a workflow page: a jurisdiction (or none) and its rows. */
 export type WorkflowGroup = { jurisdiction: Jurisdiction | null; rows: SkillRow[] };
 
 /**

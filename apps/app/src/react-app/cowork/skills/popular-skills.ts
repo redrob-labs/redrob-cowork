@@ -3,8 +3,8 @@
  *
  * The "Popular" / "인기 스킬" shelf on the Skills page shows these catalogue skill names, in this
  * order. There is no usage data yet (the public catalogue at console.redrob.ai/skills/index.json has
- * no counts, and there is no backend for it), so this is a hand-picked stand-in written in round 10.
- * Felix will replace it with the real list; editing these arrays is the only change needed.
+ * no counts, and there is no backend for it), so this is a hand-picked stand-in. Editing these
+ * arrays is the only change needed to replace it with the real list.
  *
  * Rules the shelf applies at runtime:
  * - one list per UI language (`en` for English, `ko` for Korean); any other language uses `en`;

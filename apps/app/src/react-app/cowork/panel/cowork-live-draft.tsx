@@ -8,6 +8,7 @@ import { t } from "../../../i18n";
 import { MarkdownBlock } from "../../domains/session/surface/markdown";
 import type { LiveDraft } from "./live-draft";
 
+/** Inputs of the live draft view. */
 export type CoworkLiveDraftProps = {
   /** The file being written, with the full body the write tool was given. */
   draft: LiveDraft;
@@ -16,8 +17,8 @@ export type CoworkLiveDraftProps = {
 };
 
 /**
- * Round 7 C6: the deliverable appearing in the Artifacts tab as it is written. The body is
- * revealed letter by letter at the chat's own pace (2x Claude easing to 1x, useSmoothReveal) with
+ * The deliverable appearing in the Artifacts tab as it is written. The body is revealed letter by
+ * letter at the chat's own pace (twice the reading speed easing to 1x, useSmoothReveal) with
  * the Redrob Blue caret riding the end; Markdown renders as formatted text while it builds up.
  * Under reduced motion the whole body shows at once.
  */
