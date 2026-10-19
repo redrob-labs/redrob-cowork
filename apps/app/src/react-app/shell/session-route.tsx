@@ -21,6 +21,10 @@ import { coworkSystemText } from "@/react-app/cowork/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/cowork/thread/memory-context";
 import { toNote } from "@/react-app/cowork/services/real-services";
 import { isPlanRunPrompt, isQuestionAnswerPrompt, planTurnInstruction } from "@/react-app/cowork/thread/thread-logic";
+import { useRepairMarkerTitles } from "@/react-app/cowork/thread/use-repair-marker-titles";
+
+/** Stable empty list, so the title repair's effect does not re-run on every render. */
+const EMPTY_ROUTE_SESSIONS: never[] = [];
 import { useCoworkCrossCheck } from "@/react-app/cowork/thread/use-cowork-cross-check";
 import type {
   AgentPartInput,
@@ -2482,6 +2486,14 @@ export function SessionRoute() {
     client: opencodeClient,
     directory: selectedWorkspaceRoot || undefined,
     levels: local.prefs.coworkCrossCheck,
+  });
+
+  // Round 9: a chat the server titled "```redrob-questions" is renamed after its first prompt.
+  useRepairMarkerTitles({
+    client: opencodeClient,
+    directory: selectedWorkspaceRoot || undefined,
+    sessions: sessionsByWorkspaceId[selectedWorkspaceId] ?? EMPTY_ROUTE_SESSIONS,
+    onRenamed: () => void refreshRouteState(),
   });
 
   return (

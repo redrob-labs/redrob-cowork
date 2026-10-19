@@ -3,6 +3,7 @@ import { useRef, useState, type FormEvent, type Ref } from "react";
 import { Button, EmptyState, IconButton, SectionMark, TaskStatus, icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
+import { isBlockMarkerTitle } from "../../../app/lib/session-title";
 import { useSessionPanelState, type BrowserPanelTab } from "../../domains/session/panel/panel-tab-store";
 import { useNativeBrowserBounds } from "../../domains/session/panel/use-native-browser-bounds";
 import { useSidePanelTabs } from "../../domains/session/panel/use-side-panel-tabs";
@@ -83,7 +84,7 @@ export function CoworkNewTab(props: CoworkNewTabProps) {
               <li key={`${page.chatId}:${page.url}`}>
                 <button type="button" onClick={() => props.onOpen(page.url)}>
                   <b>{page.host}</b>
-                  <span>{t("cowork.browser_read_for", { chat: page.chatTitle ?? t("cowork.untitled_chat") })}</span>
+                  <span>{t("cowork.browser_read_for", { chat: page.chatTitle && !isBlockMarkerTitle(page.chatTitle) ? page.chatTitle : t("cowork.untitled_chat") })}</span>
                 </button>
               </li>
             ))}
