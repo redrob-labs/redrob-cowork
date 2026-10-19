@@ -48,13 +48,36 @@ function reasoningLead(reasoning: string): string | null {
   return sentence.length > 80 ? `${sentence.slice(0, 79)}\u2026` : sentence
 }
 
-/** The live header text: the active tool's label, else the latest thinking lead, else "Working on it". */
-function currentActivityLabel(parts: AnyToolPart[], reasoning: string): string {
+/**
+ * Round 8 (M2): what the model is thinking about NOW - the newest paragraph of the turn's reasoning,
+ * not its first (the first froze the live line on the turn's opening thought). A bold heading line
+ * ("**Checking export rules**"), which models use to title each step, wins over the body sentence.
+ */
+export function latestReasoningLead(reasoning: string): string | null {
+  const paragraphs = reasoning.split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean)
+  for (let index = paragraphs.length - 1; index >= 0; index -= 1) {
+    const block = paragraphs[index] ?? ""
+    const heading = block.match(/^\*\*([^*\n]{3,90})\*\*\s*$/m)?.[1]?.trim()
+    if (heading) return heading
+    const lead = reasoningLead(block)
+    if (lead) return lead
+  }
+  return null
+}
+
+/**
+ * The live header text, refreshed as the run moves (round 8 M2): the tool in flight ("Searching
+ * the web for ..."), else the newest thought, else the step that just finished, else "Working on it".
+ */
+export function currentActivityLabel(parts: AnyToolPart[], reasoning: string): string {
   for (let i = parts.length - 1; i >= 0; i -= 1) {
     const part = parts[i]
     if (part && isToolPartInFlight(part)) return getToolActivityLabel(part)
   }
-  return reasoningLead(reasoning) ?? t("cowork.thread_working")
+  const thought = latestReasoningLead(reasoning)
+  if (thought) return thought
+  const last = parts[parts.length - 1]
+  return last ? getToolActivityLabel(last) : t("cowork.thread_working")
 }
 
 /** A step row's status dot: in flight, errored, or finished. */
