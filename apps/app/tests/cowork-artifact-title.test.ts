@@ -68,3 +68,30 @@ describe("in-flight write cards (item 8 / M1)", () => {
     expect(cards.map((a) => a.path)).toEqual(["/w/report.md"]);
   });
 });
+
+describe("writtenOnly cards (round 7 C2)", () => {
+  const text = (value: string): UIMessage["parts"][number] => ({ type: "text", text: value }) as UIMessage["parts"][number];
+  const tool = (toolName: string, state: string, input: Record<string, unknown>): UIMessage["parts"][number] =>
+    ({ type: "dynamic-tool", toolName, toolCallId: `${toolName}-${state}`, state, input, output: "" }) as unknown as UIMessage["parts"][number];
+  const message = (parts: UIMessage["parts"]): UIMessage => ({ id: "m1", role: "assistant", parts });
+
+  test("a path only MENTIONED in prose makes no card (the plan's 'Save as reports/x.md')", () => {
+    const messages = [message([text("Draft the memo, saved as a Markdown file. Save as reports/us-china-ai-race-outlook.md.")])];
+    expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false, writtenOnly: true })).toHaveLength(0);
+    // The bare surface's Files strip still collects mentioned paths (default behaviour unchanged).
+    expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false }).map((a) => a.path)).toEqual(["reports/us-china-ai-race-outlook.md"]);
+  });
+
+  test("a read is not a deliverable; a settled write is", () => {
+    const messages = [message([
+      tool("read", "output-available", { filePath: "notes/source.md" }),
+      tool("write", "output-available", { filePath: "reports/outlook.md" }),
+    ])];
+    expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false, writtenOnly: true }).map((a) => a.path)).toEqual(["reports/outlook.md"]);
+  });
+
+  test("an in-flight write still gets its card under writtenOnly", () => {
+    const messages = [message([tool("write", "input-streaming", { filePath: "reports/outlook.md" })])];
+    expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true })).toHaveLength(1);
+  });
+});

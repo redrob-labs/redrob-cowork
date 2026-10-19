@@ -33,6 +33,10 @@ type GetArtifactsOptions = {
   /** M1 (item 8): also surface a provisional card for an in-flight write, so the "writing" caret
    *  has a card to attach to before the write settles. Opt-in (Cowork card list only). */
   includeInFlightWrites?: boolean
+  /** Round 7 C2: collect only files a write-family tool (write, edit, apply_patch) produced. Drops
+   *  paths merely MENTIONED in prose, attachments, sources and reads, which made unopenable
+   *  cards for files that did not exist yet (e.g. a plan saying "Save as reports/x.md"). */
+  writtenOnly?: boolean
 }
 
 const WORKSPACES_PREFIX_PATTERN = /^workspaces\/[^/]+\//i;
@@ -256,10 +260,13 @@ function getArtifactPathsFromText(text: string) {
   return paths;
 }
 
-function getArtifactPathsFromMessage(message: UIMessage) {
+function getArtifactPathsFromMessage(message: UIMessage, writtenOnly = false) {
   const paths: (string | undefined)[] = [];
 
   for (const part of message.parts) {
+    // writtenOnly: only settled write-family tool parts below count; everything else is skipped.
+    if (writtenOnly && part.type !== "dynamic-tool") continue;
+
     if (part.type === "text" && message.role === "assistant") {
       paths.push(...getArtifactPathsFromText(part.text));
       continue;
@@ -298,7 +305,7 @@ function getArtifactPathsFromMessage(message: UIMessage) {
 
     // Paper artifact strip covers every file "read, edited, or created".
     if (isReadToolPart(part)) {
-      paths.push(part.input.filePath);
+      if (!writtenOnly) paths.push(part.input.filePath);
       continue;
     }
     if (isApplyPatchToolPart(part)) {
@@ -345,7 +352,7 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
   let sequence = 0;
 
   messages.forEach((message, messageIndex) => {
-    for (const path of getArtifactPathsFromMessage(message)) {
+    for (const path of getArtifactPathsFromMessage(message, options.writtenOnly)) {
       addArtifact(artifacts, path, message.id, messageIndex, sequence, openTargets);
       sequence += 1;
     }
@@ -437,10 +444,11 @@ export function useArtifacts(messages: UIMessage[], options: GetArtifactsOptions
   const { openTargets } = useOpenTargets();
   const includeTargetFallbacks = options.includeTargetFallbacks ?? false;
   const includeInFlightWrites = options.includeInFlightWrites ?? false;
+  const writtenOnly = options.writtenOnly ?? false;
 
   return React.useMemo(
-    () => getArtifactsFromMessages(messages, openTargets, { includeTargetFallbacks, includeInFlightWrites }),
-    [includeInFlightWrites, includeTargetFallbacks, messages, openTargets],
+    () => getArtifactsFromMessages(messages, openTargets, { includeTargetFallbacks, includeInFlightWrites, writtenOnly }),
+    [includeInFlightWrites, includeTargetFallbacks, messages, openTargets, writtenOnly],
   );
 }
 
