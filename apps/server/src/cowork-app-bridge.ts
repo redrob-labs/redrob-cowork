@@ -398,6 +398,59 @@ function buildTools(config: ServerConfig, call: ServerCall): ToolDef[] {
       },
     },
     {
+      name: "set_status",
+      description:
+        "Move a task's status the way a person can in the UI: \"idle\" stops a running task (the stop button), \"active\" restores an archived task (the restore button). busy/retry are set by the agent working and cannot be set by hand.",
+      input: z.object({
+        id: z.string().min(1).describe("Task (session) id"),
+        status: z.string().min(1).describe("idle (stop the task) or active (restore it from the archive)"),
+      }),
+      handler: async (args) => {
+        const id = String(args.id);
+        const status = String(args.status).trim().toLowerCase();
+        if (status !== "idle" && status !== "active") {
+          throw new Error(
+            `Status "${status}" has no user action. Use "idle" to stop a running task or "active" to restore an archived one; busy and retry come from the agent working.`,
+          );
+        }
+        const located = await locateSession(id);
+        if (status === "idle") {
+          await call(
+            "POST",
+            `/workspace/${encodeURIComponent(located.workspaceId)}/sessions/${encodeURIComponent(id)}/abort`,
+          );
+          return `${id}: stopped`;
+        }
+        // The sidebar's restore button: clear the engine's `time.archived` stamp.
+        await call("PATCH", engineProxyPath(located.workspaceId, `/session/${encodeURIComponent(id)}`), {
+          time: { archived: 0 },
+        });
+        return `${id}: restored`;
+      },
+    },
+    {
+      name: "open_desk",
+      description:
+        "Bring the Redrob Cowork window to the front on a desk (session group), opening its most recent task. Needs the app to be open on this server.",
+      input: z.object({
+        desk: z.string().min(1).describe("Desk (session group) id or label"),
+        workspace: z.string().optional().describe("Workspace id or name; omitted uses the first workspace"),
+      }),
+      handler: async (args) => {
+        const workspace = requireWorkspace(asString(args.workspace));
+        const desk = String(args.desk).trim();
+        const groups = await readGroups(workspace.id);
+        const wanted = desk.toLowerCase();
+        const group = groups.groups.find((entry) => entry.id.toLowerCase() === wanted || entry.label.toLowerCase() === wanted);
+        if (!group) throw new Error(`Unknown desk "${desk}"; known: ${groups.groups.map((entry) => entry.label).join(", ") || "none"}`);
+        await call(
+          "POST",
+          `/workspace/${encodeURIComponent(workspace.id)}/session-groups/${encodeURIComponent(group.id)}/open`,
+        );
+        return `asked the app to open desk ${group.label}`;
+      },
+    },
+    {
       name: "list_approvals",
       description: "List the approval requests waiting for a human on this server, one line each: approval id, workspace, action, summary.",
       handler: async () => {
