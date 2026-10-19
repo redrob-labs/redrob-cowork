@@ -113,7 +113,7 @@ export function SkillTile({ row, locale, pending, canAdd, fromPath, onAdd, onUse
           className="cowork-skill-tile__action"
           size="sm"
           variant="secondary"
-          iconLeft={icons.play(ICON)}
+          iconLeft={icons.sparkle(ICON)}
           aria-label={t("cowork.skills_use_label", { name: title })}
           onClick={() => onUse(row.name)}
         >
@@ -182,7 +182,7 @@ function YourSkillCard(props: { row: SkillRow; locale: string; fromPath: string;
           className="cowork-your-skill__action"
           size="sm"
           variant="secondary"
-          iconLeft={icons.play(ICON)}
+          iconLeft={icons.sparkle(ICON)}
           aria-label={t("cowork.skills_use_label", { name: title })}
           onClick={() => onUse(row.name)}
         >

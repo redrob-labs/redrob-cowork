@@ -94,7 +94,7 @@ export function WorkflowView({ id, rows, locale, canAdd, pending, addingAll, bac
                       {t("cowork.skill_add")}
                     </Button>
                   ) : onUse ? (
-                    <Button size="sm" variant="secondary" iconLeft={icons.play(ICON)} aria-label={t("cowork.skills_use_label", { name: title })} onClick={() => onUse(row.name)}>
+                    <Button size="sm" variant="secondary" iconLeft={icons.sparkle(ICON)} aria-label={t("cowork.skills_use_label", { name: title })} onClick={() => onUse(row.name)}>
                       {t("cowork.skills_use")}
                     </Button>
                   ) : null}
