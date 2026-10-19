@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { t, type Language } from "../../../i18n";
 import { TRENDING, type TrendItem } from "./chart-trending";
 import { TrendingTicker } from "./trending-ticker";
+import { RadarBanners } from "./radar-banners";
 import { useAutoRotate } from "./use-auto-rotate";
 import {
   CHART_OUTPUT_ORDER,
@@ -494,6 +495,8 @@ export function ModelChartHome(props: {
         </section>
       ) : null}
       </div>
+
+      <RadarBanners locale={props.locale} />
 
       <ModelChartShelf heading={t("cowork.chart_by_profession")} headingId="model-chart-prof">
         {professions.map((profession, index) => (

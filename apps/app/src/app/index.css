@@ -3850,7 +3850,6 @@ select:disabled {
 .model-chart__trending {
   display: flex;
   align-items: center;
-  gap: 6px;
   width: min(360px, 100%);
   min-width: 0;
   color: var(--ink-primary);
@@ -3860,6 +3859,8 @@ select:disabled {
   min-width: 0;
   flex: 1;
 }
+/* One 20px text line for every part of the pill, so icon, label, scope, rank, term, mark and chevron
+   share a single centre line instead of each font's own baseline. */
 .model-chart__trending-trigger {
   display: flex;
   align-items: center;
@@ -3867,7 +3868,8 @@ select:disabled {
   min-width: 0;
   height: 32px;
   flex: 1;
-  padding: 0 9px 0 12px;
+  padding: 0 10px 0 12px;
+  line-height: 20px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full, 999px);
   background: var(--surface-raised);
@@ -3879,23 +3881,37 @@ select:disabled {
   border-color: var(--border-strong);
 }
 .model-chart__trending-trigger:focus-visible,
-.model-chart__trending-pause:focus-visible,
 .model-chart__banner-pause:focus-visible,
 .model-chart__trending-row:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 .model-chart__trending-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
   color: var(--ink-brand);
 }
+.model-chart__trending-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+/* The label ends in a hairline divider, so the rotating entry reads as its value. */
 .model-chart__trending-label {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
   flex: 0 0 auto;
+  padding-inline-end: 8px;
+  border-inline-end: 1px solid var(--border-subtle);
   color: var(--ink-secondary);
-  font: var(--text-caption, 11px/16px sans-serif);
+  font-size: 12px;
   font-weight: 650;
+  line-height: 14px;
 }
 .model-chart__trending-window {
   display: block;
@@ -3905,10 +3921,10 @@ select:disabled {
   overflow: hidden;
 }
 .model-chart__trending-entry {
-  display: grid;
-  grid-template-columns: auto 18px minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   height: 20px;
   animation: model-chart-trending-in var(--duration-base, 220ms) var(--easing-standard, ease);
 }
@@ -3917,8 +3933,27 @@ select:disabled {
   to { transform: translateY(0); opacity: 1; }
 }
 .model-chart__trending-scope {
+  flex: 0 0 auto;
   color: var(--ink-muted);
-  font: var(--text-caption, 11px/16px sans-serif);
+  font-size: 11px;
+  line-height: 20px;
+}
+/* In the pill the rank hugs its term; the panel rows keep their fixed rank column. */
+.model-chart__trending-entry .model-chart__trending-rank {
+  flex: 0 0 auto;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: start;
+}
+.model-chart__trending-entry .model-chart__trending-item-label {
+  flex: 0 1 auto;
+  line-height: 20px;
+}
+.model-chart__trending-entry .model-chart__trending-mark {
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 20px;
 }
 .model-chart__trending-rank {
   min-width: 18px;
@@ -3940,16 +3975,17 @@ select:disabled {
   white-space: nowrap;
 }
 .model-chart__trending-chevron {
+  display: block;
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
+  margin-inline-start: auto;
   color: var(--ink-muted);
   transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
 }
 .model-chart__trending-chevron[data-open] {
   transform: rotate(180deg);
 }
-.model-chart__trending-pause,
 .model-chart__banner-pause {
   display: grid;
   place-items: center;
@@ -3963,45 +3999,91 @@ select:disabled {
   color: var(--ink-muted);
   cursor: pointer;
 }
-.model-chart__trending-pause:hover,
 .model-chart__banner-pause:hover {
   border-color: var(--border-strong);
   color: var(--ink-primary);
 }
-.model-chart__trending-pause svg,
 .model-chart__banner-pause svg {
   width: 12px;
   height: 12px;
   fill: currentColor;
 }
-.model-chart__trending-panel {
+/*
+  Liquid glass: a see-through raised surface with a strong blur and saturation behind it, a soft
+  inner highlight on the top edge and a hairline light rim, over a gentle drop shadow. The surface
+  stays 78% opaque so text keeps its contrast over the bright banner art in both themes; without
+  backdrop-filter (or with reduced transparency) it falls back to the solid raised surface.
+*/
+.model-chart__trending-panel[data-slot="popover-content"] {
   width: min(340px, calc(100vw - 24px));
   max-height: min(640px, calc(100vh - 140px));
   gap: 8px;
   overflow-y: auto;
-  border-color: var(--border-subtle);
-  background: var(--surface-material);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 60%, rgba(255, 255, 255, 0.5));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-raised) 78%, transparent);
   color: var(--ink-primary);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 45%, transparent);
+}
+[data-theme="dark"] .model-chart__trending-panel[data-slot="popover-content"] {
+  border-color: color-mix(in srgb, var(--border-subtle) 70%, rgba(255, 255, 255, 0.14));
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 70%, transparent);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .model-chart__trending-panel[data-slot="popover-content"],
+  [data-theme="dark"] .model-chart__trending-panel[data-slot="popover-content"] {
+    background: var(--surface-raised);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .model-chart__trending-panel[data-slot="popover-content"],
+  [data-theme="dark"] .model-chart__trending-panel[data-slot="popover-content"] {
+    background: var(--surface-raised);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 .model-chart__trending-heading {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
+/* Live clock above the snapshot's own muted "Updated" time, right-aligned under each other. */
+.model-chart__trending-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.model-chart__trending-clock time {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.model-chart__trending-updated {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 14px;
+}
 .model-chart__trending-heading h3 {
   margin: 0;
+  line-height: 20px;
   color: var(--ink-primary);
   font-size: 15px;
   font-weight: 700;
-}
-.model-chart__trending-heading span,
-.model-chart__trending-note {
-  color: var(--ink-muted);
-  font: var(--text-caption, 11px/16px sans-serif);
-}
-.model-chart__trending-note {
-  margin: 0;
 }
 .model-chart__trending-tabs {
   width: 100%;
@@ -4073,6 +4155,248 @@ select:disabled {
 }
 @media (max-width: 640px) {
   .model-chart__trending { width: 100%; }
+}
+
+/*
+  Radar: two banners side by side under the Featured banner (stacked on narrow widths), in the
+  Featured banner's visual language: a spectrum gradient, the glass sheen, a scrim, white copy, a
+  frosted feed mark in the corner and a pill that says where the banner goes.
+*/
+.model-chart__radar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4, 16px);
+}
+@media (max-width: 760px) {
+  .model-chart__radar-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.model-chart__radar-banner {
+  min-height: 248px;
+  gap: 8px;
+  padding-top: 72px;
+  color: #fff;
+  text-decoration: none;
+}
+.model-chart__radar-banner:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.model-chart__radar-banner .model-chart__banner-title {
+  font-size: 20px;
+  line-height: 26px;
+}
+.model-chart__radar-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  color: #fff;
+  font-size: 13px;
+  line-height: 19px;
+  opacity: 0.92;
+}
+.model-chart__radar-mark {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 24px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.model-chart__radar-mark svg {
+  width: 20px;
+  height: 20px;
+}
+.model-chart__radar-open {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: var(--radius-full, 999px);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 20px;
+}
+.model-chart__radar-open svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__radar-banner:hover .model-chart__radar-open svg,
+.model-chart__radar-banner:focus-visible .model-chart__radar-open svg {
+  transform: translateX(2px);
+}
+/*
+  Radar subpage: a banner-style header (same gradient tones, scrim and feed mark, no hover lift)
+  over a numbered list of story cards. Every surface sets its background and text colour.
+*/
+.radar-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 20px);
+}
+.radar-page__head {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 76px var(--space-6, 24px) var(--space-5, 20px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  background:
+    radial-gradient(60% 120% at 85% -10%, rgba(255, 255, 255, 0.35), transparent 60%),
+    linear-gradient(120deg, var(--spectrum-indigo), var(--spectrum-violet));
+  color: #fff;
+  box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--redrob-black) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.radar-page__head[data-tone="2"] {
+  background:
+    radial-gradient(60% 120% at 85% -10%, rgba(255, 255, 255, 0.35), transparent 60%),
+    linear-gradient(120deg, var(--spectrum-teal), var(--spectrum-sky));
+}
+.radar-page__head > * {
+  position: relative;
+  z-index: 1;
+}
+.radar-page__head > .radar-page__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--redrob-black) 45%, transparent) 100%);
+}
+.radar-page__head > .model-chart__radar-mark {
+  position: absolute;
+}
+.radar-page__eyebrow {
+  font-size: 12px;
+  line-height: 16px;
+  opacity: 0.85;
+}
+.radar-page__title {
+  margin: 0;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+.radar-page__lede {
+  max-width: 68ch;
+  margin: 0;
+  color: #fff;
+  font-size: 14px;
+  line-height: 21px;
+  opacity: 0.92;
+}
+.radar-page__meta {
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.radar-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.radar-story__card {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-3, 12px);
+  padding: var(--space-4, 16px) var(--space-5, 20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+}
+.radar-story__rank {
+  color: var(--ink-brand);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.radar-story__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.radar-story__headline {
+  margin: 0;
+  color: var(--ink-primary);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 24px;
+}
+.radar-story__summary {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+  line-height: 21px;
+}
+.radar-story__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.radar-story__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.radar-story__source:hover {
+  color: var(--ink-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a.radar-story__source:focus-visible {
+  border-radius: 4px;
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.radar-story__source svg {
+  width: 12px;
+  height: 12px;
+}
+@media (max-width: 640px) {
+  .radar-page__title { font-size: 22px; line-height: 28px; }
+  .radar-story__card { grid-template-columns: 22px minmax(0, 1fr); padding: 14px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-chart__radar-banner:hover { transform: none; }
+  .model-chart__radar-open svg { transition: none; }
+  .model-chart__radar-banner:hover .model-chart__radar-open svg,
+  .model-chart__radar-banner:focus-visible .model-chart__radar-open svg { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .model-chart__trending-entry { animation: none; transform: none; }

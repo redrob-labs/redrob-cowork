@@ -1,5 +1,5 @@
-import { Badge, Tabs } from "@redrob-labs/ui";
-import { ChevronDown, Minus, Pause, Play, TrendingUp, Triangle } from "lucide-react";
+import { Badge, Tabs, icons } from "@redrob-labs/ui";
+import { ChevronDown, Minus, Triangle } from "lucide-react";
 import { useRef, useState, type KeyboardEvent } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
@@ -12,7 +12,9 @@ import {
   type TrendItem,
   type TrendScope,
 } from "./chart-trending";
+import { formatEditionStamp, formatLiveClock } from "./edition-clock";
 import { useAutoRotate } from "./use-auto-rotate";
+import { useMinuteClock } from "./use-minute-clock";
 
 const TICKER_MS = 3000;
 
@@ -48,6 +50,12 @@ function TrendMark(props: { item: TrendItem; compact?: boolean }) {
       <span className="sr-only">{accessible}</span>
     </span>
   );
+}
+
+/** The reader's current day and time, ticking each minute while the panel is open. */
+function LiveClock(props: { locale: Language }) {
+  const now = useMinuteClock();
+  return <time dateTime={now.toISOString()}>{formatLiveClock(now, props.locale)}</time>;
 }
 
 /** One tab's ordered, keyboard-navigable search list. */
@@ -94,7 +102,6 @@ export type TrendingTickerProps = {
 /** Collapsed rotating search ticker plus its two-tab ranked list. */
 export function TrendingTicker(props: TrendingTickerProps) {
   const [open, setOpen] = useState(false);
-  const [manualPaused, setManualPaused] = useState(false);
   const [pointerInside, setPointerInside] = useState(false);
   const [focusInside, setFocusInside] = useState(false);
   const [scope, setScope] = useState<TrendScope>("korea");
@@ -104,7 +111,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
   const rotation = useAutoRotate({
     count: sequence.length,
     ms: TICKER_MS,
-    paused: manualPaused || pointerInside || focusInside || open,
+    paused: pointerInside || focusInside || open,
   });
   const current = sequence[rotation.index] ?? sequence[0];
   const visibleItems = scope === "korea" ? props.data.korea : props.data.global;
@@ -164,7 +171,10 @@ export function TrendingTicker(props: TrendingTickerProps) {
             }
           }}
         >
-          <TrendingUp className="model-chart__trending-icon" aria-hidden />
+          {/* The same chart mark as the sidebar's Trending AI item, so the ticker reads as part of it. */}
+          <span className="model-chart__trending-icon" aria-hidden="true">
+            {icons.chart({ width: 14, height: 14, "aria-hidden": true })}
+          </span>
           <span className="model-chart__trending-label">{t("cowork.chart_trending_label")}</span>
           {current ? (
             <span className="model-chart__trending-window" aria-hidden="true">
@@ -196,9 +206,13 @@ export function TrendingTicker(props: TrendingTickerProps) {
         >
           <div className="model-chart__trending-heading">
             <h3>{t("cowork.chart_trending_title")}</h3>
-            <span>{props.edition}</span>
+            <span className="model-chart__trending-clock">
+              <LiveClock locale={props.locale} />
+              <span className="model-chart__trending-updated">
+                {t("cowork.chart_trending_updated", { time: formatEditionStamp(props.data.updatedAt, props.locale) })}
+              </span>
+            </span>
           </div>
-          <p className="model-chart__trending-note">{t("cowork.chart_trending_note")}</p>
           <Tabs
             variant="line"
             label={t("cowork.chart_trending_title")}
@@ -217,17 +231,6 @@ export function TrendingTicker(props: TrendingTickerProps) {
         </PopoverContent>
       </Popover>
       </div>
-      {rotation.reducedMotion ? null : (
-        <button
-          type="button"
-          className="model-chart__trending-pause"
-          aria-label={manualPaused ? t("cowork.chart_trending_play") : t("cowork.chart_trending_pause")}
-          aria-pressed={manualPaused}
-          onClick={() => setManualPaused((paused) => !paused)}
-        >
-          {manualPaused ? <Play aria-hidden /> : <Pause aria-hidden />}
-        </button>
-      )}
     </div>
   );
 }

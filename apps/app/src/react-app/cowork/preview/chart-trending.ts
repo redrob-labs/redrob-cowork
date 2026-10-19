@@ -24,6 +24,8 @@ export type TrendItem = {
 export type TrendingEdition = {
   /** Calendar date attached to this bundled edition. */
   asOf: string;
+  /** ISO time the snapshot was taken, shown as "Updated" so a live clock never implies live data. */
+  updatedAt: string;
   /** Short, human-readable provenance for review. */
   sourceNote: string;
   /** South Korea search terms. */
@@ -34,6 +36,7 @@ export type TrendingEdition = {
 
 export const TRENDING: TrendingEdition = {
   asOf: "2026-10-19",
+  updatedAt: "2026-10-19T09:00:00+09:00",
   sourceNote: "Google Trends, South Korea and United States, past 24 hours; editorial selection checked 19 October 2026.",
   korea: [
     { id: "kr-shinsegae-gangnam", rank: 1, prevRank: 4, label: "신세계백화점 강남점", labelKo: "신세계백화점 강남점" },
