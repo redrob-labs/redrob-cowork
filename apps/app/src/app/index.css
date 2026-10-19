@@ -2565,7 +2565,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   background: var(--surface-raised);
@@ -2614,22 +2614,29 @@
   gap: 6px;
   min-width: 0;
 }
+/* Title and description wrap to at most two lines each, so a long one reads whole instead of
+   ending in "..."; the clamp only cuts past two lines. */
 .cowork-your-skill__title {
+  display: -webkit-box;
   overflow: hidden;
   font-size: 13px;
   line-height: 18px;
   font-weight: 600;
   color: var(--ink-primary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
+
 .cowork-your-skill__brief {
+  display: -webkit-box;
   overflow: hidden;
   font-size: 12px;
   line-height: 16px;
   color: var(--ink-secondary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .cowork-your-skill__action {
   flex: none;
