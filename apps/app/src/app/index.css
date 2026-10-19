@@ -2145,8 +2145,7 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
-.cowork-skills__shelf-heading h2,
-.cowork-skills__full-heading h2 {
+.cowork-skills__shelf-heading h2 {
   margin: 0;
   font-size: 16px;
   line-height: 22px;
@@ -2212,22 +2211,6 @@
 }
 .cowork-skills__shelf-row::-webkit-scrollbar { display: none; }
 .cowork-skills__shelf-row > li { scroll-snap-align: start; }
-.cowork-skills__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  column-gap: 16px;
-  row-gap: 28px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.cowork-skills__full-heading {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-.cowork-skills__header-search { width: min(240px, 38vw); }
 .cowork-skills__notice {
   padding: var(--space-4);
   border: 1px solid var(--border-subtle);

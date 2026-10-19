@@ -81,33 +81,15 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }:
   );
 }
 
-type SkillGridProps = Omit<SkillTileProps, "row"> & {
-  /** Rows shown in plain keyboard and reading order. */
-  rows: SkillRow[];
-  /** Localized label announced for the list. */
-  label: string;
-};
-
-/** Wrapped full-shelf or search-results grid. */
-export function SkillGrid({ rows, label, ...tileProps }: SkillGridProps) {
-  return (
-    <ul className="cowork-skills__grid" role="list" aria-label={label}>
-      {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
-    </ul>
-  );
-}
-
-type SkillShelfProps = Omit<SkillGridProps, "rows" | "label"> & {
-  /** Stable shelf id used for heading and URL filtering. */
+type SkillShelfProps = Omit<SkillTileProps, "row"> & {
+  /** Stable shelf id used for the heading and its label. */
   id: SkillShelfId;
   /** Rows shown in this horizontal collection. */
   rows: SkillRow[];
-  /** Opens the wrapped full-shelf view. */
-  onSeeAll: (id: SkillShelfId) => void;
 };
 
 /** One horizontally scrolling marketplace shelf; edge chevrons appear on hover or keyboard focus. */
-export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps) {
+export function SkillShelf({ id, rows, ...tileProps }: SkillShelfProps) {
   const scroller = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ canPrev: false, canNext: false });
   const headingId = `skill-shelf-${id}`;
@@ -136,9 +118,6 @@ export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps
     <section className="cowork-skills__shelf" aria-labelledby={headingId}>
       <div className="cowork-skills__shelf-heading">
         <h2 id={headingId}>{label}</h2>
-        <Button id={`${headingId}-see-all`} size="sm" variant="ghost" aria-label={t("cowork.skills_see_all_label", { shelf: label })} onClick={() => onSeeAll(id)}>
-          {t("cowork.skills_see_all")}
-        </Button>
       </div>
       <div className="cowork-skills__shelf-viewport">
         <ShelfChevron direction={-1} label={t("cowork.skills_scroll_left", { shelf: label })} show={edges.canPrev} onMove={move} />

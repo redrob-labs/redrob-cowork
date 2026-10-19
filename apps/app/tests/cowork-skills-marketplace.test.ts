@@ -149,10 +149,15 @@ describe("skills marketplace helpers", () => {
   test("shelf control labels read naturally in both locales", () => {
     expect(en["cowork.skills_scroll_left"]).toBe("{shelf}: scroll left");
     expect(en["cowork.skills_scroll_right"]).toBe("{shelf}: scroll right");
-    expect(en["cowork.skills_see_all_label"]).toBe("{shelf}: see all");
     expect(ko["cowork.skills_scroll_left"]).toBe("{shelf} 왼쪽으로 넘기기");
     expect(ko["cowork.skills_scroll_right"]).toBe("{shelf} 오른쪽으로 넘기기");
-    expect(ko["cowork.skills_see_all_label"]).toBe("{shelf} 모두 보기");
+  });
+
+  test("drops the See all and search copy from both locales together", () => {
+    for (const key of ["cowork.skills_see_all", "cowork.skills_see_all_label", "cowork.skills_search", "cowork.skills_results"]) {
+      expect(key in en).toBe(false);
+      expect(key in ko).toBe(false);
+    }
   });
 });
 
@@ -220,7 +225,7 @@ describe("skill marketplace markup", () => {
   test("renders shelf chevrons as labelled plain buttons with no hover text", () => {
     const html = renderToStaticMarkup(
       React.createElement(MemoryRouter, null,
-        React.createElement(SkillShelf, { id: "lawyer", rows: [row("us-lawyer-a", { title: "A" }), row("us-lawyer-b", { title: "B" })], locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {}, onSeeAll: () => {} }),
+        React.createElement(SkillShelf, { id: "lawyer", rows: [row("us-lawyer-a", { title: "A" }), row("us-lawyer-b", { title: "B" })], locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
       ),
     );
     expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--prev"');
@@ -228,6 +233,8 @@ describe("skill marketplace markup", () => {
     expect(html).toContain(`aria-label="${en["cowork.skills_scroll_left"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
     expect(html).toContain(`aria-label="${en["cowork.skills_scroll_right"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
     expect(html).not.toContain(" title=");
+    expect(html).not.toContain("see-all");
+    expect(html).not.toContain("See all");
   });
 
   test("reserves an image slot while retaining a tone fallback", () => {
