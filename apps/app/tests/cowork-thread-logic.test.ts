@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { setLocale } from "../src/i18n";
 import { DEFAULT_CROSS_CHECK } from "../src/react-app/cowork/composer/composer-state";
-import { createCheckStore, settleChecks, startChecks } from "../src/react-app/cowork/thread/check-store";
+import { createCheckStore, readKeptChecks, settleChecks, startChecks } from "../src/react-app/cowork/thread/check-store";
 import {
   checkMatters,
   checkPrompt,
@@ -570,5 +570,29 @@ describe("round 8 M3: the written deliverable is what gets checked", () => {
     }]);
     expect(message?.document).toEqual({ path: "/w/r.md", content: "# R" });
     expect(message?.text).toBe("Saved.");
+  });
+});
+
+describe("round 8 M7: check chips survive reopening a chat", () => {
+  const memory = () => {
+    const data = new Map<string, string>();
+    return () => ({ getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => void data.set(key, value) });
+  };
+
+  test("a settled result is kept and read back by a fresh store; a running one is not", () => {
+    const storage = memory();
+    const first = createCheckStore({ storage });
+    first.getState().start("m1", { planned: false, fact: true, challenge: true });
+    first.getState().start("m2", { planned: false, fact: true, challenge: false });
+    first.getState().settle("m1", { fact: { claims: [], missed: [] } });
+    const reopened = createCheckStore({ storage });
+    expect(reopened.getState().answers.m1).toMatchObject({ fact: "done", challenge: "failed" });
+    expect(reopened.getState().answers.m2).toBeUndefined();
+  });
+
+  test("unreadable storage is ignored", () => {
+    const storage = () => ({ getItem: () => "{not json", setItem: () => {} });
+    expect(createCheckStore({ storage }).getState().answers).toEqual({});
+    expect(readKeptChecks(() => null)).toEqual({});
   });
 });
