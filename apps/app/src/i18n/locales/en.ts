@@ -3610,6 +3610,23 @@ const en = {
   "workspace_list.unavailable": "Unavailable",
   "workspace_list.workspace_fallback": "Workspace",
   "workspace_list.workspace_options": "Workspace options",
+  // Share to Redrob Chat (domains/session/share/redrob-chat-share-dialog.tsx)
+  "redrob_chat_share.menu": "Share to Redrob Chat",
+  "redrob_chat_share.title": "Share to Redrob Chat",
+  "redrob_chat_share.description_transcript": "Creates a read-only copy of this conversation on Redrob Chat. Later changes here do not change the link.",
+  "redrob_chat_share.description_artifact": "Creates a read-only copy of this file on Redrob Chat. Later edits here do not change the link.",
+  "redrob_chat_share.visibility_unlisted": "Anyone with the link",
+  "redrob_chat_share.visibility_unlisted_hint": "Not listed anywhere. Only people you send the link to can open it.",
+  "redrob_chat_share.visibility_public": "Public",
+  "redrob_chat_share.visibility_public_hint": "Anyone can open it. Meant for links you post openly.",
+  "redrob_chat_share.visibility_private": "Only me",
+  "redrob_chat_share.visibility_private_hint": "Only you can open it, signed in to Redrob Chat.",
+  "redrob_chat_share.create": "Create link",
+  "redrob_chat_share.creating": "Creating link…",
+  "redrob_chat_share.link_label": "Link",
+  "redrob_chat_share.open": "Open in browser",
+  "redrob_chat_share.failed": "Could not create the link.",
+  "redrob_chat_share.copy_failed": "Could not copy the link.",
 } as const;
 
 /**

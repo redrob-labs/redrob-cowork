@@ -147,6 +147,7 @@ import { WorkspaceAvatarPicker } from "./workspace-avatar-picker";
 import { useWorkbenchStore } from "../chat/workbench-store";
 import { SidebarDestination } from "./sidebar-destination";
 import { SessionTitle } from "./session-title";
+import { useRedrobChatShareStore } from "../share/redrob-chat-share-dialog";
 
 /** Paper Desktop: unread #2FBE54, needs-action #E8933A (14px artboard → ~8px app). */
 const OUTCOME_DOT_UNREAD = "#2FBE54";
@@ -302,6 +303,10 @@ function SessionMenuContent({ variant, sessionId, workspaceId, isPinned, isArchi
             {t("workspace_list.rename_session")}
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuItem onClick={() => useRedrobChatShareStore.getState().open({ kind: "transcript", workspaceId, sessionId })}>
+          <Share2 className="size-4" />
+          {t("redrob_chat_share.menu")}
+        </DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Tag className="size-4" />
@@ -387,6 +392,10 @@ function SessionMenuContent({ variant, sessionId, workspaceId, isPinned, isArchi
           {t("workspace_list.rename_session")}
         </ContextMenuItem>
       ) : null}
+      <ContextMenuItem onClick={() => useRedrobChatShareStore.getState().open({ kind: "transcript", workspaceId, sessionId })}>
+        <Share2 className="size-4" />
+        {t("redrob_chat_share.menu")}
+      </ContextMenuItem>
       <ContextMenuSub>
         <ContextMenuSubTrigger>
           <Tag className="mr-2 size-4" />

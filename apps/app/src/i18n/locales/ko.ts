@@ -3575,6 +3575,23 @@ const ko = {
   "workspace_list.unavailable": "사용 불가",
   "workspace_list.workspace_fallback": "워크스페이스",
   "workspace_list.workspace_options": "워크스페이스 옵션",
+  // Share to Redrob Chat (domains/session/share/redrob-chat-share-dialog.tsx)
+  "redrob_chat_share.menu": "레드롭 챗으로 공유",
+  "redrob_chat_share.title": "레드롭 챗으로 공유",
+  "redrob_chat_share.description_transcript": "이 대화의 읽기 전용 사본을 레드롭 챗에 만듭니다. 여기서 나중에 바꿔도 링크 내용은 바뀌지 않습니다.",
+  "redrob_chat_share.description_artifact": "이 파일의 읽기 전용 사본을 레드롭 챗에 만듭니다. 여기서 나중에 고쳐도 링크 내용은 바뀌지 않습니다.",
+  "redrob_chat_share.visibility_unlisted": "링크가 있는 사람",
+  "redrob_chat_share.visibility_unlisted_hint": "어디에도 노출되지 않습니다. 링크를 받은 사람만 열 수 있습니다.",
+  "redrob_chat_share.visibility_public": "공개",
+  "redrob_chat_share.visibility_public_hint": "누구나 열 수 있습니다. 공개적으로 올릴 링크에 씁니다.",
+  "redrob_chat_share.visibility_private": "나만 보기",
+  "redrob_chat_share.visibility_private_hint": "레드롭 챗에 로그인한 본인만 열 수 있습니다.",
+  "redrob_chat_share.create": "링크 만들기",
+  "redrob_chat_share.creating": "링크 만드는 중…",
+  "redrob_chat_share.link_label": "링크",
+  "redrob_chat_share.open": "브라우저에서 열기",
+  "redrob_chat_share.failed": "링크를 만들지 못했습니다.",
+  "redrob_chat_share.copy_failed": "링크를 복사하지 못했습니다.",
 } satisfies Record<EnglishLogicalKey, string>;
 
 export default ko;
