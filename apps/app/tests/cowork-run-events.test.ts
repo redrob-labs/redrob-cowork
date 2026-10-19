@@ -67,12 +67,12 @@ describe("classifyStep", () => {
     expect(classifyStep(toolPart("navigate_page", { url: "https://a.example" }))?.kind).toBe("web");
   });
 
-  test("web fetch and search are web; navigation is set for a fetch with a url, not a bare search", () => {
-    // A webfetch with a url navigates (opens the panel); a bare websearch (query, no url) does not (item 7a).
+  test("web fetch and search are web; neither navigates, so neither opens the browser panel", () => {
+    // Round 9: reading a page is a background read; only real browser tools open the panel.
     expect(classifyStep(toolPart("webfetch", { url: "https://federalreserve.gov/rates" }))).toMatchObject({
       kind: "web",
       url: "https://federalreserve.gov/rates",
-      navigation: true,
+      navigation: false,
     });
     expect(classifyStep(toolPart("websearch", { query: "court holidays" }))).toEqual({ kind: "web", label: "websearch", navigation: false });
     expect(classifyStep(toolPart("webfetch", { url: "file:///etc/passwd" }))?.url).toBeUndefined();
@@ -157,8 +157,16 @@ describe("reduceRunEvent", () => {
       { type: "step.started", runId: "chat-1", label: "edit", kind: "files" },
     ]);
     expect(replay([partEvent(toolPart("webfetch", { url: "https://a.example" }, "completed", "w1"))]).emitted).toEqual([
-      { type: "step.started", runId: "chat-1", label: "webfetch", kind: "web", url: "https://a.example", navigation: true },
+      { type: "step.started", runId: "chat-1", label: "webfetch", kind: "web", url: "https://a.example" },
     ]);
+  });
+
+  test("round 9: a chat titled with a block fence line carries no chat title", () => {
+    const { emitted } = replay([
+      { type: "session.updated", properties: { info: { id: "chat-1", title: "```redrob-questions" } } },
+      partEvent(toolPart("webfetch", { url: "https://a.example" }, "completed", "w2")),
+    ]);
+    expect(emitted[0]).not.toHaveProperty("chatTitle");
   });
 
   test("a permission request is an approval step", () => {

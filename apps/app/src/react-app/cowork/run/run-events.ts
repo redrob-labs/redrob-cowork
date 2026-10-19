@@ -1,5 +1,7 @@
 import type { OpencodeEvent } from "../../../app/types";
 
+import { isBlockMarkerTitle } from "../../../app/lib/session-title";
+
 /**
  * The engine's events, read as the Cowork's own: a step started, a run answered, a file was
  * written. Pure, so the stream can be replayed in a test; `cowork-run-events.tsx` applies them.
@@ -56,14 +58,15 @@ function isWebTool(tool: string, input: UnknownRecord | undefined): boolean {
 }
 
 /**
- * Whether a web tool is a real page open/fetch rather than a bare search. A browser capability,
- * a `browser_*`/chrome-devtools/page tool always navigates; a fetch/search tool navigates only
- * when it carries a url. A pure `websearch` (a query, no url) is NOT navigation (item 7a).
+ * Whether a web tool drives the built-in browser rather than reading the web in the background.
+ * A browser capability, a `browser_*`/chrome-devtools/page tool always navigates. Round 9: a
+ * fetch or search tool never does, url or not - reading a page is a background read, and popping
+ * the browser panel for it pulled the person away from the chat. The read is still recorded in
+ * "Pages Cowork read today" (runEffects' page-read).
  */
 function isNavigationTool(tool: string, input: UnknownRecord | undefined): boolean {
   if (tool.endsWith("redrob_execute")) return stringField(input, "id")?.startsWith("browser.") ?? false;
-  if (tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool)) return true;
-  return FETCH_TOOLS.has(tool) && webUrl(input) !== undefined;
+  return tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool);
 }
 
 /** Whether a classified step opens the browser panel: a `web` step that is a navigation (item 7a). */
@@ -129,7 +132,7 @@ function started(state: RunEventsState, runId: string, step: StepInfo): CoworkRu
     kind: step.kind,
     ...(step.url ? { url: step.url } : {}),
     ...(step.navigation ? { navigation: true } : {}),
-    ...(title ? { chatTitle: title } : {}),
+    ...(title && !isBlockMarkerTitle(title) ? { chatTitle: title } : {}),
   };
 }
 
