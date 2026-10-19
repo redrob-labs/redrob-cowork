@@ -13,6 +13,7 @@ import {
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { trackToolCallDuration } from "@/lib/tool-call-duration"
+import { useElapsed } from "@/lib/use-elapsed"
 import { useWorkingLine } from "@/lib/working-lines"
 import { t } from "@/i18n"
 import { cn } from "@/lib/utils"
@@ -97,24 +98,6 @@ function rowStatus(part: AnyToolPart): "running" | "failed" | "done" {
   if (isToolPartInFlight(part)) return "running"
   if (part.state === "output-error") return "failed"
   return "done"
-}
-
-/** mm:ss-ish elapsed: "34s" / "1m 23s", ticking while streaming. Anchored to `startedAt` (the
- * run's server start) when given, so it does NOT reset when the row remounts on a new tool part. */
-function useElapsed(active: boolean, startedAt?: number | null): string {
-  // A stable anchor: the server start when known, else this component's first mount - captured once.
-  const firstMountRef = React.useRef<number>(Date.now())
-  const anchor = startedAt ?? firstMountRef.current
-  const [now, setNow] = React.useState(() => Date.now())
-  React.useEffect(() => {
-    if (!active) return
-    const id = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(id)
-  }, [active])
-  const total = Math.max(0, Math.floor((now - anchor) / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
 /**

@@ -6,7 +6,8 @@ import { ChevronDown, ChevronRight, Globe } from "lucide-react"
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
-import { parseWebSearchResults, type WebSearchResult } from "@/lib/websearch-results"
+import { faviconUrlForHref } from "@/lib/favicon"
+import { hostnameOf, parseWebSearchResults, type WebSearchResult } from "@/lib/websearch-results"
 import { cn } from "@/lib/utils"
 import { t } from "@/i18n"
 import { openExternal } from "@/react-app/cowork/connectors/cowork-connectors"
@@ -33,15 +34,6 @@ export type WebStep = {
   failed: boolean
 }
 
-function hostnameOf(url: string | undefined): string {
-  if (!url) return ""
-  try {
-    return new URL(url).hostname.replace(/^www\./, "")
-  } catch {
-    return ""
-  }
-}
-
 /** Pure: the web steps a run's tool parts stand for, in order. Non-web parts are skipped. */
 export function webStepsOf(parts: readonly AnyToolPart[]): WebStep[] {
   return parts.flatMap((part): WebStep[] => {
@@ -53,7 +45,7 @@ export function webStepsOf(parts: readonly AnyToolPart[]): WebStep[] {
     }
     if (isWebFetchToolPart(part)) {
       const url = part.input?.url
-      return [{ id: part.toolCallId, kind: "read", label: hostnameOf(url) || url || "", ...(url ? { url } : {}), results: [], running, failed }]
+      return [{ id: part.toolCallId, kind: "read", label: hostnameOf(url) ?? url ?? "", ...(url ? { url } : {}), results: [], running, failed }]
     }
     return []
   })
@@ -72,11 +64,13 @@ export function webStepsMeta(steps: readonly WebStep[]): string {
   return pieces.filter(Boolean).join(" · ")
 }
 
-/** A site's favicon, small and decorative. */
+/** A site's favicon, small and decorative; nothing for a local or non-web URL. */
 function Favicon(props: { url: string }) {
+  const src = faviconUrlForHref(props.url)
+  if (!src) return null
   return (
     <img
-      src={`https://www.google.com/s2/favicons?sz=32&domain_url=${encodeURIComponent(props.url)}`}
+      src={src}
       alt=""
       aria-hidden="true"
       className="size-4 shrink-0 rounded-sm"
@@ -87,7 +81,7 @@ function Favicon(props: { url: string }) {
 
 /** A source row: favicon, title, domain; opens the page in the person's browser. */
 function SourceRow(props: { result: WebSearchResult }) {
-  const host = hostnameOf(props.result.url)
+  const host = hostnameOf(props.result.url) ?? ""
   return (
     <li>
       <button
@@ -152,8 +146,8 @@ function SearchRow(props: { step: WebStep }) {
       </button>
       {open && canOpen ? (
         <ul className="flex flex-col gap-0.5 px-1 pb-2" aria-label={step.label}>
-          {step.results.map((result) => (
-            <SourceRow key={result.url} result={result} />
+          {step.results.map((result, index) => (
+            <SourceRow key={`${index}-${result.url}`} result={result} />
           ))}
         </ul>
       ) : null}

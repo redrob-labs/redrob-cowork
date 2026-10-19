@@ -1424,6 +1424,8 @@ function MessageGroup({
   // Round 7 C5: the live run row (loader + "Working on it" + timer) TRAILS the newest content of the
   // turn. It used to render first in the group; once the hidden question-answer and plan-run sends
   // folded questions, plan and run into ONE group, the loader sat above them all ("stuck at the top").
+  const openingUser = messages[(items[0]?.index ?? 0) - 1]
+  const liveRunStartedAt = openingUser?.role === "user" ? (getMessageCreated(openingUser) ?? stepsStartedAt) : stepsStartedAt
   const liveActivityRow = useUnifiedLiveActivity ? (
     <div className={CHAT_COLUMN} data-live-activity-row="">
       <UnifiedActivity
@@ -1432,8 +1434,9 @@ function MessageGroup({
         isStreaming
         /* Stable key for the whole turn so the row (and its timer) never remounts per tool. */
         activityKey={`${items[0]?.message.id ?? "live"}-activity`}
-        /* Continuous elapsed from the run's server start, not from this render's mount. */
-        startedAt={stepsStartedAt}
+        /* Continuous elapsed from the run's server start (the user message that opened it), so it
+           matches the bottom status it replaces and never resets on a remount. */
+        startedAt={liveRunStartedAt}
       />
     </div>
   ) : null
@@ -1733,6 +1736,11 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
     trailing run of assistant messages (the live group), not just the last one.
   */
   const { showThinking } = useMessageList()
+  // When the running turn started: the newest user message's server time, shared by both run timers.
+  const runStartedAt = React.useMemo(() => {
+    const lastUser = messages.findLast((message) => message.role === "user")
+    return lastUser ? getMessageCreated(lastUser) : null
+  }, [messages])
   const hasInlineActivity = React.useMemo(() => {
     if (!inCoworkFrame || !isStreaming) return false
     for (let i = messages.length - 1; i >= 0; i -= 1) {
@@ -1807,7 +1815,7 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
       {showLoading && !inCoworkFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
       {showLoading && inCoworkFrame && !hasInlineActivity ? (
         <div className={CHAT_COLUMN}>
-          <CoworkRunStatus label={liveActionLabel} web={liveActionWeb} />
+          <CoworkRunStatus label={liveActionLabel} web={liveActionWeb} startedAt={runStartedAt} />
         </div>
       ) : null}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}

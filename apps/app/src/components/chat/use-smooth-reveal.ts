@@ -1,5 +1,7 @@
 import * as React from "react"
 
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion"
+
 /**
  * Letter-by-letter reveal pacing for streaming assistant text.
  *
@@ -67,20 +69,6 @@ const MAX_DRAIN_CHARS_PER_SEC = 1500
 export function drainRate(sinceStartSeconds: number, backlog: number): number {
   const target = Math.min(backlog / DRAIN_SECONDS, MAX_DRAIN_CHARS_PER_SEC)
   return Math.max(computeRevealRate(sinceStartSeconds, backlog), target, MAX_CATCHUP_CHARS_PER_SEC)
-}
-
-/** True when the OS asks for reduced motion (read once per hook instance, kept live). */
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(false)
-  React.useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setReduced(query.matches)
-    const onChange = (event: MediaQueryListEvent) => setReduced(event.matches)
-    query.addEventListener("change", onChange)
-    return () => query.removeEventListener("change", onChange)
-  }, [])
-  return reduced
 }
 
 /**

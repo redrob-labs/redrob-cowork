@@ -2,7 +2,7 @@ export interface WebSearchResult {
   title: string
   url: string
   description?: string
-  /** Round 8b: the source's publish date when the search provider gives one (ISO date). */
+  /** The source's publish date when the search provider gives one (ISO date). */
   publishedAt?: string
 }
 
@@ -10,16 +10,18 @@ const TITLE_PATTERN = /^Title:\s*(.+)$/m
 const URL_PATTERN = /^URL:\s*(https?:\/\/\S+)$/m
 const HIGHLIGHTS_PATTERN = /(?:^|\n)Highlights:\s*([\s\S]*?)(?:\n\[\.\.\.\]|$)/
 
-function hostnameOf(url: string): string | null {
+/** A URL's host without a leading "www.", or null when the URL does not parse. */
+export function hostnameOf(url: string | undefined): string | null {
+  if (!url) return null
   try {
-    return new URL(url).hostname
+    return new URL(url).hostname.replace(/^www\./, "")
   } catch {
     return null
   }
 }
 
 /**
- * Round 8b: the engine's current web search returns JSON - { results: [{ url, title, publish_date,
+ * The engine's current web search returns JSON - { results: [{ url, title, publish_date,
  * excerpts }] } (Parallel provider, seen live) - where the older provider returned "Title: / URL: /
  * Highlights:" blocks. Both shapes are read; anything else gives no results.
  */
@@ -47,6 +49,7 @@ function parseJsonResults(output: string): WebSearchResult[] | null {
   })
 }
 
+/** The sources a web search returned, from either output shape; anything that is not a string gives none. */
 export function parseWebSearchResults(output: unknown): WebSearchResult[] {
   if (typeof output !== "string") return []
   const json = parseJsonResults(output)

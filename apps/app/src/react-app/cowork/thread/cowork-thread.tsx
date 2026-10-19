@@ -14,6 +14,7 @@ import {
 
 import { t } from "../../../i18n";
 import { cn } from "../../../lib/utils";
+import { useElapsed } from "../../../lib/use-elapsed";
 import { useWorkingLine } from "../../../lib/working-lines";
 import { CoworkQuestionsCard } from "./cowork-questions";
 import { IDLE_PLAN_ACTIVITY, planStepStates, type PlanStepState } from "./plan-progress";
@@ -342,20 +343,24 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
 }
 
 /**
- * While a run works: what it is doing now. The Cowork frame's "assistant is thinking" moment.
- * It carries the Redrob Liquid Loader at a small inline size beside a label that is slightly
- * smaller than the chat text and grey (Claude-like), with a ChatGPT-style colour-sweep shimmer
- * over the text, and a mm:ss elapsed timer on the right counting since the run row appeared.
+ * While a run works and no inline activity row is up yet: what it is doing now. The liquid loader
+ * (or a globe for a web step) beside a grey shimmering label, and the time since the run started.
  */
-export function CoworkRunStatus(props: { label: string | null; /** Round 9: a web step is in flight. */ web?: boolean }) {
-  // Round 8c: with no specific step to show, a friendly line rotates (fades in each time).
+export function CoworkRunStatus(props: {
+  label: string | null;
+  /** A web search or page read is in flight: a static globe stands in for the loader. */
+  web?: boolean;
+  /** When the run started (ms, the user message's server time), so the timer matches the inline row's. */
+  startedAt?: number | null;
+}) {
+  // With no specific step to show, a friendly line rotates (fades in each time).
   const working = useWorkingLine(props.label === null);
   const label = props.label ?? working.text;
-  const elapsed = useElapsedClock();
+  const elapsed = useElapsed(true, props.startedAt);
   return (
     <div className="flex items-center gap-2 py-1">
       {props.web ? (
-        /* Round 9: reading or searching the web shows a static globe, like the web research rows. */
+        /* Reading or searching the web shows a static globe, like the web research rows. */
         <span className="inline-flex size-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
           {icons.globe({ width: 16, height: 16 })}
         </span>
@@ -374,21 +379,6 @@ export function CoworkRunStatus(props: { label: string | null; /** Round 9: a we
       <span className="text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
     </div>
   );
-}
-
-/** Elapsed time since this hook first mounted, formatted '34s' or '1m 23s', ticking once a second. */
-function useElapsedClock(): string {
-  const startRef = useRef<number>(Date.now());
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  const totalSeconds = Math.max(0, Math.floor((now - startRef.current) / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  // Under a minute: just seconds ("34s"). A minute or more: "1m 23s".
-  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
 /** A note the run saved to memory. It can be removed from Memory, not from here. */
