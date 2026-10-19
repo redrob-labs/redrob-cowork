@@ -1,9 +1,8 @@
-import { Badge } from "@redrob-labs/ui";
+import { Badge, Tabs } from "@redrob-labs/ui";
 import { ChevronDown, Minus, Pause, Play, TrendingUp, Triangle } from "lucide-react";
 import { useRef, useState, type KeyboardEvent } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { t, type Language } from "../../../i18n";
 import {
   tickerSequence,
@@ -201,21 +200,19 @@ export function TrendingTicker(props: TrendingTickerProps) {
           </div>
           <p className="model-chart__trending-note">{t("cowork.chart_trending_note")}</p>
           <Tabs
+            variant="line"
+            label={t("cowork.chart_trending_title")}
             value={scope}
-            onValueChange={(value) => {
+            className="model-chart__trending-tabs"
+            items={[
+              { id: "korea", label: t("cowork.chart_trending_korea") },
+              { id: "global", label: t("cowork.chart_trending_global") },
+            ]}
+            onChange={(value) => {
               if (value === "korea" || value === "global") setScope(value);
             }}
           >
-            <TabsList variant="line" className="model-chart__trending-tabs">
-              <TabsTrigger value="korea">{t("cowork.chart_trending_korea")}</TabsTrigger>
-              <TabsTrigger value="global">{t("cowork.chart_trending_global")}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="korea">
-              <TrendList scope="korea" items={visibleItems} locale={props.locale} onPick={select} />
-            </TabsContent>
-            <TabsContent value="global">
-              <TrendList scope="global" items={visibleItems} locale={props.locale} onPick={select} />
-            </TabsContent>
+            <TrendList scope={scope} items={visibleItems} locale={props.locale} onPick={select} />
           </Tabs>
         </PopoverContent>
       </Popover>
