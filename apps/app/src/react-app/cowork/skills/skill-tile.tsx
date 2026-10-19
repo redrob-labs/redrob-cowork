@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { Button, IconButton, icons } from "@redrob-labs/ui";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "../../../i18n";
 import { skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
 import { SkillIcon } from "./skill-icon";
@@ -35,33 +34,23 @@ type SkillTileProps = {
   onUse?: (name: string) => void;
 };
 
-/** App Store style skill lockup with separate navigation and action targets. */
+/** App Store style skill lockup: icon, title, the full short description, then the action. */
 export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }: SkillTileProps) {
   const title = skillDisplayTitle(row, locale);
   const brief = skillBrief(row, locale);
   const briefId = `skill-brief-${row.name}`;
   return (
     <li className="cowork-skill-tile" data-skill={row.name}>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Link
-              className="cowork-skill-tile__link"
-              to={skillPath(row.name)}
-              state={{ fromSkill: row.name, fromPath }}
-              aria-describedby={briefId}
-            />
-          }
-        >
-          <SkillIcon name={row.name} size="tile" />
-          <span className="cowork-skill-tile__title">{title}</span>
-          <span id={briefId} className="cowork-skill-tile__brief">{brief}</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <span className="cowork-skill-tile__tip-title">{title}</span>
-          <span className="cowork-skill-tile__tip-brief">{brief}</span>
-        </TooltipContent>
-      </Tooltip>
+      <Link
+        className="cowork-skill-tile__link"
+        to={skillPath(row.name)}
+        state={{ fromSkill: row.name, fromPath }}
+        aria-describedby={briefId}
+      >
+        <SkillIcon name={row.name} size="tile" />
+        <span className="cowork-skill-tile__title">{title}</span>
+        <span id={briefId} className="cowork-skill-tile__brief">{brief}</span>
+      </Link>
       {row.installed === null ? (
         <Button
           className="cowork-skill-tile__action"

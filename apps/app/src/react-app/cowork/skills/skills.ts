@@ -150,17 +150,15 @@ function firstSentence(text: string): string {
   return text.trim().split(/(?<=[.!?。！？])\s+/u)[0]?.trim() ?? "";
 }
 
-/** Catalogue summary, or a compact description fallback when the catalogue has none. */
+/** Catalogue summary, or the description's first sentence in full when the catalogue has none. */
 export function skillBrief(row: { summary?: string; summaryKo?: string; description: string }, locale: string): string {
   const korean = locale.startsWith("ko");
   const summary = korean ? row.summaryKo ?? row.summary : row.summary;
   if (summary?.trim()) return summary.trim();
   const sentence = firstSentence(row.description).replace(/^Use when the user asks to\s+/i, "").replace(/^Use when\s+/i, "").trim();
   if (!sentence) return row.description.trim();
-  if (korean) return sentence.length > 40 ? `${sentence.slice(0, 40).trimEnd()}…` : sentence;
-  const normalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-  const words = normalized.split(/\s+/);
-  return words.length > 9 ? `${words.slice(0, 9).join(" ")}…` : normalized;
+  if (korean) return sentence;
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
 }
 
 const ORIGIN_ORDER: Record<SkillOrigin, number> = { team: 0, mine: 1, library: 2 };

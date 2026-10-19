@@ -79,16 +79,16 @@ describe("skills marketplace helpers", () => {
     expect(shelves[2]?.rows.map((item) => item.name)).toEqual(["a", "z"]);
   });
 
-  test("prefers localized titles and summaries with compact description fallbacks", () => {
+  test("prefers localized titles and summaries with full first-sentence fallbacks", () => {
     const display = { name: "slug", title: "English", titleKo: "한국어", summary: "English summary", summaryKo: "한국어 요약", description: "Use when the user asks to review a long and detailed contract before signing it today." };
     expect(skillDisplayTitle(display, "ko")).toBe("한국어");
     expect(skillDisplayTitle({ name: "slug", title: "English" }, "ko")).toBe("English");
     expect(skillDisplayTitle({ name: "slug" }, "en")).toBe("slug");
     expect(skillBrief(display, "ko")).toBe("한국어 요약");
     expect(skillBrief(display, "en")).toBe("English summary");
-    expect(skillBrief({ description: display.description }, "en").split(" ")).toHaveLength(9);
-    expect(skillBrief({ description: display.description }, "en")).toEndWith("…");
-    expect(skillBrief({ description: "가".repeat(45) }, "ko")).toHaveLength(41);
+    expect(skillBrief({ description: display.description }, "en")).toBe("Review a long and detailed contract before signing it today.");
+    expect(skillBrief({ description: display.description }, "en")).not.toContain("…");
+    expect(skillBrief({ description: "가".repeat(45) }, "ko")).toHaveLength(45);
     expect(skillBrief({ description: "Useful work." }, "en")).not.toBe("");
   });
 
@@ -196,13 +196,16 @@ describe("skill marketplace markup", () => {
     expect(html).not.toContain(" title=");
   });
 
-  test("never sets a native title on the tile", () => {
+  test("renders the full short description under the title with no tooltip and no title attributes", () => {
+    const summary = "A longer short description that used to be clamped after two lines in the tile.";
     const html = renderToStaticMarkup(
       React.createElement(MemoryRouter, null,
-        React.createElement(SkillTile, { row: row("long", { title: "A very long skill title that clamps", summary: "Brief." }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
+        React.createElement(SkillTile, { row: row("long", { title: "A very long skill title that clamps", summary }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
       ),
     );
     expect(html).toContain("A very long skill title that clamps");
+    expect(html).toContain(`<span id="skill-brief-long" class="cowork-skill-tile__brief">${summary}</span>`);
+    expect(html).not.toContain("tooltip");
     expect(html).not.toContain(" title=");
   });
 

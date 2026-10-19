@@ -2238,17 +2238,36 @@
 }
 .cowork-skill-tile__title,
 .cowork-skill-tile__brief {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  display: block;
   overflow-wrap: anywhere;
 }
 .cowork-skill-tile__title { min-height: 36px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-primary); }
-.cowork-skill-tile__brief { min-height: 32px; font-size: 12px; line-height: 16px; color: var(--ink-secondary); }
-.cowork-skill-tile__action { min-width: 64px; border-radius: 999px; }
-.cowork-skill-tile__tip-title { display: block; font-weight: 600; }
-.cowork-skill-tile__tip-brief { display: block; }
+.cowork-skill-tile__brief { font-size: 12px; line-height: 16px; color: var(--ink-secondary); }
+.cowork-skill-tile__action { min-width: 64px; margin-top: auto; border-radius: 999px; }
+/* Round 8: titles and full descriptions start on the same line across a row, and the actions line up
+   at the bottom. The row owns four tracks (icon, title, description, action); each tile and its link
+   adopt them through subgrid. Without subgrid the flex column above still holds, with the action
+   pushed to the bottom. */
+@supports (grid-template-rows: subgrid) {
+  .cowork-skills__shelf-row {
+    grid-template-rows: repeat(4, auto);
+    row-gap: 8px;
+  }
+  .cowork-skills__shelf-row > .cowork-skill-tile {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    justify-items: center;
+  }
+  .cowork-skills__shelf-row .cowork-skill-tile__link {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    justify-items: center;
+  }
+  .cowork-skills__shelf-row .cowork-skill-tile__title { min-height: 0; }
+  .cowork-skills__shelf-row .cowork-skill-tile__action { align-self: end; margin-top: 0; }
+}
 .cowork-skill-icon {
   display: block;
   flex: none;
