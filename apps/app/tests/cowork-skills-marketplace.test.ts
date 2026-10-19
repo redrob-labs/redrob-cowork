@@ -3,13 +3,16 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
+import en from "../src/i18n/locales/en";
+import ko from "../src/i18n/locales/ko";
 import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
-import { shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
+import { isClamped, shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillIcon } from "../src/react-app/cowork/skills/skill-icon";
 import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
+  languageTagLabel,
   matchesFilters,
   shelvesOf,
   shouldRestoreListFocus,
@@ -117,6 +120,32 @@ describe("skills marketplace helpers", () => {
     expect(matchesFilters(visible, { q: "조건" })).toBe(true);
     expect(matchesFilters(visible, { q: "missing" })).toBe(false);
   });
+
+  test("looks the language up directly instead of taking the last tag", () => {
+    const taxonomy = {
+      professions: [{ id: "lawyer", label: { en: "Lawyer", ko: "변호사" }, tasks: [{ id: "review", label: { en: "Review", ko: "검토" } }] }],
+      languages: [{ id: "ko", label: { en: "Korean", ko: "한국어" } }],
+    } as unknown as Parameters<typeof languageTagLabel>[1];
+    expect(languageTagLabel({ profession: "lawyer", task: "review" }, taxonomy, "en")).toBeNull();
+    expect(languageTagLabel({ profession: "lawyer", language: "ko" }, taxonomy, "en")).toBe("Korean");
+    expect(languageTagLabel({ language: "ko" }, taxonomy, "ko")).toBe("한국어");
+    expect(languageTagLabel({ language: "ko" }, null, "en")).toBeNull();
+  });
+
+  test("detects clamped text from measured heights", () => {
+    expect(isClamped({ scrollHeight: 120, clientHeight: 60 })).toBe(true);
+    expect(isClamped({ scrollHeight: 60, clientHeight: 60 })).toBe(false);
+    expect(isClamped({ scrollHeight: 61, clientHeight: 60 })).toBe(false);
+  });
+
+  test("shelf control labels read naturally in both locales", () => {
+    expect(en["cowork.skills_scroll_left"]).toBe("{shelf}: scroll left");
+    expect(en["cowork.skills_scroll_right"]).toBe("{shelf}: scroll right");
+    expect(en["cowork.skills_see_all_label"]).toBe("{shelf}: see all");
+    expect(ko["cowork.skills_scroll_left"]).toBe("{shelf} 왼쪽으로 넘기기");
+    expect(ko["cowork.skills_scroll_right"]).toBe("{shelf} 오른쪽으로 넘기기");
+    expect(ko["cowork.skills_see_all_label"]).toBe("{shelf} 모두 보기");
+  });
 });
 
 describe("console catalogue marketplace fields", () => {
@@ -164,6 +193,16 @@ describe("skill marketplace markup", () => {
     expect(link).toContain('aria-describedby="skill-brief-sample"');
     expect(link).not.toContain("<button");
     expect(html).toContain("<button");
+    expect(html).not.toContain(" title=");
+  });
+
+  test("never sets a native title on the tile", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(MemoryRouter, null,
+        React.createElement(SkillTile, { row: row("long", { title: "A very long skill title that clamps", summary: "Brief." }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
+      ),
+    );
+    expect(html).toContain("A very long skill title that clamps");
     expect(html).not.toContain(" title=");
   });
 

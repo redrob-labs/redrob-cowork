@@ -2241,6 +2241,8 @@
 .cowork-skill-tile__title { min-height: 36px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-primary); }
 .cowork-skill-tile__brief { min-height: 32px; font-size: 12px; line-height: 16px; color: var(--ink-secondary); }
 .cowork-skill-tile__action { min-width: 64px; border-radius: 999px; }
+.cowork-skill-tile__tip-title { display: block; font-weight: 600; }
+.cowork-skill-tile__tip-brief { display: block; }
 .cowork-skill-icon {
   display: block;
   flex: none;

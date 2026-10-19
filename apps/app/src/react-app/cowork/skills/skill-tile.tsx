@@ -57,7 +57,10 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }:
           <span className="cowork-skill-tile__title">{title}</span>
           <span id={briefId} className="cowork-skill-tile__brief">{brief}</span>
         </TooltipTrigger>
-        <TooltipContent>{brief}</TooltipContent>
+        <TooltipContent>
+          <span className="cowork-skill-tile__tip-title">{title}</span>
+          <span className="cowork-skill-tile__tip-brief">{brief}</span>
+        </TooltipContent>
       </Tooltip>
       {row.installed === null ? (
         <Button
