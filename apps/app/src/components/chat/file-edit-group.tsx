@@ -1,12 +1,11 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import type { UIMessage } from "ai"
+import { useState } from "react"
 import { ChevronDown, ChevronRight, FilePen } from "lucide-react"
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon"
 import { artifactPathMatches } from "@/react-app/cowork/panel/live-draft"
-import { canOpenArtifact, getArtifactType, prettyArtifactTitle, useArtifacts } from "@/lib/artifacts"
+import { canOpenArtifact, getArtifactType, prettyArtifactTitle, useToolPartArtifacts } from "@/lib/artifacts"
 import { isWriteToolPart } from "@/lib/build-in-tools"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import { getToolFamily, type AnyToolPart } from "@/lib/tool-aggregate"
@@ -96,11 +95,7 @@ export function FileEditGroup(props: { parts: AnyToolPart[]; className?: string 
   }
   // The artifacts these parts produced, derived the same way the in-chat cards are, so a row opens
   // the very target the panel lists (same id).
-  const message = useMemo(
-    () => [{ id: `files:${key}`, role: "assistant", parts: props.parts } as unknown as UIMessage],
-    [key, props.parts],
-  )
-  const artifacts = useArtifacts(message, { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true })
+  const artifacts = useToolPartArtifacts(props.parts)
   const openArtifact = useFrameStore((state) => state.openArtifact)
   if (steps.length === 0) return null
   const Chevron = open ? ChevronDown : ChevronRight

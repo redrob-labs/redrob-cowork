@@ -6,7 +6,6 @@ import { ArtifactIcon } from "@/components/chat/artifact-icon";
 import {
   canOpenArtifact,
   getArtifactTypeLabel,
-  isArtifactWriteInFlight,
   prettyArtifactTitle,
   useArtifacts,
   type ArtifactItem,
@@ -15,25 +14,25 @@ import { CHAT_COLUMN } from "@/components/chat/chat-column";
 import { t } from "@/i18n";
 import { useFrameStore } from "@/react-app/cowork/store/frame-store";
 
-/** Props for one rounded, clickable artifact card (item 4). */
+/** Props for one rounded, clickable artifact card. */
 interface ArtifactCardProps {
   /** The artifact this card stands for. */
   artifact: ArtifactItem;
-  /** Item 8: true while the run is still writing this artifact; shows a caret + "Writing..." shimmer. */
+  /** True while the run is still writing this artifact; shows a caret and a "Writing..." shimmer. */
   writing: boolean;
 }
 
 /**
- * A rounded, Claude-style artifact card for the chat (item 4): a type icon, a humanized Sentence-case
- * title (prettyArtifactTitle), a small type label, and a click that opens the artifact in the right
- * panel. While the file is still being written (item 8) it shows a blinking caret and a "Writing..."
+ * A rounded artifact card for the chat: a type icon, a humanized Title Case title
+ * (prettyArtifactTitle), a small type label, and a click that opens the artifact in the right
+ * panel. While the file is still being written it shows a blinking caret and a "Writing..."
  * shimmer in place of the type label, resolving to the finished type label once the file settles.
  */
 function ArtifactCard({ artifact, writing }: ArtifactCardProps) {
   const openPanel = useFrameStore((state) => state.openPanel);
   const openArtifact = useFrameStore((state) => state.openArtifact);
-  // Round 7 C6: while the file is being written the card opens the live draft in the Artifacts tab.
-  // Round 8 M6: a written artifact opens on its own in the Artifacts tab (not the Files tab).
+  // While the file is being written the card opens the live draft in the Artifacts tab; a written
+  // artifact opens on its own in the Artifacts tab (not the Files tab).
   const canOpen = writing || canOpenArtifact(artifact);
   const title = prettyArtifactTitle(artifact.path);
   return (
@@ -50,7 +49,7 @@ function ArtifactCard({ artifact, writing }: ArtifactCardProps) {
       <span className="flex min-w-0 flex-col">
         <span className="truncate text-sm font-medium leading-5 text-foreground">
           {title}
-          {/* Item 8: a blinking text caret trailing the title while the file is being written. */}
+          {/* A blinking text caret trailing the title while the file is being written. */}
           {writing ? <span className="redrob-writing-caret" aria-hidden="true" /> : null}
         </span>
         {writing ? (
@@ -63,30 +62,30 @@ function ArtifactCard({ artifact, writing }: ArtifactCardProps) {
   );
 }
 
-/** Props for the in-chat artifact card list (item 4). */
+/** Props for the in-chat artifact card list. */
 interface ArtifactCardListProps {
   /** The messages of ONE turn; the cards show the artifacts that turn produced. */
   messages: UIMessage[];
 }
 
 /**
- * The Cowork frame's in-chat artifact cards (items 4 + 8): one rounded card per artifact a turn
- * produced, each opening the right panel on click. It reads the same artifacts the Files strip
- * does, and marks a card as "writing" while a write/edit tool part for its path is still in flight.
+ * The Cowork frame's in-chat artifact cards: one rounded card per artifact a turn produced, each
+ * opening the right panel on click. It reads the same artifacts the Files strip does, and marks a
+ * card as "writing" while a write-family tool part for its path is still in flight.
  */
 export function ArtifactCardList({ messages }: ArtifactCardListProps) {
-  // Round 7 C2: writtenOnly - a card only for a file a write-family tool produced (settled or in
-  // flight). A path mentioned in prose (a plan's "Save as reports/x.md") no longer makes a card.
+  // writtenOnly: a card only for a file a write-family tool produced (settled or in flight). A path
+  // mentioned in prose (a plan's "Save as reports/x.md") makes no card.
   const artifacts = useArtifacts(messages, { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true });
   if (artifacts.length === 0) return null;
   return (
-    // Round 8 M5: the cards sit on the SAME column as the prose (CHAT_COLUMN), left-aligned with it.
-    <div className={`${CHAT_COLUMN} flex flex-col gap-2`} data-artifact-cards>
+    // The cards sit on the same column as the prose (CHAT_COLUMN), left-aligned with it.
+    <div className={`${CHAT_COLUMN} flex flex-col gap-2`} data-artifact-cards="">
       {artifacts.map((artifact) => (
         <ArtifactCard
           key={artifact.id}
           artifact={artifact}
-          writing={isArtifactWriteInFlight(messages, artifact.path)}
+          writing={artifact.writing === true}
         />
       ))}
     </div>

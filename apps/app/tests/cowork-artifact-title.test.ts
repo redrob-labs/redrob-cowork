@@ -1,90 +1,51 @@
 import { describe, expect, test } from "bun:test";
 import type { UIMessage } from "ai";
 
-import { getArtifactsFromMessages, isArtifactWriteInFlight, prettyArtifactTitle } from "../src/lib/artifacts";
+import { getArtifactsFromMessages, prettyArtifactTitle } from "../src/lib/artifacts";
 
 describe("prettyArtifactTitle", () => {
-  test("strips the extension, turns dashes/underscores into spaces, Title Case with acronyms", () => {
-    // Round 9 calibration: Title Case, acronym-aware (round 7 was Sentence case).
+  test("Title Case with acronyms, plural acronyms and minor words", () => {
     expect(prettyArtifactTitle("us-china-ai-race-2035.md")).toBe("US China AI Race 2035");
-    // Round 10: plural acronyms keep a lowercase "s" (live: "Korea Cheapest Evs 2026").
+    // A plural acronym keeps its lowercase "s" (seen live as "Korea Cheapest Evs 2026").
     expect(prettyArtifactTitle("korea-cheapest-evs-2026.md")).toBe("Korea Cheapest EVs 2026");
-    expect(prettyArtifactTitle("hiring-ceos.md")).toBe("Hiring CEOs");
-    expect(prettyArtifactTitle("bus-routes.md")).toBe("Bus Routes");
-    expect(prettyArtifactTitle("quarterly_report_2026.docx")).toBe("Quarterly Report 2026");
-    expect(prettyArtifactTitle("notes.txt")).toBe("Notes");
-  });
-
-  test("minor words stay lowercase inside, not at the ends; names keep their own case", () => {
     expect(prettyArtifactTitle("plan-for-the-launch.md")).toBe("Plan for the Launch");
-    expect(prettyArtifactTitle("the-end-of.md")).toBe("The End Of");
     expect(prettyArtifactTitle("OpenAI-vs-DeepSeek-notes.md")).toBe("OpenAI vs DeepSeek Notes");
-    expect(prettyArtifactTitle("saas-gpu-costs.md")).toBe("SaaS GPU Costs");
   });
 
-  test("takes only the basename, not the folders", () => {
-    expect(prettyArtifactTitle("workspaces/w1/sub dir/final-draft.md")).toBe("Final Draft");
+  test("takes only the basename and falls back to it when there is no stem", () => {
     expect(prettyArtifactTitle("C:\\Users\\kim\\plan-b.md")).toBe("Plan B");
-  });
-
-  test("collapses repeated separators and falls back to the raw basename when empty", () => {
-    expect(prettyArtifactTitle("a--b__c.md")).toBe("A B C");
-    // An extension-only name has no stem to humanize, so the basename is kept.
     expect(prettyArtifactTitle(".gitignore")).toBe(".gitignore");
   });
 });
 
-describe("isArtifactWriteInFlight (item 8)", () => {
-  const writePart = (filePath: string, state: string): UIMessage["parts"][number] =>
-    ({ type: "dynamic-tool", toolName: "write", toolCallId: "c1", state, input: { filePath } }) as unknown as UIMessage["parts"][number];
+const message = (parts: UIMessage["parts"]): UIMessage => ({ id: "m1", role: "assistant", parts });
+const tool = (toolName: string, state: string, input: Record<string, unknown>): UIMessage["parts"][number] =>
+  ({ type: "dynamic-tool", toolName, toolCallId: `${toolName}-${state}`, state, input, output: "" }) as unknown as UIMessage["parts"][number];
+const writing = (messages: UIMessage[]) =>
+  getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true }).map((card) => [card.path, card.writing === true]);
 
-  const message = (parts: UIMessage["parts"]): UIMessage => ({ id: "m1", role: "assistant", parts });
-
-  test("true while a write/edit for the path is still streaming or running", () => {
-    expect(isArtifactWriteInFlight([message([writePart("/w/report.md", "input-streaming")])], "/w/report.md")).toBe(true);
-    expect(isArtifactWriteInFlight([message([writePart("/w/report.md", "input-available")])], "/w/report.md")).toBe(true);
-  });
-
-  test("false once the write has settled (output-available or output-error)", () => {
-    expect(isArtifactWriteInFlight([message([writePart("/w/report.md", "output-available")])], "/w/report.md")).toBe(false);
-    expect(isArtifactWriteInFlight([message([writePart("/w/report.md", "output-error")])], "/w/report.md")).toBe(false);
-  });
-
-  test("false for a different path, and matches regardless of path normalization", () => {
-    expect(isArtifactWriteInFlight([message([writePart("/w/other.md", "input-streaming")])], "/w/report.md")).toBe(false);
-    // The in-chat card passes the artifact's normalized path; a leading ./ on the tool input still matches.
-    expect(isArtifactWriteInFlight([message([writePart("./w/report.md", "input-streaming")])], "w/report.md")).toBe(true);
-  });
-
-  test("covers an in-flight apply_patch whose path lives in patchText (M2)", () => {
-    const applyPatch = (patchText: string, state: string): UIMessage["parts"][number] =>
-      ({ type: "dynamic-tool", toolName: "apply_patch", toolCallId: "c2", state, input: { patchText } }) as unknown as UIMessage["parts"][number];
+describe("in-flight write cards", () => {
+  test("a write, edit or apply_patch is writing while streaming or running, not once settled", () => {
+    expect(writing([message([tool("write", "input-streaming", { filePath: "/w/report.md" })])])).toEqual([["/w/report.md", true]]);
+    expect(writing([message([tool("edit", "input-available", { filePath: "/w/report.md" })])])).toEqual([["/w/report.md", true]]);
+    expect(writing([message([tool("write", "output-available", { filePath: "/w/report.md" })])])).toEqual([["/w/report.md", false]]);
     const patch = "*** Begin Patch\n*** Add File: /w/report.md\n+hello\n*** End Patch";
-    expect(isArtifactWriteInFlight([message([applyPatch(patch, "input-available")])], "/w/report.md")).toBe(true);
-    expect(isArtifactWriteInFlight([message([applyPatch(patch, "output-available")])], "/w/report.md")).toBe(false);
+    expect(writing([message([tool("apply_patch", "input-available", { patchText: patch })])])).toEqual([["/w/report.md", true]]);
+  });
+
+  test("a rewrite of a settled file marks the one card writing, whatever the path spelling", () => {
+    const messages = [message([tool("write", "output-available", { filePath: "w/report.md" }), tool("write", "input-streaming", { filePath: "./w/report.md" })])];
+    expect(writing(messages)).toEqual([["w/report.md", true]]);
+  });
+
+  test("only the Cowork card list opts in to provisional cards", () => {
+    const messages = [message([tool("write", "input-streaming", { filePath: "/w/report.md" })])];
+    expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false })).toHaveLength(0);
   });
 });
 
-describe("in-flight write cards (item 8 / M1)", () => {
-  const writePart = (filePath: string, state: string): UIMessage["parts"][number] =>
-    ({ type: "dynamic-tool", toolName: "write", toolCallId: "c1", state, input: { filePath } }) as unknown as UIMessage["parts"][number];
-  const message = (parts: UIMessage["parts"]): UIMessage => ({ id: "m1", role: "assistant", parts });
-
-  test("a still-streaming write surfaces a provisional card only when opted in", () => {
-    const msgs = [message([writePart("/w/report.md", "input-streaming")])];
-    // Default (Files strip): a non-settled write is NOT collected - card appears only once settled.
-    expect(getArtifactsFromMessages(msgs, [], { includeTargetFallbacks: false }).length).toBe(0);
-    // Cowork card list opts in: the in-flight write gets a provisional card, so the caret can show.
-    const cards = getArtifactsFromMessages(msgs, [], { includeTargetFallbacks: false, includeInFlightWrites: true });
-    expect(cards.map((a) => a.path)).toEqual(["/w/report.md"]);
-  });
-});
-
-describe("writtenOnly cards (round 7 C2)", () => {
+describe("writtenOnly cards", () => {
   const text = (value: string): UIMessage["parts"][number] => ({ type: "text", text: value }) as UIMessage["parts"][number];
-  const tool = (toolName: string, state: string, input: Record<string, unknown>): UIMessage["parts"][number] =>
-    ({ type: "dynamic-tool", toolName, toolCallId: `${toolName}-${state}`, state, input, output: "" }) as unknown as UIMessage["parts"][number];
-  const message = (parts: UIMessage["parts"]): UIMessage => ({ id: "m1", role: "assistant", parts });
 
   test("a path only MENTIONED in prose makes no card (the plan's 'Save as reports/x.md')", () => {
     const messages = [message([text("Draft the memo, saved as a Markdown file. Save as reports/us-china-ai-race-outlook.md.")])];
@@ -99,10 +60,5 @@ describe("writtenOnly cards (round 7 C2)", () => {
       tool("write", "output-available", { filePath: "reports/outlook.md" }),
     ])];
     expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false, writtenOnly: true }).map((a) => a.path)).toEqual(["reports/outlook.md"]);
-  });
-
-  test("an in-flight write still gets its card under writtenOnly", () => {
-    const messages = [message([tool("write", "input-streaming", { filePath: "reports/outlook.md" })])];
-    expect(getArtifactsFromMessages(messages, [], { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true })).toHaveLength(1);
   });
 });

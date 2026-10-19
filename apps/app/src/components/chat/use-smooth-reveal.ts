@@ -56,10 +56,19 @@ export function computeRevealRate(sinceStartSeconds: number, backlog: number): n
   return rate
 }
 
-/** Round 9: seconds the leftover text takes to drain once the stream has ended. */
+/** Seconds the leftover text takes to drain once the stream has ended. */
 const DRAIN_SECONDS = 0.8
-/** Round 9: the drain never goes faster than this (chars/sec, ~25 per frame at 60fps). */
+/** The drain never goes faster than this (chars/sec, ~25 per frame at 60fps). */
 const MAX_DRAIN_CHARS_PER_SEC = 1500
+
+/**
+ * Re-render throttle. Each committed count re-parses the growing markdown, so the reveal commits a
+ * new count only every few characters and at most ~30 times a second (always within 100ms), not
+ * on every animation frame; the fractional pace itself still advances every frame.
+ */
+const MIN_COMMIT_CHARS = 3
+const MIN_COMMIT_MS = 33
+const MAX_COMMIT_MS = 100
 
 /**
  * Pure drain rate (chars/sec) after the stream has ended: whatever is left finishes in about
@@ -75,10 +84,9 @@ export function drainRate(sinceStartSeconds: number, backlog: number): number {
  * Reveal `fullText` at a smooth, constant velocity with an opening burst while `streaming`
  * is true. Returns the revealed prefix and whether the reveal is still behind.
  *
- * Round 9: when the stream ends with text still unrevealed (the model often races far ahead of the
- * reading pace), the rest DRAINS over about DRAIN_SECONDS instead of snapping in at once. Measured
- * live before this change: a single 50ms frame jumped by 542 characters at the end of a turn,
- * which read as a block landing rather than writing.
+ * When the stream ends with text still unrevealed (the model often races far ahead of the reading
+ * pace), the rest DRAINS over about DRAIN_SECONDS instead of snapping in at once, which would read
+ * as a block landing rather than writing.
  */
 export function useSmoothReveal(fullText: string, streaming: boolean): SmoothReveal {
   const reducedMotion = usePrefersReducedMotion()
@@ -91,6 +99,9 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
   const stateRef = React.useRef({
     // Fractional revealed length, the source of truth the integer state mirrors.
     revealed: 0,
+    // The count last committed to state, and when (see MIN_COMMIT_CHARS).
+    committed: 0,
+    committedAt: 0,
     // Timestamp of the previous frame, for elapsed-time integration.
     lastFrame: 0,
     // When the current reveal run started, for the burst decay curve.
@@ -122,6 +133,8 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
     let raf = 0
     stateRef.current.lastFrame = 0
     stateRef.current.startedAt = 0
+    stateRef.current.committed = Math.floor(stateRef.current.revealed)
+    stateRef.current.committedAt = 0
 
     const tick = (now: number) => {
       const state = stateRef.current
@@ -141,7 +154,17 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
 
         // Never reveal past what the model has emitted.
         state.revealed = Math.min(total, state.revealed + rate * deltaSeconds)
-        setRevealedCount(Math.floor(state.revealed))
+        const next = Math.floor(state.revealed)
+        const sinceCommit = now - state.committedAt
+        const due =
+          next >= total ||
+          sinceCommit >= MAX_COMMIT_MS ||
+          (next - state.committed >= MIN_COMMIT_CHARS && sinceCommit >= MIN_COMMIT_MS)
+        if (next !== state.committed && due) {
+          state.committed = next
+          state.committedAt = now
+          setRevealedCount(next)
+        }
         if (!state.streaming && state.revealed >= total) {
           state.owesDrain = false
           setDrained((value) => value + 1)

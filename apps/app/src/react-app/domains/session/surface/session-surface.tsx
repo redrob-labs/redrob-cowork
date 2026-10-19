@@ -836,24 +836,22 @@ export function SessionSurface(props: SessionSurfaceProps) {
     currentSnapshot,
     cachedRendered: rendered,
   });
-  // Item 10: inside the Cowork frame, synthetic plan-run / question-answer sends are hidden from
-  // the rendered transcript (the engine still gets them). Outside the frame the transcript is bare.
+  // Inside the Cowork frame, synthetic plan-run / question-answer sends are hidden from the
+  // rendered transcript (the engine still gets them). Outside the frame the transcript is bare.
   const inCoworkFrame = useInCoworkFrame();
   const revertMessageId = snapshot?.session.revert?.messageID ?? null;
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
   const chatStreaming = sending || liveStatus.type === "busy" || liveStatus.type === "retry";
-  // Round 9: whether this session has been working at any point while this surface was mounted.
-  // A plan auto-runs only in a chat that was live here (not one reopened from history); a plan
-  // block renders only once it is complete, often in the same moment the run goes idle, so the
-  // plan itself cannot reliably see the busy state.
-  const [wentBusy, setWentBusy] = useState<{ sessionId: string; busy: boolean }>({ sessionId: props.sessionId, busy: false });
-  const sawBusyHere = wentBusy.sessionId === props.sessionId && wentBusy.busy;
-  useEffect(() => {
-    if (chatStreaming && !sawBusyHere) setWentBusy({ sessionId: props.sessionId, busy: true });
-  }, [chatStreaming, props.sessionId, sawBusyHere]);
-  // Round 9: the to-do dock above the composer is gone (Felix: it misfired; the plan's own
-  // checklist in the thread shows progress now).
+  // Whether this session has been working at any point while this surface was mounted. A plan
+  // auto-runs only in a chat that was live here (not one reopened from history); a plan block
+  // renders only once it is complete, often in the same moment the run goes idle, so the plan
+  // itself cannot reliably see the busy state. A render-time latch: it flips in the very render
+  // where streaming starts, so no extra render or state is needed; a new session resets it.
+  const wentBusyRef = useRef({ sessionId: props.sessionId, busy: false });
+  if (wentBusyRef.current.sessionId !== props.sessionId) wentBusyRef.current = { sessionId: props.sessionId, busy: false };
+  if (chatStreaming) wentBusyRef.current.busy = true;
+  const sawBusyHere = wentBusyRef.current.busy;
 
   useEffect(() => {
     if (!chatStreaming) setSteering(false);
@@ -878,36 +876,38 @@ export function SessionSurface(props: SessionSurfaceProps) {
     setEvalMarkdownMessages(EMPTY_TRANSCRIPT);
   }, [props.sessionId]);
 
+  // The snapshot + live merge runs once per update; the render, the questions and the plans share it.
+  const mergedMessages = useMemo(() => mergedSessionMessages({ transcriptState, snapshot }), [snapshot, transcriptState]);
   const baseRenderedMessages = useMemo(
-    () => deriveRenderedSessionMessages({ transcriptState, snapshot, inCoworkFrame }),
-    [snapshot, transcriptState, inCoworkFrame],
+    () => deriveRenderedSessionMessages({ messages: mergedMessages, revertMessageId, inCoworkFrame }),
+    [mergedMessages, revertMessageId, inCoworkFrame],
   );
-  // Round 8 (M1): Plan's questions read against the RAW transcript, where the hidden
-  // question-answer sends still are, so "answered" means the person actually replied.
+  // Plan's questions read against the RAW transcript, where the hidden question-answer sends
+  // still are, so "answered" means the person actually replied.
   const coworkQuestionsRef = useRef<CoworkQuestionState>(EMPTY_QUESTION_STATE);
   const coworkQuestions = useMemo(() => {
-    const next = inCoworkFrame ? coworkQuestionState(mergedSessionMessages({ transcriptState, snapshot })) : EMPTY_QUESTION_STATE;
+    const next = inCoworkFrame ? coworkQuestionState(mergedMessages) : EMPTY_QUESTION_STATE;
     // Keep the same object while nothing changed, so the thread context (and every message under
     // it) does not re-render on each streamed token.
     if (sameQuestionState(coworkQuestionsRef.current, next)) return coworkQuestionsRef.current;
     coworkQuestionsRef.current = next;
     return next;
-  }, [snapshot, transcriptState, inCoworkFrame]);
-  // Round 9: how far each plan's run has got (the plan's live checklist), from the same raw
-  // transcript. Kept as the same object while nothing it reads changed, like the questions.
+  }, [mergedMessages, inCoworkFrame]);
+  // How far each plan's run has got (the plan's live checklist), from the same raw transcript.
+  // Kept as the same object while nothing it reads changed, like the questions.
   const coworkPlansRef = useRef<ReadonlyMap<string, PlanRunActivity>>(EMPTY_PLAN_ACTIVITIES);
   const coworkPlans = useMemo(() => {
-    const next = inCoworkFrame ? planRunActivities(mergedSessionMessages({ transcriptState, snapshot }), chatStreaming) : EMPTY_PLAN_ACTIVITIES;
+    const next = inCoworkFrame ? planRunActivities(mergedMessages, chatStreaming) : EMPTY_PLAN_ACTIVITIES;
     if (samePlanActivities(coworkPlansRef.current, next)) return coworkPlansRef.current;
     coworkPlansRef.current = next;
     return next;
-  }, [snapshot, transcriptState, inCoworkFrame, chatStreaming]);
+  }, [mergedMessages, inCoworkFrame, chatStreaming]);
   const renderedMessages = useMemo(() => {
     if (evalMarkdownMessages.length === 0) return baseRenderedMessages;
 
     return [...baseRenderedMessages, ...evalMarkdownMessages];
   }, [baseRenderedMessages, evalMarkdownMessages]);
-  // Round 7 C6: hand the deliverable being written to the side panel, live. A new write in a
+  // Hand the deliverable being written to the side panel, live. A new write in a
   // RUNNING turn publishes its draft and opens the panel on Artifacts; an already-published draft
   // keeps updating after the run ends so its "settled" flag lands. Reopening an old chat
   // publishes nothing (it is not running and nothing was published for it).
