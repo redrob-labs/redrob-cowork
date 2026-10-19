@@ -2273,7 +2273,8 @@
 }
 .cowork-skills__chevron {
   position: absolute;
-  top: 56px;
+  /* Centred on the 72px circles: row padding 8 + tile padding 8 + half the circle 36. */
+  top: 52px;
   z-index: 3;
   display: grid;
   place-items: center;
@@ -2365,9 +2366,10 @@
 .cowork-skills__skeleton-tile {
   display: grid;
   flex: 0 0 156px;
-  justify-items: center;
+  /* Left aligned, like the tiles it stands in for. */
+  justify-items: start;
   gap: 8px;
-  padding: 12px 8px;
+  padding: 8px 0;
 }
 /* The workflow card's square loading placeholder. */
 .cowork-skills__skeleton-card {
@@ -2380,25 +2382,31 @@
 .cowork-skill-tile {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* Left and top aligned, like the workflow cards ("The whole job, one set"): the circle, then the
+     title, then the description directly under it, all from the tile's left edge. */
+  align-items: flex-start;
   min-width: 0;
-  gap: 8px;
-  padding: 12px 8px 14px;
+  gap: 10px;
+  padding: 8px 0 4px;
   border-radius: 16px;
   background: transparent;
   color: var(--ink-primary);
-  text-align: center;
+  text-align: left;
 }
 /* No hover frame: only the circle lifts (below), like the Trending AI album covers. */
 .cowork-skill-tile__link {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   align-self: stretch;
   min-width: 0;
-  gap: 8px;
+  gap: 4px;
   color: var(--ink-primary);
   text-decoration: none;
+}
+/* The circle keeps the workflow cover's breathing room above the title. */
+.cowork-skill-tile__link > .cowork-skill-icon {
+  margin-bottom: 8px;
 }
 .cowork-skill-tile__link:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -2411,7 +2419,6 @@
   overflow-wrap: anywhere;
 }
 .cowork-skill-tile__title {
-  min-height: 36px;
   font-size: 13px;
   line-height: 18px;
   font-weight: 600;
@@ -2422,39 +2429,11 @@
   line-height: 16px;
   color: var(--ink-secondary);
 }
+/* Tiles in a row stretch to the tallest one, so the actions still line up along the bottom. */
 .cowork-skill-tile__action {
   min-width: 64px;
   margin-top: auto;
   border-radius: 999px;
-}
-/* Titles and full descriptions start on the same line across a row, and the actions line up
-   at the bottom. The row owns four tracks (icon, title, description, action); each tile and its link
-   adopt them through subgrid. Without subgrid the flex column above still holds, with the action
-   pushed to the bottom. */
-@supports (grid-template-rows: subgrid) {
-  .cowork-skills__shelf-row {
-    grid-template-rows: repeat(4, auto);
-    row-gap: 8px;
-  }
-  .cowork-skills__shelf-row > .cowork-skill-tile {
-    display: grid;
-    grid-row: span 4;
-    grid-template-rows: subgrid;
-    justify-items: center;
-  }
-  .cowork-skills__shelf-row .cowork-skill-tile__link {
-    display: grid;
-    grid-row: span 3;
-    grid-template-rows: subgrid;
-    justify-items: center;
-  }
-  .cowork-skills__shelf-row .cowork-skill-tile__title {
-    min-height: 0;
-  }
-  .cowork-skills__shelf-row .cowork-skill-tile__action {
-    align-self: end;
-    margin-top: 0;
-  }
 }
 .cowork-skill-icon {
   display: block;
