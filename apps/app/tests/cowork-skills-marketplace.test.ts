@@ -6,7 +6,7 @@ import { MemoryRouter } from "react-router";
 import en from "../src/i18n/locales/en";
 import ko from "../src/i18n/locales/ko";
 import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
-import { isClamped, shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
+import { SkillView, shouldEscapeToList, type SkillViewProps } from "../src/react-app/cowork/skills/cowork-skill";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillIcon } from "../src/react-app/cowork/skills/skill-icon";
 import { SkillShelf, SkillTile } from "../src/react-app/cowork/skills/skill-tile";
@@ -133,12 +133,6 @@ describe("skills marketplace helpers", () => {
     expect(languageTagLabel({ language: "ko" }, null, "en")).toBeNull();
   });
 
-  test("detects clamped text from measured heights", () => {
-    expect(isClamped({ scrollHeight: 120, clientHeight: 60 })).toBe(true);
-    expect(isClamped({ scrollHeight: 60, clientHeight: 60 })).toBe(false);
-    expect(isClamped({ scrollHeight: 61, clientHeight: 60 })).toBe(false);
-  });
-
   test("shows a shelf chevron only toward a side that can still scroll", () => {
     expect(shelfEdges(0, 600, 600)).toEqual({ canPrev: false, canNext: false });
     expect(shelfEdges(0, 1200, 600)).toEqual({ canPrev: false, canNext: true });
@@ -196,6 +190,25 @@ describe("skill detail escape guard", () => {
 });
 
 describe("skill marketplace markup", () => {
+  const longDescription = "Use when the user asks to review a contract. ".repeat(12).trim();
+  const view = (installedSkill: CoworkSkill | null) => renderToStaticMarkup(
+    React.createElement(MemoryRouter, null,
+      React.createElement(SkillView, {
+        skill: { name: "sample", description: longDescription, tags: {}, body: "# Secret instructions", installed: installedSkill } as unknown as SkillViewProps["skill"],
+        taxonomy: null, locale: "en", extra: "", canRun: true, busy: false, backPath: "/skills",
+        onBack: () => {}, onExtra: () => {}, onRun: () => {}, onAdd: () => {},
+      } as SkillViewProps),
+    ),
+  );
+
+  test("detail page shows the full description with no More toggle and no instructions accordion", () => {
+    const html = view(null);
+    expect(html).toContain(`<p class="cowork-skill-about__text">${longDescription}</p>`);
+    expect(html).not.toContain("data-expanded");
+    expect(html).not.toContain("aria-expanded");
+    expect(html).not.toContain("Secret instructions");
+    expect(html).not.toContain(" title=");
+  });
   test("keeps the action outside the link and uses described-by without title attributes", () => {
     const html = renderToStaticMarkup(
       React.createElement(MemoryRouter, null,

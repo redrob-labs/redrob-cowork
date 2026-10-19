@@ -1,12 +1,10 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Badge, Button, EmptyState, Textarea, icons } from "@redrob-labs/ui";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
-import { MarkdownPreview } from "../../domains/session/artifacts/preview";
 import { PreviewPage, PreviewState } from "../preview/preview-note";
 import { previewKey, usePreviewServices } from "../preview/preview";
 import { ScheduleDialog } from "../scheduled/schedule-dialog";
@@ -33,11 +31,6 @@ export function runSkill(
   deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name, extra), mode: "plan" });
   deps.navigate("/chat");
   return true;
-}
-
-/** True when CSS line clamping hides part of an element's text. */
-export function isClamped(node: { scrollHeight: number; clientHeight: number }): boolean {
-  return node.scrollHeight > node.clientHeight + 1;
 }
 
 export type EscapeToListState = {
@@ -83,9 +76,6 @@ export type SkillViewProps = {
 
 /** Product-page presentation for one installed or library skill. */
 export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPath, onBack, onExtra, onRun, onAdd }: SkillViewProps) {
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [aboutClamped, setAboutClamped] = useState(false);
-  const aboutRef = useRef<HTMLParagraphElement>(null);
   const brief = skillBrief(skill, locale);
   const category = skillShelf({ name: skill.name, tags: skill.tags, installed: null });
   // Profession and task only; the language has its own Information row.
@@ -98,15 +88,6 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
     ...(skill.version ? [{ label: t("cowork.skill_info_version"), value: skill.version }] : []),
   ];
   const focusRun = () => document.getElementById("cowork-skill-run-extra")?.focus();
-  useEffect(() => {
-    const node = aboutRef.current;
-    if (!node || aboutOpen) return;
-    const measure = () => setAboutClamped(isClamped(node));
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [aboutOpen, skill.description]);
 
   return (
     <div className="cowork-skill-detail">
@@ -138,8 +119,7 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
       ) : null}
       <section className="cowork-skill-about">
         <h2>{t("cowork.skill_detail_about")}</h2>
-        <p ref={aboutRef} id="cowork-skill-about-text" className="cowork-skill-about__text" data-expanded={aboutOpen}>{skill.description}</p>
-        {aboutOpen || aboutClamped ? <Button size="sm" variant="ghost" aria-expanded={aboutOpen} aria-controls="cowork-skill-about-text" onClick={() => setAboutOpen((value) => !value)}>{aboutOpen ? t("cowork.skill_less") : t("cowork.skill_more")}</Button> : null}
+        <p className="cowork-skill-about__text">{skill.description}</p>
       </section>
       <section className="cowork-skill-info">
         <h2>{t("cowork.skill_detail_info")}</h2>
@@ -147,14 +127,6 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
           {info.map((row) => <div key={row.label} className="cowork-skill-info__row"><dt>{row.label}</dt><dd>{row.value}</dd></div>)}
           <div className="cowork-skill-info__row"><dt>{t("cowork.skill_info_name")}</dt><dd><code>{skill.name}</code></dd></div>
         </dl>
-      </section>
-      <section className="cowork-skill-instructions">
-        <Accordion>
-          <AccordionItem value="instructions">
-            <AccordionTrigger>{t("cowork.skill_instructions_show")}</AccordionTrigger>
-            <AccordionContent><MarkdownPreview content={skill.body} className="h-auto p-0" /></AccordionContent>
-          </AccordionItem>
-        </Accordion>
       </section>
     </div>
   );
