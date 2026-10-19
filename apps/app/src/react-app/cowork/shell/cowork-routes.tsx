@@ -7,6 +7,7 @@ import { CoworkMemoryScreen } from "../memory/cowork-memory";
 import { CoworkPrivacyScreen } from "../privacy/cowork-privacy";
 import { GuideScreen } from "../preview/cowork-guide";
 import { HistoryScreen } from "../preview/cowork-history";
+import { RadarScreen } from "../preview/radar-screen";
 import { ScheduledScreen } from "../preview/cowork-scheduled";
 import { ProjectScreen, ProjectsScreen } from "../projects/cowork-projects";
 import { SkillScreen } from "../skills/cowork-skill";
@@ -67,6 +68,8 @@ export function coworkRoutes(chat: ReactNode) {
     <Route key="scheduled" path="/scheduled" element={ready(<ScheduledScreen />)} />,
     <Route key="history" path="/history" element={ready(<HistoryScreen />)} />,
     <Route key="guide" path="/guide" element={ready(<GuideScreen />)} />,
+    // Radar subpages under Trending AI: /radar/news and /radar/social (an unknown feed returns to /guide).
+    <Route key="radar" path="/radar/:feed" element={ready(<RadarScreen />)} />,
     <Route key="root" path="/" element={<RedirectToGuide />} />,
     <Route key="fallback" path="*" element={<RedirectToGuide />} />,
   ];

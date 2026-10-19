@@ -4240,6 +4240,158 @@ select:disabled {
 .model-chart__radar-banner:focus-visible .model-chart__radar-open svg {
   transform: translateX(2px);
 }
+/*
+  Radar subpage: a banner-style header (same gradient tones, scrim and feed mark, no hover lift)
+  over a numbered list of story cards. Every surface sets its background and text colour.
+*/
+.radar-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 20px);
+}
+.radar-page__head {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 76px var(--space-6, 24px) var(--space-5, 20px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  background:
+    radial-gradient(60% 120% at 85% -10%, rgba(255, 255, 255, 0.35), transparent 60%),
+    linear-gradient(120deg, var(--spectrum-indigo), var(--spectrum-violet));
+  color: #fff;
+  box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--redrob-black) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.radar-page__head[data-tone="2"] {
+  background:
+    radial-gradient(60% 120% at 85% -10%, rgba(255, 255, 255, 0.35), transparent 60%),
+    linear-gradient(120deg, var(--spectrum-teal), var(--spectrum-sky));
+}
+.radar-page__head > * {
+  position: relative;
+  z-index: 1;
+}
+.radar-page__head > .radar-page__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--redrob-black) 45%, transparent) 100%);
+}
+.radar-page__head > .model-chart__radar-mark {
+  position: absolute;
+}
+.radar-page__eyebrow {
+  font-size: 12px;
+  line-height: 16px;
+  opacity: 0.85;
+}
+.radar-page__title {
+  margin: 0;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+.radar-page__lede {
+  max-width: 68ch;
+  margin: 0;
+  color: #fff;
+  font-size: 14px;
+  line-height: 21px;
+  opacity: 0.92;
+}
+.radar-page__meta {
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.radar-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.radar-story__card {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-3, 12px);
+  padding: var(--space-4, 16px) var(--space-5, 20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+}
+.radar-story__rank {
+  color: var(--ink-brand);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.radar-story__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.radar-story__headline {
+  margin: 0;
+  color: var(--ink-primary);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 24px;
+}
+.radar-story__summary {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+  line-height: 21px;
+}
+.radar-story__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.radar-story__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.radar-story__source:hover {
+  color: var(--ink-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a.radar-story__source:focus-visible {
+  border-radius: 4px;
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.radar-story__source svg {
+  width: 12px;
+  height: 12px;
+}
+@media (max-width: 640px) {
+  .radar-page__title { font-size: 22px; line-height: 28px; }
+  .radar-story__card { grid-template-columns: 22px minmax(0, 1fr); padding: 14px 16px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .model-chart__radar-banner:hover { transform: none; }
   .model-chart__radar-open svg { transition: none; }
