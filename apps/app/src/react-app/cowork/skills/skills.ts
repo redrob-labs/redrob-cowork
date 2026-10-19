@@ -93,8 +93,8 @@ export type SkillRow = SkillDisplayFields & {
   installed: CoworkSkill | null;
 };
 
-/** The artwork tones a skill icon can take. */
-export const SKILL_TONES = ["blue", "sky", "teal", "green", "violet", "pink", "red", "orange"] as const;
+/** The artwork tones a skill icon can take; each has a `data-tone` rule in index.css. */
+const SKILL_TONES = ["blue", "sky", "teal", "green", "violet", "pink", "red", "orange"] as const;
 /** One of `SKILL_TONES`. */
 export type SkillTone = (typeof SKILL_TONES)[number];
 

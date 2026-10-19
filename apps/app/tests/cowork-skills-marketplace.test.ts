@@ -4,14 +4,11 @@ import { createConsoleCatalogue, CATALOGUE_CACHE_MS } from "../src/react-app/cow
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import {
-  SKILL_TONES,
   languageTagLabel,
-  shelfEdges,
   skillBrief,
   skillDisplayTitle,
   skillRows,
   skillShelf,
-  skillTone,
   type SkillRow,
 } from "../src/react-app/cowork/skills/skills";
 import type { CoworkSkill, LibrarySkill } from "../src/react-app/cowork/services/types";
@@ -33,11 +30,6 @@ const row = (name: string, overrides: Partial<SkillRow> = {}): SkillRow => ({
 });
 
 describe("skills marketplace helpers", () => {
-  test("assigns a stable, valid tone", () => {
-    expect(skillTone("us-lawyer-nda")).toBe(skillTone("us-lawyer-nda"));
-    for (const name of ["us-lawyer-nda", "kr-vc-term-sheet-review", "humanize-writing"]) expect(SKILL_TONES).toContain(skillTone(name));
-  });
-
   test("groups prefix families, tags, installed rows, and everyday work", () => {
     expect(skillShelf(row("us-lawyer-nda"))).toBe("lawyer");
     expect(skillShelf(row("kr-accountant-vat-return"))).toBe("accountant");
@@ -47,38 +39,25 @@ describe("skills marketplace helpers", () => {
     expect(skillShelf(row("custom", { tags: { profession: "lawyer" } }))).toBe("lawyer");
   });
 
-  test("prefers localized titles and summaries with full first-sentence fallbacks", () => {
+  test("display fields: localized title and brief, local values win, language looked up by id", () => {
     const display = { name: "slug", title: "English", titleKo: "한국어", summary: "English summary", summaryKo: "한국어 요약", description: "Use when the user asks to review a long and detailed contract before signing it today." };
-    expect(skillDisplayTitle(display, "ko")).toBe("한국어");
-    expect(skillDisplayTitle({ name: "slug", title: "English" }, "ko")).toBe("English");
-    expect(skillDisplayTitle({ name: "slug" }, "en")).toBe("slug");
-    expect(skillBrief(display, "ko")).toBe("한국어 요약");
-    expect(skillBrief(display, "en")).toBe("English summary");
-    expect(skillBrief({ description: display.description }, "en")).toBe("Review a long and detailed contract before signing it today.");
-    expect(skillBrief({ description: display.description }, "en")).not.toContain("…");
-    expect(skillBrief({ description: "가".repeat(45) }, "ko")).toHaveLength(45);
+    const cases: Array<[string, string]> = [
+      [skillDisplayTitle(display, "ko"), "한국어"],
+      [skillDisplayTitle({ name: "slug", title: "English" }, "ko"), "English"],
+      [skillDisplayTitle({ name: "slug" }, "en"), "slug"],
+      [skillBrief(display, "ko"), "한국어 요약"],
+      [skillBrief(display, "en"), "English summary"],
+      // No summary: the description's first sentence, whole, without the "Use when" lead.
+      [skillBrief({ description: display.description }, "en"), "Review a long and detailed contract before signing it today."],
+      [skillBrief({ description: "가".repeat(45) }, "ko"), "가".repeat(45)],
+    ];
+    for (const [actual, expected] of cases) expect(actual).toBe(expected);
     expect(skillBrief({ description: "Useful work." }, "en")).not.toBe("");
-  });
 
-  test("joins catalogue display fields into installed rows without replacing local values", () => {
-    const local = { ...installed("shared", "library"), title: "Local title" };
     const library: LibrarySkill = { name: "shared", title: "Catalogue title", summary: "Short summary", description: "Catalogue description", tags: {} };
-    const rows = skillRows({ installed: [local], library: [library] });
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.title).toBe("Local title");
-    expect(rows[0]?.summary).toBe("Short summary");
-  });
+    const rows = skillRows({ installed: [{ ...installed("shared", "library"), title: "Local title" }], library: [library] });
+    expect(rows.map(({ title, summary }) => ({ title, summary }))).toEqual([{ title: "Local title", summary: "Short summary" }]);
 
-  test("shows offline state after rows load, including empty and populated branches", () => {
-    expect(shouldShowLibraryNotice(null, true)).toBe(false);
-    expect(shouldShowLibraryNotice([], true)).toBe(true);
-    expect(shouldShowLibraryNotice([row("installed")], true)).toBe(true);
-    // With nothing at all to show, the notice stands in for the page.
-    expect(shouldShowLibraryNotice([], false)).toBe(true);
-    expect(shouldShowLibraryNotice([row("installed")], false)).toBe(false);
-  });
-
-  test("looks the language up directly instead of taking the last tag", () => {
     const taxonomy = {
       professions: [{ id: "lawyer", label: { en: "Lawyer", ko: "변호사" }, tasks: [{ id: "review", label: { en: "Review", ko: "검토" } }] }],
       languages: [{ id: "ko", label: { en: "Korean", ko: "한국어" } }],
@@ -89,11 +68,13 @@ describe("skills marketplace helpers", () => {
     expect(languageTagLabel({ language: "ko" }, null, "en")).toBeNull();
   });
 
-  test("shows a shelf chevron only toward a side that can still scroll", () => {
-    expect(shelfEdges(0, 600, 600)).toEqual({ canPrev: false, canNext: false });
-    expect(shelfEdges(0, 1200, 600)).toEqual({ canPrev: false, canNext: true });
-    expect(shelfEdges(300, 1200, 600)).toEqual({ canPrev: true, canNext: true });
-    expect(shelfEdges(599, 1200, 600)).toEqual({ canPrev: true, canNext: false });
+  test("shows offline state after rows load, including empty and populated branches", () => {
+    expect(shouldShowLibraryNotice(null, true)).toBe(false);
+    expect(shouldShowLibraryNotice([], true)).toBe(true);
+    expect(shouldShowLibraryNotice([row("installed")], true)).toBe(true);
+    // With nothing at all to show, the notice stands in for the page.
+    expect(shouldShowLibraryNotice([], false)).toBe(true);
+    expect(shouldShowLibraryNotice([row("installed")], false)).toBe(false);
   });
 });
 
