@@ -13,15 +13,13 @@ import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { useElapsed } from "@/lib/use-elapsed"
+import { useRememberedOpen } from "@/lib/use-remembered-open"
 import { useWorkingLine } from "@/lib/working-lines"
 import { t } from "@/i18n"
 import { cn } from "@/lib/utils"
 
 /** Most step rows the expanded table lists; the rest fold into a "+N more" line. */
 const ROW_CAP = 10
-
-/** Expansion persists per message while the session stays mounted (matches ToolAggregateGroup). */
-const expandedByKey = new Map<string, boolean>()
 
 /** Props of the live activity row; it is only ever mounted while the run streams. */
 type UnifiedActivityProps = {
@@ -111,13 +109,9 @@ function rowStatus(part: AnyToolPart): "running" | "failed" | "done" {
  * transcript. Once the turn ends the group shows the collapsed "Worked for ..." run instead.
  */
 export function UnifiedActivity({ parts, reasoning, activityKey, startedAt }: UnifiedActivityProps) {
-  const [expanded, setExpandedState] = React.useState(() => expandedByKey.get(activityKey) ?? false)
-  const setExpanded = (value: boolean) => {
-    expandedByKey.set(activityKey, value)
-    setExpandedState(value)
-  }
+  const [expandedState, setExpanded] = useRememberedOpen(`activity:${activityKey}`)
   const elapsed = useElapsed(true, startedAt)
-  const lead = latestReasoningLead(reasoning)
+  const lead = React.useMemo(() => latestReasoningLead(reasoning), [reasoning])
 
   // When nothing specific is known yet, a friendly line rotates in its place.
   const working = useWorkingLine(true)
@@ -125,9 +119,15 @@ export function UnifiedActivity({ parts, reasoning, activityKey, startedAt }: Un
   const showingWorkingLine = header === working.text
   const liveWebStep = isWebStepInFlight(parts)
 
-  const rows = parts.filter((part) => !isWebPart(part))
-  // Tracked on every render (not only when expanded): a duration is timed from when a call is first seen running.
-  const durations = rows.map((part) => trackToolCallDuration(part))
+  // Derived from the parts only, so the one-second timer tick does not re-walk every call. Durations
+  // are tracked even while collapsed: a call is timed from when it is first seen running.
+  const { rows, durations } = React.useMemo(() => {
+    const rows = parts.filter((part) => !isWebPart(part))
+    return { rows, durations: rows.map((part) => trackToolCallDuration(part)) }
+  }, [parts])
+  // A web-only run with no thought has nothing to list (web steps show in the transcript).
+  const canExpand = rows.length > 0 || lead !== null
+  const expanded = canExpand && expandedState
   const visible = expanded ? rows.slice(0, ROW_CAP) : []
   const hidden = rows.length - visible.length
 
@@ -135,9 +135,10 @@ export function UnifiedActivity({ parts, reasoning, activityKey, startedAt }: Un
     <div className="w-full" data-unified-activity={activityKey}>
       <button
         type="button"
+        disabled={!canExpand}
         onClick={() => setExpanded(!expanded)}
-        aria-expanded={expanded}
-        className="group flex min-w-0 max-w-full cursor-pointer items-center gap-2 text-start transition-colors"
+        aria-expanded={canExpand ? expanded : undefined}
+        className="group flex min-w-0 max-w-full cursor-pointer items-center gap-2 text-start transition-colors disabled:cursor-default"
       >
         {liveWebStep ? (
           /* While the run reads or searches the web, a static globe (like the web research rows)

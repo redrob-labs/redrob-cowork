@@ -22,17 +22,11 @@ describe("latestReasoningLead", () => {
 });
 
 describe("currentActivityLabel", () => {
-  test("a tool in flight wins, even over a thought or the fallback", () => {
-    const parts = [tool("websearch", "input-available", { query: "US chip export rules 2026" })];
-    expect(currentActivityLabel(parts, "Old thought.", "Mulling it over...")).toContain("US chip export rules 2026");
-  });
-
-  test("between tools, the newest thought shows", () => {
-    const parts = [tool("websearch", "output-available", { query: "q" })];
-    expect(currentActivityLabel(parts, "First.\n\nDrafting the scenarios section.")).toBe("Drafting the scenarios section.");
-  });
-
-  test("with nothing specific known, the friendly fallback line shows", () => {
+  test("a tool in flight wins, then the newest thought, then the friendly fallback", () => {
+    const running = [tool("websearch", "input-available", { query: "US chip export rules 2026" })];
+    expect(currentActivityLabel(running, "Old thought.", "Mulling it over...")).toContain("US chip export rules 2026");
+    const finished = [tool("websearch", "output-available", { query: "q" })];
+    expect(currentActivityLabel(finished, "First.\n\nDrafting the scenarios section.")).toBe("Drafting the scenarios section.");
     expect(currentActivityLabel([], "", "Mulling it over...")).toBe("Mulling it over...");
   });
 });
