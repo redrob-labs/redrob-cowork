@@ -148,6 +148,7 @@ import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/co
 import { CoworkAnswerFooter, CoworkBlocksView, CoworkMemoryNote, CoworkRunStatus } from "@/react-app/cowork/thread/cowork-thread"
 import { memorySavedFrom } from "@/react-app/cowork/thread/thread-logic"
 import { withoutTodoToolParts } from "@/react-app/cowork/thread/hide-todo-tools"
+import { isInvisibleCoworkText } from "@/react-app/cowork/thread/invisible-blocks"
 import { useFrameStore } from "@/react-app/cowork/store/frame-store"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
@@ -582,6 +583,10 @@ const AssistantMessage = React.memo(
         // once at the GROUP level (MessageGroup) over the whole run, not per message - a run spans
         // several assistant messages, so folding per message produced one stray row per message.
         const groups = getAssistantRenderGroups(message.parts, showThinking)
+          // Round 7 (review): a text group that is only a superseded Plan questions block (or a
+          // cross-check block, which renders in the footer) draws nothing, so drop it here; otherwise
+          // its empty <Message> wrapper keeps the column gap where "Answered." used to be.
+          .filter((group) => !(inCoworkFrame && group.kind === "text" && isInvisibleCoworkText(group.text, isLastMessage)))
         if (hideSteps) {
           // The live activity row already shows reasoning + every tool call; keep only text/file.
           // Round 7 C7: EXCEPT web research - each search/fetch row shows in place as it happens
@@ -590,7 +595,7 @@ const AssistantMessage = React.memo(
         }
         return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
       },
-      [hideReasoning, hideSteps, message.parts, showThinking]
+      [hideReasoning, hideSteps, inCoworkFrame, isLastMessage, message.parts, showThinking]
     )
 
     // Round 7 C7: a message whose parts all folded into the live row renders NOTHING - not an empty
