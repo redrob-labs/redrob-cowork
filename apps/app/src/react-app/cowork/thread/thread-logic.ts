@@ -77,12 +77,16 @@ export function planToText(plan: PlanDoc): string {
 const PLAN_RUN_SENTINEL = "\u2060";
 
 /**
- * A provenance sentinel for a synthetic QUESTION-ANSWER send (item 10): the choices the user made
- * in the PlanQuestions card, sent to the engine as a reply. Distinct from the plan-run sentinel so
- * the two synthetic kinds are told apart: U+2060 (word joiner) + U+FEFF (zero-width no-break
- * space). Both render as nothing, so the engine sees only the real answer text after the prefix.
+ * A provenance sentinel for a synthetic QUESTION-ANSWER send: the choices the person made in the
+ * questions card, sent to the engine as a reply. An INVISIBLE SEPARATOR (U+2063), a different
+ * character from the plan-run sentinel so neither can be read as the other. Like U+2060 it renders
+ * as nothing and is not whitespace, so trim() and BOM stripping keep it (U+FEFF, used before, is a
+ * BOM that normalizers drop, which turned an answer into a plan-run).
  */
-const QUESTION_ANSWER_SENTINEL = "\u2060\ufeff";
+const QUESTION_ANSWER_SENTINEL = "\u2063";
+
+/** The question-answer sentinel older chats carry (U+2060 U+FEFF), still recognised when read back. */
+const LEGACY_QUESTION_ANSWER_SENTINEL = "\u2060\ufeff";
 
 /** Run sends this, in Run mode, so the run agent gets the plan it is to follow. */
 export function planRunPrompt(planText: string): string {
@@ -91,14 +95,13 @@ export function planRunPrompt(planText: string): string {
 
 /** Whether a prompt is a plan being run, by its provenance sentinel (it routes to the Run agent). */
 export function isPlanRunPrompt(prompt: string): boolean {
-  // The question-answer sentinel starts with the same word joiner, so check it FIRST to avoid a
-  // question-answer send being misread as a plan-run.
-  return prompt.startsWith(PLAN_RUN_SENTINEL) && !prompt.startsWith(QUESTION_ANSWER_SENTINEL);
+  // An older chat's answer sentinel also opens with the word joiner, so rule answers out first.
+  return prompt.startsWith(PLAN_RUN_SENTINEL) && !isQuestionAnswerPrompt(prompt);
 }
 
-/** Whether a prompt is a synthetic question-answer send (item 10), by its provenance sentinel. */
+/** Whether a prompt is a synthetic question-answer send, by its provenance sentinel. */
 export function isQuestionAnswerPrompt(prompt: string): boolean {
-  return prompt.startsWith(QUESTION_ANSWER_SENTINEL);
+  return prompt.startsWith(QUESTION_ANSWER_SENTINEL) || prompt.startsWith(LEGACY_QUESTION_ANSWER_SENTINEL);
 }
 
 /**

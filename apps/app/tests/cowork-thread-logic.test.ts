@@ -144,16 +144,16 @@ describe("answers, plan and run", () => {
   const questions = parseCoworkBlocks(fence("redrob-questions", QUESTIONS)).questions ?? [];
 
   test("answersToPrompt reads as the person's reply, behind the question-answer sentinel", () => {
-    // Item 10: the sent text is prefixed with the U+2060 U+FEFF provenance sentinel so the Cowork
-    // transcript can hide this synthetic send; the engine sees only the real answer after it.
-    const sentinel = "\u2060\ufeff";
+    // The sent text is prefixed with the U+2063 provenance sentinel so the Cowork transcript can
+    // hide this synthetic send; the engine sees only the real answer after it.
+    const sentinel = "\u2063";
     expect(answersToPrompt(questions, { q1: 1, q2: [0, 2] })).toBe(
       `${sentinel}What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.`,
     );
     expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe(`${sentinel}Go ahead with what fits best.`);
   });
 
-  test("synthetic Cowork sends are detectable and told apart by their sentinels (item 10)", () => {
+  test("synthetic Cowork sends are detectable and told apart by their sentinels", () => {
     const planRun = planRunPrompt("# A plan");
     const answer = answersToPrompt(questions, { q1: 1, q2: [] });
     // A plan-run is a plan-run, not a question-answer, and vice versa.
@@ -165,6 +165,10 @@ describe("answers, plan and run", () => {
     expect(isSyntheticCoworkPrompt(planRun)).toBe(true);
     expect(isSyntheticCoworkPrompt(answer)).toBe(true);
     expect(isSyntheticCoworkPrompt("Just a normal message")).toBe(false);
+    // The sentinel survives trim(); an older chat's answer (U+2060 U+FEFF) still reads as an answer.
+    expect(isQuestionAnswerPrompt(answer.trim())).toBe(true);
+    expect(isQuestionAnswerPrompt("\u2060\ufeffYes.")).toBe(true);
+    expect(isPlanRunPrompt("\u2060\ufeffYes.")).toBe(false);
   });
 
   test("Run sends the plan behind 'Run this plan.'", () => {
