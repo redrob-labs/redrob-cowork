@@ -96,8 +96,11 @@ import {
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
+import { useStickyTodos } from "./sticky-todos";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
+/** Stable empty list for a surface rendered without todos, so the sticky dock memo stays put. */
+const EMPTY_TODOS: TodoItem[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
 /**
  * Sample argument for the `composer.set_text` control action, used as its
@@ -486,7 +489,8 @@ function AssistantWaitingCard({ label = t("session.assistant_thinking") }: { lab
 }
 
 function TodoPanel(props: { todos: TodoItem[] }) {
-  const [expanded, setExpanded] = useState(false);
+  // Round 7 C4: open by default; the person can still fold it with the corner control.
+  const [expanded, setExpanded] = useState(true);
   const todos = props.todos.filter((todo) => todo.content.trim());
   const completedTodos = todos.filter((todo) => todo.status === "completed").length;
   const progressLabel = t("session.todo_progress_label");
@@ -895,6 +899,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
   const chatStreaming = sending || liveStatus.type === "busy" || liveStatus.type === "retry";
+  // Round 7 C4: the to-do dock's list - sticky through stale empty writes while the run is busy,
+  // hidden once the run is idle and every item is done (see sticky-todos.ts).
+  const dockTodos = useStickyTodos(props.sessionId, props.todos ?? EMPTY_TODOS, chatStreaming);
 
   useEffect(() => {
     if (!chatStreaming) setSteering(false);
@@ -2233,9 +2240,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
         isRemoteWorkspace={props.isRemoteWorkspace}
           isSandboxWorkspace={props.isSandboxWorkspace}
           onUploadInboxFiles={props.onUploadInboxFiles ?? handleUploadInboxFiles}
-          compactTopSpacing={Boolean(props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0)}
+          compactTopSpacing={Boolean(props.activeQuestion || dockTodos.length > 0 || props.activePermission || queuedItems.length > 0)}
           topAccessory={
-            props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 ? (
+            props.activeQuestion || dockTodos.length > 0 || props.activePermission || queuedItems.length > 0 ? (
               <div>
                 {queuedItems.length > 0 ? (
                   <QueuedMessagesPanel
@@ -2257,9 +2264,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
                       }
                     }}
                   />
-                ) : (props.todos ?? []).some((todo) => todo.content.trim()) ? (
-                  <TodoPanel todos={props.todos ?? []} />
                 ) : null}
+                {/* Round 7 C4: the dock stays up beside a pending question instead of being replaced. */}
+                {dockTodos.length > 0 ? <TodoPanel todos={dockTodos} /> : null}
                 {props.activePermission ? (
                   <PermissionApprovalPanel
                     permission={props.activePermission}
