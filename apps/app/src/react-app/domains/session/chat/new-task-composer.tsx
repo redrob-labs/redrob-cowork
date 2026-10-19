@@ -261,6 +261,8 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
       // Round 36 (item 3): the hero composer is two lines by default; the in-chat
       // composer stays one line. NewTaskComposer is only ever the hero, so set it here.
       twoLineDefault
+      // The hero shows the recommended-skills popup while its empty text box is focused.
+      skillPicks
       placeholderOverride={props.placeholderOverride}
       draftScopeKey={`new-task:${workspaceId ?? "chat-first"}`}
     />

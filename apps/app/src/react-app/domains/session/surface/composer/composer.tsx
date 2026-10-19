@@ -33,6 +33,7 @@ import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
 import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/composer/cowork-composer";
 import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
 import { attachSkill, ComposerSkillTray, detachSkill } from "@/react-app/cowork/composer/skill-tray";
+import { ComposerSkillPicks } from "@/react-app/cowork/composer/skill-picks";
 
 type MentionItem = {
   id: string;
@@ -126,6 +127,8 @@ type ComposerProps = {
    * unset and stays one line. Both still grow to the same max height.
    */
   twoLineDefault?: boolean;
+  /** Show the recommended-skills popup while the empty text box is focused (the new-chat hero only). */
+  skillPicks?: boolean;
   topAccessory?: ReactNode;
 };
 
@@ -352,6 +355,15 @@ export function ReactSessionComposer(props: ComposerProps) {
   useEffect(() => {
     setTraySkills([]);
   }, [props.sessionId]);
+  // Whether the text box has focus, and whether Escape closed the skill popup for this focus.
+  const [editorFocused, setEditorFocused] = useState(false);
+  const [picksDismissed, setPicksDismissed] = useState(false);
+  const syncEditorFocus = useCallback(() => {
+    const active = document.activeElement;
+    const focused = Boolean(active && rootRef.current?.contains(active) && active.getAttribute("contenteditable") === "true");
+    setEditorFocused(focused);
+    if (!focused) setPicksDismissed(false);
+  }, []);
   const submitWithTray = useCallback(
     (run: (skills?: readonly string[]) => void | Promise<void>) => {
       const skills = traySkills.length ? traySkills : undefined;
@@ -701,6 +713,10 @@ export function ReactSessionComposer(props: ComposerProps) {
     ...skills.filter((skill) => !localCommandSkillNames.has(skill.name)),
   ];
   const canSend = props.draft.trim().length > 0 || props.attachments.length > 0 || traySkills.length > 0;
+  // The new-chat hero's recommended skills: while its text box is focused and still empty, and no
+  // other menu is open. The first keystroke, Escape or leaving the box hides it.
+  const showSkillPicks = Boolean(props.skillPicks) && inCoworkFrame && editorFocused && !picksDismissed
+    && props.draft.trim().length === 0 && !slashOpen && !toolMenuOpen && !mentionOpen;
 
   const renderConnectionRows = () => {
     const servers = props.mcpServers ?? [];
@@ -847,6 +863,13 @@ export function ReactSessionComposer(props: ComposerProps) {
       (event.nativeEvent as KeyboardEvent).isComposing === true ||
       event.keyCode === 229;
     if (event.key === "Enter" && imeActive) {
+      return;
+    }
+    // Escape closes the recommended-skills popup first, and does nothing else.
+    if (event.key === "Escape" && showSkillPicks) {
+      event.preventDefault();
+      event.stopPropagation();
+      setPicksDismissed(true);
       return;
     }
     // Escape-to-stop while the agent is busy. Only when no menu is open so
@@ -1144,6 +1167,9 @@ export function ReactSessionComposer(props: ComposerProps) {
       }
       style={{ contain: "layout style" }}
       onKeyDownCapture={handleKeyDownCapture}
+      onFocus={syncEditorFocus}
+      // Focus has not moved yet while blur fires; read where it went on the next tick.
+      onBlur={() => window.setTimeout(syncEditorFocus, 0)}
       onCompositionStart={() => {
         imeComposingRef.current = true;
       }}
@@ -1657,6 +1683,17 @@ export function ReactSessionComposer(props: ComposerProps) {
               </div>
             </div>
           </div>
+          {showSkillPicks ? (
+            <div className="cowork-skill-picks-pop">
+              <ComposerSkillPicks
+                attached={traySkills}
+                onAttach={(name) => {
+                  setTraySkills((current) => attachSkill(current, name));
+                  focusEditor();
+                }}
+              />
+            </div>
+          ) : null}
         </div>
 
         {/*

@@ -1840,6 +1840,80 @@
     transition: none;
   }
 }
+/* Hero composer's recommended skills: a horizontal popup hanging under the panel while its empty
+   text box is focused. It floats over the status row below rather than pushing the page down. */
+.cowork-skill-picks-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+}
+.cowork-skill-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--redrob-black) 35%, transparent);
+  animation: cowork-skill-picks-in var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+@keyframes cowork-skill-picks-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-picks {
+    animation: none;
+  }
+}
+.cowork-skill-picks__label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+.cowork-skill-picks__row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-skill-picks__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+.cowork-skill-picks__title {
+  display: -webkit-box;
+  min-height: 32px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  overflow-wrap: anywhere;
+}
+.cowork-skill-picks__action {
+  margin-top: auto;
+  border-radius: 999px;
+}
 .cowork-composer-status {
   margin-top: var(--space-2);
   padding: 0 var(--space-2);
