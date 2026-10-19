@@ -9,7 +9,7 @@ import {
   trendOf,
   type TrendItem,
 } from "../src/react-app/cowork/preview/chart-trending";
-import { nextAutoRotateIndex } from "../src/react-app/cowork/preview/use-auto-rotate";
+import { interactionPaused, nextAutoRotateIndex } from "../src/react-app/cowork/preview/use-auto-rotate";
 
 function item(rank: number, prevRank: number | null): TrendItem {
   return { id: "test", rank, prevRank, label: "Test", labelKo: "테스트" };
@@ -92,5 +92,29 @@ describe("trending edition", () => {
     expect(reduced).toContain(".model-chart__trending-chevron");
     expect(reduced).toContain("transition: none");
     expect(reduced).toContain("transform: none");
+  });
+});
+
+describe("hero banner rotation", () => {
+  test("holds still while the pointer or focus is inside, and for good once a dot is picked", () => {
+    const idle = { pointerInside: false, focusInside: false, stopped: false };
+    expect(interactionPaused(idle)).toBe(false);
+    expect(interactionPaused({ ...idle, pointerInside: true })).toBe(true);
+    expect(interactionPaused({ ...idle, focusInside: true })).toBe(true);
+    expect(interactionPaused({ ...idle, stopped: true })).toBe(true);
+  });
+
+  test("the visible pause button, its keys and its styles are gone", async () => {
+    for (const table of [en, ko] as Array<Record<string, string>>) {
+      expect(table["cowork.chart_banners_pause"]).toBeUndefined();
+      expect(table["cowork.chart_banners_play"]).toBeUndefined();
+    }
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    expect(css).not.toContain("model-chart__banner-pause");
+    const home = await Bun.file(new URL("../src/react-app/cowork/preview/model-chart-home.tsx", import.meta.url)).text();
+    expect(home).not.toContain("model-chart__banner-pause");
+    expect(home).not.toMatch(/\bPause\b, \bPlay\b/);
+    expect(home).toContain("setBannerStopped(true)");
+    expect(home).toContain("pointerInside: bannerPointerInside, focusInside: bannerFocusInside, stopped: bannerStopped");
   });
 });

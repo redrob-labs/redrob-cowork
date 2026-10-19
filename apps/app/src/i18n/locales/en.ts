@@ -242,8 +242,6 @@ const en = {
   "common.copy": "Copy",
   "cowork.chart_back": "All charts",
   "cowork.chart_banners_label": "Featured",
-  "cowork.chart_banners_pause": "Pause featured banners",
-  "cowork.chart_banners_play": "Play featured banners",
   "cowork.chart_trending_label": "Trending",
   "cowork.chart_trending_title": "Trending searches",
   "cowork.chart_trending_trigger": "Trending searches, {edition}. Show the list",

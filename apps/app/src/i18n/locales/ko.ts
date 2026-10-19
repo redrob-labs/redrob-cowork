@@ -523,8 +523,6 @@ const ko = {
   "cowork.connectors_turn_on": "켜기",
   "cowork.chart_back": "전체 차트",
   "cowork.chart_banners_label": "추천",
-  "cowork.chart_banners_pause": "추천 배너 멈추기",
-  "cowork.chart_banners_play": "추천 배너 다시 넘기기",
   "cowork.chart_trending_label": "급상승",
   "cowork.chart_trending_title": "급상승 검색어",
   "cowork.chart_trending_trigger": "급상승 검색어, {edition} 기준. 목록 보기",
