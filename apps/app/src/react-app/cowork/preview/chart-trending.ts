@@ -61,6 +61,11 @@ export const TRENDING: TrendingEdition = {
   ],
 };
 
+/** Formats the full UTC calendar date attached to a daily editorial snapshot. */
+export function trendingEditionDate(asOf: string, locale: Language): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${asOf}T00:00:00Z`));
+}
+
 /** Derives direction and distance from this and the previous rank. */
 export function trendOf(item: TrendItem): { trend: Trend; moved: number } {
   if (item.prevRank === null) return { trend: "new", moved: 0 };

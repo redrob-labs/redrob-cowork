@@ -5,6 +5,7 @@ import ko from "../src/i18n/locales/ko";
 import {
   TRENDING,
   tickerSequence,
+  trendingEditionDate,
   trendOf,
   type TrendItem,
 } from "../src/react-app/cowork/preview/chart-trending";
@@ -43,6 +44,11 @@ describe("ticker rotation", () => {
 });
 
 describe("trending edition", () => {
+  test("formats the snapshot with its full calendar day", () => {
+    expect(trendingEditionDate("2026-10-19", "en")).toBe("October 19, 2026");
+    expect(trendingEditionDate("2026-10-19", "ko")).toBe("2026년 10월 19일");
+  });
+
   test("has complete, unique top tens with valid previous ranks", () => {
     const ids = new Set<string>();
     for (const entries of [TRENDING.korea, TRENDING.global]) {
@@ -67,6 +73,7 @@ describe("trending edition", () => {
     for (const [, value] of [...english, ...korean]) {
       expect(value).not.toContain("—");
       expect(value.toLowerCase()).not.toContain("real-time");
+      expect(value).not.toContain("실시간");
       expect(value).not.toMatch(/\b[A-Z]{4,}\b/);
     }
   });

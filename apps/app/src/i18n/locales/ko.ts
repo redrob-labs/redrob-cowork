@@ -525,7 +525,7 @@ const ko = {
   "cowork.chart_banners_label": "추천",
   "cowork.chart_banners_pause": "추천 배너 멈추기",
   "cowork.chart_banners_play": "추천 배너 다시 넘기기",
-  "cowork.chart_trending_label": "인기 검색",
+  "cowork.chart_trending_label": "급상승",
   "cowork.chart_trending_title": "급상승 검색어",
   "cowork.chart_trending_trigger": "급상승 검색어, {edition} 기준. 목록 보기",
   "cowork.chart_trending_note": "공개 검색 흐름을 날짜별로 골라 담은 목록이에요.",

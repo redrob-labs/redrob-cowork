@@ -33,7 +33,7 @@ import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useCoworkStartStore } from "../skills/start-chat";
 import { ModelChartHome, type ChartPick } from "./model-chart-home";
-import { TRENDING, trendLabel, type TrendItem } from "./chart-trending";
+import { TRENDING, trendLabel, trendingEditionDate, type TrendItem } from "./chart-trending";
 import { ChartDetail } from "./chart-detail";
 import { CHART_MODELS } from "./chart-models";
 
@@ -84,7 +84,7 @@ export function ProfessionGuideView(props: {
       <ModelChartHome
         research={props.research}
         locale={props.locale}
-        trendingEdition={guideEdition(TRENDING.asOf, props.locale)}
+        trendingEdition={trendingEditionDate(TRENDING.asOf, props.locale)}
         onOpen={setPick}
         onTrendPick={props.onTrendPick}
       />
@@ -236,6 +236,7 @@ export function GuideScreen() {
   const openTrend = (item: TrendItem) => {
     if (!workspaceId) {
       toast.warning(t("cowork.chart_trending_no_project"));
+      navigate("/chat");
       return;
     }
     requestChat({
