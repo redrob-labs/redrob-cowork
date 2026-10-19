@@ -143,8 +143,8 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(@types/react@19.2.14)(react@19.2.8)
       '@redrob-labs/sdk':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.6.2
+        version: 0.6.2
       '@redrob-labs/ui':
         specifier: 1.7.0
         version: 1.7.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -303,8 +303,8 @@ importers:
         specifier: 0.155.1
         version: 0.155.1
       '@redrob-labs/sdk':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.6.2
+        version: 0.6.2
       '@redrob/enterprise-mcp-client':
         specifier: workspace:*
         version: link:../../packages/enterprise-mcp-client
@@ -2163,9 +2163,6 @@ packages:
 
   '@react-email/ui@6.9.1':
     resolution: {integrity: sha512-zw7KvwMu3RU/fDC9TAkegg9/qNV9foJtd3QRoetdWVFe8aQC/NyXmWTrG9IrkzVLzn5otkkxu7e7B1QelcwdiQ==}
-
-  '@redrob-labs/sdk@0.4.1':
-    resolution: {integrity: sha512-ocqmm8K5lCWiwO6qXoMhhOFEwiNNEneRlWBEYxEsKATAbjREC4EXFlq474Ix2+WtDLI7cNM5/+b9cMkkb1TBDQ==}
 
   '@redrob-labs/sdk@0.6.2':
     resolution: {integrity: sha512-vqgefyMAiWk9JEYgapL9gc2hYoOn3M3dL9y8uujmig7U48vaqjsgw3kKimDOZc34JStG8RJq6f/ETLOZ9MM5SA==}
@@ -7385,10 +7382,6 @@ snapshots:
       - react
       - react-dom
       - sass
-
-  '@redrob-labs/sdk@0.4.1':
-    dependencies:
-      cross-spawn: 7.0.6
 
   '@redrob-labs/sdk@0.6.2':
     dependencies:
