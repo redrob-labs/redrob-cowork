@@ -434,11 +434,12 @@ export function ModelSelect({
               disabled={disabled}
               aria-label={t("session.change_model")}
               aria-keyshortcuts="Meta+Alt+/"
-              className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-9 max-h-9 min-w-0 max-w-full items-center gap-1.5 rounded-md px-2.5 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             />
           }
         >
-          <span className="max-w-48 truncate">
+          {/* Shrinks with the row; in a narrow composer action row the name hides and the tooltip carries it. */}
+          <span className="min-w-0 max-w-48 truncate @max-[26rem]/composer-actions:hidden">
             {hideValue
               ? t("model_select.select_model")
               : (shownTitle || t("model_select.select_model"))}
@@ -448,7 +449,7 @@ export function ModelSelect({
             so this control shows the model and nothing else. Two settings on one button, one of them
             read-only, is what made the interaction unreadable.
           */}
-          <ChevronDown className="h-3 w-3" />
+          <ChevronDown className="h-3 w-3 shrink-0" />
         </TooltipTrigger>
         <TooltipContent>
           {t("session.change_model")}

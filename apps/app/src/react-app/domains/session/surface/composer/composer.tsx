@@ -1292,9 +1292,15 @@ export function ReactSessionComposer(props: ComposerProps) {
               }}
             />
 
-            {/* Action row - tools, attachments, model, and send stay on one line */}
-            <div className="mt-2 flex items-center gap-1.5">
-              <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            {/*
+              Action row - tools, attachments, model, and send stay on one line. It is a size container so
+              the model picker can drop its text when the column gets narrow (side panel open), instead of
+              the right-hand cluster overflowing back across the attach button.
+            */}
+            <div className="@container/composer-actions mt-2 flex items-center gap-1.5">
+              {/* In the Cowork frame this group holds only fixed icon buttons, so it must not shrink below
+                  them (min-w-0 there is what let the right cluster run over Attach). */}
+              <div className={`flex flex-1 items-center gap-1.5 ${inCoworkFrame ? "" : "min-w-0"}`}>
                 <input
                   ref={(element) => {
                     fileInput = element ?? undefined;
@@ -1583,9 +1589,11 @@ export function ReactSessionComposer(props: ComposerProps) {
                 - Idle: send arrow.
                 - Busy: stop icon in that same slot (Enter still queues;
                   Cmd/Ctrl+Enter still steers).
-                Inside the Cowork frame the mic, Plan or Run and the model sit before it.
+                Inside the Cowork frame the mic and the model sit before it.
+                The cluster may shrink (min-w-0): only the model label gives way; the icon buttons keep
+                fixed slots.
               */}
-              <div className="ml-auto flex shrink-0 items-center gap-1.5">
+              <div className="ml-auto flex min-w-0 items-center gap-1.5">
                 {inCoworkFrame ? (
                   <CoworkComposerTools chatKey={coworkChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
                     {modelControls}

@@ -53,12 +53,12 @@ export function EffortSelect(props: {
               type="button"
               disabled={props.disabled}
               aria-label={props.title ?? t("effort.label")}
-              className="flex h-9 max-h-9 items-center gap-1 rounded-md px-2 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-9 max-h-9 min-w-0 items-center gap-1 rounded-md px-2 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             />
           }
         >
-          <span className="max-w-28 truncate">{shown}</span>
-          <ChevronDown className="h-3 w-3" />
+          <span className="min-w-0 max-w-28 truncate">{shown}</span>
+          <ChevronDown className="h-3 w-3 shrink-0" />
         </TooltipTrigger>
         <TooltipContent>{props.title ?? t("effort.label")}</TooltipContent>
       </Tooltip>

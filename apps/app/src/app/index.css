@@ -1871,10 +1871,15 @@
   color: var(--ink-secondary);
 }
 
+/* May shrink so the model label truncates; the mic (first child) keeps its fixed slot. */
 .cowork-composer-tools {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
   gap: var(--space-2);
+}
+.cowork-composer-tools > :first-child {
+  flex-shrink: 0;
 }
 
 .cowork-composer-status {
