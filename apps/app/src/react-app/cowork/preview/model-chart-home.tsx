@@ -1,8 +1,11 @@
 /** @jsxImportSource react */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 import { t, type Language } from "../../../i18n";
+import { TRENDING, type TrendItem } from "./chart-trending";
+import { TrendingTicker } from "./trending-ticker";
+import { useAutoRotate } from "./use-auto-rotate";
 import {
   CHART_OUTPUT_ORDER,
   COUNTRY_LABEL_KEY,
@@ -394,27 +397,51 @@ function ModelChartShelf(props: { heading: string; headingId: string; children: 
   );
 }
 
-export function ModelChartHome(props: { research: GuideResearch; locale: Language; onOpen: (pick: ChartPick) => void }) {
+export function ModelChartHome(props: {
+  research: GuideResearch;
+  locale: Language;
+  /** Localized date for the bundled trending-search edition. */
+  trendingEdition: string;
+  /** Opens an existing model chart. */
+  onOpen: (pick: ChartPick) => void;
+  /** Starts a normal chat about a selected search trend. */
+  onTrendPick: (item: TrendItem) => void;
+}) {
   const banners = buildBanners(props.research, props.locale);
   const professions = orderByRank(guideProfessions(props.research, props.locale), (p) => p.id, PROFESSION_ORDER);
   const outputs = chartOutputs();
   const skills = skillTiles(props.research, props.locale);
   const countries = COUNTRY_TILES;
-  const [active, setActive] = useState(0);
-  // Auto-rotate the banners, paused under reduced-motion.
-  const reduced = useRef(false);
-  useEffect(() => {
-    reduced.current = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduced.current || banners.length <= 1) return;
-    const id = window.setInterval(() => setActive((n) => (n + 1) % banners.length), BANNER_MS);
-    return () => window.clearInterval(id);
-  }, [banners.length]);
-
-  const banner = banners[active];
+  const [bannerPaused, setBannerPaused] = useState(false);
+  const [bannerPointerInside, setBannerPointerInside] = useState(false);
+  const [bannerFocusInside, setBannerFocusInside] = useState(false);
+  const bannerRotation = useAutoRotate({
+    count: banners.length,
+    ms: BANNER_MS,
+    paused: bannerPaused || bannerPointerInside || bannerFocusInside,
+  });
+  const banner = banners[bannerRotation.index];
   return (
     <div className="model-chart">
+      <div className="model-chart__topbar">
+        <TrendingTicker
+          data={TRENDING}
+          edition={props.trendingEdition}
+          locale={props.locale}
+          onPick={props.onTrendPick}
+        />
+      </div>
       {banner ? (
-        <section className="model-chart__banners" aria-label={t("cowork.chart_banners_label")}>
+        <section
+          className="model-chart__banners"
+          aria-label={t("cowork.chart_banners_label")}
+          onMouseEnter={() => setBannerPointerInside(true)}
+          onMouseLeave={() => setBannerPointerInside(false)}
+          onFocusCapture={() => setBannerFocusInside(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setBannerFocusInside(false);
+          }}
+        >
           <button type="button" className="model-chart__banner" data-tone={banner.tone} onClick={() => props.onOpen(banner.pick)}>
             <span className="model-chart__glass" style={glassStyle(`banner-${banner.id}`)} aria-hidden="true" />
             <img className="model-chart__banner-art" src={`/brand/banner-art/${banner.art}.png`} alt="" aria-hidden="true" loading="lazy" draggable={false} />
@@ -429,13 +456,24 @@ export function ModelChartHome(props: { research: GuideResearch; locale: Languag
                 key={b.id}
                 type="button"
                 role="tab"
-                aria-selected={index === active}
+                aria-selected={index === bannerRotation.index}
                 aria-label={b.title}
                 className="model-chart__dot"
-                data-on={index === active ? "true" : undefined}
-                onClick={() => setActive(index)}
+                data-on={index === bannerRotation.index ? "true" : undefined}
+                onClick={() => bannerRotation.setIndex(index)}
               />
             ))}
+            {bannerRotation.reducedMotion ? null : (
+              <button
+                type="button"
+                className="model-chart__banner-pause"
+                aria-label={bannerPaused ? t("cowork.chart_banners_play") : t("cowork.chart_banners_pause")}
+                aria-pressed={bannerPaused}
+                onClick={() => setBannerPaused((paused) => !paused)}
+              >
+                {bannerPaused ? <Play aria-hidden /> : <Pause aria-hidden />}
+              </button>
+            )}
           </div>
         </section>
       ) : null}

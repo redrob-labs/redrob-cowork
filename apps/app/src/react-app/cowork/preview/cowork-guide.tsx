@@ -30,7 +30,10 @@ import {
   type GuideUse,
 } from "../guide/model-guide";
 import { CoworkShell } from "../shell/cowork-shell";
+import { useCoworkConnection } from "../shell/cowork-connection";
+import { useCoworkStartStore } from "../skills/start-chat";
 import { ModelChartHome, type ChartPick } from "./model-chart-home";
+import { TRENDING, trendLabel, type TrendItem } from "./chart-trending";
 import { ChartDetail } from "./chart-detail";
 import { CHART_MODELS } from "./chart-models";
 
@@ -63,6 +66,8 @@ export function ProfessionGuideView(props: {
   locale: Language;
   onChoose?: (model: ModelRef, variant: string | null) => void;
   onStartChat?: () => void;
+  /** Starts a normal chat for a selected trending search. */
+  onTrendPick: (item: TrendItem) => void;
 }) {
   // Round 8, item 10: the chart-style browse layer. Null = the Spotify/Apple-Music home (banners +
   // tiles); a pick drills into the existing ModelGuide ranking for that profession or output.
@@ -75,7 +80,15 @@ export function ProfessionGuideView(props: {
     document.getElementById("rr-shell-main")?.scrollTo({ top: 0 });
   }, [pick]);
   if (!pick) {
-    return <ModelChartHome research={props.research} locale={props.locale} onOpen={setPick} />;
+    return (
+      <ModelChartHome
+        research={props.research}
+        locale={props.locale}
+        trendingEdition={guideEdition(TRENDING.asOf, props.locale)}
+        onOpen={setPick}
+        onTrendPick={props.onTrendPick}
+      />
+    );
   }
   return (
     <ChartDetail
@@ -218,6 +231,20 @@ export function GuideScreen() {
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const local = useLocalOptional();
   const navigate = useNavigate();
+  const workspaceId = useCoworkConnection((state) => state.workspaceId);
+  const requestChat = useCoworkStartStore((state) => state.request);
+  const openTrend = (item: TrendItem) => {
+    if (!workspaceId) {
+      toast.warning(t("cowork.chart_trending_no_project"));
+      return;
+    }
+    requestChat({
+      workspaceId,
+      prompt: t("cowork.chart_trending_prompt", { topic: trendLabel(item, locale) }),
+      mode: "run",
+    });
+    navigate("/chat");
+  };
   // New chats start on the default model; chats that exist keep theirs.
   const chooseForNewChats = local
     ? (model: ModelRef, variant: string | null) => {
@@ -241,7 +268,13 @@ export function GuideScreen() {
         ) : !research.data ? (
           <EmptyState title={t("cowork.guide_profession_error")} description={t("cowork.settings_try_again")} />
         ) : (
-          <ProfessionGuideView research={research.data} locale={locale} onChoose={chooseForNewChats} onStartChat={() => navigate("/chat")} />
+          <ProfessionGuideView
+            research={research.data}
+            locale={locale}
+            onChoose={chooseForNewChats}
+            onStartChat={() => navigate("/chat")}
+            onTrendPick={openTrend}
+          />
         )}
       </div>
     </CoworkShell>

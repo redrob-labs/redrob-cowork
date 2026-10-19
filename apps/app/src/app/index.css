@@ -3748,3 +3748,240 @@ select:disabled {
     transition: none;
   }
 }
+
+/*
+  Trending search edition: a compact rotating ticker above the hero, with a dated two-tab list.
+  Every surface owns both its background and text colour; movement stops under reduced motion.
+*/
+.model-chart__topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: calc(var(--space-3, 12px) - var(--space-6, 24px));
+}
+.model-chart__trending {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: min(360px, 100%);
+  min-width: 0;
+  color: var(--ink-primary);
+}
+.model-chart__trending-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 32px;
+  flex: 1;
+  padding: 0 9px 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: border-color var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+.model-chart__trending-trigger:hover {
+  border-color: var(--border-strong);
+}
+.model-chart__trending-trigger:focus-visible,
+.model-chart__trending-pause:focus-visible,
+.model-chart__banner-pause:focus-visible,
+.model-chart__trending-row:focus-visible {
+  outline: 2px solid var(--spectrum-sky);
+  outline-offset: 2px;
+}
+.model-chart__trending-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  color: var(--spectrum-sky);
+}
+.model-chart__trending-label {
+  flex: 0 0 auto;
+  color: var(--ink-secondary);
+  font: var(--text-caption, 11px/16px sans-serif);
+  font-weight: 650;
+}
+.model-chart__trending-window {
+  display: block;
+  min-width: 0;
+  height: 20px;
+  flex: 1;
+  overflow: hidden;
+}
+.model-chart__trending-entry {
+  display: grid;
+  grid-template-columns: auto 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  animation: model-chart-trending-in var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+@keyframes model-chart-trending-in {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.model-chart__trending-scope {
+  color: var(--ink-muted);
+  font: var(--text-caption, 11px/16px sans-serif);
+}
+.model-chart__trending-rank {
+  min-width: 18px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+.model-chart__trending-rank[data-top] {
+  color: var(--spectrum-sky);
+}
+.model-chart__trending-item-label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-primary);
+  font: var(--text-body-sm, 13px/20px sans-serif);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-chart__trending-chevron {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  color: var(--ink-muted);
+  transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+.model-chart__trending-chevron[data-open] {
+  transform: rotate(180deg);
+}
+.model-chart__trending-pause,
+.model-chart__banner-pause {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-raised);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.model-chart__trending-pause:hover,
+.model-chart__banner-pause:hover {
+  border-color: var(--border-strong);
+  color: var(--ink-primary);
+}
+.model-chart__trending-pause svg,
+.model-chart__banner-pause svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+.model-chart__trending-panel {
+  width: min(340px, calc(100vw - 24px));
+  max-height: min(640px, calc(100vh - 140px));
+  gap: 8px;
+  overflow-y: auto;
+  border-color: var(--border-subtle);
+  background: var(--surface-material);
+  color: var(--ink-primary);
+}
+.model-chart__trending-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.model-chart__trending-heading h3 {
+  margin: 0;
+  color: var(--ink-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+.model-chart__trending-heading span,
+.model-chart__trending-note {
+  color: var(--ink-muted);
+  font: var(--text-caption, 11px/16px sans-serif);
+}
+.model-chart__trending-note {
+  margin: 0;
+}
+.model-chart__trending-tabs {
+  width: 100%;
+  background: transparent;
+  color: var(--ink-secondary);
+}
+.model-chart__trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.model-chart__trending-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 30px;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: var(--ink-primary);
+  text-align: start;
+  cursor: pointer;
+}
+.model-chart__trending-row:hover,
+.model-chart__trending-row:focus-visible {
+  background: color-mix(in srgb, var(--ink-primary) 6%, transparent);
+  color: var(--ink-primary);
+}
+.model-chart__trending-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  min-width: 16px;
+  font: var(--text-caption, 11px/16px sans-serif);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.model-chart__trending-mark svg {
+  width: 8px;
+  height: 8px;
+  fill: currentColor;
+}
+.model-chart__trending-mark--up {
+  color: var(--spectrum-sky);
+}
+.model-chart__trending-mark--down {
+  color: var(--status-danger);
+}
+.model-chart__trending-mark--down svg {
+  transform: rotate(180deg);
+}
+.model-chart__trending-mark--steady {
+  color: var(--ink-muted);
+}
+.model-chart__trending-mark--steady svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+}
+.model-chart__banner-pause {
+  margin-inline-start: 4px;
+}
+@media (max-width: 640px) {
+  .model-chart__trending { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-chart__trending-entry { animation: none; transform: none; }
+  .model-chart__trending-trigger,
+  .model-chart__trending-chevron { transition: none; transform: none; }
+}
