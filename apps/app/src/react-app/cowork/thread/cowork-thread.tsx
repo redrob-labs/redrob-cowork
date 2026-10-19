@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import {
   ApprovalStep,
   Button,
@@ -165,14 +165,16 @@ function CoworkPlan(props: {
   const autoRanRef = useRef(false);
   const sawDraftingRef = useRef(false);
   if (props.isLatest && (thread?.busy || thread?.liveHere)) sawDraftingRef.current = true;
-  useEffect(() => {
+  // An effect event, so it always reads the current run/thread/plan; the effect below only says when to look.
+  const autoRunOnce = useEffectEvent(() => {
     if (autoRanRef.current || !props.autoRun || !sawDraftingRef.current) return;
     if (!thread || thread.busy) return;
     if (!props.isLatest || stage !== "draft" || activity.started) return;
     autoRanRef.current = true;
     run();
-    // run/thread are stable enough for this one-shot; deps kept minimal intentionally.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+  useEffect(() => {
+    autoRunOnce();
   }, [props.autoRun, props.isLatest, stage, thread?.busy, thread?.liveHere, activity.started]);
 
   const progress =
