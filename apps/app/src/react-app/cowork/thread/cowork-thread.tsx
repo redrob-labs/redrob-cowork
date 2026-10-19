@@ -5,6 +5,7 @@ import {
   Button,
   ChallengeReport,
   FactCheckReport,
+  Loader,
   PlanDocument,
   PlanQuestions,
   ThreadNote,
@@ -161,12 +162,15 @@ function CoworkPlan(props: {
   }, [props.autoRun, props.isLatest, stage, thread?.busy]);
 
   return (
-    <div ref={root}>
+    <div ref={root} className="cowork-plan">
+      {/* Items 3 + 9: a clean "Research plan" + detailed To-do list. `sections` and `file` are no
+          longer passed (the narrative + filename chip are dropped); the title renders in the body.
+          The DS PlanDocument ALWAYS paints a header strip (file chip + status), so it is hidden by
+          CSS on .cowork-plan .rr-plandoc__h (index.css) - there is no prop that suppresses it.
+          planToText still sends everything to the run agent; this change is display-only. */}
       <PlanDocument
-        file={t("cowork.thread_plan_file")}
-        title={props.plan.title}
+        title={t("cowork.thread_plan_research_title")}
         summary={props.plan.summary}
-        sections={props.plan.sections}
         todo={props.plan.todo}
         done={status === "done" ? props.plan.todo.length : undefined}
         note={props.plan.note}
@@ -250,8 +254,10 @@ function CheckChip(props: {
   if (props.running || !props.verdict || !props.report) {
     return (
       <span className={`${chipBase} text-dls-text-muted`}>
-        {/* Small inline loader on the LEFT while the check runs, so the chip reads as in-progress. */}
-        {props.running ? <RedrobLiquidLoader size={14} label={props.name} /> : props.icon}
+        {/* Small inline loader on the LEFT while the check runs, so the chip reads as in-progress.
+            Item 6: the simple DS three-bar Loader (not the morphing liquid loader); live=false
+            because several chips can run at once and each announcing itself would be noise. */}
+        {props.running ? <Loader size="sm" tone="neutral" label={props.name} live={false} /> : props.icon}
         <span>{props.name}</span>
       </span>
     );

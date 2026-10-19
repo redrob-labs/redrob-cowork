@@ -117,6 +117,21 @@ function getFileExtension(filename: string) {
   return filename.split(".").pop()?.toLowerCase();
 }
 
+/**
+ * A human title for an artifact path (item 4): take the basename, drop its extension, turn
+ * `-`/`_` runs into spaces, and render in Sentence case (first letter upper, the rest lower -
+ * NOT Title Case, NOT acronym-aware, per round-7 calibration). E.g. `us-china-ai-race.md` ->
+ * "Us china ai race". An empty or extension-only name falls back to the raw basename.
+ */
+export function prettyArtifactTitle(path: string): string {
+  const basename = path.split(/[/\\]/).filter(Boolean).pop() ?? path;
+  const dot = basename.lastIndexOf(".");
+  const stem = dot > 0 ? basename.slice(0, dot) : basename;
+  const words = stem.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!words) return basename;
+  return words.charAt(0).toUpperCase() + words.slice(1).toLowerCase();
+}
+
 export function getArtifactTypeLabel(type: ArtifactType) {
   switch (type) {
     case "website": return t("artifact.type_website");
@@ -352,6 +367,35 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
 
     return right.sequence - left.sequence;
   });
+}
+
+/** The file path a write/edit tool part targets while its input is known, else null. */
+function writeToolTargetPath(part: UIMessage["parts"][number]): string | null {
+  if (part.type !== "dynamic-tool") return null;
+  if (part.toolName !== "write" && part.toolName !== "edit") return null;
+  const input: unknown = (part as { input?: unknown }).input;
+  if (!input || typeof input !== "object") return null;
+  const filePath = (input as { filePath?: unknown }).filePath;
+  return typeof filePath === "string" && filePath.trim() ? filePath.trim() : null;
+}
+
+/**
+ * Item 8: whether a write/edit tool part for `path` is still in flight (streaming its input or
+ * running) across all messages - the signal the artifact is still being WRITTEN. A part that has
+ * settled (`output-available` or `output-error`) is finished and does not count. Pure + tested.
+ */
+export function isArtifactWriteInFlight(messages: UIMessage[], path: string): boolean {
+  const target = normalizeArtifactPath(path).toLowerCase();
+  for (const message of messages) {
+    for (const part of message.parts) {
+      const partPath = writeToolTargetPath(part);
+      if (!partPath) continue;
+      if (normalizeArtifactPath(partPath).toLowerCase() !== target) continue;
+      const state = (part as { state?: unknown }).state;
+      if (state !== "output-available" && state !== "output-error") return true;
+    }
+  }
+  return false;
 }
 
 export function useArtifacts(messages: UIMessage[], options: GetArtifactsOptions = {}) {

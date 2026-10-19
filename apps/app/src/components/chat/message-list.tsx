@@ -49,6 +49,7 @@ import { WebfetchTool } from "@/components/tools/webfetch"
 import { WebsearchTool } from "@/components/tools/websearch"
 import { useMessageList, useSessionErrorMessage } from "@/components/chat/message-list-provider"
 import { ArtifactList } from "@/components/chat/artifact"
+import { ArtifactCardList } from "@/components/chat/artifact-card"
 import { TaskSuggestions } from "@/components/chat/task-suggestions"
 import { RedrobPayNotice } from "@/react-app/domains/billing/redrob-pay-sheet"
 import {
@@ -1459,11 +1460,16 @@ function MessageGroup({
           still renders. hideReasoning=true drops reasoning groups, and the tool/aggregate groups
           are the activity's job now. */}
       {renderItems(proseItems, stepItems.length, collapseSteps, useUnifiedLiveActivity)}
-      {/* Paper artifact strip: one FILES row per turn, at the end. */}
-      <ArtifactList
-        messages={items.map((item) => item.message)}
-        includeTargetFallbacks={false}
-      />
+      {/* Items 4 + 8: in the Cowork frame the turn's artifacts show as rounded, clickable cards
+          with a "writing" caret while still being written; the bare surface keeps the FILES strip. */}
+      {inCoworkFrame ? (
+        <ArtifactCardList messages={items.map((item) => item.message)} />
+      ) : (
+        <ArtifactList
+          messages={items.map((item) => item.message)}
+          includeTargetFallbacks={false}
+        />
+      )}
       {memoryNotes.map((text, index) => (
         <div key={`memory-${index}`} className={CHAT_COLUMN}>
           <CoworkMemoryNote text={text} />
@@ -1760,7 +1766,11 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
               isStreaming={isLastMessage && isStreaming}
               isLastStep={isLastStep}
             />
-            <ArtifactList messages={[item.message]} includeTargetFallbacks={false} />
+            {inCoworkFrame ? (
+              <ArtifactCardList messages={[item.message]} />
+            ) : (
+              <ArtifactList messages={[item.message]} includeTargetFallbacks={false} />
+            )}
           </div>
         )
       })}

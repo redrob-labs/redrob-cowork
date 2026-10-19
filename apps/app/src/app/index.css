@@ -2449,6 +2449,37 @@ html[lang="ko"] {
   }
 }
 
+/* Items 3 + 9: the Cowork plan reads as a clean "Research plan" + To-do list. The DS PlanDocument
+   always paints a header strip (the "Plan.md" file chip + the "Approved by you" status line); no
+   prop suppresses it, so hide the whole header on our wrapper. The body title ("Research plan")
+   and the To-do list remain. */
+.cowork-plan .rr-plandoc__h {
+  display: none;
+}
+
+/* Item 8: a blinking "writing" caret shown in the artifact card and the right-panel preview while
+   the run is still writing the file. Pure CSS; a thin bar that pulses like a text cursor. */
+.redrob-writing-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: redrob-caret-blink 1s step-end infinite;
+}
+@keyframes redrob-caret-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Motion-sensitive readers get a steady caret, no blink. */
+  .redrob-writing-caret {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .markdown-content [data-redrob-code-block] pre {
   margin: 0;
   background: transparent !important;

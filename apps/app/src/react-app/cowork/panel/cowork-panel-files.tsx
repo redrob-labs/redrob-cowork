@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
 
 import { openWorkspaceFile, revealWorkspaceFile } from "../../../app/lib/desktop";
+import { prettyArtifactTitle } from "../../../lib/artifacts";
 import { isElectronRuntime } from "../../../app/lib/runtime-env";
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import type { OpenTarget } from "../../domains/session/artifacts/open-target";
@@ -100,7 +101,9 @@ export function CoworkFileView(props: CoworkFileViewProps) {
       <div className="cowork-file__head">
         <FileIcon file={file} />
         <div>
-          <b>{file.name}</b>
+          {/* Item 4: the panel header uses the same humanized title as the in-chat card
+              (prettyArtifactTitle), falling back to the raw filename when the path is empty. */}
+          <b>{prettyArtifactTitle(file.path || file.name)}</b>
           <span>
             <span>{t("cowork.file_folder", { project: file.projectName })}</span>
             {file.when > 0 ? <span>{formatNavTime(file.when, props.now, props.locale)}</span> : null}
