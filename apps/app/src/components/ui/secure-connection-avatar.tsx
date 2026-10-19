@@ -17,9 +17,9 @@ export type SecureConnectionAvatarProps = {
  * circular mask leaves room) - it reads clearly at avatar size and fills the circle edge to edge.
  *
  * The globe artwork is ALWAYS shown AND ALWAYS animated, including under the OS reduced-motion
- * preference. The vendored component normally self-suppresses motion under reduced-motion, but
- * per product direction (round 3) its internal reduced-motion check is neutralized in the
- * vendored .js (search `redrob-always-animate`) so the particle sweep keeps running regardless.
+ * preference. This is a deliberate product exception to the reduced-motion rule: the vendored
+ * component's own reduced-motion check is neutralized in its .js (search `redrob-always-animate`)
+ * so the particle sweep keeps running regardless.
  * It still pauses while the document is hidden. The neutral `User` glyph remains only as the
  * fallback for a runtime without custom-element support or a load failure.
  *
@@ -35,7 +35,7 @@ export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
     let cancelled = false
     // Browser-only dynamic import: registers <secure-connection-avatar> as a side effect.
     if (typeof window.customElements !== "undefined") {
-      import("./secure-connection-avatar.js")
+      import("./vendor/secure-connection-avatar-element.js")
         .then(() => window.customElements.whenDefined("secure-connection-avatar"))
         .then(() => {
           if (!cancelled) setReady(true)
@@ -59,7 +59,7 @@ export function SecureConnectionAvatar({ label }: SecureConnectionAvatarProps) {
   // The vendored custom element's shadow :host hard-codes width:128px with aspect-ratio:1, so we
   // override with an explicit 100% width AND height (not just width) - width alone let aspect-ratio
   // keep the old 128px height, which centred a smaller square and left the top/bottom/side gaps.
-  // It animates regardless of the OS reduced-motion setting, by product direction (round 3).
+  // It animates regardless of the OS reduced-motion setting: a deliberate product exception.
   return (
     <secure-connection-avatar
       aria-label={label}

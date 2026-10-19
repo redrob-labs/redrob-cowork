@@ -17,7 +17,7 @@ import { cn } from "../../../lib/utils";
 import { useWorkingLine } from "../../../lib/working-lines";
 import { CoworkQuestionsCard } from "./cowork-questions";
 import { IDLE_PLAN_ACTIVITY, planStepStates, type PlanStepState } from "./plan-progress";
-import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader/RedrobLiquidLoader";
+import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { useCoworkComposerStore } from "../composer/composer-state";
 import { useCheckStore, type AnswerChecks } from "./check-store";

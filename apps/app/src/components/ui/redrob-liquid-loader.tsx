@@ -1,14 +1,22 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-// The engine is a dependency-free Canvas-2D ES module; its sibling .d.ts supplies the types.
-import { createLiquidLoader, type LiquidLoader } from "./redrob-liquid-loader.js"
+// The engine is a vendored, dependency-free Canvas-2D ES module; its sibling .d.ts supplies the types.
+import { createLiquidLoader, type LiquidLoader } from "./vendor/liquid-loader-engine.js"
+
+/** Used only when the brand token cannot be read (no stylesheet, e.g. a test render). */
+const FALLBACK_COLOR = "#2B52FF"
+
+/** The brand blue as the current theme defines it, read from the canvas's computed style. */
+function brandColor(canvas: HTMLCanvasElement): string {
+  return getComputedStyle(canvas).getPropertyValue("--action-primary").trim() || FALLBACK_COLOR
+}
 
 /** Props for the in-chat liquid loader. */
 export type RedrobLiquidLoaderProps = {
   /** Square size in CSS px. Brand minimum for the animated symbol is 96; default 96 for the thinking row. */
   size?: number
-  /** Fill color. Defaults to Redrob Blue (#2B52FF); pass #FFFFFF on a dark/brand ground. */
+  /** Fill color. Defaults to the theme's brand blue (`--action-primary`); pass #FFFFFF on a dark/brand ground. */
   color?: string
   /** Accessible label announced once (role=status). Always pass something real. */
   label: string
@@ -26,7 +34,7 @@ export type RedrobLiquidLoaderProps = {
  * reduced-motion setting by default and pauses itself while the document is hidden. The
  * canvas is `aria-hidden`; the visually hidden label carries the meaning for a reader.
  */
-export function RedrobLiquidLoader({ size = 96, color = "#2B52FF", label, className }: RedrobLiquidLoaderProps) {
+export function RedrobLiquidLoader({ size = 96, color, label, className }: RedrobLiquidLoaderProps) {
   // The canvas the engine draws into.
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   // The live engine handle, so size/color updates go through its methods, not a remount.
@@ -35,7 +43,7 @@ export function RedrobLiquidLoader({ size = 96, color = "#2B52FF", label, classN
   // Create once on mount; the engine reads devicePixelRatio and follows reduced motion itself.
   React.useEffect(() => {
     if (!canvasRef.current) return
-    loaderRef.current = createLiquidLoader(canvasRef.current, { size, color, reducedMotion: "auto" })
+    loaderRef.current = createLiquidLoader(canvasRef.current, { size, color: color ?? brandColor(canvasRef.current), reducedMotion: "auto" })
     return () => {
       loaderRef.current?.destroy()
       loaderRef.current = null
@@ -51,7 +59,7 @@ export function RedrobLiquidLoader({ size = 96, color = "#2B52FF", label, classN
 
   // Recolor in place when the color prop changes.
   React.useEffect(() => {
-    loaderRef.current?.setColor(color)
+    if (color) loaderRef.current?.setColor(color)
   }, [color])
 
   return (

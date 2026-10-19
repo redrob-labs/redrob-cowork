@@ -99,7 +99,7 @@ import {
   MessageContent,
 } from "@/components/ui/message"
 import { Tool } from "@/components/ui/tool"
-import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader/RedrobLiquidLoader"
+import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader"
 import { useSmoothReveal } from "@/components/chat/use-smooth-reveal"
 import { CapabilityCallLine } from "@/components/chat/capability-call-line"
 import {
