@@ -73,11 +73,67 @@ function restartChecks(previous: AnswerChecks | undefined, next: AnswerChecks): 
   };
 }
 
-/** In memory for the app session. */
-export function createCheckStore() {
+/**
+ * Settled check results are kept on this device, so a chat reopened later (or after
+ * the app restarts) still shows its Fact check and Council chips. Only finished checks are kept:
+ * a check still running when the app closed has no result to show and would read as stuck.
+ */
+export const CHECKS_STORAGE_KEY = "redrob.cowork.checks.v1";
+/** How many answers' checks are kept, newest first. */
+export const CHECKS_KEPT = 200;
+
+/** Where settled check results are kept between app runs (null when there is no storage). */
+type CheckStorage = () => Pick<Storage, "getItem" | "setItem"> | null;
+
+/** The browser's localStorage, or null outside a window (tests, SSR). */
+const windowCheckStorage: CheckStorage = () => (typeof window === "undefined" ? null : window.localStorage);
+
+/** Whether an answer's checks have finished (nothing still running) and found something to show. */
+function isSettled(checks: AnswerChecks): boolean {
+  return checks.fact !== "running" && checks.challenge !== "running" && (checks.fact !== "off" || checks.challenge !== "off");
+}
+
+/** Reads the kept answers; anything unreadable is ignored. Pure apart from the storage read. */
+export function readKeptChecks(storage: CheckStorage): Record<string, AnswerChecks> {
+  try {
+    const raw = storage()?.getItem(CHECKS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || !Array.isArray((parsed as { entries?: unknown }).entries)) return {};
+    const answers: Record<string, AnswerChecks> = {};
+    for (const entry of (parsed as { entries: unknown[] }).entries) {
+      if (!Array.isArray(entry) || typeof entry[0] !== "string" || !entry[1] || typeof entry[1] !== "object") continue;
+      const { planned, fact, challenge, result } = entry[1] as AnswerChecks;
+      const checks: AnswerChecks = { planned, fact, challenge, ...(result ? { result } : {}) };
+      if (isSettled(checks)) answers[entry[0]] = checks;
+    }
+    return answers;
+  } catch {
+    return {};
+  }
+}
+
+/** Keeps the settled answers, newest last, capped at CHECKS_KEPT. Only the chips are written: the
+ *  retry request (with the person's question) stays in memory, so Retry works for checks made in this
+ *  app run only. Storage errors are ignored. */
+export function writeKeptChecks(storage: CheckStorage, answers: Record<string, AnswerChecks>) {
+  try {
+    const entries = Object.entries(answers)
+      .filter(([, checks]) => isSettled(checks))
+      .slice(-CHECKS_KEPT)
+      .map(([id, { planned, fact, challenge, result }]): [string, AnswerChecks] => [id, { planned, fact, challenge, ...(result ? { result } : {}) }]);
+    storage()?.setItem(CHECKS_STORAGE_KEY, JSON.stringify({ entries }));
+  } catch {
+    // Quota or private mode: the chips still show for this app session.
+  }
+}
+
+/** In memory for the app session, with settled results kept on the device. */
+export function createCheckStore(options: { storage?: CheckStorage } = {}) {
+  const storage = options.storage ?? windowCheckStorage;
   return create<CheckStoreState>()((set, get) => ({
     pending: {},
-    answers: {},
+    answers: readKeptChecks(storage),
     checking: {},
     stopped: {},
     retryHandler: null,
@@ -93,14 +149,18 @@ export function createCheckStore() {
     },
     start: (messageId, input) =>
       set((state) => ({ answers: { ...state.answers, [messageId]: restartChecks(state.answers[messageId], startChecks(input)) } })),
-    settle: (messageId, result) =>
+    settle: (messageId, result) => {
       set((state) => {
         const previous = state.answers[messageId];
         if (!previous) return state;
         // A retry that comes back empty keeps the earlier result for the check that was done.
         const merged = result && previous.result ? { ...previous.result, ...result } : result;
-        return { answers: { ...state.answers, [messageId]: settleChecks(previous, merged) } };
-      }),
+        // Re-insert so the newest settled answer is last (the cap drops the oldest).
+        const { [messageId]: _old, ...rest } = state.answers;
+        return { answers: { ...rest, [messageId]: settleChecks(previous, merged) } };
+      });
+      writeKeptChecks(storage, get().answers);
+    },
     track: (checkSessionId, messageId) => set((state) => ({ checking: { ...state.checking, [checkSessionId]: messageId } })),
     untrack: (checkSessionId) =>
       set((state) => {

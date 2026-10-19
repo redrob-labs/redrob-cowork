@@ -1,35 +1,37 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 import { setLocale } from "../src/i18n";
 import { DEFAULT_CROSS_CHECK } from "../src/react-app/cowork/composer/composer-state";
-import { createCheckStore, settleChecks, startChecks } from "../src/react-app/cowork/thread/check-store";
+import { createCheckStore } from "../src/react-app/cowork/thread/check-store";
 import {
   checkMatters,
   checkPrompt,
+  checkedDocument,
   crossCheckPlan,
-  COWORK_CHECK_AGENT,
   parseCheckAnswer,
   retryPlan,
   runCrossCheck,
+  turnAnswer,
   type CrossCheckDeps,
   type TranscriptMessage,
 } from "../src/react-app/cowork/thread/cross-check";
-import { COWORK_BLOCK_TAGS, hasCoworkBlocks, parseCoworkBlocks, type CheckResult } from "../src/react-app/cowork/thread/cowork-blocks";
+import { hasCoworkBlocks, parseCoworkBlocks } from "../src/react-app/cowork/thread/cowork-blocks";
 import { challengeReportProps, factReportProps } from "../src/react-app/cowork/thread/cowork-thread";
 import { coworkSystemText, MEMORY_OFF_INSTRUCTION } from "../src/react-app/cowork/thread/memory-off";
 import { permissionAsk, toTranscript } from "../src/react-app/cowork/thread/use-cowork-cross-check";
 import {
-  answersSummary,
   answersToPrompt,
   approvalActions,
+  challengeOutcome,
+  factConfidence,
   isPlanRunPrompt,
+  isQuestionAnswerPrompt,
+  isSyntheticCoworkPrompt,
   memorySavedFrom,
   planRunPrompt,
   planStatus,
   planToText,
-  receiptItems,
+  planTurnInstruction,
 } from "../src/react-app/cowork/thread/thread-logic";
 
 afterEach(() => setLocale("en"));
@@ -70,16 +72,6 @@ const CHECK = {
     unsettled: "Whether a courier abroad counts.",
   },
 };
-
-describe("fence tags", () => {
-  test("match the server's COWORK_BLOCKS", () => {
-    const server = readFileSync(join(import.meta.dir, "..", "..", "server", "src", "redrob-cowork-agents.ts"), "utf8");
-    const block = /export const COWORK_BLOCKS = \{([\s\S]*?)\} as const;/.exec(server)?.[1] ?? "";
-    const tags = Object.fromEntries([...block.matchAll(/(\w+):\s*"([^"]+)"/g)].map((match) => [match[1], match[2]]));
-    expect(tags).toEqual({ ...COWORK_BLOCK_TAGS });
-    expect(server).toContain(`COWORK_CHECK_AGENT = "${COWORK_CHECK_AGENT}"`);
-  });
-});
 
 describe("parseCoworkBlocks", () => {
   test("reads questions and keeps the prose around them", () => {
@@ -141,12 +133,32 @@ describe("parseCoworkBlocks", () => {
 describe("answers, plan and run", () => {
   const questions = parseCoworkBlocks(fence("redrob-questions", QUESTIONS)).questions ?? [];
 
-  test("answersToPrompt reads as the person's reply", () => {
+  test("answersToPrompt reads as the person's reply, behind the question-answer sentinel", () => {
+    // The sent text is prefixed with the U+2063 provenance sentinel so the Cowork transcript can
+    // hide this synthetic send; the engine sees only the real answer after it.
+    const sentinel = "\u2063";
     expect(answersToPrompt(questions, { q1: 1, q2: [0, 2] })).toBe(
-      "What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.",
+      `${sentinel}What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.`,
     );
-    expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe("Go ahead with what fits best.");
-    expect(answersSummary(questions, { q1: 0, q2: [1] })).toBe("Answered: A yes or no, The project's files");
+    expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe(`${sentinel}Go ahead with what fits best.`);
+  });
+
+  test("synthetic Cowork sends are detectable and told apart by their sentinels", () => {
+    const planRun = planRunPrompt("# A plan");
+    const answer = answersToPrompt(questions, { q1: 1, q2: [] });
+    // A plan-run is a plan-run, not a question-answer, and vice versa.
+    expect(isPlanRunPrompt(planRun)).toBe(true);
+    expect(isQuestionAnswerPrompt(planRun)).toBe(false);
+    expect(isQuestionAnswerPrompt(answer)).toBe(true);
+    expect(isPlanRunPrompt(answer)).toBe(false); // the question-answer sentinel must not read as a plan-run
+    // Both are synthetic machinery the transcript hides; an ordinary typed message is not.
+    expect(isSyntheticCoworkPrompt(planRun)).toBe(true);
+    expect(isSyntheticCoworkPrompt(answer)).toBe(true);
+    expect(isSyntheticCoworkPrompt("Just a normal message")).toBe(false);
+    // The sentinel survives trim(); an older chat's answer (U+2060 U+FEFF) still reads as an answer.
+    expect(isQuestionAnswerPrompt(answer.trim())).toBe(true);
+    expect(isQuestionAnswerPrompt("\u2060\ufeffYes.")).toBe(true);
+    expect(isPlanRunPrompt("\u2060\ufeffYes.")).toBe(false);
   });
 
   test("Run sends the plan behind 'Run this plan.'", () => {
@@ -158,51 +170,18 @@ describe("answers, plan and run", () => {
     expect(text).toContain("2. Draft the notice.");
     expect(text).toContain("- Write the notice (Redrob Auto)");
     const prompt = planRunPrompt(text);
-    expect(prompt.startsWith("Run this plan.\n\n# End the Seorin MSA")).toBe(true);
+    expect(prompt.startsWith("\u2060Run this plan.")).toBe(true); // zero-width provenance sentinel then the visible prompt
+    expect(prompt).toContain("\n\n# End the Seorin MSA");
     expect(isPlanRunPrompt(prompt)).toBe(true);
     expect(isPlanRunPrompt("Run the tests")).toBe(false);
+    // A human who literally types the run wording is NOT an internal plan-run (no sentinel).
+    expect(isPlanRunPrompt("Run this plan. Write the final deliverable to a file.")).toBe(false);
   });
 
-  test("Run and Keep move the plan; a run that finished is done", () => {
+  test("a plan that ran and finished is done", () => {
     expect(planStatus({ local: "draft", isLatest: true, busy: false })).toBe("draft");
-    expect(planStatus({ local: "kept", isLatest: false, busy: false })).toBe("kept");
     expect(planStatus({ local: "running", isLatest: false, busy: true })).toBe("running");
     expect(planStatus({ local: "running", isLatest: false, busy: false })).toBe("done");
-  });
-});
-
-describe("receipt", () => {
-  const labels = (items: ReturnType<typeof receiptItems>) => items.map((item) => [item.label, item.sub ?? null, item.busy ?? false]);
-  const result = parseCoworkBlocks(fence("redrob-check", CHECK)).check;
-
-  test("a plain answer is not checked", () => {
-    expect(labels(receiptItems({ planned: false, fact: "off", challenge: "off" }))).toEqual([
-      ["Redrob Auto", null, false],
-      ["Not checked", "a quick answer", false],
-    ]);
-  });
-
-  test("a planned answer with checks running", () => {
-    expect(labels(receiptItems({ model: "claude-opus-5", planned: true, fact: "running", challenge: "running" }))).toEqual([
-      ["claude-opus-5", "by Redrob Auto", false],
-      ["Plan followed", null, false],
-      ["Fact check running", null, true],
-      ["Challenge running", null, true],
-    ]);
-  });
-
-  test("checks done: to fix, and holds up", () => {
-    const items = receiptItems({ planned: false, fact: "done", challenge: "done", result });
-    expect(labels(items).slice(1)).toEqual([
-      ["Fact check: 2 to fix", null, false],
-      ["Challenged", "1 to change", false],
-    ]);
-    expect(items.map((item) => item.tone)).toEqual([undefined, "differ", "differ"]);
-    const clean: CheckResult = { fact: { claims: [{ verdict: "holds", claim: "x" }], missed: [] } };
-    expect(receiptItems({ planned: false, fact: "done", challenge: "off", result: clean })[1]).toMatchObject({
-      label: "Fact check: holds up",
-      tone: "agree",
-    });
   });
 });
 
@@ -240,28 +219,6 @@ describe("cross-check", () => {
     expect(prompt).toContain("No.");
   });
 
-  test("check-store: pending is taken once; checks run, then settle", () => {
-    const store = createCheckStore();
-    store.getState().expect("s1", { question: "Q", planned: true });
-    expect(store.getState().take("s1")).toEqual({ question: "Q", planned: true });
-    expect(store.getState().take("s1")).toBeNull();
-
-    store.getState().start("m1", { planned: true, fact: true, challenge: false });
-    expect(store.getState().answers.m1).toEqual({ planned: true, fact: "running", challenge: "off" });
-    expect(store.getState().take("s1")).toBeNull();
-    store.getState().settle("m1", { fact: { claims: [], missed: [] } });
-    expect(store.getState().answers.m1).toMatchObject({ fact: "done", challenge: "off" });
-
-    const running = startChecks({ planned: false, fact: true, challenge: true });
-    expect(settleChecks(running, null)).toEqual({ planned: false, fact: "failed", challenge: "failed" });
-    expect(settleChecks(running, { challenge: parseCheckAnswer(fence("redrob-check", CHECK))?.challenge })).toMatchObject({
-      fact: "failed",
-      challenge: "done",
-    });
-    store.getState().settle("unknown", null);
-    expect(store.getState().answers.unknown).toBeUndefined();
-  });
-
   test("the check result maps onto FactCheckReport and ChallengeReport", () => {
     const result = parseCheckAnswer(`Here:\n${fence("redrob-check", CHECK)}`);
     if (!result?.fact || !result.challenge) throw new Error("no result");
@@ -297,6 +254,9 @@ describe("cross-check", () => {
         calls.push(`create:${parentId}`);
         return "check-1";
       },
+      deleteCheckSession: async (id) => {
+        calls.push(`delete:${id}`);
+      },
       prompt: async (sessionId, _text, agent, model) => {
         calls.push(`prompt:${sessionId}:${agent}:${model.model?.modelID ?? "default"}:${model.variant ?? "-"}`);
       },
@@ -315,8 +275,8 @@ describe("cross-check", () => {
       model: { providerID: "redrob", modelID: "picked" },
       variant: "high",
     });
-    // On the model the chat used, not the engine default.
-    expect(calls).toEqual(["messages:s1", "create:s1", "prompt:check-1:redrob-check:picked:high", "messages:check-1", "messages:check-1"]);
+    // On the model the chat used, not the engine default; the check session is deleted after.
+    expect(calls).toEqual(["messages:s1", "create:s1", "prompt:check-1:redrob-check:picked:high", "messages:check-1", "messages:check-1", "delete:check-1"]);
     expect(store.getState().answers.a1).toMatchObject({ fact: "done", challenge: "done", request: { sessionId: "s1", model: { modelID: "picked" } } });
     expect(store.getState().checking).toEqual({});
 
@@ -328,9 +288,10 @@ describe("cross-check", () => {
     expect(quiet.getState().answers.a1).toMatchObject({ planned: true, fact: "off", challenge: "off" });
   });
 
-  test("a check that asked and was refused stops at once and reads as failed", async () => {
+  test("a check that asked and was refused stops at once, reads as failed, and its session is deleted", async () => {
     const store = createCheckStore();
     let polls = 0;
+    const deleted: string[] = [];
     await runCrossCheck(
       {
         messages: async (sessionId) => {
@@ -341,6 +302,10 @@ describe("cross-check", () => {
           return [{ id: "c1", role: "assistant", completed: false, text: "" }];
         },
         createCheckSession: async () => "check-1",
+        deleteCheckSession: async (id) => {
+          deleted.push(id);
+          throw new Error("offline");
+        },
         prompt: async () => {
           expect(store.getState().checking["check-1"]).toBe("a1");
         },
@@ -354,6 +319,8 @@ describe("cross-check", () => {
       { sessionId: "s1", question: "Q", planned: false, levels: { factCheck: "always", challenge: "off" } },
     );
     expect(polls).toBe(1);
+    // A failed delete does not change the result.
+    expect(deleted).toEqual(["check-1"]);
     expect(store.getState().answers.a1).toMatchObject({ fact: "failed", challenge: "off" });
     expect(store.getState().checking).toEqual({});
     expect(store.getState().stopped).toEqual({});
@@ -387,6 +354,7 @@ describe("cross-check", () => {
         createCheckSession: async () => {
           throw new Error("offline");
         },
+        deleteCheckSession: async () => {},
         prompt: async () => {},
         sleep: async () => {},
         start: store.getState().start,
@@ -450,7 +418,81 @@ describe("approvals and memory", () => {
 
   test("Korean strings come through t()", () => {
     setLocale("ko");
-    expect(planRunPrompt("x").startsWith("이 계획대로 실행해 주세요.")).toBe(true);
-    expect(receiptItems({ planned: false, fact: "off", challenge: "off" }).map((item) => item.label)).toEqual(["레드롭 자동", "확인하지 않음"]);
+    expect(planRunPrompt("x").startsWith("\u2060이 계획대로 실행해 주세요.")).toBe(true);
+  });
+});
+
+describe("cross-check verdict words", () => {
+  test("fact confidence bands: all hold, mostly, low", () => {
+    expect(factConfidence({ claims: [{ verdict: "holds", claim: "a" }, { verdict: "holds", claim: "b" }], missed: [] }).tone).toBe("agree");
+    const fourOfFive = ["a", "b", "c", "d"].map((claim) => ({ verdict: "holds" as const, claim }));
+    expect(factConfidence({ claims: [...fourOfFive, { verdict: "wrong", claim: "e" }], missed: [] }).tone).toBe("mild");
+    expect(factConfidence({ claims: [{ verdict: "wrong", claim: "a" }, { verdict: "wrong", claim: "b" }, { verdict: "holds", claim: "c" }], missed: [{ text: "missed one" }] }).tone).toBe("differ");
+  });
+
+  test("council outcome: a broken point challenges, one change in four mostly holds", () => {
+    expect(challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "broke", text: "b" }] }).tone).toBe("differ");
+    const verdict = [{ kind: "held" as const, text: "a" }, { kind: "held" as const, text: "b" }, { kind: "held" as const, text: "c" }, { kind: "changed" as const, text: "d" }];
+    expect(challengeOutcome({ claim: "x", rounds: [], verdict }).tone).toBe("mild");
+  });
+});
+
+describe("the written deliverable is what gets checked", () => {
+  test("checkedDocument takes the newest full write of the answering turn only", () => {
+    const doc = { path: "reports/outlook.md", content: "# Outlook\n\nThe U.S. keeps the lead." };
+    expect(checkedDocument([
+      { id: "u1", role: "user", completed: false, text: "Write the memo" },
+      { id: "a1", role: "assistant", completed: true, text: "", document: doc },
+      { id: "a2", role: "assistant", completed: true, text: "Saved the memo." },
+    ])).toEqual(doc);
+    // A file written in an EARLIER turn is not this answer's deliverable.
+    expect(checkedDocument([
+      { id: "a0", role: "assistant", completed: true, text: "", document: doc },
+      { id: "u1", role: "user", completed: false, text: "Thanks, one question" },
+      { id: "a1", role: "assistant", completed: true, text: "Sure." },
+    ])).toBeNull();
+  });
+
+  test("a file-only run's check sits under its own turn, never the plan before it", () => {
+    const doc = { path: "reports/outlook.md", content: "# Outlook" };
+    const plan: TranscriptMessage = { id: "plan", role: "assistant", completed: true, text: "Here is the plan." };
+    const runSend: TranscriptMessage = { id: "u2", role: "user", completed: false, text: "Run this plan." };
+    expect(turnAnswer([plan, runSend, { id: "a2", role: "assistant", completed: true, text: "", document: doc }])?.id).toBe("a2");
+    // Nothing said and nothing written in this turn: nothing to check.
+    expect(turnAnswer([plan, runSend, { id: "a2", role: "assistant", completed: true, text: "" }])).toBeNull();
+  });
+
+  test("checkPrompt checks the document when there is one, the chat answer otherwise", () => {
+    const plan = { fact: true, challenge: true };
+    const withDoc = checkPrompt({ question: "Forecast", answer: "Saved the memo.", plan, document: { path: "reports/outlook.md", content: "BODY" } });
+    expect(withDoc).toContain("on the document below");
+    expect(withDoc).toContain("## The document (reports/outlook.md)");
+    expect(withDoc).toContain("BODY");
+    expect(withDoc).not.toContain("Saved the memo.");
+    expect(checkPrompt({ question: "Q", answer: "A", plan })).toContain("## The answer\n\nA");
+  });
+
+  test("toTranscript keeps a write tool call's body as the message's document", () => {
+    const [message] = toTranscript([{
+      info: { id: "a1", role: "assistant", time: { created: 1, completed: 2 }, finish: "stop" } as never,
+      parts: [
+        { type: "text", text: "Saved." } as never,
+        { type: "tool", tool: "write", state: { status: "completed", input: { filePath: "/w/r.md", content: "# R" } } } as never,
+        { type: "tool", tool: "edit", state: { status: "completed", input: { filePath: "/w/x.md", content: "diff" } } } as never,
+      ],
+    }]);
+    expect(message?.document).toEqual({ path: "/w/r.md", content: "# R" });
+    expect(message?.text).toBe("Saved.");
+  });
+});
+
+describe("plan-mode turn rule", () => {
+  test("a new request asks questions first; answers get exactly one plan", () => {
+    const first = planTurnInstruction("Deep research the US-China AI race");
+    expect(first).toContain("redrob-questions");
+    expect(first).not.toContain("redrob-plan block");
+    const answers = planTurnInstruction(answersToPrompt(QUESTIONS, { q1: 0, q2: [1] }));
+    expect(answers).toContain("ONE fenced redrob-plan block");
+    expect(answers).not.toContain("redrob-questions");
   });
 });

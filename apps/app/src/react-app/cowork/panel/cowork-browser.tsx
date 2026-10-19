@@ -1,8 +1,10 @@
 /** @jsxImportSource react */
 import { useRef, useState, type FormEvent, type Ref } from "react";
+import { Reorder } from "motion/react";
 import { Button, EmptyState, IconButton, SectionMark, TaskStatus, icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
+import { isBlockMarkerTitle } from "../../../app/lib/session-title";
 import { useSessionPanelState, type BrowserPanelTab } from "../../domains/session/panel/panel-tab-store";
 import { useNativeBrowserBounds } from "../../domains/session/panel/use-native-browser-bounds";
 import { useSidePanelTabs } from "../../domains/session/panel/use-side-panel-tabs";
@@ -19,8 +21,37 @@ import {
   takeOver,
 } from "./cowork-browser-state";
 
-const TAB_ICON = { width: 13, height: 13, "aria-hidden": true };
+const TAB_ICON = { width: 14, height: 14, "aria-hidden": true };
+const CLOSE_ICON = { width: 12, height: 12, "aria-hidden": true };
 const BAR_ICON = { width: 15, height: 15, "aria-hidden": true };
+
+/**
+ * Every panel tab id in the order to store, after the browser tabs were dragged into
+ * `browserOrder`. The store's reorder wants ALL of the session's tabs (it refuses a partial list),
+ * and the browser view only shows browser tabs, so the other tabs keep their slots and the browser
+ * slots take the new order. Pure.
+ */
+export function mergeTabOrder(all: readonly { id: string; type: string }[], browserOrder: readonly string[]): string[] {
+  const browserIds = all.filter((tab) => tab.type === "browser").map((tab) => tab.id);
+  const queue = browserOrder.filter((id, index) => browserIds.includes(id) && browserOrder.indexOf(id) === index);
+  // Not the same set of browser tabs (a stale drag): keep the stored order rather than lose a tab.
+  if (queue.length !== browserIds.length) return all.map((tab) => tab.id);
+  return all.map((tab) => (tab.type === "browser" ? (queue.shift() ?? tab.id) : tab.id));
+}
+
+/**
+ * The tab a key moves to in the tab strip (ArrowLeft/ArrowRight wrap, Home/End jump), or null for
+ * any other key. Pure; the strip selects and focuses the result (roving tabindex).
+ */
+export function tabKeyTarget(ids: readonly string[], currentId: string, key: string): string | null {
+  const at = ids.indexOf(currentId);
+  if (at < 0 || ids.length === 0) return null;
+  if (key === "ArrowRight") return ids[(at + 1) % ids.length] ?? null;
+  if (key === "ArrowLeft") return ids[(at - 1 + ids.length) % ids.length] ?? null;
+  if (key === "Home") return ids[0] ?? null;
+  if (key === "End") return ids[ids.length - 1] ?? null;
+  return null;
+}
 
 /** A new tab opens on the Cowork's own page, not on a search engine. */
 export const NEW_TAB_URL = "about:blank";
@@ -83,7 +114,7 @@ export function CoworkNewTab(props: CoworkNewTabProps) {
               <li key={`${page.chatId}:${page.url}`}>
                 <button type="button" onClick={() => props.onOpen(page.url)}>
                   <b>{page.host}</b>
-                  <span>{t("cowork.browser_read_for", { chat: page.chatTitle ?? t("cowork.untitled_chat") })}</span>
+                  <span>{t("cowork.browser_read_for", { chat: page.chatTitle && !isBlockMarkerTitle(page.chatTitle) ? page.chatTitle : t("cowork.untitled_chat") })}</span>
                 </button>
               </li>
             ))}
@@ -107,6 +138,10 @@ export type CoworkBrowserViewProps = {
   /** Where Electron lays the page; only rendered while a page is showing. */
   contentRef?: Ref<HTMLDivElement>;
   onSelectTab: (id: string) => void;
+  /** Closes one tab (its x, a middle click, or Ctrl/Cmd+W). */
+  onCloseTab: (id: string) => void;
+  /** The tabs' new order after a drag, as ids. */
+  onReorderTabs: (ids: string[]) => void;
   onNewTab: () => void;
   onBack: () => void;
   onForward: () => void;
@@ -129,31 +164,89 @@ export function CoworkBrowserView(props: CoworkBrowserViewProps) {
   const host = addressHost(tab?.url);
   return (
     <div className="cowork-browser">
-      <div className="cowork-browser__tabs" role="tablist" aria-label={t("cowork.browser_tabs")}>
-        {props.tabs.map((entry) => {
-          const title = tabTitle(entry);
-          const live = entry.id === props.coworkTabId && props.cowork === "reading";
-          return (
-            <button
-              key={entry.id}
-              type="button"
-              role="tab"
-              aria-selected={entry.id === tab?.id}
-              className="cowork-browser__tab"
-              title={title}
-              onClick={() => props.onSelectTab(entry.id)}
-            >
-              {live ? (
-                <span className="cowork-browser__live" role="img" aria-label={t("cowork.browser_live")} />
-              ) : entry.favicon ? (
-                <img src={entry.favicon} alt="" width={13} height={13} className="cowork-browser__favicon" />
-              ) : (
-                icons.globe(TAB_ICON)
-              )}
-              <span className="cowork-browser__tab-title">{title}</span>
-            </button>
-          );
-        })}
+      <div className="cowork-browser__tabs">
+        {/* Tabs drag to reorder (motion's Reorder, x axis), close with the x, a
+            middle click, or Ctrl/Cmd+W on a focused tab. The page is a native view laid over the
+            panel, so a drag stays inside this strip. */}
+        <Reorder.Group
+          as="div"
+          axis="x"
+          values={props.tabs.map((entry) => entry.id)}
+          onReorder={props.onReorderTabs}
+          className="cowork-browser__tablist"
+          role="tablist"
+          aria-label={t("cowork.browser_tabs")}
+        >
+          {props.tabs.map((entry) => {
+            const title = tabTitle(entry);
+            const live = entry.id === props.coworkTabId && props.cowork === "reading";
+            const selected = entry.id === tab?.id;
+            return (
+              <Reorder.Item
+                as="div"
+                key={entry.id}
+                value={entry.id}
+                dragElastic={0}
+                layout="position"
+                className="cowork-browser__tab"
+                data-active={selected ? "" : undefined}
+                onAuxClick={(event) => {
+                  if (event.button !== 1) return;
+                  event.preventDefault();
+                  props.onCloseTab(entry.id);
+                }}
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  // Roving tabindex: only the selected tab is in the Tab order; arrows move between tabs.
+                  tabIndex={selected ? 0 : -1}
+                  data-tab-id={entry.id}
+                  className="cowork-browser__tab-select"
+                  title={title}
+                  onClick={() => props.onSelectTab(entry.id)}
+                  onKeyDown={(event) => {
+                    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "w") {
+                      event.preventDefault();
+                      props.onCloseTab(entry.id);
+                      return;
+                    }
+                    const target = tabKeyTarget(props.tabs.map((each) => each.id), entry.id, event.key);
+                    if (!target) return;
+                    event.preventDefault();
+                    props.onSelectTab(target);
+                    event.currentTarget
+                      .closest('[role="tablist"]')
+                      ?.querySelector<HTMLButtonElement>(`[data-tab-id="${CSS.escape(target)}"]`)
+                      ?.focus();
+                  }}
+                >
+                  {live ? (
+                    <span className="cowork-browser__live" role="img" aria-label={t("cowork.browser_live")} />
+                  ) : entry.favicon ? (
+                    <img src={entry.favicon} alt="" width={14} height={14} className="cowork-browser__favicon" draggable={false} />
+                  ) : (
+                    icons.globe(TAB_ICON)
+                  )}
+                  <span className="cowork-browser__tab-title">{title}</span>
+                </button>
+                <button
+                  type="button"
+                  className="cowork-browser__tab-close"
+                  aria-label={t("cowork.browser_close_tab", { title })}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    props.onCloseTab(entry.id);
+                  }}
+                >
+                  {icons.close(CLOSE_ICON)}
+                </button>
+              </Reorder.Item>
+            );
+          })}
+        </Reorder.Group>
         <IconButton label={t("cowork.browser_new_tab")} size="sm" onClick={props.onNewTab}>
           {icons.plus(BAR_ICON)}
         </IconButton>
@@ -208,7 +301,7 @@ export function CoworkBrowserView(props: CoworkBrowserViewProps) {
  */
 export function CoworkBrowser(props: { sessionKey: string }) {
   const session = useSessionPanelState(props.sessionKey);
-  const { createTab, selectTab } = useSidePanelTabs(props.sessionKey);
+  const { createTab, selectTab, closeTab, reorderTabs } = useSidePanelTabs(props.sessionKey);
   const cowork = useFrameStore((state) => state.browser.cowork);
   const pinned = useFrameStore((state) => state.browser.tab);
   const reading = useCoworkPages((state) => state.reading);
@@ -230,6 +323,11 @@ export function CoworkBrowser(props: { sessionKey: string }) {
       pages={pagesToday(pages, now)}
       contentRef={contentRef}
       onSelectTab={selectTab}
+      onCloseTab={(id) => {
+        const entry = tabs.find((tab) => tab.id === id);
+        if (entry) closeTab(entry);
+      }}
+      onReorderTabs={(ids) => reorderTabs(mergeTabOrder(session.tabs, ids))}
       onNewTab={() => createTab(NEW_TAB_URL)}
       onBack={() => void browser?.back?.()}
       onForward={() => void browser?.forward?.()}

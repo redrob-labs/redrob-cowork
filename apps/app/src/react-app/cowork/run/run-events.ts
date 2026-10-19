@@ -1,5 +1,7 @@
 import type { OpencodeEvent } from "../../../app/types";
 
+import { isBlockMarkerTitle } from "../../../app/lib/session-title";
+
 /**
  * The engine's events, read as the Cowork's own: a step started, a run answered, a file was
  * written. Pure, so the stream can be replayed in a test; `cowork-run-events.tsx` applies them.
@@ -7,10 +9,13 @@ import type { OpencodeEvent } from "../../../app/types";
 
 export type StepKind = "web" | "files" | "model" | "approval";
 
-export type StepInfo = { kind: StepKind; label: string; url?: string };
+/** `navigation` is set only on a `web` step that actually opens/fetches a page (a real address,
+ *  or a browser/devtools/page tool) as opposed to a bare web SEARCH (a query with no url). The
+ *  panel pops only for a navigation step; a search alone no longer opens the browser. */
+export type StepInfo = { kind: StepKind; label: string; url?: string; navigation?: boolean };
 
 export type CoworkRunEvent =
-  | { type: "step.started"; runId: string; label: string; kind: StepKind; url?: string; chatTitle?: string }
+  | { type: "step.started"; runId: string; label: string; kind: StepKind; url?: string; navigation?: boolean; chatTitle?: string }
   | { type: "run.answered"; runId: string }
   | { type: "file.written"; name: string; chatId: string };
 
@@ -52,6 +57,18 @@ function isWebTool(tool: string, input: UnknownRecord | undefined): boolean {
   return tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool) || FETCH_TOOLS.has(tool);
 }
 
+/**
+ * Whether a web tool drives the built-in browser rather than reading the web in the background.
+ * A browser capability, a `browser_*`/chrome-devtools/page tool always navigates. A
+ * fetch or search tool never does, url or not - reading a page is a background read, and popping
+ * the browser panel for it pulled the person away from the chat. The read is still recorded in
+ * "Pages Cowork read today" (runEffects' page-read).
+ */
+function isNavigationTool(tool: string, input: UnknownRecord | undefined): boolean {
+  if (tool.endsWith("redrob_execute")) return stringField(input, "id")?.startsWith("browser.") ?? false;
+  return tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool);
+}
+
 function webUrl(input: UnknownRecord | undefined): string | undefined {
   const url = stringField(input, "url") ?? stringField(recordField(input, "args"), "url");
   return url && /^https?:\/\//i.test(url) ? url : undefined;
@@ -72,7 +89,8 @@ export function classifyStep(part: unknown): StepInfo | null {
   const label = stringField(recordField(part, "state"), "title") ?? stringField(input, "id") ?? tool;
   if (isWebTool(tool, input)) {
     const url = webUrl(input);
-    return url ? { kind: "web", label, url } : { kind: "web", label };
+    const navigation = isNavigationTool(tool, input);
+    return url ? { kind: "web", label, url, navigation } : { kind: "web", label, navigation };
   }
   if (FILE_TOOLS.has(tool)) return { kind: "files", label };
   return { kind: "model", label };
@@ -108,7 +126,8 @@ function started(state: RunEventsState, runId: string, step: StepInfo): CoworkRu
     label: step.label,
     kind: step.kind,
     ...(step.url ? { url: step.url } : {}),
-    ...(title ? { chatTitle: title } : {}),
+    ...(step.navigation ? { navigation: true } : {}),
+    ...(title && !isBlockMarkerTitle(title) ? { chatTitle: title } : {}),
   };
 }
 

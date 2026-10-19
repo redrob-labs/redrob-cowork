@@ -5,8 +5,11 @@ import {
   getAssistantRenderGroups,
   getMessageCompleted,
   getMessageCreated,
+  isWebResearchGroup,
+  liveActivityOf,
   splitTurnAtAnswer,
 } from "../src/components/chat/utils";
+import { continuesAggregate } from "../src/lib/tool-aggregate";
 
 function bashPart(id: string): DynamicToolUIPart {
   return {
@@ -98,7 +101,7 @@ describe("splitTurnAtAnswer", () => {
         bashPart("c1"),
         textPart("Let me also check something."),
         bashPart("c2"),
-        textPart("All done — here is the summary."),
+        textPart("All done - here is the summary."),
       ],
     };
 
@@ -109,7 +112,7 @@ describe("splitTurnAtAnswer", () => {
     expect(split?.answer.id).toBe("msg-1");
     expect(split?.answer.parts).toHaveLength(1);
     const answerPart = split?.answer.parts[0];
-    expect(answerPart?.type === "text" && answerPart.text).toBe("All done — here is the summary.");
+    expect(answerPart?.type === "text" && answerPart.text).toBe("All done - here is the summary.");
   });
 
   test("returns null for a pure prose message", () => {
@@ -151,5 +154,45 @@ describe("message timestamps", () => {
       parts: [textPart("hi")],
     };
     expect(getMessageCompleted(message)).toBeNull();
+  });
+});
+
+describe("liveActivityOf", () => {
+  test("collects every tool call and the shown reasoning; null while there is none", () => {
+    const empty: UIMessage["parts"][number] = { type: "reasoning", text: "", state: "streaming" };
+    const messages: UIMessage[] = [
+      { id: "a1", role: "assistant", parts: [reasoningPart("Looking."), bashPart("c1")] },
+      { id: "a2", role: "assistant", parts: [empty, textPart("Done.")] },
+    ];
+    expect(liveActivityOf(messages, true)).toEqual({ parts: [bashPart("c1")], reasoning: "Looking." });
+    expect(liveActivityOf(messages, false)).toEqual({ parts: [bashPart("c1")], reasoning: "" });
+    // A bare reasoning part (how thinking starts streaming) puts up no row.
+    expect(liveActivityOf([{ id: "a3", role: "assistant", parts: [empty] }], true)).toBeNull();
+  });
+});
+
+describe("web research groups", () => {
+  const web = (toolName: string, id: string): DynamicToolUIPart =>
+    ({ type: "dynamic-tool", toolName, toolCallId: id, state: "output-available", input: { query: "q", url: "https://example.com" }, output: "" }) as unknown as DynamicToolUIPart;
+
+  test("web calls fold into one group only in the Cowork frame, which reads it as web research", () => {
+    const parts = [web("websearch", "w1"), web("webfetch", "w2")];
+    const folded = getAssistantRenderGroups(parts, true, true);
+    expect(folded).toHaveLength(1);
+    expect(folded[0] && isWebResearchGroup(folded[0])).toBe(true);
+    // The bare surface keeps one row per call (each with its own sources popover).
+    expect(getAssistantRenderGroups(parts, true).map((group) => group.kind)).toEqual(["tool", "tool"]);
+    expect(isWebResearchGroup({ kind: "tool-aggregate", parts: [web("websearch", "w3"), bashPart("c1")] })).toBe(false);
+    expect(isWebResearchGroup({ kind: "tool", part: bashPart("c2") })).toBe(false);
+    expect(isWebResearchGroup({ kind: "text", text: "hello" })).toBe(false);
+  });
+
+  test("in the Cowork frame web research and file edits keep their own aggregates", () => {
+    const groups = getAssistantRenderGroups([bashPart("c1"), web("websearch", "w1"), web("webfetch", "w2"), editPart("c2", "a.md"), editPart("c3", "b.md")], true, true);
+    expect(groups.map((group) => (group.kind === "tool-aggregate" ? group.parts.map((part) => part.toolCallId) : group.kind))).toEqual([["c1"], ["w1", "w2"], ["c2", "c3"]]);
+    expect(groups[1] && isWebResearchGroup(groups[1])).toBe(true);
+    // The bare surface keeps commands and edits in one aggregate (develop behaviour).
+    expect(continuesAggregate(bashPart("c1"), editPart("c2", "a.md"))).toBe(true);
+    expect(continuesAggregate(bashPart("c1"), editPart("c2", "a.md"), true)).toBe(false);
   });
 });

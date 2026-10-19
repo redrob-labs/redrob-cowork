@@ -53,6 +53,34 @@ export function modeFor(chats: Record<string, ChatSettings>, key: string, prefer
   return chats[key]?.mode ?? preference;
 }
 
+/**
+ * Auto-pick Plan mode for a complex request. A prompt reads as complex when it is long,
+ * or it asks for the kind of multi-step work a plan-then-execute flow serves best - research,
+ * analysis, a report/document deliverable, a comparison, or an explicit "plan"/"step by step".
+ * Deliberately conservative (a short, simple ask stays in Run) and ONE-WAY: it only upgrades Run
+ * to Plan, never the reverse, and a user who explicitly chose Plan or Run is respected - the
+ * caller passes the resolved mode and only an unmodified "run" is eligible for the upgrade.
+ */
+const COMPLEX_PROMPT = /\b(deep research|research|analy[sz]e|analysis|compare|comparison|evaluate|assess|predict|forecast|strategy|plan|roadmap|step[- ]by[- ]step|report|write[- ]?up|draft|proposal|design|architect|investigate|deep think)\b/i;
+const COMPLEX_PROMPT_MIN_LEN = 180; // long free-form asks tend to need a plan even without a keyword
+
+/** Whether a prompt reads as complex enough to plan first: long, or naming a planning-type task. */
+export function isComplexPrompt(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length >= COMPLEX_PROMPT_MIN_LEN) return true;
+  return COMPLEX_PROMPT.test(trimmed);
+}
+
+/**
+ * The mode a prompt actually runs in: the chosen mode, upgraded Run -> Plan when the prompt looks
+ * complex. Only "run" is eligible (an explicit "plan" stays plan); keeps the manual toggle intact.
+ * `isPlanRun` marks a plan being RUN (thread-logic isPlanRunPrompt): never upgraded, since its
+ * prompt carries the whole plan (long, and says "plan") and upgrading it would loop plan -> plan.
+ */
+export function effectiveCoworkMode(mode: ChatMode, text: string, isPlanRun = false): ChatMode {
+  return mode === "run" && !isPlanRun && isComplexPrompt(text) ? "plan" : mode;
+}
+
 /** "This project" only exists inside a project; elsewhere it reads as All my work. */
 export function memoryFor(chats: Record<string, ChatSettings>, key: string, inProject: boolean): ChatMemory {
   const memory = chats[key]?.memory ?? (inProject ? "project" : "all");

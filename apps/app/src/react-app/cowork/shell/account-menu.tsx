@@ -2,8 +2,9 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "lucide-react";
 import { Menu, icons, type MenuItem } from "@redrob-labs/ui";
+
+import { SecureConnectionAvatar } from "../../../components/ui/secure-connection-avatar";
 
 import { t } from "../../../i18n";
 import { recheckRedrobKeyStatus } from "../../domains/billing/redrob-pay-sheet";
@@ -99,13 +100,15 @@ export function AccountLabel(props: { connected: boolean | null; link?: RedrobKe
   const title = connected ? t("cowork.account_name") : t("cowork.account_login");
   return (
     <span className="cowork-account__label">
-      {/*
-        Round 32: the avatar is always a neutral person glyph -- there is no personal
-        account, so a brand mark here read as "this is you". The empty-profile icon
-        reads correctly as a placeholder whether or not a Redrob key is connected.
-      */}
       <span className="cowork-account__avatar-placeholder" aria-hidden="true">
-        <User size={16} strokeWidth={2} />
+        {/*
+          The animated globe avatar fills the 32x32 circular placeholder; the wrapper's
+          border-radius and overflow clip it to a circle on var(--surface-sunken). It is not a
+          personal photo, since there is no personal account. It falls back to the neutral User
+          glyph only when custom elements are unsupported or fail to load, and it keeps animating
+          under reduced motion as a deliberate product exception (see SecureConnectionAvatar).
+        */}
+        <SecureConnectionAvatar label={title} />
       </span>
       <span className="cowork-account__text">
         <b>{title}</b>

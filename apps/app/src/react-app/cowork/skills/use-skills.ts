@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 
 import { t } from "../../../i18n";
@@ -12,6 +13,7 @@ export function invalidateSkills(queryClient: Pick<QueryClient, "invalidateQueri
   }
 }
 
+/** What the add and remove helpers need: the skill service, the cache to refresh, and the toast. */
 export type SkillActionDeps = {
   skills: Pick<CoworkServices["skills"], "install" | "remove">;
   queryClient: Pick<QueryClient, "invalidateQueries">;
@@ -43,4 +45,47 @@ export async function removeSkill(deps: SkillActionDeps, name: string): Promise<
     deps.showToast(t("cowork.skill_remove_failed"), t("cowork.settings_try_again"), "danger");
     return false;
   }
+}
+
+/** A copy of `pending` with `name` added or removed. */
+function togglePending(pending: ReadonlySet<string>, name: string, on: boolean): ReadonlySet<string> {
+  const next = new Set(pending);
+  if (on) next.add(name);
+  else next.delete(name);
+  return next;
+}
+
+/**
+ * Single Add requests on a list page. Each name stays pending until its own request settles,
+ * so overlapping adds finish in any order without clearing one another.
+ */
+export function usePendingAdds(deps: SkillActionDeps) {
+  const [pending, setPending] = useState<ReadonlySet<string>>(() => new Set());
+  const add = (name: string) => {
+    if (pending.has(name)) return;
+    setPending((current) => togglePending(current, name, true));
+    void installSkill(deps, name).finally(() => setPending((current) => togglePending(current, name, false)));
+  };
+  return { pending, add };
+}
+
+/**
+ * A workflow's "Add all". Adds each name in turn, carries on past a failure, refreshes the
+ * lists once and says what happened in one toast. Returns how many were added.
+ */
+export async function installSkills(deps: SkillActionDeps, names: readonly string[]): Promise<{ added: number; failed: number }> {
+  let added = 0;
+  let failed = 0;
+  for (const name of names) {
+    try {
+      await deps.skills.install(name);
+      added += 1;
+    } catch {
+      failed += 1;
+    }
+  }
+  invalidateSkills(deps.queryClient, deps.scope);
+  if (failed === 0) deps.showToast(t("cowork.skills_workflow_added", { count: added }));
+  else deps.showToast(t("cowork.skills_workflow_add_partial", { added, total: names.length }), t("cowork.settings_try_again"), "danger");
+  return { added, failed };
 }

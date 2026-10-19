@@ -3,7 +3,6 @@ import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } fro
 import type { UIMessage } from "ai";
 import { useQuery } from "@tanstack/react-query";
 import type { SessionStatus } from "@redrob-labs/sdk/v2/client";
-import { Check, Minimize2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { parseFanOutCommand, type FanOutCommand } from "@/react-app/domains/session/model-fanout";
 import type { VariantRun } from "@/react-app/domains/session/variant-run";
@@ -30,7 +29,6 @@ import type {
   PendingPermission,
   PendingQuestion,
   SkillCard,
-  TodoItem,
 } from "@/app/types";
 import {
   publishInspectorSlice,
@@ -50,7 +48,12 @@ import { PaperGrainGradient } from "@redrob/ui/react";
 import { useShellConfig } from "@/react-app/shell/shell-config";
 import { useReactRenderWatchdog } from "@/react-app/shell/react-render-watchdog";
 import { SessionDebugPanel } from "./debug-panel";
-import { deriveRenderedSessionMessages, resolveRenderedSessionSnapshot } from "./session-render-state";
+import { deriveRenderedSessionMessages, mergedSessionMessages, resolveRenderedSessionSnapshot } from "./session-render-state";
+import { coworkQuestionState, EMPTY_QUESTION_STATE, sameQuestionState, type CoworkQuestionState } from "@/react-app/cowork/thread/question-state";
+import { planRunActivities, samePlanActivities, type PlanRunActivity } from "@/react-app/cowork/thread/plan-progress";
+
+/** Stable empty plan-activity map, so the thread context keeps its identity outside the frame. */
+const EMPTY_PLAN_ACTIVITIES: ReadonlyMap<string, PlanRunActivity> = new Map();
 import { useLocal } from "@/react-app/kernel/local-provider";
 import { resolveAttachmentFileMetadata } from "@/react-app/domains/session/sync/attachment-file-part";
 import { deriveSessionRenderModel } from "@/react-app/domains/session/sync/transition-controller";
@@ -61,6 +64,7 @@ import { useSessionFindStore } from "./find-store";
 import { getSessionActivityStatusLabel, useSessionActivityStore, type SessionActivityStatus } from "@/react-app/domains/session/status/session-activity-store";
 import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permission-approval-modal";
 import { CoworkThreadContext, textDraft, type CoworkThread } from "@/react-app/cowork/thread/cowork-thread-context";
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
 import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
@@ -95,6 +99,9 @@ import {
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
+import { latestLiveDraft, useLiveDraftStore } from "@/react-app/cowork/panel/live-draft";
+import { useFrameStore } from "@/react-app/cowork/store/frame-store";
+import { getSidePanelSessionKey } from "@/react-app/domains/session/panel/side-panel-session";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
@@ -350,7 +357,6 @@ export type SessionSurfaceProps = {
   searchFiles: (query: string) => Promise<string[]>;
   isRemoteWorkspace: boolean;
   isSandboxWorkspace: boolean;
-  todos?: TodoItem[];
   activePermission?: PendingPermission | null;
   permissionReplyBusy?: boolean;
   respondPermission?: (requestID: string, reply: "once" | "always" | "reject") => void;
@@ -480,63 +486,6 @@ function AssistantWaitingCard({ label = t("session.assistant_thinking") }: { lab
         </div>
         <span>{label}</span>
       </div>
-    </div>
-  );
-}
-
-function TodoPanel(props: { todos: TodoItem[] }) {
-  const [expanded, setExpanded] = useState(false);
-  const todos = props.todos.filter((todo) => todo.content.trim());
-  const completedTodos = todos.filter((todo) => todo.status === "completed").length;
-  const progressLabel = t("session.todo_progress_label");
-  const label = expanded ? progressLabel : `${progressLabel} · ${completedTodos}/${todos.length}`;
-
-  if (todos.length === 0) return null;
-
-  return (
-    <div className="overflow-hidden border-b border-dls-border bg-transparent">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between px-4 py-3 text-xs text-subtle-foreground transition-colors hover:bg-muted/50"
-          onClick={() => setExpanded((current) => !current)}
-        >
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-muted-foreground">{label}</span>
-          </div>
-          <Minimize2 size={12} className={`text-disabled-foreground transition-transform ${expanded ? "" : "rotate-180"}`} />
-        </button>
-        {expanded ? (
-          <div className="max-h-60 space-y-2.5 overflow-auto border-t border-dls-border px-4 pb-3">
-            {todos.map((todo, index) => {
-              const done = todo.status === "completed";
-              const cancelled = todo.status === "cancelled";
-              const active = todo.status === "in_progress";
-              return (
-                <div key={todo.id} className="flex items-start gap-2.5 pt-2.5 first:pt-2.5">
-                  <div className="flex items-center gap-1.5 pt-0.5">
-                    <div
-                      className={`flex size-4.5 items-center justify-center rounded-full border ${
-                        done
-                          ? "border-success-muted bg-success-soft text-success-ink"
-                          : active
-                            ? "border-warning-muted bg-warning-soft text-warning-ink"
-                            : cancelled
-                              ? "border-border bg-muted text-disabled-foreground"
-                              : "border-border bg-background text-disabled-foreground"
-                      }`}
-                    >
-                      {done ? <Check size={10} /> : active ? <span className="size-1.5 rounded-full bg-warning" /> : null}
-                    </div>
-                  </div>
-                  <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-subtle-foreground line-through" : "text-foreground"}`}>
-                    <span className="mr-1.5 text-subtle-foreground">{index + 1}.</span>
-                    {todo.content}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
     </div>
   );
 }
@@ -887,10 +836,22 @@ export function SessionSurface(props: SessionSurfaceProps) {
     currentSnapshot,
     cachedRendered: rendered,
   });
+  // Inside the Cowork frame, synthetic plan-run / question-answer sends are hidden from the
+  // rendered transcript (the engine still gets them). Outside the frame the transcript is bare.
+  const inCoworkFrame = useInCoworkFrame();
   const revertMessageId = snapshot?.session.revert?.messageID ?? null;
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
   const chatStreaming = sending || liveStatus.type === "busy" || liveStatus.type === "retry";
+  // Whether this session has been working at any point while this surface was mounted. A plan
+  // auto-runs only in a chat that was live here (not one reopened from history); a plan block
+  // renders only once it is complete, often in the same moment the run goes idle, so the plan
+  // itself cannot reliably see the busy state. A render-time latch: it flips in the very render
+  // where streaming starts, so no extra render or state is needed; a new session resets it.
+  const wentBusyRef = useRef({ sessionId: props.sessionId, busy: false });
+  if (wentBusyRef.current.sessionId !== props.sessionId) wentBusyRef.current = { sessionId: props.sessionId, busy: false };
+  if (chatStreaming) wentBusyRef.current.busy = true;
+  const sawBusyHere = wentBusyRef.current.busy;
 
   useEffect(() => {
     if (!chatStreaming) setSteering(false);
@@ -915,15 +876,52 @@ export function SessionSurface(props: SessionSurfaceProps) {
     setEvalMarkdownMessages(EMPTY_TRANSCRIPT);
   }, [props.sessionId]);
 
+  // The snapshot + live merge runs once per update; the render, the questions and the plans share it.
+  const mergedMessages = useMemo(() => mergedSessionMessages({ transcriptState, snapshot }), [snapshot, transcriptState]);
   const baseRenderedMessages = useMemo(
-    () => deriveRenderedSessionMessages({ transcriptState, snapshot }),
-    [snapshot, transcriptState],
+    () => deriveRenderedSessionMessages({ messages: mergedMessages, revertMessageId, inCoworkFrame }),
+    [mergedMessages, revertMessageId, inCoworkFrame],
   );
+  // Plan's questions read against the RAW transcript, where the hidden question-answer sends
+  // still are, so "answered" means the person actually replied.
+  const coworkQuestionsRef = useRef<CoworkQuestionState>(EMPTY_QUESTION_STATE);
+  const coworkQuestions = useMemo(() => {
+    const next = inCoworkFrame ? coworkQuestionState(mergedMessages) : EMPTY_QUESTION_STATE;
+    // Keep the same object while nothing changed, so the thread context (and every message under
+    // it) does not re-render on each streamed token.
+    if (sameQuestionState(coworkQuestionsRef.current, next)) return coworkQuestionsRef.current;
+    coworkQuestionsRef.current = next;
+    return next;
+  }, [mergedMessages, inCoworkFrame]);
+  // How far each plan's run has got (the plan's live checklist), from the same raw transcript.
+  // Kept as the same object while nothing it reads changed, like the questions.
+  const coworkPlansRef = useRef<ReadonlyMap<string, PlanRunActivity>>(EMPTY_PLAN_ACTIVITIES);
+  const coworkPlans = useMemo(() => {
+    const next = inCoworkFrame ? planRunActivities(mergedMessages, chatStreaming) : EMPTY_PLAN_ACTIVITIES;
+    if (samePlanActivities(coworkPlansRef.current, next)) return coworkPlansRef.current;
+    coworkPlansRef.current = next;
+    return next;
+  }, [mergedMessages, inCoworkFrame, chatStreaming]);
   const renderedMessages = useMemo(() => {
     if (evalMarkdownMessages.length === 0) return baseRenderedMessages;
 
     return [...baseRenderedMessages, ...evalMarkdownMessages];
   }, [baseRenderedMessages, evalMarkdownMessages]);
+  // Hand the deliverable being written to the side panel, live. A new write in a
+  // RUNNING turn publishes its draft and opens the panel on Artifacts; an already-published draft
+  // keeps updating after the run ends so its "settled" flag lands. Reopening an old chat
+  // publishes nothing (it is not running and nothing was published for it).
+  const liveDraft = useMemo(() => (inCoworkFrame ? latestLiveDraft(renderedMessages) : null), [inCoworkFrame, renderedMessages]);
+  useEffect(() => {
+    if (!liveDraft) return;
+    const sessionKey = getSidePanelSessionKey(props.sessionId);
+    const store = useLiveDraftStore.getState();
+    const known = store.drafts[sessionKey]?.callId === liveDraft.callId;
+    if (!chatStreaming && !known) return;
+    if (store.done[sessionKey]?.includes(liveDraft.callId)) return;
+    store.publish(sessionKey, liveDraft);
+    if (!known) useFrameStore.getState().openPanel("artifacts");
+  }, [chatStreaming, liveDraft, props.sessionId]);
   const seedMarkdownPrimitiveControlAction = useMemo<RedrobControlAction | null>(() => {
     if (!import.meta.env.DEV) return null;
 
@@ -1978,7 +1976,10 @@ export function SessionSurface(props: SessionSurfaceProps) {
     sendText: async (text) => {
       await sendDraft(textDraft(text));
     },
-  }), [chatStreaming, props.sessionId, sendDraft]);
+    questions: coworkQuestions,
+    plans: coworkPlans,
+    liveHere: sawBusyHere,
+  }), [chatStreaming, coworkPlans, coworkQuestions, props.sessionId, sawBusyHere, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">
@@ -2066,8 +2067,13 @@ export function SessionSurface(props: SessionSurfaceProps) {
                   </div>
                 )}
               </div>
-            ) : renderedMessages.length === 0 && effectiveActivityStatus !== "idle" ? (
+            ) : renderedMessages.length === 0 && effectiveActivityStatus !== "idle" && !inCoworkFrame ? (
               <div className="px-6 py-12">
+                {/* This is the PaperGrainGradient orb ("gradient circle" loader). In the
+                    Cowork frame it painted for one frame right after send - before any message
+                    rendered - as a blink next to the globe CoworkRunStatus. The Cowork frame has
+                    its own single loader (CoworkRunStatus in MessageList), so suppress this orb
+                    there; the bare surface keeps it. */}
                 <AssistantWaitingCard label={getSessionActivityStatusLabel(effectiveActivityStatus)} />
               </div>
             ) : renderedMessages.length === 0 && snapshot && snapshot.messages.length === 0 && error ? (
@@ -2224,9 +2230,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
         isRemoteWorkspace={props.isRemoteWorkspace}
           isSandboxWorkspace={props.isSandboxWorkspace}
           onUploadInboxFiles={props.onUploadInboxFiles ?? handleUploadInboxFiles}
-          compactTopSpacing={Boolean(props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0)}
+          compactTopSpacing={Boolean(props.activeQuestion || props.activePermission || queuedItems.length > 0)}
           topAccessory={
-            props.activeQuestion || (props.todos ?? []).some((todo) => todo.content.trim()) || props.activePermission || queuedItems.length > 0 ? (
+            props.activeQuestion || props.activePermission || queuedItems.length > 0 ? (
               <div>
                 {queuedItems.length > 0 ? (
                   <QueuedMessagesPanel
@@ -2248,8 +2254,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
                       }
                     }}
                   />
-                ) : (props.todos ?? []).some((todo) => todo.content.trim()) ? (
-                  <TodoPanel todos={props.todos ?? []} />
                 ) : null}
                 {props.activePermission ? (
                   <PermissionApprovalPanel

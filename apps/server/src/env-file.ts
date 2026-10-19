@@ -39,6 +39,8 @@ const PERSISTABLE_INTERNAL_KEYS = new Set([
   "REDROB_MODELS_API_KEY",
   "REDROB_INFERENCE_BASE_URL",
   "REDROB_MODELS_BASE_URL",
+  // Redrob Chat share endpoint override (redrob-chat-share.ts).
+  "REDROB_CHAT_API_URL",
 ]);
 
 export type EnvRecord = {

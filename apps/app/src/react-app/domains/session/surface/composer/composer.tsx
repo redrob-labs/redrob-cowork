@@ -109,14 +109,14 @@ type ComposerProps = {
   /** Render inline in a page (new-task hero): no sticky dock chrome or inner max-width, aligning with sibling content. */
   flush?: boolean;
   /**
-   * Overrides the editor placeholder. Round 35, item 4: the new-chat hero passes
+   * Overrides the editor placeholder. The new-chat hero passes
    * its rotating starter hint here so the suggestion lives INSIDE the input
    * instead of as a separate sub-line. Falls back to the frame/default
    * placeholder when unset.
    */
   placeholderOverride?: string;
   /**
-   * Round 36 (item 3): when true the editor starts at a two-line min-height
+   * When true the editor starts at a two-line min-height
    * (`min-h-[60px]`) instead of the one-line default. The new-chat hero sets it
    * so the hero composer is two lines by default; the in-chat composer leaves it
    * unset and stays one line. Both still grow to the same max height.
@@ -1102,7 +1102,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         previously a read-only chip on the model control and could only be CHANGED by clicking a
         model and walking into a submenu, which is why the interaction was unreadable.
         `EffortSelect` renders nothing when the selected model publishes no levels.
-        Round 37 (item 9): Redrob Auto routes per task and has no user-facing effort level,
+        Redrob Auto routes per task and has no user-facing effort level,
         so hide the Effort selector entirely when Auto is the selected model.
       */}
       {props.selectedModel.modelID === REDROB_MODEL_ID ? null : (
@@ -1292,9 +1292,16 @@ export function ReactSessionComposer(props: ComposerProps) {
               }}
             />
 
-            {/* Action row - tools, attachments, model, and send stay on one line */}
-            <div className="mt-2 flex items-center gap-1.5">
-              <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            {/*
+              Action row - tools, attachments, model, and send stay on one line. It is a size container so
+              the model picker can drop its text when the column gets narrow (side panel open), instead of
+              the right-hand cluster overflowing back across the attach button.
+            */}
+            <div className="@container/composer-actions mt-2 flex w-full items-center gap-1.5">
+              {/* In the Cowork frame this group holds only fixed icon buttons: it takes its own width and
+                  never grows, so free space goes to the right cluster and the model name truncates
+                  instead of collapsing to nothing (flex-1 here let it claim the space). */}
+              <div className={`flex items-center gap-1.5 ${inCoworkFrame ? "flex-none" : "min-w-0 flex-1"}`}>
                 <input
                   ref={(element) => {
                     fileInput = element ?? undefined;
@@ -1316,7 +1323,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                     if (target instanceof Element && target.closest("button")) event.preventDefault();
                   }}
                 >
-                  {/* Round 37 (item 9): the "+" tools button (agents/commands/skills/
+                  {/* The "+" tools button (agents/commands/skills/
                      plugins/connections) is hidden everywhere. @-mention and slash
                      access is unaffected -- it still works by typing "@"/"/" in the
                      editor. The menu markup below stays but is no longer triggerable. */}
@@ -1583,9 +1590,11 @@ export function ReactSessionComposer(props: ComposerProps) {
                 - Idle: send arrow.
                 - Busy: stop icon in that same slot (Enter still queues;
                   Cmd/Ctrl+Enter still steers).
-                Inside the Cowork frame the mic, Plan or Run and the model sit before it.
+                Inside the Cowork frame the mic and the model sit before it.
+                The cluster may shrink (min-w-0): only the model label gives way; the icon buttons keep
+                fixed slots.
               */}
-              <div className="ml-auto flex shrink-0 items-center gap-1.5">
+              <div className="ml-auto flex min-w-0 items-center gap-1.5">
                 {inCoworkFrame ? (
                   <CoworkComposerTools chatKey={coworkChatKey} draft={props.draft} onDraftChange={props.onDraftChange}>
                     {modelControls}
@@ -1642,7 +1651,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         */}
         {inCoworkFrame ? <CoworkComposerStatus chatKey={coworkChatKey} showValues={Boolean(props.flush)} /> : null}
         {inCoworkFrame && !props.flush ? (
-          // Round 35, item 3: a quiet disclaimer under the IN-CHAT composer, matching the
+          // A quiet disclaimer under the in-chat composer, matching the
           // new-chat home. The hero (flush) renders its own, so this is in-chat only.
           <p className="cowork-chat__disclaimer">{t("hero.disclaimer")}</p>
         ) : null}

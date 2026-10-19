@@ -2,7 +2,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePanelRef } from "react-resizable-panels";
-import { FileText, Globe, Mic2, MoreHorizontal, PanelRight, TextSearch, Zap } from "lucide-react";
+import { FileText, Globe, Mic2, MoreHorizontal, PanelRight, Share2, TextSearch, Zap } from "lucide-react";
 
 import { resolveExtensionIconSrc } from "@/react-app/design-system/extension-icon-src";
 import { t } from "../../../../i18n";
@@ -16,7 +16,6 @@ import type {
   PendingPermission,
   PendingQuestion,
   ProviderListItem,
-  TodoItem,
   WorkspaceConnectionState,
   WorkspaceSessionGroup,
 } from "../../../../app/types";
@@ -50,6 +49,7 @@ import { ConfirmModal } from "../../../design-system/modals/confirm-modal";
 import { usePlatform } from "../../../kernel/platform";
 import ProviderAuthModal, { type ProviderAuthModalProps } from "../../connections/provider-auth/provider-auth-modal";
 import { RenameSessionModal } from "../modals/rename-session-modal";
+import { RedrobChatShareDialog, useRedrobChatShareStore } from "../share/redrob-chat-share-dialog";
 import { AppSidebar } from "../sidebar/app-sidebar";
 import { useSessionManagementStore } from "../sidebar/session-management-store";
 import { SessionSurface, type SessionSurfaceProps } from "../surface/session-surface";
@@ -248,7 +248,6 @@ export type SessionPageProps = {
   sidebar: SessionPageSidebarProps;
   surface?: SessionPageSurfaceProps | null;
   history?: SessionPageHistoryControls | null;
-  todos: TodoItem[];
   sessionLoadingById: (sessionId: string | null) => boolean;
   shareWorkspaceModal?: ShareWorkspaceModalProps | null;
   providerAuthModal?: ProviderAuthModalProps | null;
@@ -428,6 +427,7 @@ export function SessionPage(props: SessionPageProps) {
     workspaceCount: props.workspaces.length,
   });
 
+  const redrobChatShareRequest = useRedrobChatShareStore((state) => state.request);
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameTitle, setRenameTitle] = useState("");
   const [renameBusy, setRenameBusy] = useState(false);
@@ -1329,6 +1329,19 @@ export function SessionPage(props: SessionPageProps) {
                     <DropdownMenuItem onClick={openVoiceRailPane}>
                       <Mic2 className="size-4" />{t("voice.mode")}</DropdownMenuItem>
                   ) : null}
+                  {props.selectedSessionId ? (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (!props.selectedSessionId) return;
+                        useRedrobChatShareStore.getState().open({
+                          kind: "transcript",
+                          workspaceId: props.selectedWorkspaceId,
+                          sessionId: props.selectedSessionId,
+                        });
+                      }}
+                    >
+                      <Share2 className="size-4" />{t("redrob_chat_share.menu")}</DropdownMenuItem>
+                  ) : null}
                 </DropdownMenuContent>
               </DropdownMenu>
               {props.developerMode ? (
@@ -1455,7 +1468,6 @@ export function SessionPage(props: SessionPageProps) {
                         isControlTarget={activeWorkbenchPane === "primary"}
                         opencodeBaseUrl={reactSessionBaseUrl}
                         redrobToken={reactSessionToken}
-                        todos={props.todos}
                         activePermission={props.activePermission}
                         permissionReplyBusy={props.permissionReplyBusy}
                         respondPermission={props.respondPermission}
@@ -1486,7 +1498,6 @@ export function SessionPage(props: SessionPageProps) {
                             isControlTarget={activeWorkbenchPane === "secondary"}
                             opencodeBaseUrl={reactSessionBaseUrl}
                             redrobToken={reactSessionToken}
-                            todos={[]}
                             onOpenTarget={openTarget}
                           />
                         </ResizablePanel>
@@ -1641,7 +1652,12 @@ export function SessionPage(props: SessionPageProps) {
             </ResizablePanel>
               {sidePanelOpen && !isMobile ? (
               <>
-                <ResizableHandle className="hidden bg-transparent lg:flex" />
+                {/* A visible, grabbable seam at every width so the side panel can be resized
+                    (bounds: min 320px, max 70%, below). */}
+                <ResizableHandle
+                  withHandle
+                  className="w-1.5 bg-border/60 transition-colors hover:bg-primary/40 data-[resize-handle-active]:bg-primary/60 cursor-col-resize"
+                />
                 <ResizablePanel
                   panelRef={browserPanelRef}
                   defaultSize={`${activeSidePanel === "extensions" ? Math.max(browserPanelDefaultWidth, 480) : browserPanelDefaultWidth}px`}
@@ -1850,6 +1866,12 @@ export function SessionPage(props: SessionPageProps) {
       </Dialog>
 
       {props.shareWorkspaceModal ? <ShareWorkspaceModal {...props.shareWorkspaceModal} /> : null}
+
+      <RedrobChatShareDialog
+        client={props.redrobServerClient}
+        request={redrobChatShareRequest}
+        onClose={() => useRedrobChatShareStore.getState().close()}
+      />
 
 
     </div>

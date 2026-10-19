@@ -22,6 +22,8 @@ export type ArtifactItem = {
   messageIndex: number
   updatedAt?: number
   legacy_target: OpenTarget
+  /** True while a write-family tool call for this file is still in flight (set only with includeInFlightWrites). */
+  writing?: boolean
 }
 
 type ArtifactEntry = ArtifactItem & {
@@ -30,6 +32,13 @@ type ArtifactEntry = ArtifactItem & {
 
 type GetArtifactsOptions = {
   includeTargetFallbacks?: boolean
+  /** Also surface a provisional card (marked `writing`) for an in-flight write, so the "writing"
+   *  caret has a card to attach to before the write settles. Opt-in (Cowork card list only). */
+  includeInFlightWrites?: boolean
+  /** Collect only files a write-family tool (write, edit, apply_patch) produced. Drops
+   *  paths merely MENTIONED in prose, attachments, sources and reads, which made unopenable
+   *  cards for files that did not exist yet (e.g. a plan saying "Save as reports/x.md"). */
+  writtenOnly?: boolean
 }
 
 const WORKSPACES_PREFIX_PATTERN = /^workspaces\/[^/]+\//i;
@@ -117,6 +126,50 @@ function getFileExtension(filename: string) {
   return filename.split(".").pop()?.toLowerCase();
 }
 
+/** Words a title keeps in capitals (matched case-insensitively). */
+const TITLE_ACRONYMS = new Set([
+  "ai", "ml", "llm", "llms", "api", "apis", "gpu", "gpus", "cpu", "hbm", "euv", "tsmc", "us", "usa", "uk", "eu",
+  "un", "uae", "nato", "ceo", "cfo", "cto", "coo", "hr", "pr", "kpi", "kpis", "okr", "okrs", "roi", "ipo", "esg",
+  "seo", "ux", "ui", "vc", "b2b", "b2c", "saas", "faq", "pdf", "q1", "q2", "q3", "q4", "h1", "h2", "r&d", "gdp",
+]);
+
+/** Acronyms that also appear pluralised in file names ("evs", "suvs", "ceos"), shown "EVs". */
+const TITLE_PLURAL_ACRONYMS = new Set(["ev", "suv", "ceo", "cfo", "cto", "kpi", "okr", "gpu", "cpu", "api", "llm", "ipo", "vc"]);
+
+/** Short words a Title Case title keeps lowercase unless they open or close it. */
+const TITLE_MINOR_WORDS = new Set([
+  "a", "an", "the", "and", "but", "or", "nor", "for", "so", "yet", "of", "on", "in", "at", "to", "by", "up",
+  "as", "vs", "via", "per", "with", "from", "into",
+]);
+
+/** One word of a Title Case title: acronym, kept mixed case ("iPhone"), minor word, or capitalized. */
+function titleWord(word: string, first: boolean, last: boolean): string {
+  const lower = word.toLowerCase();
+  if (TITLE_ACRONYMS.has(lower)) return lower === "saas" ? "SaaS" : word.toUpperCase();
+  // A plural acronym keeps a lowercase "s" ("evs" -> "EVs", "llms" is listed already).
+  if (lower.length > 2 && lower.endsWith("s") && TITLE_PLURAL_ACRONYMS.has(lower.slice(0, -1))) return `${lower.slice(0, -1).toUpperCase()}s`;
+  // A word written with an inner capital ("OpenAI", "iPhone") is a name: keep it as written.
+  if (/[a-z][A-Z]/.test(word)) return word;
+  if (!first && !last && TITLE_MINOR_WORDS.has(lower)) return lower;
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+/**
+ * A human title for an artifact path: take the basename, drop its extension, turn `-`/`_` runs
+ * into spaces, and render in Title Case, acronym-aware,
+ * so `us-china-ai-race-2035.md` -> "US China AI Race 2035". Short connecting words stay lowercase inside the title ("Plan for the
+ * Launch"). An empty or extension-only name falls back to the raw basename.
+ */
+export function prettyArtifactTitle(path: string): string {
+  const basename = path.split(/[/\\]/).filter(Boolean).pop() ?? path;
+  const dot = basename.lastIndexOf(".");
+  const stem = dot > 0 ? basename.slice(0, dot) : basename;
+  const words = stem.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!words) return basename;
+  const list = words.split(" ");
+  return list.map((word, index) => titleWord(word, index === 0, index === list.length - 1)).join(" ");
+}
+
 export function getArtifactTypeLabel(type: ArtifactType) {
   switch (type) {
     case "website": return t("artifact.type_website");
@@ -146,6 +199,11 @@ function getArtifactName(path: string) {
   const segments = path.split(/[/\\]/);
   
   return segments[segments.length - 1] ?? path;
+}
+
+/** One file's identity across spellings ("./Reports\\Brief.md" = "reports/brief.md"), as the artifact list keys it. */
+export function artifactPathKey(path: string): string {
+  return normalizeArtifactPath(path).toLowerCase();
 }
 
 function normalizeArtifactPath(path: string) {
@@ -238,10 +296,13 @@ function getArtifactPathsFromText(text: string) {
   return paths;
 }
 
-function getArtifactPathsFromMessage(message: UIMessage) {
+function getArtifactPathsFromMessage(message: UIMessage, writtenOnly = false) {
   const paths: (string | undefined)[] = [];
 
   for (const part of message.parts) {
+    // writtenOnly: only settled write-family tool parts below count; everything else is skipped.
+    if (writtenOnly && part.type !== "dynamic-tool") continue;
+
     if (part.type === "text" && message.role === "assistant") {
       paths.push(...getArtifactPathsFromText(part.text));
       continue;
@@ -280,7 +341,7 @@ function getArtifactPathsFromMessage(message: UIMessage) {
 
     // Paper artifact strip covers every file "read, edited, or created".
     if (isReadToolPart(part)) {
-      paths.push(part.input.filePath);
+      if (!writtenOnly) paths.push(part.input.filePath);
       continue;
     }
     if (isApplyPatchToolPart(part)) {
@@ -327,11 +388,30 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
   let sequence = 0;
 
   messages.forEach((message, messageIndex) => {
-    for (const path of getArtifactPathsFromMessage(message)) {
+    for (const path of getArtifactPathsFromMessage(message, options.writtenOnly)) {
       addArtifact(artifacts, path, message.id, messageIndex, sequence, openTargets);
       sequence += 1;
     }
   });
+
+  // Also surface a provisional card for a write-family tool part that is still IN FLIGHT (input
+  // streaming or running). getArtifactPathsFromMessage only collects a path once its write settles,
+  // so without this a streaming write has no card to show the "writing" caret on. Opt-in, so only
+  // the Cowork card list surfaces in-flight writes; the Files strip keeps settled-only.
+  const inFlight = new Set<string>();
+  if (options.includeInFlightWrites) {
+    messages.forEach((message, messageIndex) => {
+      for (const part of message.parts) {
+        if (part.type !== "dynamic-tool") continue;
+        if (part.state === "output-available" || part.state === "output-error") continue;
+        for (const path of writeToolTargetPaths(part)) {
+          addArtifact(artifacts, path, message.id, messageIndex, sequence, openTargets);
+          inFlight.add(artifactPathKey(path));
+          sequence += 1;
+        }
+      }
+    });
+  }
 
   if (options.includeTargetFallbacks ?? true) {
     const fallbackMessageId = messages[messages.length - 1]?.id ?? "open-target";
@@ -341,6 +421,11 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
         sequence += 1;
       }
     }
+  }
+
+  for (const key of inFlight) {
+    const entry = artifacts.get(key);
+    if (entry) entry.writing = true;
   }
 
   return [...artifacts.values()].sort((left, right) => {
@@ -354,13 +439,44 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
   });
 }
 
+/**
+ * The file path(s) a write-family tool part targets, in ANY state (so an in-flight write still
+ * resolves its path). Reuses the house helpers so the set of write tools matches the artifact
+ * collector: write/edit carry `input.filePath`, apply_patch carries its paths inside `patchText`.
+ * Returns [] for a non-write part.
+ */
+export function writeToolTargetPaths(part: UIMessage["parts"][number]): string[] {
+  // Narrow to a dynamic-tool part first: the house helpers (isWriteToolPart etc.) type their
+  // argument as ToolUIPart | DynamicToolUIPart, which is narrower than a UIMessage part.
+  if (part.type !== "dynamic-tool") return [];
+  if (isWriteToolPart(part) || isEditToolPart(part)) {
+    const filePath = part.input.filePath;
+    return typeof filePath === "string" && filePath.trim() ? [filePath.trim()] : [];
+  }
+  if (isApplyPatchToolPart(part)) {
+    return parseApplyPatchPaths(part.input.patchText).filter(Boolean);
+  }
+  return [];
+}
+
+/**
+ * The files a run of tool parts wrote (settled or still in flight), collected the way the in-chat
+ * artifact cards collect them, so a row can open the very target the panel lists.
+ */
+export function useToolPartArtifacts(parts: UIMessage["parts"]) {
+  const messages = React.useMemo((): UIMessage[] => [{ id: "tool-parts", role: "assistant", parts }], [parts]);
+  return useArtifacts(messages, { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true });
+}
+
 export function useArtifacts(messages: UIMessage[], options: GetArtifactsOptions = {}) {
   const { openTargets } = useOpenTargets();
   const includeTargetFallbacks = options.includeTargetFallbacks ?? false;
+  const includeInFlightWrites = options.includeInFlightWrites ?? false;
+  const writtenOnly = options.writtenOnly ?? false;
 
   return React.useMemo(
-    () => getArtifactsFromMessages(messages, openTargets, { includeTargetFallbacks }),
-    [includeTargetFallbacks, messages, openTargets],
+    () => getArtifactsFromMessages(messages, openTargets, { includeTargetFallbacks, includeInFlightWrites, writtenOnly }),
+    [includeInFlightWrites, includeTargetFallbacks, messages, openTargets, writtenOnly],
   );
 }
 

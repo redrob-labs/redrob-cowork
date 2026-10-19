@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useSyncExternalStore, type CSSProperties, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { useHref } from "react-router";
 import { AppShell, IconButton, ThemeSwitch, icons, type AppShellProps } from "@redrob-labs/ui";
 import { TextSearch } from "lucide-react";
@@ -8,7 +8,7 @@ import { getInitialThemeMode, setThemeMode, subscribeToTheme } from "../../../ap
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
 import { CoworkSidePanel } from "../panel/cowork-side-panel";
-import { useUiStateStore } from "../../shell/ui-state-store";
+import { MAX_WORKSPACE_RIGHT_SIDEBAR_WIDTH, MIN_WORKSPACE_RIGHT_SIDEBAR_WIDTH, useUiStateStore } from "../../shell/ui-state-store";
 import { useFrameStore } from "../store/frame-store";
 import { useSessionFindStore } from "../../domains/session/surface/find-store";
 import { AccountMenu } from "./account-menu";
@@ -50,11 +50,44 @@ function keepSkipLinkOnScreen(event: MouseEvent<HTMLDivElement>) {
   document.getElementById("rr-shell-main")?.focus();
 }
 
+/** Width change per arrow-key press on the panel's resize grip (px). */
+const PANEL_RESIZE_STEP = 16;
+
+/**
+ * Drags a vertical resize grip. Pointer capture keeps the drag alive when the pointer crosses the
+ * native Electron browser view, and `pointercancel` ends it like `pointerup`, so a drag never sticks.
+ * `direction` is 1 when dragging right widens (left sidebar) and -1 when it narrows (right panel).
+ */
+function startDrag(
+  event: ReactPointerEvent<HTMLDivElement>,
+  drag: { startWidth: number; direction: 1 | -1; set: (width: number) => void; setResizing: (resizing: boolean) => void },
+) {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  const grip = event.currentTarget;
+  const pointerId = event.pointerId;
+  const startX = event.clientX;
+  grip.setPointerCapture?.(pointerId);
+  drag.setResizing(true);
+  const onMove = (move: PointerEvent) => drag.set(drag.startWidth + drag.direction * (move.clientX - startX));
+  const onEnd = () => {
+    drag.setResizing(false);
+    if (grip.hasPointerCapture?.(pointerId)) grip.releasePointerCapture(pointerId);
+    grip.removeEventListener("pointermove", onMove);
+    grip.removeEventListener("pointerup", onEnd);
+    grip.removeEventListener("pointercancel", onEnd);
+  };
+  grip.addEventListener("pointermove", onMove);
+  grip.addEventListener("pointerup", onEnd);
+  grip.addEventListener("pointercancel", onEnd);
+}
+
 /** The side panel button says what pressing it does. */
 export function panelToggleLabel(open: boolean): string {
   return open ? t("cowork.panel_close") : t("cowork.panel_open");
 }
 
+/** The shell's root class list for its layout modifiers. */
 export function coworkShellClassName(fill: boolean, panelOpen: boolean, bareTop = false, headless = false): string {
   return ["cowork-shell", fill ? "cowork-shell--fill" : null, panelOpen ? "cowork-shell--panel" : null, bareTop ? "cowork-shell--bare-top" : null, headless ? "cowork-shell--headless" : null]
     .filter(Boolean)
@@ -71,7 +104,13 @@ export function CoworkShell(props: CoworkShellProps) {
   return <CoworkShellView {...props} panelOpen={panelOpen} onTogglePanel={togglePanel} />;
 }
 
-export type CoworkShellViewProps = CoworkShellProps & { panelOpen: boolean; onTogglePanel: () => void };
+/** `CoworkShell` inputs plus the panel state, so the view renders without the frame store. */
+export type CoworkShellViewProps = CoworkShellProps & {
+  /** Whether the side panel is open. */
+  panelOpen: boolean;
+  /** Opens or closes the side panel. */
+  onTogglePanel: () => void;
+};
 
 /**
  * `CoworkShell` with the panel state passed in. While the panel is open it sits to the right
@@ -92,29 +131,30 @@ export function CoworkShellView(props: CoworkShellViewProps) {
   // One sidebar state for every screen, so the title bar's toggle and Ctrl+B fold this menu too.
   const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUiStateStore((state) => state.setSidebarOpen);
-  // The open chat publishes its header here (round 7, item 6) so the title + Find sit on the shell's
-  // top row beside Invite and the side panel, instead of a second header row inside the chat column.
+  // The open chat publishes its header here so the title and Find sit on the shell's top row beside
+  // Invite and the side panel, instead of a second header row inside the chat column.
   const chatHeader = useFrameStore((state) => state.chatHeader);
-  // Round 8, items 5 + 7: the sidebar is draggable (width from the store, clamped 220-420) and the
-  // title-bar toggle fully hides it rather than leaving the DS 64px mini-rail.
+  // The sidebar is draggable (width from the store, clamped 220-420) and the title-bar toggle fully
+  // hides it rather than leaving the DS 64px mini-rail.
   const sideWidth = useUiStateStore((state) => state.workspaceLeftSidebarWidth);
   const setSideWidth = useUiStateStore((state) => state.setWorkspaceLeftSidebarWidth);
   const setSideResizing = useUiStateStore((state) => state.setWorkspaceLeftSidebarResizing);
   const sideResizing = useUiStateStore((state) => state.workspaceLeftSidebarResizing);
-  const startSideResize = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return;
+  // The right side panel is draggable too. Its width is the persisted right-sidebar width (clamped
+  // 320-960 in the store); the grip sits on its left edge and dragging LEFT widens it.
+  const panelWidth = useUiStateStore((state) => state.workspaceRightSidebarExpandedWidth);
+  const setPanelWidth = useUiStateStore((state) => state.setWorkspaceRightSidebarExpandedWidth);
+  const [panelResizing, setPanelResizing] = useState(false);
+  const startPanelResize = (event: ReactPointerEvent<HTMLDivElement>) =>
+    startDrag(event, { startWidth: panelWidth, direction: -1, set: setPanelWidth, setResizing: setPanelResizing });
+  const startSideResize = (event: ReactPointerEvent<HTMLDivElement>) =>
+    startDrag(event, { startWidth: sideWidth, direction: 1, set: setSideWidth, setResizing: setSideResizing });
+  // ArrowLeft widens the panel (its grip is on its left edge), ArrowRight narrows it.
+  const resizePanelByKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    const step = event.key === "ArrowLeft" ? PANEL_RESIZE_STEP : event.key === "ArrowRight" ? -PANEL_RESIZE_STEP : 0;
+    if (!step) return;
     event.preventDefault();
-    const startX = event.clientX;
-    const startWidth = sideWidth;
-    setSideResizing(true);
-    const onMove = (move: PointerEvent) => setSideWidth(startWidth + (move.clientX - startX));
-    const onUp = () => {
-      setSideResizing(false);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
+    setPanelWidth(panelWidth + step);
   };
   const shellClass = [
     coworkShellClassName(Boolean(props.fill), panelOpen, Boolean(props.bareTop), Boolean(props.headless)),
@@ -128,7 +168,7 @@ export function CoworkShellView(props: CoworkShellViewProps) {
       <div
         className={shellClass}
         onClickCapture={keepSkipLinkOnScreen}
-        style={{ "--app-side-width": `${sideWidth}px` } as CSSProperties}
+        style={{ "--app-side-width": `${sideWidth}px`, "--app-panel-width": `${panelWidth}px` } as CSSProperties}
       >
         {sidebarOpen ? (
           <div
@@ -192,9 +232,8 @@ export function CoworkShellView(props: CoworkShellViewProps) {
                   <TextSearch width={16} height={16} aria-hidden />
                 </IconButton>
               ) : null}
-              {/* Round 14, item C: the side-panel button belongs to a chat only. It is shown when a
-                  chat has published its header (chatHeader), and hidden on Trending AI, Skills,
-                  Projects and the other non-chat screens where there is no panel to open. */}
+              {/* The side-panel button belongs to a chat only: shown once a chat has published its
+                  header, hidden on Trending AI, Skills, Projects and the other non-chat screens. */}
               {chatHeader ? (
                 <IconButton
                   label={panelLabel}
@@ -210,7 +249,25 @@ export function CoworkShellView(props: CoworkShellViewProps) {
         >
           {props.children}
         </AppShell>
-        {panelOpen ? <CoworkSidePanel chatId={props.chatId ?? null} /> : null}
+        {panelOpen ? (
+          <>
+            {/* The grip that resizes the right panel, on its left edge; drag or arrow keys. */}
+            <div
+              className="cowork-panel__resizer"
+              role="separator"
+              tabIndex={0}
+              aria-orientation="vertical"
+              aria-label={t("cowork.resize_panel")}
+              aria-valuenow={panelWidth}
+              aria-valuemin={MIN_WORKSPACE_RIGHT_SIDEBAR_WIDTH}
+              aria-valuemax={MAX_WORKSPACE_RIGHT_SIDEBAR_WIDTH}
+              data-resizing={panelResizing ? "" : undefined}
+              onPointerDown={startPanelResize}
+              onKeyDown={resizePanelByKey}
+            />
+            <CoworkSidePanel chatId={props.chatId ?? null} />
+          </>
+        ) : null}
       </div>
     </CoworkFrameContext>
   );

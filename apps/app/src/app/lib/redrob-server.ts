@@ -2075,6 +2075,20 @@ export function createRedrobServerClient(options: { baseUrl: string; token?: str
         timeoutMs: timeouts.config,
       }),
 
+    // Share to Redrob Chat. The server reads the content and holds the Redrob Key; only the
+    // resulting link comes back. See apps/server/src/redrob-chat-share.ts.
+    shareToRedrobChat: (
+      workspaceId: string,
+      input:
+        | { kind: "transcript"; sessionId: string; visibility: "public" | "unlisted" | "private"; title?: string }
+        | { kind: "artifact"; path: string; visibility: "public" | "unlisted" | "private"; title?: string },
+    ) =>
+      requestJson<{ id: string; url: string }>(
+        baseUrl,
+        `/workspace/${encodeURIComponent(workspaceId)}/redrob-chat/share`,
+        { token, hostToken, method: "POST", body: input, timeoutMs: timeouts.config },
+      ),
+
     // User-level env vars (host-auth only - desktop shell is the sole caller).
     // See apps/server/src/env-file.ts and apps/app/pr/environment-variables.md.
     listUserEnvKeys: () =>

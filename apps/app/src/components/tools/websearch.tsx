@@ -16,12 +16,18 @@ import type { WebSearchToolPart } from "@/lib/build-in-tools"
 import { Tool } from "@/components/ui/tool"
 import { parseWebSearchResults } from "@/lib/websearch-results"
 import { t } from "@/i18n"
+import { WebResearchGroup } from "@/components/chat/web-research-group"
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 
 interface WebsearchToolProps {
   part: WebSearchToolPart
 }
 
 export function WebsearchTool({ part }: WebsearchToolProps) {
+  // Round 8b: in the Cowork thread a single search reads as the web research table too.
+  const inCoworkFrame = useInCoworkFrame()
+  if (inCoworkFrame) return <WebResearchGroup parts={[part]} />
+
   if (part.state === "output-error") {
     return <Tool toolPart={part} />
   }

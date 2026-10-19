@@ -1,4 +1,4 @@
-// Pending permissions, questions, and todos for the selected session:
+// Pending permissions and questions for the selected session:
 // query-cache subscriptions, snapshot seeding, and reply handlers.
 // Extracted verbatim from session-route.tsx (cluster had no readers of its
 // internals besides the JSX).
@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { unwrap } from "@/app/lib/opencode";
-import type { Client, PendingPermission, PendingQuestion, TodoItem } from "@/app/types";
+import type { Client, PendingPermission, PendingQuestion } from "@/app/types";
 import { t } from "@/i18n";
 import { getReactQueryClient } from "@/react-app/infra/query-client";
 import { useQueryCacheState } from "@/react-app/infra/query-cache-state";
@@ -16,12 +16,10 @@ import {
   questionKey,
   seedPermissionState,
   seedQuestionState,
-  todoKey,
 } from "./session-sync";
 
 const emptyPendingPermissions: PendingPermission[] = [];
 const emptyPendingQuestions: PendingQuestion[] = [];
-const emptyTodos: TodoItem[] = [];
 
 export type UseSessionInteractionsInput = {
   client: Client | null;
@@ -54,11 +52,6 @@ export function useSessionInteractions(input: UseSessionInteractionsInput) {
     questionQueryKey,
     emptyPendingQuestions,
   );
-  const todoQueryKey = useMemo(
-    () => (workspaceId && sessionId ? todoKey(workspaceId, sessionId) : null),
-    [sessionId, workspaceId],
-  );
-  const todos = useQueryCacheState<TodoItem[]>(todoQueryKey, emptyTodos);
 
   useEffect(() => {
     if (!client || !workspaceId || !sessionId) return;
@@ -195,6 +188,5 @@ export function useSessionInteractions(input: UseSessionInteractionsInput) {
     activeQuestion,
     questionReplyBusy,
     respondQuestion,
-    todos,
   };
 }

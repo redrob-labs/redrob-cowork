@@ -1,6 +1,8 @@
 import { createContext, use } from "react";
 
 import type { ComposerDraft } from "../../../app/types";
+import type { CoworkQuestionState } from "./question-state";
+import type { PlanRunActivity } from "./plan-progress";
 
 /**
  * What the thread's own controls need from the session they sit in: its id, whether it is
@@ -11,6 +13,12 @@ export type CoworkThread = {
   sessionId: string;
   busy: boolean;
   sendText(text: string): Promise<void>;
+  /** Which Plan questions were answered and which plans are held back. */
+  questions?: CoworkQuestionState;
+  /** How far each plan's run has got, by the plan message's id (see plan-progress.ts). */
+  plans?: ReadonlyMap<string, PlanRunActivity>;
+  /** The session was working at some point while this surface was mounted. */
+  liveHere?: boolean;
 };
 
 export const CoworkThreadContext = createContext<CoworkThread | null>(null);
