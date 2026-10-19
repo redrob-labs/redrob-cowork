@@ -150,17 +150,27 @@ function firstSentence(text: string): string {
   return text.trim().split(/(?<=[.!?。！？])\s+/u)[0]?.trim() ?? "";
 }
 
-/** Catalogue summary, or a compact description fallback when the catalogue has none. */
+/** Catalogue summary, or the description's first sentence in full when the catalogue has none. */
 export function skillBrief(row: { summary?: string; summaryKo?: string; description: string }, locale: string): string {
   const korean = locale.startsWith("ko");
   const summary = korean ? row.summaryKo ?? row.summary : row.summary;
   if (summary?.trim()) return summary.trim();
   const sentence = firstSentence(row.description).replace(/^Use when the user asks to\s+/i, "").replace(/^Use when\s+/i, "").trim();
   if (!sentence) return row.description.trim();
-  if (korean) return sentence.length > 40 ? `${sentence.slice(0, 40).trimEnd()}…` : sentence;
-  const normalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-  const words = normalized.split(/\s+/);
-  return words.length > 9 ? `${words.slice(0, 9).join(" ")}…` : normalized;
+  if (korean) return sentence;
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+}
+
+/** Sub-pixel tolerance so a shelf at its edge never keeps a chevron with nothing left to reveal. */
+const SHELF_EDGE_EPSILON = 2;
+
+/** Whether a horizontal shelf can scroll back or forward from its current position. */
+export function shelfEdges(scrollLeft: number, scrollWidth: number, clientWidth: number): { canPrev: boolean; canNext: boolean } {
+  const overflow = scrollWidth - clientWidth > SHELF_EDGE_EPSILON;
+  return {
+    canPrev: overflow && scrollLeft > SHELF_EDGE_EPSILON,
+    canNext: overflow && scrollLeft < scrollWidth - clientWidth - SHELF_EDGE_EPSILON,
+  };
 }
 
 const ORIGIN_ORDER: Record<SkillOrigin, number> = { team: 0, mine: 1, library: 2 };

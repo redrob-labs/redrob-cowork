@@ -6,14 +6,15 @@ import { MemoryRouter } from "react-router";
 import en from "../src/i18n/locales/en";
 import ko from "../src/i18n/locales/ko";
 import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
-import { isClamped, shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
+import { SkillView, shouldEscapeToList, type SkillViewProps } from "../src/react-app/cowork/skills/cowork-skill";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillIcon } from "../src/react-app/cowork/skills/skill-icon";
-import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
+import { SkillShelf, SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
   languageTagLabel,
   matchesFilters,
+  shelfEdges,
   shelvesOf,
   shouldRestoreListFocus,
   skillBrief,
@@ -79,16 +80,16 @@ describe("skills marketplace helpers", () => {
     expect(shelves[2]?.rows.map((item) => item.name)).toEqual(["a", "z"]);
   });
 
-  test("prefers localized titles and summaries with compact description fallbacks", () => {
+  test("prefers localized titles and summaries with full first-sentence fallbacks", () => {
     const display = { name: "slug", title: "English", titleKo: "한국어", summary: "English summary", summaryKo: "한국어 요약", description: "Use when the user asks to review a long and detailed contract before signing it today." };
     expect(skillDisplayTitle(display, "ko")).toBe("한국어");
     expect(skillDisplayTitle({ name: "slug", title: "English" }, "ko")).toBe("English");
     expect(skillDisplayTitle({ name: "slug" }, "en")).toBe("slug");
     expect(skillBrief(display, "ko")).toBe("한국어 요약");
     expect(skillBrief(display, "en")).toBe("English summary");
-    expect(skillBrief({ description: display.description }, "en").split(" ")).toHaveLength(9);
-    expect(skillBrief({ description: display.description }, "en")).toEndWith("…");
-    expect(skillBrief({ description: "가".repeat(45) }, "ko")).toHaveLength(41);
+    expect(skillBrief({ description: display.description }, "en")).toBe("Review a long and detailed contract before signing it today.");
+    expect(skillBrief({ description: display.description }, "en")).not.toContain("…");
+    expect(skillBrief({ description: "가".repeat(45) }, "ko")).toHaveLength(45);
     expect(skillBrief({ description: "Useful work." }, "en")).not.toBe("");
   });
 
@@ -132,19 +133,25 @@ describe("skills marketplace helpers", () => {
     expect(languageTagLabel({ language: "ko" }, null, "en")).toBeNull();
   });
 
-  test("detects clamped text from measured heights", () => {
-    expect(isClamped({ scrollHeight: 120, clientHeight: 60 })).toBe(true);
-    expect(isClamped({ scrollHeight: 60, clientHeight: 60 })).toBe(false);
-    expect(isClamped({ scrollHeight: 61, clientHeight: 60 })).toBe(false);
+  test("shows a shelf chevron only toward a side that can still scroll", () => {
+    expect(shelfEdges(0, 600, 600)).toEqual({ canPrev: false, canNext: false });
+    expect(shelfEdges(0, 1200, 600)).toEqual({ canPrev: false, canNext: true });
+    expect(shelfEdges(300, 1200, 600)).toEqual({ canPrev: true, canNext: true });
+    expect(shelfEdges(599, 1200, 600)).toEqual({ canPrev: true, canNext: false });
   });
 
   test("shelf control labels read naturally in both locales", () => {
     expect(en["cowork.skills_scroll_left"]).toBe("{shelf}: scroll left");
     expect(en["cowork.skills_scroll_right"]).toBe("{shelf}: scroll right");
-    expect(en["cowork.skills_see_all_label"]).toBe("{shelf}: see all");
     expect(ko["cowork.skills_scroll_left"]).toBe("{shelf} 왼쪽으로 넘기기");
     expect(ko["cowork.skills_scroll_right"]).toBe("{shelf} 오른쪽으로 넘기기");
-    expect(ko["cowork.skills_see_all_label"]).toBe("{shelf} 모두 보기");
+  });
+
+  test("drops the See all and search copy from both locales together", () => {
+    for (const key of ["cowork.skills_see_all", "cowork.skills_see_all_label", "cowork.skills_search", "cowork.skills_results"]) {
+      expect(key in en).toBe(false);
+      expect(key in ko).toBe(false);
+    }
   });
 });
 
@@ -183,6 +190,34 @@ describe("skill detail escape guard", () => {
 });
 
 describe("skill marketplace markup", () => {
+  const longDescription = "Use when the user asks to review a contract. ".repeat(12).trim();
+  const view = (installedSkill: CoworkSkill | null) => renderToStaticMarkup(
+    React.createElement(MemoryRouter, null,
+      React.createElement(SkillView, {
+        skill: { name: "sample", description: longDescription, tags: {}, body: "# Secret instructions", installed: installedSkill } as unknown as SkillViewProps["skill"],
+        taxonomy: null, locale: "en", canRun: true, busy: false, backPath: "/skills",
+        onBack: () => {}, onRun: () => {}, onAdd: () => {},
+      } as SkillViewProps),
+    ),
+  );
+
+  test("installed page has no Anything to add box and shows the full description", () => {
+    const html = view(installed("sample"));
+    expect(html).not.toContain("<textarea");
+    expect(html).not.toContain("cowork-skill-run-extra");
+    expect(html).toContain(`<p class="cowork-skill-about__text">${longDescription}</p>`);
+    expect(html).toContain(en["cowork.skills_use"]);
+    expect(html).not.toContain(" title=");
+  });
+
+  test("detail page shows the full description with no More toggle and no instructions accordion", () => {
+    const html = view(null);
+    expect(html).toContain(`<p class="cowork-skill-about__text">${longDescription}</p>`);
+    expect(html).not.toContain("data-expanded");
+    expect(html).not.toContain("aria-expanded");
+    expect(html).not.toContain("Secret instructions");
+    expect(html).not.toContain(" title=");
+  });
   test("keeps the action outside the link and uses described-by without title attributes", () => {
     const html = renderToStaticMarkup(
       React.createElement(MemoryRouter, null,
@@ -196,14 +231,32 @@ describe("skill marketplace markup", () => {
     expect(html).not.toContain(" title=");
   });
 
-  test("never sets a native title on the tile", () => {
+  test("renders the full short description under the title with no tooltip and no title attributes", () => {
+    const summary = "A longer short description that used to be clamped after two lines in the tile.";
     const html = renderToStaticMarkup(
       React.createElement(MemoryRouter, null,
-        React.createElement(SkillTile, { row: row("long", { title: "A very long skill title that clamps", summary: "Brief." }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
+        React.createElement(SkillTile, { row: row("long", { title: "A very long skill title that clamps", summary }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
       ),
     );
     expect(html).toContain("A very long skill title that clamps");
+    expect(html).toContain(`<span id="skill-brief-long" class="cowork-skill-tile__brief">${summary}</span>`);
+    expect(html).not.toContain("tooltip");
     expect(html).not.toContain(" title=");
+  });
+
+  test("renders shelf chevrons as labelled plain buttons with no hover text", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(MemoryRouter, null,
+        React.createElement(SkillShelf, { id: "lawyer", rows: [row("us-lawyer-a", { title: "A" }), row("us-lawyer-b", { title: "B" })], locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
+      ),
+    );
+    expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--prev"');
+    expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--next"');
+    expect(html).toContain(`aria-label="${en["cowork.skills_scroll_left"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
+    expect(html).toContain(`aria-label="${en["cowork.skills_scroll_right"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
+    expect(html).not.toContain(" title=");
+    expect(html).not.toContain("see-all");
+    expect(html).not.toContain("See all");
   });
 
   test("reserves an image slot while retaining a tone fallback", () => {

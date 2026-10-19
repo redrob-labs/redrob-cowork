@@ -1,11 +1,11 @@
 /** @jsxImportSource react */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { Button, IconButton, icons } from "@redrob-labs/ui";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button, icons } from "@redrob-labs/ui";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "../../../i18n";
-import { skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
+import { shelfEdges, skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
 import { SkillIcon } from "./skill-icon";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
@@ -35,33 +35,23 @@ type SkillTileProps = {
   onUse?: (name: string) => void;
 };
 
-/** App Store style skill lockup with separate navigation and action targets. */
+/** App Store style skill lockup: icon, title, the full short description, then the action. */
 export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }: SkillTileProps) {
   const title = skillDisplayTitle(row, locale);
   const brief = skillBrief(row, locale);
   const briefId = `skill-brief-${row.name}`;
   return (
     <li className="cowork-skill-tile" data-skill={row.name}>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Link
-              className="cowork-skill-tile__link"
-              to={skillPath(row.name)}
-              state={{ fromSkill: row.name, fromPath }}
-              aria-describedby={briefId}
-            />
-          }
-        >
-          <SkillIcon name={row.name} size="tile" />
-          <span className="cowork-skill-tile__title">{title}</span>
-          <span id={briefId} className="cowork-skill-tile__brief">{brief}</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <span className="cowork-skill-tile__tip-title">{title}</span>
-          <span className="cowork-skill-tile__tip-brief">{brief}</span>
-        </TooltipContent>
-      </Tooltip>
+      <Link
+        className="cowork-skill-tile__link"
+        to={skillPath(row.name)}
+        state={{ fromSkill: row.name, fromPath }}
+        aria-describedby={briefId}
+      >
+        <SkillIcon name={row.name} size="tile" />
+        <span className="cowork-skill-tile__title">{title}</span>
+        <span id={briefId} className="cowork-skill-tile__brief">{brief}</span>
+      </Link>
       {row.installed === null ? (
         <Button
           className="cowork-skill-tile__action"
@@ -91,41 +81,23 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }:
   );
 }
 
-type SkillGridProps = Omit<SkillTileProps, "row"> & {
-  /** Rows shown in plain keyboard and reading order. */
-  rows: SkillRow[];
-  /** Localized label announced for the list. */
-  label: string;
-};
-
-/** Wrapped full-shelf or search-results grid. */
-export function SkillGrid({ rows, label, ...tileProps }: SkillGridProps) {
-  return (
-    <ul className="cowork-skills__grid" role="list" aria-label={label}>
-      {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
-    </ul>
-  );
-}
-
-type SkillShelfProps = Omit<SkillGridProps, "rows" | "label"> & {
-  /** Stable shelf id used for heading and URL filtering. */
+type SkillShelfProps = Omit<SkillTileProps, "row"> & {
+  /** Stable shelf id used for the heading and its label. */
   id: SkillShelfId;
   /** Rows shown in this horizontal collection. */
   rows: SkillRow[];
-  /** Opens the wrapped full-shelf view. */
-  onSeeAll: (id: SkillShelfId) => void;
 };
 
-/** One horizontally scrolling marketplace shelf with keyboard-reachable controls. */
-export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps) {
+/** One horizontally scrolling marketplace shelf; edge chevrons appear on hover or keyboard focus. */
+export function SkillShelf({ id, rows, ...tileProps }: SkillShelfProps) {
   const scroller = useRef<HTMLUListElement>(null);
-  const [edges, setEdges] = useState({ start: true, end: false });
+  const [edges, setEdges] = useState({ canPrev: false, canNext: false });
   const headingId = `skill-shelf-${id}`;
   const label = SHELF_LABEL[id]();
   const measure = useCallback(() => {
     const node = scroller.current;
     if (!node) return;
-    setEdges({ start: node.scrollLeft <= 1, end: node.scrollLeft + node.clientWidth >= node.scrollWidth - 1 });
+    setEdges(shelfEdges(node.scrollLeft, node.scrollWidth, node.clientWidth));
   }, []);
   useEffect(() => {
     const node = scroller.current;
@@ -137,40 +109,52 @@ export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps
   }, [measure, rows.length]);
   const move = (direction: -1 | 1) => {
     const node = scroller.current;
-    if (node) node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: "smooth" });
+    if (!node) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: reduced ? "auto" : "smooth" });
   };
 
   return (
     <section className="cowork-skills__shelf" aria-labelledby={headingId}>
       <div className="cowork-skills__shelf-heading">
         <h2 id={headingId}>{label}</h2>
-        <div className="cowork-skills__shelf-controls">
-          <IconButton
-            size="sm"
-            label={t("cowork.skills_scroll_left", { shelf: label })}
-            aria-disabled={edges.start}
-            data-disabled={edges.start ? "" : undefined}
-            onClick={() => { if (!edges.start) move(-1); }}
-          >
-            {icons.arrowLeft(ICON)}
-          </IconButton>
-          <IconButton
-            size="sm"
-            label={t("cowork.skills_scroll_right", { shelf: label })}
-            aria-disabled={edges.end}
-            data-disabled={edges.end ? "" : undefined}
-            onClick={() => { if (!edges.end) move(1); }}
-          >
-            {icons.arrowRight(ICON)}
-          </IconButton>
-          <Button id={`${headingId}-see-all`} size="sm" variant="ghost" aria-label={t("cowork.skills_see_all_label", { shelf: label })} onClick={() => onSeeAll(id)}>
-            {t("cowork.skills_see_all")}
-          </Button>
-        </div>
       </div>
-      <ul ref={scroller} className="cowork-skills__shelf-row" role="list" aria-label={label} onScroll={measure}>
-        {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
-      </ul>
+      <div className="cowork-skills__shelf-viewport">
+        <ShelfChevron direction={-1} label={t("cowork.skills_scroll_left", { shelf: label })} show={edges.canPrev} onMove={move} />
+        <ul ref={scroller} className="cowork-skills__shelf-row" role="list" aria-label={label} onScroll={measure}>
+          {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
+        </ul>
+        <ShelfChevron direction={1} label={t("cowork.skills_scroll_right", { shelf: label })} show={edges.canNext} onMove={move} />
+      </div>
     </section>
+  );
+}
+
+type ShelfChevronProps = {
+  /** Which way this chevron pages the shelf: -1 left, 1 right. */
+  direction: -1 | 1;
+  /** Localized accessible name; there is no hover text. */
+  label: string;
+  /** Whether there is anything left to scroll in this direction. */
+  show: boolean;
+  /** Pages the shelf in the given direction. */
+  onMove: (direction: -1 | 1) => void;
+};
+
+/** A plain overlay button (not IconButton, which sets title) that leaves the tab order at an edge. */
+function ShelfChevron({ direction, label, show, onMove }: ShelfChevronProps) {
+  const Icon = direction < 0 ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      className={`cowork-skills__chevron cowork-skills__chevron--${direction < 0 ? "prev" : "next"}`}
+      aria-label={label}
+      aria-hidden={!show}
+      tabIndex={show ? 0 : -1}
+      data-show={show || undefined}
+      onClick={() => { if (show) onMove(direction); }}
+    >
+      <Icon width={18} height={18} aria-hidden />
+    </button>
   );
 }
