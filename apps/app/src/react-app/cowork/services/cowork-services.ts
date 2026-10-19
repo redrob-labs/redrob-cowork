@@ -58,7 +58,7 @@ export interface CoworkServices {
   skills: {
     /** The installed skills: the workspace's, then the person's own folder's. */
     list(): Async<CoworkSkill[]>;
-    /** The Console's library, filtered; the copy that ships with the app when the Console cannot answer. */
+    /** The Console's public catalogue; rejects when that remote catalogue is unavailable. */
     library(filters?: SkillFilters): Async<LibrarySkill[]>;
     taxonomy(): Async<SkillTaxonomy>;
     /** An installed skill, or else the library's. Null when neither has it. */

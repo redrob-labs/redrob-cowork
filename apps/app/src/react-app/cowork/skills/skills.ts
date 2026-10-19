@@ -86,14 +86,20 @@ export function canSaveSkill(draft: SkillDraft): boolean {
   return isValidSkillName(draft.name) && description.length > 0 && description.length <= SKILL_DESCRIPTION_MAX && draft.instructions.trim().length > 0;
 }
 
-/** The Console's filter: every field optional, combined with AND; `q` searches the name and the description. */
-export function matchesFilters(skill: { name: string; description: string; tags: SkillTags }, filters: SkillFilters): boolean {
-  const query = filters.q?.trim().toLowerCase();
+/** The Console's filter: every field optional and combined with AND; `q` searches every visible text field. */
+export function matchesFilters(
+  skill: { name: string; description: string; title?: string; titleKo?: string; summary?: string; summaryKo?: string; tags: SkillTags },
+  filters: SkillFilters,
+): boolean {
+  const query = filters.q?.trim().toLocaleLowerCase();
+  const searchable = [skill.name, skill.description, skill.title, skill.titleKo, skill.summary, skill.summaryKo]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => value.toLocaleLowerCase());
   return (
     (!filters.profession || skill.tags.profession === filters.profession) &&
     (!filters.task || skill.tags.task === filters.task) &&
     (!filters.language || skill.tags.language === filters.language) &&
-    (!query || skill.name.toLowerCase().includes(query) || skill.description.toLowerCase().includes(query))
+    (!query || searchable.some((value) => value.includes(query)))
   );
 }
 
@@ -191,6 +197,13 @@ export function skillRows(input: {
     .filter((skill) => !names.has(skill.name) && matchesFilters(skill, input.filters))
     .map((skill): SkillRow => ({ ...skill, origin: "library", installed: null }));
   return [...installed, ...available];
+}
+
+/** The localized language tag, or null when this skill has no known language. */
+export function languageTagLabel(tags: SkillTags, taxonomy: SkillTaxonomy | null, locale: string): string | null {
+  const language = taxonomy?.languages.find((entry) => entry.id === tags.language);
+  if (!language) return null;
+  return locale.startsWith("ko") ? language.label.ko : language.label.en;
 }
 
 /** The taxonomy's words for a skill's tags, in the person's language (Korean or English). */

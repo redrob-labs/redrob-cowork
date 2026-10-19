@@ -5,10 +5,12 @@ import { MemoryRouter } from "react-router";
 
 import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
+import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillIcon } from "../src/react-app/cowork/skills/skill-icon";
 import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
+  matchesFilters,
   shelvesOf,
   shouldRestoreListFocus,
   skillBrief,
@@ -101,6 +103,20 @@ describe("skills marketplace helpers", () => {
     expect(shouldRestoreListFocus("entry-2", "entry-2")).toBe(false);
     expect(skillPath("kr lawyer/nda")).toBe("/skill/kr%20lawyer%2Fnda");
   });
+
+  test("shows offline state after rows load, including empty and populated branches", () => {
+    expect(shouldShowLibraryNotice(null, true)).toBe(false);
+    expect(shouldShowLibraryNotice([], true)).toBe(true);
+    expect(shouldShowLibraryNotice([row("installed")], true)).toBe(true);
+    expect(shouldShowLibraryNotice([], false)).toBe(false);
+  });
+
+  test("searches visible English and Korean titles and summaries", () => {
+    const visible = row("opaque-slug", { title: "Contract review", titleKo: "계약 검토", summary: "Check signature terms", summaryKo: "서명 조건을 확인합니다" });
+    expect(matchesFilters(visible, { q: "contract" })).toBe(true);
+    expect(matchesFilters(visible, { q: "조건" })).toBe(true);
+    expect(matchesFilters(visible, { q: "missing" })).toBe(false);
+  });
 });
 
 describe("console catalogue marketplace fields", () => {
@@ -111,7 +127,9 @@ describe("console catalogue marketplace fields", () => {
       return new Response("---\nname: sample\ndescription: Use when testing.\ntitle: Sample\ntitle_ko: 예시\nsummary: Test a sample.\nsummary_ko: 예시를 시험합니다.\nversion: 2.1.0\n---\n\n# Instructions");
     };
     const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test" });
+    expect(catalogue.peek("sample")).toBeNull();
     expect(await catalogue.list()).toEqual([{ name: "sample", title: "Sample", titleKo: "예시", summary: "Test a sample.", summaryKo: "예시를 시험합니다.", description: "Use when testing.", tags: {} }]);
+    expect(catalogue.peek("sample")).toMatchObject({ titleKo: "예시", summaryKo: "예시를 시험합니다.", version: "2.1.0" });
     expect(await catalogue.get("sample")).toMatchObject({ titleKo: "예시", summaryKo: "예시를 시험합니다.", version: "2.1.0", body: "# Instructions" });
   });
 

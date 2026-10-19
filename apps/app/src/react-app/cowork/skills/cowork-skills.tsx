@@ -45,6 +45,12 @@ export function teamStatusText(state: TeamSkillsState | null): string | null {
   return null;
 }
 
+
+/** The catalogue notice appears only after installed rows are ready. */
+export function shouldShowLibraryNotice(rows: readonly unknown[] | null, libraryError: boolean): boolean {
+  return rows !== null && libraryError;
+}
+
 function SkillsSkeleton() {
   return (
     <div className="cowork-skills__loading" aria-busy="true">
@@ -84,7 +90,7 @@ export function SkillsScreen() {
   const requestChat = useCoworkStartStore((state) => state.request);
 
   const installed = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, retry: 2, placeholderData: keepPreviousData });
-  const library = useQuery({ queryKey: previewKey(scope, "library"), queryFn: () => services.skills.library(), staleTime: 5 * 60_000, retry: 2, placeholderData: keepPreviousData });
+  const library = useQuery({ queryKey: previewKey(scope, "library"), queryFn: () => services.skills.library(), staleTime: 5 * 60_000, retry: false, placeholderData: keepPreviousData });
   const team = useQuery({ queryKey: previewKey(scope, "team"), queryFn: () => services.skills.teamState(), staleTime: 60_000 });
   const preview = installed.data?.preview ?? true;
   const rows = useMemo(
@@ -127,6 +133,14 @@ export function SkillsScreen() {
     target.scrollIntoView({ block: "nearest", inline: "nearest" });
     restoredFocusKey.current = location.key;
   }, [location.key, location.state, rows]);
+
+  const libraryNotice = shouldShowLibraryNotice(rows, library.isError) ? (
+    <section className="cowork-skills__notice">
+      <h2>{t("cowork.skills_library_offline_title")}</h2>
+      <p>{t("cowork.skills_library_offline_text")}</p>
+      <Button size="sm" variant="secondary" onClick={retryLibrary}>{t("cowork.skills_retry")}</Button>
+    </section>
+  ) : null;
 
   const tileProps = { locale, busy, canAdd: !preview, fromPath, onAdd: add, ...(use ? { onUse: use } : {}) };
 
@@ -174,12 +188,15 @@ export function SkillsScreen() {
             </div>
           ) : <SkillsSkeleton />
         ) : rows.length === 0 ? (
-          <EmptyState
-            title={search.trim() ? t("cowork.skills_none_match_title") : t("cowork.skills_empty_title")}
-            description={search.trim() ? t("cowork.skills_none_match_search") : t("cowork.skills_empty_text")}
-          />
+          libraryNotice ?? (
+            <EmptyState
+              title={search.trim() ? t("cowork.skills_none_match_title") : t("cowork.skills_empty_title")}
+              description={search.trim() ? t("cowork.skills_none_match_search") : t("cowork.skills_empty_text")}
+            />
+          )
         ) : selectedShelf ? (
           <div className="cowork-skills__marketplace">
+            {libraryNotice}
             <div>
               <div className="cowork-skills__full-heading">
                 <Button size="sm" variant="ghost" iconLeft={icons.arrowLeft(ICON)} onClick={showAll}>{t("cowork.skills_back_to_all")}</Button>
@@ -190,6 +207,7 @@ export function SkillsScreen() {
           </div>
         ) : search.trim() ? (
           <div className="cowork-skills__marketplace">
+            {libraryNotice}
             <section className="cowork-skills__shelf" aria-labelledby="skills-results-heading">
               <div className="cowork-skills__shelf-heading"><h2 id="skills-results-heading">{t("cowork.skills_results")}</h2></div>
               <SkillGrid rows={rows} label={t("cowork.skills_results")} {...tileProps} />
@@ -198,13 +216,7 @@ export function SkillsScreen() {
         ) : (
           <div className="cowork-skills__marketplace">
             {shelves.map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} onSeeAll={showShelf} {...tileProps} />)}
-            {library.isError ? (
-              <section className="cowork-skills__notice">
-                <h2>{t("cowork.skills_library_offline_title")}</h2>
-                <p>{t("cowork.skills_library_offline_text")}</p>
-                <Button size="sm" variant="secondary" onClick={retryLibrary}>{t("cowork.skills_retry")}</Button>
-              </section>
-            ) : null}
+            {libraryNotice}
           </div>
         )}
       </PreviewPage>
