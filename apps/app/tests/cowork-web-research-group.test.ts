@@ -46,4 +46,11 @@ describe("webStepsOf / webStepsMeta", () => {
     ]);
     expect(webStepsMeta(steps)).toBe("2 searches · 2 sources");
   });
+
+  test("round 9: a page read keeps its url and counts as a page", () => {
+    const read = { type: "dynamic-tool", toolName: "webfetch", toolCallId: "wf", state: "input-available", input: { url: "https://www.cnn.com/a" } } as unknown as DynamicToolUIPart;
+    const steps = webStepsOf([search("q", JSON_OUTPUT), read]);
+    expect(steps[1]).toMatchObject({ kind: "read", label: "cnn.com", url: "https://www.cnn.com/a", running: true });
+    expect(webStepsMeta(steps)).toBe("1 search · 2 sources · 1 page");
+  });
 });

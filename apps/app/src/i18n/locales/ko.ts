@@ -869,6 +869,8 @@ const ko = {
   "cowork.web_searched": "웹 검색",
   "cowork.web_searching": "웹 검색 중",
   "cowork.web_read": "읽음",
+  "cowork.web_reading": "읽는 중",
+  "cowork.web_pages": "페이지 {count}개",
   "cowork.web_count": "검색 {count}회",
   "cowork.web_sources": "출처 {count}곳",
   "cowork.artifacts_back": "모든 아티팩트",
