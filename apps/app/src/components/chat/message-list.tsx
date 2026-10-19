@@ -675,16 +675,11 @@ const AssistantMessage = React.memo(
               )
             }
 
-            if (group.kind === "tool") {
-              return (
-                <div key={key} className="w-full">
-                  <ToolMessage part={group.part} />
-                </div>
-              )
-            }
-
-            // The "activity" kind is only produced at the group level (MessageGroup), never here.
-            return null
+            return (
+              <div key={key} className="w-full">
+                <ToolMessage part={group.part} />
+              </div>
+            )
           })}
         </div>
       </Message>

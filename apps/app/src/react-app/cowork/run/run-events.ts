@@ -69,11 +69,6 @@ function isNavigationTool(tool: string, input: UnknownRecord | undefined): boole
   return tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool);
 }
 
-/** Whether a classified step opens the browser panel: a `web` step that is a navigation (item 7a). */
-export function isNavigationWebStep(step: Pick<StepInfo, "kind" | "navigation">): boolean {
-  return step.kind === "web" && step.navigation === true;
-}
-
 function webUrl(input: UnknownRecord | undefined): string | undefined {
   const url = stringField(input, "url") ?? stringField(recordField(input, "args"), "url");
   return url && /^https?:\/\//i.test(url) ? url : undefined;

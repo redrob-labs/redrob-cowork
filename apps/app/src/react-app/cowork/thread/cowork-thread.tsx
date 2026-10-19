@@ -140,7 +140,7 @@ function CoworkPlan(props: {
   const activity = (props.messageId ? thread?.plans?.get(props.messageId) : undefined) ?? IDLE_PLAN_ACTIVITY;
   const ran = stage === "running" || activity.started;
   const status = activity.finished ? "done" : ran ? "running" : planStatus({ local: stage, isLatest: props.isLatest, busy: thread?.busy ?? false });
-  const canRun = Boolean(thread) && !ran && (status === "draft" || status === "kept") && !(thread?.busy ?? false);
+  const canRun = Boolean(thread) && !ran && status === "draft" && !(thread?.busy ?? false);
   const labels = props.plan.todo.map((todo) => todo.label);
   // Before the run's send lands in the transcript, the step it starts on is already active.
   const steps = planStepStates(labels, ran && !activity.started ? { ...activity, started: true } : activity);
@@ -256,8 +256,6 @@ function verdictToneClass(tone: CheckVerdict["tone"]): string {
  * check is still running it shows a muted "running" chip with no popover.
  */
 function CheckChip(props: {
-  /** Optional leading glyph; the chips currently stay textual (the report carries the icon). */
-  icon?: ReactNode;
   /** The check's name, e.g. "Fact check". */
   name: string;
   /** True while the check runs: a muted chip with a small loader and no popover. */
@@ -276,7 +274,7 @@ function CheckChip(props: {
         {/* Small inline loader on the LEFT while the check runs, so the chip reads as in-progress.
             Item 6: the simple DS three-bar Loader (not the morphing liquid loader); live=false
             because several chips can run at once and each announcing itself would be noise. */}
-        {props.running ? <Loader size="sm" tone="neutral" label={props.name} live={false} /> : props.icon}
+        {props.running ? <Loader size="sm" tone="neutral" label={props.name} live={false} /> : null}
         <span>{props.name}</span>
       </span>
     );
@@ -285,7 +283,6 @@ function CheckChip(props: {
     <Popover>
       {/* The chip is the trigger; clicking opens the report popover, so no inline report is drawn. */}
       <PopoverTrigger className={`${chipBase} cursor-pointer text-dls-text transition-colors hover:bg-dls-surface-hover`}>
-        {props.icon}
         <span>{props.name}</span>
         {/* The verdict word, coloured by tone - this is the "result in the chip itself". */}
         <span className={verdictToneClass(props.verdict.tone)}>{props.verdict.label}</span>

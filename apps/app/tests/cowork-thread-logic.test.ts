@@ -17,12 +17,11 @@ import {
   type CrossCheckDeps,
   type TranscriptMessage,
 } from "../src/react-app/cowork/thread/cross-check";
-import { COWORK_BLOCK_TAGS, hasCoworkBlocks, parseCoworkBlocks, type CheckResult } from "../src/react-app/cowork/thread/cowork-blocks";
+import { COWORK_BLOCK_TAGS, hasCoworkBlocks, parseCoworkBlocks } from "../src/react-app/cowork/thread/cowork-blocks";
 import { challengeReportProps, factReportProps } from "../src/react-app/cowork/thread/cowork-thread";
 import { coworkSystemText, MEMORY_OFF_INSTRUCTION } from "../src/react-app/cowork/thread/memory-off";
 import { permissionAsk, toTranscript } from "../src/react-app/cowork/thread/use-cowork-cross-check";
 import {
-  answersSummary,
   answersToPrompt,
   approvalActions,
   isPlanRunPrompt,
@@ -33,7 +32,6 @@ import {
   planStatus,
   planToText,
   planTurnInstruction,
-  receiptItems,
 } from "../src/react-app/cowork/thread/thread-logic";
 
 afterEach(() => setLocale("en"));
@@ -153,7 +151,6 @@ describe("answers, plan and run", () => {
       `${sentinel}What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.`,
     );
     expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe(`${sentinel}Go ahead with what fits best.`);
-    expect(answersSummary(questions, { q1: 0, q2: [1] })).toBe("Answered: A yes or no, The project's files");
   });
 
   test("synthetic Cowork sends are detectable and told apart by their sentinels (item 10)", () => {
@@ -187,46 +184,10 @@ describe("answers, plan and run", () => {
     expect(isPlanRunPrompt("Run this plan. Write the final deliverable to a file.")).toBe(false);
   });
 
-  test("Run and Keep move the plan; a run that finished is done", () => {
+  test("a plan that ran and finished is done", () => {
     expect(planStatus({ local: "draft", isLatest: true, busy: false })).toBe("draft");
-    expect(planStatus({ local: "kept", isLatest: false, busy: false })).toBe("kept");
     expect(planStatus({ local: "running", isLatest: false, busy: true })).toBe("running");
     expect(planStatus({ local: "running", isLatest: false, busy: false })).toBe("done");
-  });
-});
-
-describe("receipt", () => {
-  const labels = (items: ReturnType<typeof receiptItems>) => items.map((item) => [item.label, item.sub ?? null, item.busy ?? false]);
-  const result = parseCoworkBlocks(fence("redrob-check", CHECK)).check;
-
-  test("a plain answer is not checked", () => {
-    expect(labels(receiptItems({ planned: false, fact: "off", challenge: "off" }))).toEqual([
-      ["Redrob Auto", null, false],
-      ["Not checked", "a quick answer", false],
-    ]);
-  });
-
-  test("a planned answer with checks running", () => {
-    expect(labels(receiptItems({ model: "claude-opus-5", planned: true, fact: "running", challenge: "running" }))).toEqual([
-      ["claude-opus-5", "by Redrob Auto", false],
-      ["Plan followed", null, false],
-      ["Fact check running", null, true],
-      ["Council running", null, true],
-    ]);
-  });
-
-  test("checks done: to fix, and holds up", () => {
-    const items = receiptItems({ planned: false, fact: "done", challenge: "done", result });
-    expect(labels(items).slice(1)).toEqual([
-      ["Fact check: 2 to fix", null, false],
-      ["Council", "1 to change", false],
-    ]);
-    expect(items.map((item) => item.tone)).toEqual([undefined, "differ", "differ"]);
-    const clean: CheckResult = { fact: { claims: [{ verdict: "holds", claim: "x" }], missed: [] } };
-    expect(receiptItems({ planned: false, fact: "done", challenge: "off", result: clean })[1]).toMatchObject({
-      label: "Fact check: holds up",
-      tone: "agree",
-    });
   });
 });
 
@@ -475,7 +436,6 @@ describe("approvals and memory", () => {
   test("Korean strings come through t()", () => {
     setLocale("ko");
     expect(planRunPrompt("x").startsWith("\u2060이 계획대로 실행해 주세요.")).toBe(true);
-    expect(receiptItems({ planned: false, fact: "off", challenge: "off" }).map((item) => item.label)).toEqual(["레드롭 자동", "확인하지 않음"]);
   });
 });
 
