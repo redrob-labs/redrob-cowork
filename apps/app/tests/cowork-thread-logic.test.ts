@@ -209,7 +209,7 @@ describe("receipt", () => {
       ["claude-opus-5", "by Redrob Auto", false],
       ["Plan followed", null, false],
       ["Fact check running", null, true],
-      ["Challenge running", null, true],
+      ["Council running", null, true],
     ]);
   });
 
@@ -217,7 +217,7 @@ describe("receipt", () => {
     const items = receiptItems({ planned: false, fact: "done", challenge: "done", result });
     expect(labels(items).slice(1)).toEqual([
       ["Fact check: 2 to fix", null, false],
-      ["Challenged", "1 to change", false],
+      ["Council", "1 to change", false],
     ]);
     expect(items.map((item) => item.tone)).toEqual([undefined, "differ", "differ"]);
     const clean: CheckResult = { fact: { claims: [{ verdict: "holds", claim: "x" }], missed: [] } };

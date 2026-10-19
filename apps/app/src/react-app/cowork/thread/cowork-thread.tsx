@@ -290,16 +290,12 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
   const challengeState = checks?.challenge ?? "off";
   const showFact = factState === "running" || (factState === "done" && Boolean(result?.fact));
   const showChallenge = challengeState === "running" || (challengeState === "done" && Boolean(result?.challenge));
-  // The model chip ("Redrob Auto") is intentionally dropped from the receipt row per round 5.
+  // The model chip ("Redrob Auto") is intentionally dropped from the receipt row per round 5, and
+  // round 8 drops the "Plan followed" chip too: only the checks' verdicts remain.
   return (
     <div className="flex w-full flex-col gap-3">
-      {checks?.planned || showFact || showChallenge ? (
+      {showFact || showChallenge ? (
         <div className="flex flex-wrap items-center gap-2">
-          {checks?.planned ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-dls-border bg-dls-surface px-3 py-1 text-xs text-dls-text-muted">
-              {t("cowork.thread_receipt_plan")}
-            </span>
-          ) : null}
           {showFact ? (
             <CheckChip
               name={t("cowork.thread_fact_title")}
