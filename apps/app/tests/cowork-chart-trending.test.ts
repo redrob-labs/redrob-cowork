@@ -48,12 +48,14 @@ describe("trending edition", () => {
     for (const entries of [TRENDING.korea, TRENDING.global]) {
       expect(entries).toHaveLength(10);
       expect(entries.map((entry) => entry.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      const previousRanks = entries.flatMap((entry) => entry.prevRank === null ? [] : [entry.prevRank]);
+      expect(new Set(previousRanks).size).toBe(previousRanks.length);
+      expect(previousRanks.every((rank) => rank >= 1 && rank <= 10)).toBe(true);
       for (const entry of entries) {
         expect(ids.has(entry.id)).toBe(false);
         ids.add(entry.id);
         expect(entry.label.length).toBeGreaterThan(0);
         expect(entry.labelKo.length).toBeGreaterThan(0);
-        expect(entry.prevRank === null || entry.prevRank > 0).toBe(true);
       }
     }
   });

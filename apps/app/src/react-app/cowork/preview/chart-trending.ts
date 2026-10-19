@@ -43,7 +43,7 @@ export const TRENDING: TrendingEdition = {
     { id: "kr-golf", rank: 5, prevRank: 3, label: "골프", labelKo: "골프" },
     { id: "kr-koo-sung-hwan", rank: 6, prevRank: null, label: "구성환", labelKo: "구성환" },
     { id: "kr-park-se-young", rank: 7, prevRank: 5, label: "박세영", labelKo: "박세영" },
-    { id: "kr-son-ye-jin", rank: 8, prevRank: 8, label: "손예진", labelKo: "손예진" },
+    { id: "kr-son-ye-jin", rank: 8, prevRank: 10, label: "손예진", labelKo: "손예진" },
     { id: "kr-hwang-yeon-joo", rank: 9, prevRank: null, label: "황연주", labelKo: "황연주" },
     { id: "kr-overcharging", rank: 10, prevRank: 7, label: "바가지 요금", labelKo: "바가지 요금" },
   ],
