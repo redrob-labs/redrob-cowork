@@ -44,3 +44,24 @@ export async function removeSkill(deps: SkillActionDeps, name: string): Promise<
     return false;
   }
 }
+
+/**
+ * Round 10: a workflow's "Add all". Adds each name in turn, carries on past a failure, refreshes the
+ * lists once and says what happened in one toast. Returns how many were added.
+ */
+export async function installSkills(deps: SkillActionDeps, names: readonly string[]): Promise<{ added: number; failed: number }> {
+  let added = 0;
+  let failed = 0;
+  for (const name of names) {
+    try {
+      await deps.skills.install(name);
+      added += 1;
+    } catch {
+      failed += 1;
+    }
+  }
+  invalidateSkills(deps.queryClient, deps.scope);
+  if (failed === 0) deps.showToast(t("cowork.skills_workflow_added", { count: added }));
+  else deps.showToast(t("cowork.skills_workflow_add_partial", { added, total: names.length }), t("cowork.settings_try_again"), "danger");
+  return { added, failed };
+}

@@ -1,23 +1,26 @@
 /** @jsxImportSource react */
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router";
 import { Badge, Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { openExternal } from "../connectors/cowork-connectors";
 import { PreviewPage } from "../preview/preview-note";
-import { previewKey, usePreviewServices } from "../preview/preview";
+import { previewKey } from "../preview/preview";
 import type { SkillOrigin, TeamSkillsState } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { CONSOLE_SKILLS_URL, marketplaceReady, shelvesOf, shouldRestoreListFocus, skillRows } from "./skills";
+import { CONSOLE_SKILLS_URL, shelvesOf, shouldRestoreListFocus } from "./skills";
 import { installSkill } from "./use-skills";
 import { runSkill } from "./cowork-skill";
 import { useCoworkStartStore } from "./start-chat";
-import { CATALOGUE_CACHE_MS, consoleCatalogue } from "./console-catalogue";
+import { consoleCatalogue } from "./console-catalogue";
 import { SkillShelf } from "./skill-tile";
+import { useMarketplaceRows } from "./use-marketplace";
+import { WorkflowShelf } from "./workflow-card";
+import { availableWorkflows } from "./workflows";
 
 /** The localized label for where a skill came from. */
 export function originLabel(origin: SkillOrigin): string {
@@ -83,7 +86,7 @@ function SkillsSkeleton() {
 
 /** `/skills`: installed skills first, then horizontally scrolling catalogue shelves. */
 export function SkillsScreen() {
-  const { services, scope } = usePreviewServices();
+  const { services, scope, installed, library, rows, preview } = useMarketplaceRows();
   const queryClient = useQueryClient();
   const showToast = useFrameStore((state) => state.showToast);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
@@ -94,17 +97,9 @@ export function SkillsScreen() {
   const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const requestChat = useCoworkStartStore((state) => state.request);
 
-  const installed = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, gcTime: CATALOGUE_CACHE_MS, retry: 2, placeholderData: keepPreviousData });
-  const library = useQuery({ queryKey: previewKey(scope, "library"), queryFn: () => services.skills.library(), staleTime: 5 * 60_000, gcTime: CATALOGUE_CACHE_MS, retry: false, placeholderData: keepPreviousData });
   const team = useQuery({ queryKey: previewKey(scope, "team"), queryFn: () => services.skills.teamState(), staleTime: 60_000 });
-  // Round 10: unknown until a result arrives; the preview note never paints while loading.
-  const preview = installed.data?.preview;
-  const ready = marketplaceReady({ hasData: Boolean(installed.data) }, library);
-  const rows = useMemo(
-    () => installed.data && ready ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters: {}, installedOnly: false }) : null,
-    [installed.data, library.data, ready],
-  );
   const shelves = useMemo(() => rows ? shelvesOf(rows, locale) : [], [rows, locale]);
+  const workflows = useMemo(() => rows ? availableWorkflows(rows) : [], [rows]);
   const count = installed.data?.data.length;
   const teamText = teamStatusText(team.data?.data ?? null);
   const fromPath = "/skills";
@@ -122,11 +117,13 @@ export function SkillsScreen() {
   };
 
   useEffect(() => {
-    const state = location.state as { fromSkill?: string } | null;
+    const state = location.state as { fromSkill?: string; fromWorkflow?: string } | null;
     if (!shouldRestoreListFocus(location.key, restoredFocusKey.current)) return;
     const target = state?.fromSkill
       ? document.querySelector<HTMLElement>(`[data-skill="${CSS.escape(state.fromSkill)}"] .cowork-skill-tile__link`)
-      : null;
+      : state?.fromWorkflow
+        ? document.querySelector<HTMLElement>(`[data-workflow="${CSS.escape(state.fromWorkflow)}"] .cowork-workflow-tile__link`)
+        : null;
     if (!target) return;
     target.focus();
     target.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -175,7 +172,9 @@ export function SkillsScreen() {
           libraryNotice
         ) : (
           <div className="cowork-skills__marketplace">
-            {shelves.map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} {...tileProps} />)}
+            {shelves.filter((shelf) => shelf.id === "yours").map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} {...tileProps} />)}
+            {workflows.length ? <WorkflowShelf workflows={workflows} locale={locale} fromPath={fromPath} /> : null}
+            {shelves.filter((shelf) => shelf.id !== "yours").map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} {...tileProps} />)}
             {libraryNotice}
           </div>
         )}
