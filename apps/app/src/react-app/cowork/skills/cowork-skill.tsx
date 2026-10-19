@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Badge, Button, EmptyState, Textarea, icons } from "@redrob-labs/ui";
@@ -66,6 +66,8 @@ export type SkillViewProps = {
   busy: boolean;
   /** Marketplace path preserved for Back and Escape. */
   backPath: string;
+  /** Returns to the marketplace without adding a duplicate history entry. */
+  onBack: () => void;
   /** Updates optional run instructions. */
   onExtra: (text: string) => void;
   /** Starts the skill in a Plan chat. */
@@ -75,7 +77,7 @@ export type SkillViewProps = {
 };
 
 /** Product-page presentation for one installed or library skill. */
-export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPath, onExtra, onRun, onAdd }: SkillViewProps) {
+export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPath, onBack, onExtra, onRun, onAdd }: SkillViewProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
   const brief = skillBrief(skill, locale);
   const category = skillShelf({ name: skill.name, tags: skill.tags, installed: null });
@@ -90,7 +92,7 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
 
   return (
     <div className="cowork-skill-detail">
-      <Link className="cowork-settings__action" to={backPath} state={{ fromSkill: skill.name }}>
+      <Link className="cowork-settings__action" to={backPath} state={{ fromSkill: skill.name }} onClick={(event) => { event.preventDefault(); onBack(); }}>
         {icons.arrowLeft(ICON)}{t("cowork.skills_back_to_all")}
       </Link>
       <div className="cowork-skill-hero">
@@ -162,6 +164,10 @@ export function SkillScreen() {
   const installed = skill?.installed ?? null;
   const locationState = location.state as { fromPath?: string } | null;
   const backPath = locationState?.fromPath ?? "/skills";
+  const returnToList = useCallback(() => {
+    if (locationState?.fromPath) navigate(-1);
+    else navigate(backPath, { replace: true, state: { fromSkill: name } });
+  }, [backPath, locationState?.fromPath, name, navigate]);
   const deps = { skills: services.skills, queryClient, scope, showToast };
   const act = async (run: typeof installSkill, then?: () => void) => {
     setBusy(true);
@@ -174,11 +180,11 @@ export function SkillScreen() {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target instanceof HTMLElement ? event.target : null;
       if (!shouldEscapeToList({ key: event.key, defaultPrevented: event.defaultPrevented, targetTag: target?.tagName, contentEditable: Boolean(target?.isContentEditable || target?.closest("[contenteditable]")) }, { modalOpen: modal !== null, scheduling })) return;
-      navigate(backPath, { state: { fromSkill: name } });
+      returnToList();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [backPath, modal, name, navigate, scheduling]);
+  }, [modal, returnToList, scheduling]);
 
   const title = skill ? skillDisplayTitle(skill, locale) : name || t("cowork.nav_skills");
 
@@ -197,7 +203,7 @@ export function SkillScreen() {
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
         <PreviewState query={query}>
           {(data) => data ? (
-            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} extra={extra} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onExtra={setExtra} onRun={() => void runSkill({ workspaceId, request, navigate }, name, extra)} onAdd={() => void act(installSkill)} />
+            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} extra={extra} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onExtra={setExtra} onRun={() => void runSkill({ workspaceId, request, navigate }, name, extra)} onAdd={() => void act(installSkill)} />
           ) : <EmptyState title={t("cowork.skill_not_found_title")} description={t("cowork.skill_not_found_text")} />}
         </PreviewState>
       </PreviewPage>

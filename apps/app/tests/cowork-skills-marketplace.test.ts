@@ -10,8 +10,10 @@ import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
   shelvesOf,
+  shouldRestoreListFocus,
   skillBrief,
   skillDisplayTitle,
+  skillPath,
   skillRows,
   skillShelf,
   skillTone,
@@ -92,6 +94,12 @@ describe("skills marketplace helpers", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]?.title).toBe("Local title");
     expect(rows[0]?.summary).toBe("Short summary");
+  });
+
+  test("restores focus only once per history entry and builds safe detail paths", () => {
+    expect(shouldRestoreListFocus("entry-2", "entry-1")).toBe(true);
+    expect(shouldRestoreListFocus("entry-2", "entry-2")).toBe(false);
+    expect(skillPath("kr lawyer/nda")).toBe("/skill/kr%20lawyer%2Fnda");
   });
 });
 

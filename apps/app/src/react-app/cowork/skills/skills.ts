@@ -7,6 +7,16 @@ import type { CoworkSkill, LibrarySkill, SkillDraft, SkillFilters, SkillOrigin, 
  * skill, and instructions. The Redrob Console marks the ones it supplies in `metadata.source`.
  */
 
+/** `/skill/<name>` with a route-safe stable skill name. */
+export function skillPath(name: string): string {
+  return `/skill/${encodeURIComponent(name)}`;
+}
+
+/** A marketplace history entry restores its originating control at most once. */
+export function shouldRestoreListFocus(locationKey: string, restoredKey: string | null): boolean {
+  return locationKey !== restoredKey;
+}
+
 /** Where people manage their team's skills. */
 export const CONSOLE_SKILLS_URL = "https://console.redrob.ai/skills";
 

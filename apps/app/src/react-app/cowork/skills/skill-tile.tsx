@@ -1,11 +1,11 @@
 /** @jsxImportSource react */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { Button, icons } from "@redrob-labs/ui";
+import { Button, IconButton, icons } from "@redrob-labs/ui";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "../../../i18n";
-import { skillBrief, skillDisplayTitle, type SkillRow, type SkillShelfId } from "./skills";
+import { skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
 import { SkillIcon } from "./skill-icon";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
@@ -47,7 +47,7 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }:
           render={
             <Link
               className="cowork-skill-tile__link"
-              to={`/skill/${encodeURIComponent(row.name)}`}
+              to={skillPath(row.name)}
               state={{ fromSkill: row.name, fromPath }}
               aria-describedby={briefId}
             />
@@ -142,13 +142,25 @@ export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps
       <div className="cowork-skills__shelf-heading">
         <h2 id={headingId}>{label}</h2>
         <div className="cowork-skills__shelf-controls">
-          <Button size="sm" variant="ghost" aria-label={t("cowork.skills_scroll_left", { shelf: label })} disabled={edges.start} onClick={() => move(-1)}>
+          <IconButton
+            size="sm"
+            label={t("cowork.skills_scroll_left", { shelf: label })}
+            aria-disabled={edges.start}
+            data-disabled={edges.start ? "" : undefined}
+            onClick={() => { if (!edges.start) move(-1); }}
+          >
             {icons.arrowLeft(ICON)}
-          </Button>
-          <Button size="sm" variant="ghost" aria-label={t("cowork.skills_scroll_right", { shelf: label })} disabled={edges.end} onClick={() => move(1)}>
+          </IconButton>
+          <IconButton
+            size="sm"
+            label={t("cowork.skills_scroll_right", { shelf: label })}
+            aria-disabled={edges.end}
+            data-disabled={edges.end ? "" : undefined}
+            onClick={() => { if (!edges.end) move(1); }}
+          >
             {icons.arrowRight(ICON)}
-          </Button>
-          <Button size="sm" variant="ghost" aria-label={t("cowork.skills_see_all_label", { shelf: label })} onClick={() => onSeeAll(id)}>
+          </IconButton>
+          <Button id={`${headingId}-see-all`} size="sm" variant="ghost" aria-label={t("cowork.skills_see_all_label", { shelf: label })} onClick={() => onSeeAll(id)}>
             {t("cowork.skills_see_all")}
           </Button>
         </div>
