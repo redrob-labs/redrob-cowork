@@ -3845,6 +3845,11 @@ select:disabled {
   min-width: 0;
   color: var(--ink-primary);
 }
+.model-chart__trending-track {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+}
 .model-chart__trending-trigger {
   display: flex;
   align-items: center;

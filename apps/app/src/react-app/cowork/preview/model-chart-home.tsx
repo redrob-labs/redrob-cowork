@@ -435,14 +435,17 @@ export function ModelChartHome(props: {
         <section
           className="model-chart__banners"
           aria-label={t("cowork.chart_banners_label")}
-          onMouseEnter={() => setBannerPointerInside(true)}
-          onMouseLeave={() => setBannerPointerInside(false)}
-          onFocusCapture={() => setBannerFocusInside(true)}
-          onBlurCapture={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) setBannerFocusInside(false);
-          }}
         >
-          <button type="button" className="model-chart__banner" data-tone={banner.tone} onClick={() => props.onOpen(banner.pick)}>
+          <button
+            type="button"
+            className="model-chart__banner"
+            data-tone={banner.tone}
+            onMouseEnter={() => setBannerPointerInside(true)}
+            onMouseLeave={() => setBannerPointerInside(false)}
+            onFocus={() => setBannerFocusInside(true)}
+            onBlur={() => setBannerFocusInside(false)}
+            onClick={() => props.onOpen(banner.pick)}
+          >
             <span className="model-chart__glass" style={glassStyle(`banner-${banner.id}`)} aria-hidden="true" />
             <img className="model-chart__banner-art" src={`/brand/banner-art/${banner.art}.png`} alt="" aria-hidden="true" loading="lazy" draggable={false} />
             <span className="model-chart__banner-scrim" aria-hidden="true" />
@@ -451,7 +454,17 @@ export function ModelChartHome(props: {
             <span className="model-chart__banner-sub">{banner.sub}</span>
           </button>
           <div className="model-chart__dots">
-            <div className="model-chart__dots-tabs" role="tablist" aria-label={t("cowork.chart_banners_label")}>
+            <div
+              className="model-chart__dots-tabs"
+              role="tablist"
+              aria-label={t("cowork.chart_banners_label")}
+              onMouseEnter={() => setBannerPointerInside(true)}
+              onMouseLeave={() => setBannerPointerInside(false)}
+              onFocus={() => setBannerFocusInside(true)}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setBannerFocusInside(false);
+              }}
+            >
               {banners.map((b, index) => (
                 <button
                   key={b.id}

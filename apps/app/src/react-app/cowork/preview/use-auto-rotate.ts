@@ -28,7 +28,7 @@ export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
   const [index, setIndex] = useState(0);
   const [hidden, setHidden] = useState(() => typeof document !== "undefined" && document.hidden);
   const [reducedMotion, setReducedMotion] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => typeof window !== "undefined" && (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false),
   );
 
   useEffect(() => {
@@ -44,7 +44,8 @@ export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const media = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!media) return;
     const onChange = () => setReducedMotion(media.matches);
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);

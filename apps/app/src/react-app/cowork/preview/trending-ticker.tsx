@@ -1,6 +1,6 @@
 import { Badge } from "@redrob-labs/ui";
 import { ChevronDown, Minus, Pause, Play, TrendingUp, Triangle } from "lucide-react";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
@@ -61,15 +61,12 @@ function TrendList(props: {
   locale: Language;
   /** Starts a normal chat for the selected term. */
   onPick: (item: TrendItem) => void;
-  /** Registers row buttons for arrow-key focus movement. */
-  rowRefs: React.MutableRefObject<Array<HTMLButtonElement | null>>;
 }) {
   return (
     <ol className="model-chart__trending-list" aria-label={scopeLabel(props.scope)}>
-      {props.items.map((item, index) => (
+      {props.items.map((item) => (
         <li key={item.id}>
           <button
-            ref={(node) => { props.rowRefs.current[index] = node; }}
             type="button"
             className="model-chart__trending-row"
             onClick={() => props.onPick(item)}
@@ -103,7 +100,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
   const [focusInside, setFocusInside] = useState(false);
   const [scope, setScope] = useState<TrendScope>("korea");
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const panelRef = useRef<HTMLDivElement>(null);
   const sequence = tickerSequence(props.data, props.locale);
   const rotation = useAutoRotate({
     count: sequence.length,
@@ -113,21 +110,19 @@ export function TrendingTicker(props: TrendingTickerProps) {
   const current = sequence[rotation.index] ?? sequence[0];
   const visibleItems = scope === "korea" ? props.data.korea : props.data.global;
 
-  useEffect(() => {
-    rowRefs.current = [];
-  }, [scope]);
-
   const openAndFocus = () => {
     setOpen(true);
-    window.requestAnimationFrame(() => rowRefs.current[0]?.focus());
   };
   const select = (item: TrendItem) => {
     setOpen(false);
+    setScope("korea");
     props.onPick(item);
   };
   const moveRowFocus = (event: KeyboardEvent<HTMLDivElement>) => {
-    const rows = rowRefs.current.filter((row): row is HTMLButtonElement => row !== null);
-    const at = rows.findIndex((row) => row === document.activeElement);
+    const row = (event.target as HTMLElement).closest<HTMLButtonElement>(".model-chart__trending-row");
+    if (!row && event.key !== "ArrowDown") return;
+    const rows = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>(".model-chart__trending-row"));
+    const at = row ? rows.indexOf(row) : -1;
     let next = at;
     if (event.key === "ArrowDown") next = Math.min(rows.length - 1, at + 1);
     else if (event.key === "ArrowUp") next = Math.max(0, at - 1);
@@ -139,16 +134,23 @@ export function TrendingTicker(props: TrendingTickerProps) {
   };
 
   return (
-    <div
-      className="model-chart__trending"
-      onMouseEnter={() => setPointerInside(true)}
-      onMouseLeave={() => setPointerInside(false)}
-      onFocus={() => setFocusInside(true)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setFocusInside(false);
-      }}
-    >
-      <Popover open={open} onOpenChange={setOpen}>
+    <div className="model-chart__trending">
+      <div
+        className="model-chart__trending-track"
+        onMouseEnter={() => setPointerInside(true)}
+        onMouseLeave={() => setPointerInside(false)}
+        onFocus={() => setFocusInside(true)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setFocusInside(false);
+        }}
+      >
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) setScope("korea");
+        }}
+      >
         <PopoverTrigger
           ref={triggerRef}
           className="model-chart__trending-trigger"
@@ -156,7 +158,6 @@ export function TrendingTicker(props: TrendingTickerProps) {
           delay={250}
           closeDelay={300}
           aria-label={t("cowork.chart_trending_trigger", { edition: props.edition })}
-          aria-haspopup="dialog"
           onKeyDown={(event) => {
             if (event.key === "ArrowDown") {
               event.preventDefault();
@@ -179,11 +180,12 @@ export function TrendingTicker(props: TrendingTickerProps) {
           <ChevronDown className="model-chart__trending-chevron" data-open={open || undefined} aria-hidden />
         </PopoverTrigger>
         <PopoverContent
+          ref={panelRef}
           className="model-chart__trending-panel"
           side="bottom"
           align="end"
           sideOffset={8}
-          role="dialog"
+          initialFocus={() => panelRef.current?.querySelector<HTMLButtonElement>(".model-chart__trending-row") ?? true}
           aria-label={t("cowork.chart_trending_title")}
           onMouseEnter={() => setPointerInside(true)}
           onMouseLeave={() => setPointerInside(false)}
@@ -209,14 +211,15 @@ export function TrendingTicker(props: TrendingTickerProps) {
               <TabsTrigger value="global">{t("cowork.chart_trending_global")}</TabsTrigger>
             </TabsList>
             <TabsContent value="korea">
-              <TrendList scope="korea" items={visibleItems} locale={props.locale} onPick={select} rowRefs={rowRefs} />
+              <TrendList scope="korea" items={visibleItems} locale={props.locale} onPick={select} />
             </TabsContent>
             <TabsContent value="global">
-              <TrendList scope="global" items={visibleItems} locale={props.locale} onPick={select} rowRefs={rowRefs} />
+              <TrendList scope="global" items={visibleItems} locale={props.locale} onPick={select} />
             </TabsContent>
           </Tabs>
         </PopoverContent>
       </Popover>
+      </div>
       {rotation.reducedMotion ? null : (
         <button
           type="button"
