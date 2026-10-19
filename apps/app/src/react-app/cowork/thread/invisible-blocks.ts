@@ -1,17 +1,28 @@
 import { hasCoworkBlocks, parseCoworkBlocks } from "./cowork-blocks";
 
+/** What the thread knows about a message's blocks beyond its own text (round 8 M1). */
+export type CoworkTextVisibility = {
+  /** Its Plan questions still wait on the person. */
+  questionsOpen: boolean;
+  /** Its plan is held back because questions came with it this turn. */
+  planHeld?: boolean;
+};
+
 /**
- * Round 7 (review of C1/C7): whether an assistant text group draws NOTHING in the Cowork thread,
- * so the transcript can skip its message wrapper instead of leaving an empty band. True only for a
- * text that is nothing but Cowork blocks that render nothing inline:
- * - Plan questions once they are no longer the latest turn (answered or superseded; C1), and
+ * Round 7 (review of C1/C7), extended in round 8: whether an assistant text group draws NOTHING in
+ * the Cowork thread, so the transcript can skip its message wrapper instead of leaving an empty
+ * band. True only for a text that is nothing but Cowork blocks that render nothing inline:
+ * - Plan questions that are answered (C1),
+ * - a plan held back until the answers come (M1),
  * - a cross-check block (its verdict shows as chips in the answer footer).
- * Any prose, a plan, or questions still waiting on the person keeps the group. Pure.
+ * Any prose, a shown plan, a still-pending block, or questions still waiting keep the group. Pure.
  */
-export function isInvisibleCoworkText(text: string, isLatest: boolean): boolean {
+export function isInvisibleCoworkText(text: string, visibility: CoworkTextVisibility): boolean {
   const blocks = parseCoworkBlocks(text);
   if (!hasCoworkBlocks(blocks) || blocks.pending) return false;
-  if (blocks.prose.trim() || blocks.plan) return false;
-  if (blocks.questions && isLatest) return false;
+  if (blocks.prose.trim()) return false;
+  if (blocks.questions && visibility.questionsOpen) return false;
+  // A plan beside questions is always held (see CoworkBlocksView); otherwise the thread says.
+  if (blocks.plan && !blocks.questions && !visibility.planHeld) return false;
   return true;
 }

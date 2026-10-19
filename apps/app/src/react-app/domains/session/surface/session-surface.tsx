@@ -50,7 +50,8 @@ import { PaperGrainGradient } from "@redrob/ui/react";
 import { useShellConfig } from "@/react-app/shell/shell-config";
 import { useReactRenderWatchdog } from "@/react-app/shell/react-render-watchdog";
 import { SessionDebugPanel } from "./debug-panel";
-import { deriveRenderedSessionMessages, resolveRenderedSessionSnapshot } from "./session-render-state";
+import { deriveRenderedSessionMessages, mergedSessionMessages, resolveRenderedSessionSnapshot } from "./session-render-state";
+import { coworkQuestionState, EMPTY_QUESTION_STATE, sameQuestionState, type CoworkQuestionState } from "@/react-app/cowork/thread/question-state";
 import { useLocal } from "@/react-app/kernel/local-provider";
 import { resolveAttachmentFileMetadata } from "@/react-app/domains/session/sync/attachment-file-part";
 import { deriveSessionRenderModel } from "@/react-app/domains/session/sync/transition-controller";
@@ -933,6 +934,17 @@ export function SessionSurface(props: SessionSurfaceProps) {
     () => deriveRenderedSessionMessages({ transcriptState, snapshot, inCoworkFrame }),
     [snapshot, transcriptState, inCoworkFrame],
   );
+  // Round 8 (M1): Plan's questions read against the RAW transcript, where the hidden
+  // question-answer sends still are, so "answered" means the person actually replied.
+  const coworkQuestionsRef = useRef<CoworkQuestionState>(EMPTY_QUESTION_STATE);
+  const coworkQuestions = useMemo(() => {
+    const next = inCoworkFrame ? coworkQuestionState(mergedSessionMessages({ transcriptState, snapshot })) : EMPTY_QUESTION_STATE;
+    // Keep the same object while nothing changed, so the thread context (and every message under
+    // it) does not re-render on each streamed token.
+    if (sameQuestionState(coworkQuestionsRef.current, next)) return coworkQuestionsRef.current;
+    coworkQuestionsRef.current = next;
+    return next;
+  }, [snapshot, transcriptState, inCoworkFrame]);
   const renderedMessages = useMemo(() => {
     if (evalMarkdownMessages.length === 0) return baseRenderedMessages;
 
@@ -2007,7 +2019,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
     sendText: async (text) => {
       await sendDraft(textDraft(text));
     },
-  }), [chatStreaming, props.sessionId, sendDraft]);
+    questions: coworkQuestions,
+  }), [chatStreaming, coworkQuestions, props.sessionId, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">

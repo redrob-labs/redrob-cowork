@@ -47,6 +47,27 @@ export function filterSyntheticCoworkMessages(messages: UIMessage[]): UIMessage[
   return messages.filter((message) => !isSyntheticCoworkPrompt(userMessageText(message)));
 }
 
+/**
+ * The session's messages before any Cowork filtering: the persisted snapshot as the history floor
+ * with live stream updates layered on top. Round 8 (M1) also reads this raw list to see which Plan
+ * questions were answered, since the hidden question-answer sends are dropped from the render.
+ */
+export function mergedSessionMessages(input: {
+  transcriptState: UIMessage[] | null | undefined;
+  snapshot: RedrobSessionSnapshot | null | undefined;
+}): UIMessage[] {
+  const liveMessages = input.transcriptState ?? [];
+  const snapshotMessages = input.snapshot && input.snapshot.messages.length > 0
+    ? snapshotToUIMessages(input.snapshot)
+    : [];
+  // Render the server snapshot as the history floor and layer live stream
+  // updates on top. During prompt submission the live cache can briefly contain
+  // only the new turn; it must not replace the older persisted transcript.
+  return snapshotMessages.length > 0
+    ? mergeSnapshotAndLiveMessages(snapshotMessages, liveMessages, { appendLiveOnlyMessages: true })
+    : liveMessages;
+}
+
 export function deriveRenderedSessionMessages(input: {
   transcriptState: UIMessage[] | null | undefined;
   snapshot: RedrobSessionSnapshot | null | undefined;
@@ -54,18 +75,7 @@ export function deriveRenderedSessionMessages(input: {
   inCoworkFrame?: boolean;
 }) {
   const revertMessageId = (input.snapshot?.session as any)?.revert?.messageID ?? null;
-  const liveMessages = input.transcriptState ?? [];
-
-  const snapshotMessages = input.snapshot && input.snapshot.messages.length > 0
-    ? snapshotToUIMessages(input.snapshot)
-    : [];
-
-  // Render the server snapshot as the history floor and layer live stream
-  // updates on top. During prompt submission the live cache can briefly contain
-  // only the new turn; it must not replace the older persisted transcript.
-  const messages = snapshotMessages.length > 0
-    ? mergeSnapshotAndLiveMessages(snapshotMessages, liveMessages, { appendLiveOnlyMessages: true })
-    : liveMessages;
+  const messages = mergedSessionMessages(input);
 
   // Hide synthetic sends BEFORE the revert cursor runs, preserving ids/order so applyRevertCursor
   // still finds its cursor message. Render-only: the snapshot still persists them server-side, so

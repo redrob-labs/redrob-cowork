@@ -149,6 +149,7 @@ import { CoworkAnswerFooter, CoworkBlocksView, CoworkMemoryNote, CoworkRunStatus
 import { memorySavedFrom } from "@/react-app/cowork/thread/thread-logic"
 import { withoutTodoToolParts } from "@/react-app/cowork/thread/hide-todo-tools"
 import { isInvisibleCoworkText } from "@/react-app/cowork/thread/invisible-blocks"
+import { useCoworkThread } from "@/react-app/cowork/thread/cowork-thread-context"
 import { useFrameStore } from "@/react-app/cowork/store/frame-store"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
@@ -577,16 +578,20 @@ const AssistantMessage = React.memo(
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
     // Inside the Cowork frame, Plan's and Cross-check's fenced blocks render as the design system's.
     const inCoworkFrame = useInCoworkFrame()
+    // Round 8 (M1): where this message's Plan questions / plan stand, from the raw transcript.
+    const coworkQuestions = useCoworkThread()?.questions
+    const questionsOpen = coworkQuestions ? !coworkQuestions.answered.has(message.id) : isLastMessage
+    const planHeld = coworkQuestions?.heldPlans.has(message.id) ?? false
     const assistantRenderGroups = React.useMemo(
       () => {
         // Per-message grouping stays per-kind here; the unified Cowork activity row is assembled
         // once at the GROUP level (MessageGroup) over the whole run, not per message - a run spans
         // several assistant messages, so folding per message produced one stray row per message.
         const groups = getAssistantRenderGroups(message.parts, showThinking)
-          // Round 7 (review): a text group that is only a superseded Plan questions block (or a
-          // cross-check block, which renders in the footer) draws nothing, so drop it here; otherwise
-          // its empty <Message> wrapper keeps the column gap where "Answered." used to be.
-          .filter((group) => !(inCoworkFrame && group.kind === "text" && isInvisibleCoworkText(group.text, isLastMessage)))
+          // Round 7 (review): a text group that is only an answered Plan questions block, a held
+          // plan (round 8), or a cross-check block (rendered in the footer) draws nothing, so drop it
+          // here; otherwise its empty <Message> wrapper keeps the column gap.
+          .filter((group) => !(inCoworkFrame && group.kind === "text" && isInvisibleCoworkText(group.text, { questionsOpen, planHeld })))
         if (hideSteps) {
           // The live activity row already shows reasoning + every tool call; keep only text/file.
           // Round 7 C7: EXCEPT web research - each search/fetch row shows in place as it happens
@@ -595,7 +600,7 @@ const AssistantMessage = React.memo(
         }
         return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
       },
-      [hideReasoning, hideSteps, inCoworkFrame, isLastMessage, message.parts, showThinking]
+      [hideReasoning, hideSteps, inCoworkFrame, message.parts, planHeld, questionsOpen, showThinking]
     )
 
     // Round 7 C7: a message whose parts all folded into the live row renders NOTHING - not an empty
@@ -636,7 +641,7 @@ const AssistantMessage = React.memo(
                       highlightQuery={highlightQuery}
                     />
                   )}
-                  {coworkBlocks ? <CoworkBlocksView blocks={coworkBlocks} isLatest={isLastMessage} /> : null}
+                  {coworkBlocks ? <CoworkBlocksView blocks={coworkBlocks} isLatest={isLastMessage} messageId={message.id} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}

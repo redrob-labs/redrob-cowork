@@ -83,10 +83,14 @@ export function challengeReportProps(challenge: ChallengeData): ChallengeReportP
 }
 
 /** Plan's questions; answering sends the choices as the person's reply, then folds. */
-function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boolean }) {
+function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boolean; messageId?: string }) {
   const thread = useCoworkThread();
   const [answered, setAnswered] = useState<PlanAnswers | null>(null);
-  const done = answered !== null || !props.isLatest;
+  // Round 8 (M1): done means the person ANSWERED (here, or by any reply after this message), not
+  // "this is no longer the last message" - the agent often keeps writing after it asks. Without the
+  // thread's state (outside a session surface), fall back to the old position rule.
+  const repliedLater = props.messageId && thread?.questions ? thread.questions.answered.has(props.messageId) : !props.isLatest;
+  const done = answered !== null || repliedLater;
   // Round 7 C1: once answered (or superseded by a later turn) the questions leave the thread
   // entirely. The DS fold line ("Answered." / "Answered: a, b") read as an inline comment; the
   // plan that follows is the visible result of the answers.
@@ -202,15 +206,18 @@ function CoworkPlan(props: {
 }
 
 /** The blocks in an assistant answer, as the design system draws them. */
-export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean }) {
+export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean; /** The message the blocks came in (round 8 M1). */ messageId?: string }) {
   const { questions, plan } = props.blocks;
+  const thread = useCoworkThread();
+  // Round 8 (M1): a plan drafted in the same turn as questions waits for the answers - it is not
+  // shown and never runs; the answers produce a new plan that runs on its own.
+  const held = Boolean(questions) || Boolean(props.messageId && thread?.questions?.heldPlans.has(props.messageId));
   // Fact check + Challenge no longer render inline here; they appear as verdict CHIPS in the
   // answer footer (CoworkAnswerFooterView), and their full report opens in a popover on click.
   return (
     <>
-      {questions ? <CoworkQuestions questions={questions} isLatest={props.isLatest} /> : null}
-      {/* A plan with unanswered questions beside it waits for the answers instead of auto-running. */}
-      {plan ? <CoworkPlan plan={plan} isLatest={props.isLatest} autoRun={!questions} /> : null}
+      {questions ? <CoworkQuestions questions={questions} isLatest={props.isLatest} messageId={props.messageId} /> : null}
+      {plan && !held ? <CoworkPlan plan={plan} isLatest={props.isLatest} autoRun /> : null}
     </>
   );
 }
