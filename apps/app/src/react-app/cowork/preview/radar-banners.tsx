@@ -16,7 +16,7 @@ export const RADAR_TONE: Record<RadarFeed, number> = { news: 1, social: 2 };
 /** Decorative feed mark, top corner of the banner and the subpage header. */
 export function RadarMark(props: { feed: RadarFeed }) {
   return (
-    <span className="model-chart__radar-mark" aria-hidden="true">
+    <span className="cowork-radar-mark" aria-hidden="true">
       {props.feed === "news" ? <Newspaper aria-hidden /> : <MessageCircle aria-hidden />}
     </span>
   );
@@ -41,7 +41,7 @@ function RadarBanner(props: {
       aria-describedby={summaryId}
     >
       {/* Round 10: white liquid glass. The tint layer is the soft colour the frosted surface sits over. */}
-      <span className="model-chart__radar-tint" aria-hidden="true" />
+      <span className="cowork-radar-tint" aria-hidden="true" />
       <RadarMark feed={props.feed} />
       <span id={titleId} className="model-chart__banner-title">{radarTitle(props.feed)}</span>
       <span id={summaryId} className="model-chart__radar-summary">

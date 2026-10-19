@@ -105,7 +105,7 @@ export function SkillsScreen() {
     const target = state?.fromSkill
       ? document.querySelector<HTMLElement>(`[data-skill="${CSS.escape(state.fromSkill)}"] .cowork-skill-tile__link`)
       : state?.fromWorkflow
-        ? document.querySelector<HTMLElement>(`[data-workflow="${CSS.escape(state.fromWorkflow)}"] .cowork-workflow-tile__link`)
+        ? document.querySelector<HTMLElement>(`[data-workflow="${CSS.escape(state.fromWorkflow)}"] .cowork-workflow-card__link`)
         : null;
     if (!target) return;
     target.focus();

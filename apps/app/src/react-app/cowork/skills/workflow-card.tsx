@@ -11,9 +11,9 @@ import { workflowOrderedRows, workflowPath, workflowSub, workflowTitle, type Wor
 export function WorkflowMosaic(props: { rows: readonly SkillRow[]; locale: string; size: "card" | "hero" }) {
   const covers = workflowOrderedRows(props.rows, props.locale).slice(0, 4);
   return (
-    <span className="cowork-workflow-cover" data-size={props.size} aria-hidden="true">
+    <span className="cowork-workflow-card__cover" data-size={props.size} aria-hidden="true">
       {covers.map((row) => (
-        <span key={row.name} className="cowork-workflow-cover__cell">
+        <span key={row.name} className="cowork-workflow-card__cover-cell">
           <SkillIcon name={row.name} size="fill" />
         </span>
       ))}
@@ -34,14 +34,14 @@ type WorkflowCardProps = {
 export function WorkflowCard({ id, rows, locale, fromPath }: WorkflowCardProps) {
   const subId = `workflow-sub-${id}`;
   return (
-    <li className="cowork-workflow-tile" data-workflow={id}>
-      <Link className="cowork-workflow-tile__link" to={workflowPath(id)} state={{ fromPath }} aria-describedby={subId}>
-        <span className="cowork-workflow-tile__card">
+    <li className="cowork-workflow-card" data-workflow={id}>
+      <Link className="cowork-workflow-card__link" to={workflowPath(id)} state={{ fromPath }} aria-describedby={subId}>
+        <span className="cowork-workflow-card__art">
           <WorkflowMosaic rows={rows} locale={locale} size="card" />
         </span>
-        <span className="cowork-workflow-tile__title">{workflowTitle(id)}</span>
-        <span id={subId} className="cowork-workflow-tile__sub">{workflowSub(id)}</span>
-        <span className="cowork-workflow-tile__count">{t("cowork.skills_workflow_count", { count: rows.length })}</span>
+        <span className="cowork-workflow-card__title">{workflowTitle(id)}</span>
+        <span id={subId} className="cowork-workflow-card__sub">{workflowSub(id)}</span>
+        <span className="cowork-workflow-card__count">{t("cowork.skills_workflow_count", { count: rows.length })}</span>
       </Link>
     </li>
   );

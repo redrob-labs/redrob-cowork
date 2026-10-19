@@ -1421,7 +1421,7 @@ const en = {
   "cowork.skills_workflow_add_partial": "Added {added} of {total} skills",
   "cowork.skills_workflow_group_us": "United States",
   "cowork.skills_workflow_group_kr": "Korea",
-  "cowork.skills_workflow_legal_drafting_title": "The Drafting Desk",
+  "cowork.skills_workflow_legal_drafting_title": "From Draft to Signature",
   "cowork.skills_workflow_legal_drafting_sub": "Contracts and agreements, first draft to signature.",
   "cowork.skills_workflow_legal_disputes_title": "Redlines and Rebuttals",
   "cowork.skills_workflow_legal_disputes_sub": "Review the deal, then answer the other side.",

@@ -129,7 +129,7 @@ describe("workflow markup", () => {
     const html = render(React.createElement("ul", null, React.createElement(WorkflowCard, { id: "office", rows: workflowRows("office", allRows()), locale: "en", fromPath: "/skills" })));
     expect(html).toContain('href="/skills/workflow/office"');
     expect(html).toContain('aria-describedby="workflow-sub-office"');
-    expect(html).toContain("cowork-workflow-cover");
+    expect(html).toContain("cowork-workflow-card__cover");
     expect(html).not.toContain("title=");
   });
 

@@ -1405,7 +1405,7 @@ const ko = {
   "cowork.skills_workflow_add_partial": "스킬 {total}개 중 {added}개를 추가했습니다",
   "cowork.skills_workflow_group_us": "미국",
   "cowork.skills_workflow_group_kr": "한국",
-  "cowork.skills_workflow_legal_drafting_title": "계약서 작성 데스크",
+  "cowork.skills_workflow_legal_drafting_title": "초안부터 서명까지",
   "cowork.skills_workflow_legal_drafting_sub": "초안부터 서명본까지, 계약서를 한곳에서.",
   "cowork.skills_workflow_legal_disputes_title": "검토와 분쟁 대응",
   "cowork.skills_workflow_legal_disputes_sub": "계약 검토부터 내용증명, 소송 서면까지.",

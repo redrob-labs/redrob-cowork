@@ -24,14 +24,14 @@ import {
 function StorySource(props: { story: RadarStory }) {
   const { story } = props;
   const url = story.url;
-  if (!url) return <span className="radar-story__source">{story.source}</span>;
+  if (!url) return <span className="cowork-radar-story__source">{story.source}</span>;
   const tip = t("cowork.radar_source_tip", { source: story.source });
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <a
-            className="radar-story__source"
+            className="cowork-radar-story__source"
             href={url}
             target="_blank"
             rel="noopener noreferrer"
@@ -61,33 +61,33 @@ export function RadarPage(props: {
 }) {
   const section = radarSection(RADAR, props.feed);
   return (
-    <div className="radar-page">
+    <div className="cowork-radar-page">
       <Link className="model-chart__back" to="/guide">
         {icons.back({ width: 16, height: 16, "aria-hidden": true })}
         {t("cowork.nav_guide")}
       </Link>
-      <header className="radar-page__head" data-tone={RADAR_TONE[props.feed]} data-feed={props.feed}>
-        <span className="model-chart__radar-tint" aria-hidden="true" />
+      <header className="cowork-radar-page__head" data-tone={RADAR_TONE[props.feed]} data-feed={props.feed}>
+        <span className="cowork-radar-tint" aria-hidden="true" />
         <RadarMark feed={props.feed} />
-        <span className="radar-page__eyebrow">{t("cowork.radar_heading")}</span>
-        <h1 className="radar-page__title">{radarTitle(props.feed)}</h1>
-        <p className="radar-page__lede">{radarSummary(section, props.locale)}</p>
-        <time className="radar-page__meta" dateTime={RADAR.asOf}>
+        <span className="cowork-radar-page__eyebrow">{t("cowork.radar_heading")}</span>
+        <h1 className="cowork-radar-page__title">{radarTitle(props.feed)}</h1>
+        <p className="cowork-radar-page__lede">{radarSummary(section, props.locale)}</p>
+        <time className="cowork-radar-page__meta" dateTime={RADAR.asOf}>
           {t("cowork.radar_updated", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
         </time>
       </header>
-      <ol className="radar-page__list" aria-label={t("cowork.radar_stories")}>
+      <ol className="cowork-radar-page__list" aria-label={t("cowork.radar_stories")}>
         {section.stories.map((story, index) => {
           const text = radarStoryText(story, props.locale);
-          const headingId = `radar-story-${story.id}`;
+          const headingId = `cowork-radar-story-${story.id}`;
           return (
-            <li key={story.id} className="radar-story">
-              <article className="radar-story__card" aria-labelledby={headingId}>
-                <span className="radar-story__rank" aria-hidden="true">{index + 1}</span>
-                <div className="radar-story__body">
-                  <h2 id={headingId} className="radar-story__headline">{text.headline}</h2>
-                  <p className="radar-story__summary">{text.summary}</p>
-                  <p className="radar-story__meta">
+            <li key={story.id} className="cowork-radar-story">
+              <article className="cowork-radar-story__card" aria-labelledby={headingId}>
+                <span className="cowork-radar-story__rank" aria-hidden="true">{index + 1}</span>
+                <div className="cowork-radar-story__body">
+                  <h2 id={headingId} className="cowork-radar-story__headline">{text.headline}</h2>
+                  <p className="cowork-radar-story__summary">{text.summary}</p>
+                  <p className="cowork-radar-story__meta">
                     <StorySource story={story} />
                     <span aria-hidden="true">·</span>
                     <time dateTime={story.publishedAt}>

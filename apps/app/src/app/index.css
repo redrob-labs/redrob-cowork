@@ -2413,8 +2413,8 @@
   gap: 20px;
 }
 .cowork-skills__shelf--cards .cowork-skills__chevron { top: 88px; }
-.cowork-workflow-tile { min-width: 0; color: var(--ink-primary); }
-.cowork-workflow-tile__link {
+.cowork-workflow-card { min-width: 0; color: var(--ink-primary); }
+.cowork-workflow-card__link {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2422,13 +2422,13 @@
   color: var(--ink-primary);
   text-decoration: none;
 }
-.cowork-workflow-tile__link:focus-visible {
+.cowork-workflow-card__link:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: 18px;
 }
 /* The square cover, styled as .model-chart__card (border, radius, resting shadow, hover). */
-.cowork-workflow-tile__card,
+.cowork-workflow-card__art,
 .cowork-workflow-hero__card {
   display: grid;
   place-items: center;
@@ -2441,27 +2441,27 @@
   transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), border-color var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 .cowork-workflow-hero__card { width: 128px; margin: 0; }
-.cowork-workflow-tile:hover .cowork-workflow-tile__card {
+.cowork-workflow-card:hover .cowork-workflow-card__art {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent);
 }
-[data-theme="dark"] .cowork-workflow-tile__card,
+[data-theme="dark"] .cowork-workflow-card__art,
 [data-theme="dark"] .cowork-workflow-hero__card {
   border-color: color-mix(in srgb, var(--border-subtle) 90%, transparent);
   box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.6);
 }
-.cowork-workflow-cover {
+.cowork-workflow-card__cover {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   width: 72%;
   aspect-ratio: 1 / 1;
 }
-.cowork-workflow-cover__cell { display: block; min-width: 0; aspect-ratio: 1 / 1; }
-.cowork-workflow-tile__title { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-primary); }
-.cowork-workflow-tile__sub { font-size: 12px; line-height: 16px; color: var(--ink-secondary); }
-.cowork-workflow-tile__count { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.cowork-workflow-card__cover-cell { display: block; min-width: 0; aspect-ratio: 1 / 1; }
+.cowork-workflow-card__title { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-primary); }
+.cowork-workflow-card__sub { font-size: 12px; line-height: 16px; color: var(--ink-secondary); }
+.cowork-workflow-card__count { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
 .cowork-workflow-hero__eyebrow {
   margin: 0;
   font-size: 12px;
@@ -2501,8 +2501,8 @@
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
 }
 @media (prefers-reduced-motion: reduce) {
-  .cowork-workflow-tile__card { transition: none; }
-  .cowork-workflow-tile:hover .cowork-workflow-tile__card,
+  .cowork-workflow-card__art { transition: none; }
+  .cowork-workflow-card:hover .cowork-workflow-card__art,
   .cowork-workflow__row:hover .cowork-skill-icon { transform: none; }
 }
 /* ---------- end Round 10 skills ---------- */
@@ -4460,7 +4460,7 @@ select:disabled {
   .model-chart__radar-grid { grid-template-columns: minmax(0, 1fr); }
 }
 .model-chart__banner.model-chart__radar-banner,
-.radar-page__head {
+.cowork-radar-page__head {
   border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, color-mix(in srgb, var(--redrob-white) 60%, transparent));
   background: color-mix(in srgb, var(--redrob-white) 66%, transparent);
   color: var(--ink-primary);
@@ -4488,8 +4488,8 @@ select:disabled {
   outline-offset: 2px;
 }
 /* The tint: blurred colour blobs above the white surface and below the copy. */
-.model-chart__banner > .model-chart__radar-tint,
-.radar-page__head > .model-chart__radar-tint {
+.model-chart__banner > .cowork-radar-tint,
+.cowork-radar-page__head > .cowork-radar-tint {
   position: absolute;
   inset: -20%;
   z-index: 0;
@@ -4501,7 +4501,7 @@ select:disabled {
     radial-gradient(50% 60% at 88% 26%, var(--spectrum-sky), transparent 72%),
     radial-gradient(55% 60% at 60% 110%, var(--spectrum-violet), transparent 75%);
 }
-[data-feed="social"] > .model-chart__radar-tint {
+[data-feed="social"] > .cowork-radar-tint {
   background:
     radial-gradient(45% 55% at 18% 12%, var(--spectrum-teal), transparent 70%),
     radial-gradient(50% 60% at 88% 26%, var(--spectrum-sky), transparent 72%),
@@ -4519,7 +4519,7 @@ select:disabled {
   font-size: 13px;
   line-height: 19px;
 }
-.model-chart__radar-mark {
+.cowork-radar-mark {
   position: absolute;
   top: 20px;
   inset-inline-start: 24px;
@@ -4536,7 +4536,7 @@ select:disabled {
   backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 90%, transparent);
 }
-.model-chart__radar-mark svg {
+.cowork-radar-mark svg {
   width: 20px;
   height: 20px;
 }
@@ -4567,7 +4567,7 @@ select:disabled {
 }
 /* Dark: smoked white glass - white at a low mix over the dark raised surface, light theme ink. */
 [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
-[data-theme="dark"] .radar-page__head {
+[data-theme="dark"] .cowork-radar-page__head {
   border-color: color-mix(in srgb, var(--redrob-white) 14%, transparent);
   background: color-mix(in srgb, var(--redrob-white) 9%, color-mix(in srgb, var(--surface-raised) 70%, transparent));
   box-shadow:
@@ -4581,11 +4581,11 @@ select:disabled {
     inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 6%, transparent),
     0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 72%, transparent);
 }
-[data-theme="dark"] .model-chart__banner > .model-chart__radar-tint,
-[data-theme="dark"] .radar-page__head > .model-chart__radar-tint {
+[data-theme="dark"] .model-chart__banner > .cowork-radar-tint,
+[data-theme="dark"] .cowork-radar-page__head > .cowork-radar-tint {
   opacity: 0.24;
 }
-[data-theme="dark"] .model-chart__radar-mark {
+[data-theme="dark"] .cowork-radar-mark {
   border-color: color-mix(in srgb, var(--redrob-white) 18%, transparent);
   background: color-mix(in srgb, var(--redrob-white) 10%, transparent);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 18%, transparent);
@@ -4596,22 +4596,22 @@ select:disabled {
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .model-chart__banner.model-chart__radar-banner,
-  .radar-page__head,
+  .cowork-radar-page__head,
   [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
-  [data-theme="dark"] .radar-page__head {
+  [data-theme="dark"] .cowork-radar-page__head {
     background: var(--surface-raised);
   }
 }
 @media (prefers-reduced-transparency: reduce) {
   .model-chart__banner.model-chart__radar-banner,
-  .radar-page__head,
+  .cowork-radar-page__head,
   [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
-  [data-theme="dark"] .radar-page__head {
+  [data-theme="dark"] .cowork-radar-page__head {
     background: var(--surface-raised);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  .model-chart__radar-mark {
+  .cowork-radar-mark {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -4620,12 +4620,12 @@ select:disabled {
   Radar subpage: the same white glass header (tint and feed mark, no hover lift) over a numbered
   list of story cards. Every surface sets its background and text colour.
 */
-.radar-page {
+.cowork-radar-page {
   display: flex;
   flex-direction: column;
   gap: var(--space-5, 20px);
 }
-.radar-page__head {
+.cowork-radar-page__head {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -4635,19 +4635,19 @@ select:disabled {
   padding: 76px var(--space-6, 24px) var(--space-5, 20px);
   border-radius: 20px;
 }
-.radar-page__head > * {
+.cowork-radar-page__head > * {
   position: relative;
   z-index: 1;
 }
-.radar-page__head > .model-chart__radar-mark {
+.cowork-radar-page__head > .cowork-radar-mark {
   position: absolute;
 }
-.radar-page__eyebrow {
+.cowork-radar-page__eyebrow {
   color: var(--ink-secondary);
   font-size: 12px;
   line-height: 16px;
 }
-.radar-page__title {
+.cowork-radar-page__title {
   margin: 0;
   color: var(--ink-primary);
   font-size: 28px;
@@ -4655,20 +4655,20 @@ select:disabled {
   line-height: 34px;
   letter-spacing: -0.02em;
 }
-.radar-page__lede {
+.cowork-radar-page__lede {
   max-width: 68ch;
   margin: 0;
   color: var(--ink-secondary);
   font-size: 14px;
   line-height: 21px;
 }
-.radar-page__meta {
+.cowork-radar-page__meta {
   color: var(--ink-muted);
   font-size: 12px;
   line-height: 16px;
   font-variant-numeric: tabular-nums;
 }
-.radar-page__list {
+.cowork-radar-page__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3, 12px);
@@ -4676,7 +4676,7 @@ select:disabled {
   padding: 0;
   list-style: none;
 }
-.radar-story__card {
+.cowork-radar-story__card {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
   gap: var(--space-3, 12px);
@@ -4686,33 +4686,33 @@ select:disabled {
   background: var(--surface-raised);
   color: var(--ink-primary);
 }
-.radar-story__rank {
+.cowork-radar-story__rank {
   color: var(--ink-brand);
   font-size: 18px;
   font-weight: 700;
   line-height: 24px;
   font-variant-numeric: tabular-nums;
 }
-.radar-story__body {
+.cowork-radar-story__body {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
-.radar-story__headline {
+.cowork-radar-story__headline {
   margin: 0;
   color: var(--ink-primary);
   font-size: 16px;
   font-weight: 650;
   line-height: 24px;
 }
-.radar-story__summary {
+.cowork-radar-story__summary {
   margin: 0;
   color: var(--ink-secondary);
   font-size: 14px;
   line-height: 21px;
 }
-.radar-story__meta {
+.cowork-radar-story__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -4723,7 +4723,7 @@ select:disabled {
   line-height: 18px;
   font-variant-numeric: tabular-nums;
 }
-.radar-story__source {
+.cowork-radar-story__source {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -4731,23 +4731,23 @@ select:disabled {
   font-weight: 600;
   text-decoration: none;
 }
-a.radar-story__source:hover {
+a.cowork-radar-story__source:hover {
   color: var(--ink-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-a.radar-story__source:focus-visible {
+a.cowork-radar-story__source:focus-visible {
   border-radius: 4px;
   outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
   outline-offset: 2px;
 }
-.radar-story__source svg {
+.cowork-radar-story__source svg {
   width: 12px;
   height: 12px;
 }
 @media (max-width: 640px) {
-  .radar-page__title { font-size: 22px; line-height: 28px; }
-  .radar-story__card { grid-template-columns: 22px minmax(0, 1fr); padding: 14px 16px; }
+  .cowork-radar-page__title { font-size: 22px; line-height: 28px; }
+  .cowork-radar-story__card { grid-template-columns: 22px minmax(0, 1fr); padding: 14px 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .model-chart__radar-banner:hover { transform: none; }
