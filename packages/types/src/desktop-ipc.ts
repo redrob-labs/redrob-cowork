@@ -415,6 +415,8 @@ export type DesktopCommandMap = {
     args: [input: DesktopNotificationInput];
     result: DesktopNotificationResult;
   };
+  /** Restore, show and focus the window that sent this, e.g. when the server asks to open a desk. */
+  desktopFocusWindow: { args: []; result: { ok: boolean } };
   desktopSentrySetSession: {
     args: [input: { userId: string; orgId: string }];
     result: { enabled: boolean };

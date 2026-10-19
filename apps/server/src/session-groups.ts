@@ -13,7 +13,8 @@ export type SessionGroupState = {
   assignments: Record<string, string>;
 };
 
-export type SessionGroupEventAction = "created" | "updated" | "deleted" | "assigned" | "reordered" | "imported";
+/** `opened` changes no state: it asks the app showing this workspace to bring that desk to the front. */
+export type SessionGroupEventAction = "created" | "updated" | "deleted" | "assigned" | "reordered" | "imported" | "opened";
 
 export type SessionGroupEvent = {
   id: string;
