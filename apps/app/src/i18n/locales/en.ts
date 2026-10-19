@@ -250,8 +250,6 @@ const en = {
   "cowork.chart_trending_note": "A dated editorial snapshot from public search trends.",
   "cowork.chart_trending_korea": "Korea",
   "cowork.chart_trending_global": "Global",
-  "cowork.chart_trending_pause": "Pause trending searches",
-  "cowork.chart_trending_play": "Play trending searches",
   "cowork.chart_trending_up": "Up {count}",
   "cowork.chart_trending_down": "Down {count}",
   "cowork.chart_trending_same": "No change",

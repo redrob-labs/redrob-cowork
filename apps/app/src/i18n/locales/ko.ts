@@ -531,8 +531,6 @@ const ko = {
   "cowork.chart_trending_note": "공개 검색 흐름을 날짜별로 골라 담은 목록이에요.",
   "cowork.chart_trending_korea": "국내",
   "cowork.chart_trending_global": "글로벌",
-  "cowork.chart_trending_pause": "급상승 검색어 멈추기",
-  "cowork.chart_trending_play": "급상승 검색어 다시 넘기기",
   "cowork.chart_trending_up": "{count}계단 상승",
   "cowork.chart_trending_down": "{count}계단 하락",
   "cowork.chart_trending_same": "변동 없음",

@@ -1,5 +1,5 @@
-import { Badge, Tabs } from "@redrob-labs/ui";
-import { ChevronDown, Minus, Pause, Play, TrendingUp, Triangle } from "lucide-react";
+import { Badge, Tabs, icons } from "@redrob-labs/ui";
+import { ChevronDown, Minus, Triangle } from "lucide-react";
 import { useRef, useState, type KeyboardEvent } from "react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
@@ -94,7 +94,6 @@ export type TrendingTickerProps = {
 /** Collapsed rotating search ticker plus its two-tab ranked list. */
 export function TrendingTicker(props: TrendingTickerProps) {
   const [open, setOpen] = useState(false);
-  const [manualPaused, setManualPaused] = useState(false);
   const [pointerInside, setPointerInside] = useState(false);
   const [focusInside, setFocusInside] = useState(false);
   const [scope, setScope] = useState<TrendScope>("korea");
@@ -104,7 +103,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
   const rotation = useAutoRotate({
     count: sequence.length,
     ms: TICKER_MS,
-    paused: manualPaused || pointerInside || focusInside || open,
+    paused: pointerInside || focusInside || open,
   });
   const current = sequence[rotation.index] ?? sequence[0];
   const visibleItems = scope === "korea" ? props.data.korea : props.data.global;
@@ -164,7 +163,10 @@ export function TrendingTicker(props: TrendingTickerProps) {
             }
           }}
         >
-          <TrendingUp className="model-chart__trending-icon" aria-hidden />
+          {/* The same chart mark as the sidebar's Trending AI item, so the ticker reads as part of it. */}
+          <span className="model-chart__trending-icon" aria-hidden="true">
+            {icons.chart({ width: 14, height: 14, "aria-hidden": true })}
+          </span>
           <span className="model-chart__trending-label">{t("cowork.chart_trending_label")}</span>
           {current ? (
             <span className="model-chart__trending-window" aria-hidden="true">
@@ -217,17 +219,6 @@ export function TrendingTicker(props: TrendingTickerProps) {
         </PopoverContent>
       </Popover>
       </div>
-      {rotation.reducedMotion ? null : (
-        <button
-          type="button"
-          className="model-chart__trending-pause"
-          aria-label={manualPaused ? t("cowork.chart_trending_play") : t("cowork.chart_trending_pause")}
-          aria-pressed={manualPaused}
-          onClick={() => setManualPaused((paused) => !paused)}
-        >
-          {manualPaused ? <Play aria-hidden /> : <Pause aria-hidden />}
-        </button>
-      )}
     </div>
   );
 }

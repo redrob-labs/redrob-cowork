@@ -3850,7 +3850,6 @@ select:disabled {
 .model-chart__trending {
   display: flex;
   align-items: center;
-  gap: 6px;
   width: min(360px, 100%);
   min-width: 0;
   color: var(--ink-primary);
@@ -3860,6 +3859,8 @@ select:disabled {
   min-width: 0;
   flex: 1;
 }
+/* One 20px text line for every part of the pill, so icon, label, scope, rank, term, mark and chevron
+   share a single centre line instead of each font's own baseline. */
 .model-chart__trending-trigger {
   display: flex;
   align-items: center;
@@ -3867,7 +3868,8 @@ select:disabled {
   min-width: 0;
   height: 32px;
   flex: 1;
-  padding: 0 9px 0 12px;
+  padding: 0 10px 0 12px;
+  line-height: 20px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full, 999px);
   background: var(--surface-raised);
@@ -3879,23 +3881,37 @@ select:disabled {
   border-color: var(--border-strong);
 }
 .model-chart__trending-trigger:focus-visible,
-.model-chart__trending-pause:focus-visible,
 .model-chart__banner-pause:focus-visible,
 .model-chart__trending-row:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 .model-chart__trending-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
   color: var(--ink-brand);
 }
+.model-chart__trending-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+/* The label ends in a hairline divider, so the rotating entry reads as its value. */
 .model-chart__trending-label {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
   flex: 0 0 auto;
+  padding-inline-end: 8px;
+  border-inline-end: 1px solid var(--border-subtle);
   color: var(--ink-secondary);
-  font: var(--text-caption, 11px/16px sans-serif);
+  font-size: 12px;
   font-weight: 650;
+  line-height: 14px;
 }
 .model-chart__trending-window {
   display: block;
@@ -3905,10 +3921,10 @@ select:disabled {
   overflow: hidden;
 }
 .model-chart__trending-entry {
-  display: grid;
-  grid-template-columns: auto 18px minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   height: 20px;
   animation: model-chart-trending-in var(--duration-base, 220ms) var(--easing-standard, ease);
 }
@@ -3917,8 +3933,27 @@ select:disabled {
   to { transform: translateY(0); opacity: 1; }
 }
 .model-chart__trending-scope {
+  flex: 0 0 auto;
   color: var(--ink-muted);
-  font: var(--text-caption, 11px/16px sans-serif);
+  font-size: 11px;
+  line-height: 20px;
+}
+/* In the pill the rank hugs its term; the panel rows keep their fixed rank column. */
+.model-chart__trending-entry .model-chart__trending-rank {
+  flex: 0 0 auto;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: start;
+}
+.model-chart__trending-entry .model-chart__trending-item-label {
+  flex: 0 1 auto;
+  line-height: 20px;
+}
+.model-chart__trending-entry .model-chart__trending-mark {
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 20px;
 }
 .model-chart__trending-rank {
   min-width: 18px;
@@ -3940,16 +3975,17 @@ select:disabled {
   white-space: nowrap;
 }
 .model-chart__trending-chevron {
+  display: block;
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
+  margin-inline-start: auto;
   color: var(--ink-muted);
   transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
 }
 .model-chart__trending-chevron[data-open] {
   transform: rotate(180deg);
 }
-.model-chart__trending-pause,
 .model-chart__banner-pause {
   display: grid;
   place-items: center;
@@ -3963,12 +3999,10 @@ select:disabled {
   color: var(--ink-muted);
   cursor: pointer;
 }
-.model-chart__trending-pause:hover,
 .model-chart__banner-pause:hover {
   border-color: var(--border-strong);
   color: var(--ink-primary);
 }
-.model-chart__trending-pause svg,
 .model-chart__banner-pause svg {
   width: 12px;
   height: 12px;
