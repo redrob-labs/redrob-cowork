@@ -21,10 +21,7 @@ import { coworkSystemText } from "@/react-app/cowork/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/cowork/thread/memory-context";
 import { toNote } from "@/react-app/cowork/services/real-services";
 import { isPlanRunPrompt, isQuestionAnswerPrompt, planTurnInstruction } from "@/react-app/cowork/thread/thread-logic";
-import { useRepairMarkerTitles } from "@/react-app/cowork/thread/use-repair-marker-titles";
-
-/** Stable empty list, so the title repair's effect does not re-run on every render. */
-const EMPTY_ROUTE_SESSIONS: never[] = [];
+import { useChatTitles, type TitledSession } from "@/react-app/cowork/thread/use-chat-titles";
 import { useCoworkCrossCheck } from "@/react-app/cowork/thread/use-cowork-cross-check";
 import type {
   AgentPartInput,
@@ -216,6 +213,9 @@ import {
   refreshProviderListQueries,
   useProviderListQuery,
 } from "@/react-app/infra/provider-list-query";
+
+/** Stable empty list, so the chat-title effect does not re-run on every render. */
+const EMPTY_ROUTE_SESSIONS: readonly TitledSession[] = [];
 
 /**
  * Serialize an SDK error value into a string that parseSessionError can parse.
@@ -2487,8 +2487,9 @@ export function SessionRoute() {
     levels: local.prefs.coworkCrossCheck,
   });
 
-  // Round 9: a chat the server titled "```redrob-questions" is renamed after its first prompt.
-  useRepairMarkerTitles({
+  // In the Cowork frame, a chat titled from its prompt (or a block marker) gets a short name.
+  useChatTitles({
+    enabled: inCoworkFrame,
     client: opencodeClient,
     directory: selectedWorkspaceRoot || undefined,
     sessions: sessionsByWorkspaceId[selectedWorkspaceId] ?? EMPTY_ROUTE_SESSIONS,

@@ -22,8 +22,7 @@ export function getDisplaySessionTitle(
 }
 
 /**
- * Round 9: a title that is really the opening line of a fenced Cowork block. Since round 8b the
- * Plan agent's first reply is a `redrob-questions` block, and the server's title step can pick up
+ * A title that is really the opening line of a fenced Cowork block. The Plan agent's first reply is a `redrob-questions` block, and the server's title step can pick up
  * its fence line ("```redrob-questions") as the chat's name. Such a title is never shown.
  */
 export function isBlockMarkerTitle(title: string | null | undefined): boolean {
@@ -33,7 +32,7 @@ export function isBlockMarkerTitle(title: string | null | undefined): boolean {
   return /^`{0,3}\s*redrob-[a-z-]+\s*`{0,3}$/i.test(trimmed);
 }
 
-/** Round 9: a stored chat title as lists should show it: "" for a block marker, so they fall back. */
+/** A stored chat title as lists should show it: "" for a block marker, so they fall back. */
 export function shownChatTitle(title: string | null | undefined): string {
   return title && !isBlockMarkerTitle(title) ? title : "";
 }
@@ -42,11 +41,11 @@ export function shownChatTitle(title: string | null | undefined): string {
 const PROMPT_TITLE_MAX = 60;
 
 /**
- * Round 9: a chat title made from the person's first prompt, used to replace a block-marker title.
- * First line only, whitespace collapsed, trailing punctuation dropped, cut on a word boundary with
+ * A chat title made from the person's first prompt; the fallback of shortTitleFromPrompt when
+ * stripping filler leaves nothing. First line only, whitespace collapsed, trailing punctuation dropped, cut on a word boundary with
  * an ellipsis past PROMPT_TITLE_MAX. Empty in, empty out.
  */
-export function titleFromPrompt(prompt: string): string {
+function titleFromPrompt(prompt: string): string {
   const firstLine = prompt.split(/\r?\n/).find((line) => line.trim())?.trim() ?? "";
   const text = firstLine.replace(/\s+/g, " ").replace(/[\s.,;:!?]+$/, "");
   if (!text) return "";
@@ -57,11 +56,11 @@ export function titleFromPrompt(prompt: string): string {
   return `${(space > PROMPT_TITLE_MAX / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:]+$/, "")}\u2026`;
 }
 
-/** Round 10: most words a chat title may have (Felix: "fewer than 7 words max"). */
+/** Most words a chat title may have (titles stay under 7 words). */
 export const CHAT_TITLE_MAX_WORDS = 6;
 
 /**
- * Round 10: openers that say what to do rather than what it is about ("Deep research, deep think
+ * Openers that say what to do rather than what it is about ("Deep research, deep think
  * and tell me ..."). Stripped from the front of a prompt, repeatedly, before it becomes a title.
  */
 const PROMPT_FILLER = [
@@ -77,7 +76,7 @@ const PROMPT_FILLER = [
 ];
 
 /**
- * Round 10: a short chat title made by rule from the person's first prompt: filler openers dropped,
+ * A short chat title made by rule from the person's first prompt: filler openers dropped,
  * the first clause kept, capped at CHAT_TITLE_MAX_WORDS words, first letter capitalised, no
  * ellipsis. It shows until the AI-written title lands, and stays when that request fails.
  * Falls back to the plain first-line title when stripping leaves nothing.
@@ -100,7 +99,7 @@ export function shortTitleFromPrompt(prompt: string): string {
 }
 
 /**
- * Round 10: the title an AI naming request answered with, cleaned: first line of plain text, no
+ * The title an AI naming request answered with, cleaned: first line of plain text, no
  * fences, quotes, markdown or "Title:" label, no closing punctuation. "" when the answer is not a
  * usable title (empty, a Cowork block, JSON, or longer than CHAT_TITLE_MAX_WORDS + 1 words), so the
  * caller keeps the rule-made title.
@@ -121,7 +120,7 @@ export function cleanGeneratedTitle(answer: string): string {
 }
 
 /**
- * Round 10: whether a stored title was made from the prompt itself rather than chosen: a block
+ * Whether a stored title was made from the prompt itself rather than chosen: a block
  * marker, the default title, or the prompt's own opening words (any trailing "~", "..." or "\u2026"
  * ignored). A title the person typed in Rename is none of these, so it is never replaced.
  */
