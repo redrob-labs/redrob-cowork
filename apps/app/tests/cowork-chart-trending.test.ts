@@ -118,3 +118,28 @@ describe("hero banner rotation", () => {
     expect(home).toContain("pointerInside: bannerPointerInside, focusInside: bannerFocusInside, stopped: bannerStopped");
   });
 });
+
+
+describe("ticker pill layout", () => {
+  const rule = (css: string, selector: string) => {
+    // Match the selector at the start of a line, so ".a .b {" never stands in for ".b {".
+    const at = css.search(new RegExp(`(^|\\n)${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\{`));
+    expect(at).toBeGreaterThanOrEqual(0);
+    return css.slice(at, css.indexOf("}", at));
+  };
+
+  test("pushes rank, term and arrow to the end edge with the scope at the item text size", async () => {
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    expect(rule(css, ".model-chart__trending-entry .model-chart__trending-rank")).toContain("margin-inline-start: auto");
+    const scope = rule(css, ".model-chart__trending-scope");
+    expect(scope).toContain("var(--text-body-sm");
+    expect(scope).not.toContain("11px");
+    expect(rule(css, ".model-chart__trending-item-label")).toContain("var(--text-body-sm");
+  });
+
+  test("keeps the pill's size", async () => {
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    expect(rule(css, ".model-chart__trending")).toContain("width: min(360px, 100%)");
+    expect(rule(css, ".model-chart__trending-trigger")).toContain("height: 32px");
+  });
+});
