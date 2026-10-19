@@ -147,6 +147,7 @@ import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/cowork-blocks"
 import { CoworkAnswerFooter, CoworkBlocksView, CoworkMemoryNote, CoworkRunStatus } from "@/react-app/cowork/thread/cowork-thread"
 import { memorySavedFrom } from "@/react-app/cowork/thread/thread-logic"
+import { withoutTodoToolParts } from "@/react-app/cowork/thread/hide-todo-tools"
 import { useFrameStore } from "@/react-app/cowork/store/frame-store"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
@@ -1669,10 +1670,15 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
   )
 }
 
-export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
+export function MessageList({ messages: rawMessages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
-  const showLoading = shouldShowMessageListLoading(status, messages.length)
   const inCoworkFrame = useInCoworkFrame()
+  // Round 7 C8: in the Cowork frame the to-do tool calls are not drawn (the dock carries progress).
+  const messages = React.useMemo(
+    () => (inCoworkFrame ? withoutTodoToolParts(rawMessages) : rawMessages),
+    [inCoworkFrame, rawMessages],
+  )
+  const showLoading = shouldShowMessageListLoading(status, messages.length)
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
   /*
     Which rows a context compaction owns. The engine's summary arrives as real messages - a marked user
