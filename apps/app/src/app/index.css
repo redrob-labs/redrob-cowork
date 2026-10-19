@@ -6020,8 +6020,26 @@ a.cowork-radar-story__source:focus-visible {
   opacity: 1;
 }
 
+/* The hover fill belongs to the whole item (row link, more button and the padding around it),
+   like the History rows, so it no longer stops short of the button. The link inside an item
+   drops its own fill. */
+.cowork-project-item:hover,
+.cowork-project-item:focus-within,
 .cowork-project-item[data-menu-open] {
   background: var(--surface-sunken);
+}
+
+.cowork-project-item > .cowork-project-row:hover {
+  background: none;
+}
+
+/* The folder tile is --surface-sunken too, so on a filled row it would vanish; it lifts to the
+   base surface with a hairline instead. */
+.cowork-project-item:hover .cowork-project-row__icon,
+.cowork-project-item:focus-within .cowork-project-row__icon,
+.cowork-project-item[data-menu-open] .cowork-project-row__icon {
+  background: var(--surface-base);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .cowork-project-row__text .cowork-inline-rename {
