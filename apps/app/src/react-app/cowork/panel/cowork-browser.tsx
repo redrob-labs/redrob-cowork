@@ -39,6 +39,20 @@ export function mergeTabOrder(all: readonly { id: string; type: string }[], brow
   return all.map((tab) => (tab.type === "browser" ? (queue.shift() ?? tab.id) : tab.id));
 }
 
+/**
+ * The tab a key moves to in the tab strip (ArrowLeft/ArrowRight wrap, Home/End jump), or null for
+ * any other key. Pure; the strip selects and focuses the result (roving tabindex).
+ */
+export function tabKeyTarget(ids: readonly string[], currentId: string, key: string): string | null {
+  const at = ids.indexOf(currentId);
+  if (at < 0 || ids.length === 0) return null;
+  if (key === "ArrowRight") return ids[(at + 1) % ids.length] ?? null;
+  if (key === "ArrowLeft") return ids[(at - 1 + ids.length) % ids.length] ?? null;
+  if (key === "Home") return ids[0] ?? null;
+  if (key === "End") return ids[ids.length - 1] ?? null;
+  return null;
+}
+
 /** A new tab opens on the Cowork's own page, not on a search engine. */
 export const NEW_TAB_URL = "about:blank";
 
@@ -186,6 +200,9 @@ export function CoworkBrowserView(props: CoworkBrowserViewProps) {
                   type="button"
                   role="tab"
                   aria-selected={selected}
+                  // Roving tabindex: only the selected tab is in the Tab order; arrows move between tabs.
+                  tabIndex={selected ? 0 : -1}
+                  data-tab-id={entry.id}
                   className="cowork-browser__tab-select"
                   title={title}
                   onClick={() => props.onSelectTab(entry.id)}
@@ -193,7 +210,16 @@ export function CoworkBrowserView(props: CoworkBrowserViewProps) {
                     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "w") {
                       event.preventDefault();
                       props.onCloseTab(entry.id);
+                      return;
                     }
+                    const target = tabKeyTarget(props.tabs.map((each) => each.id), entry.id, event.key);
+                    if (!target) return;
+                    event.preventDefault();
+                    props.onSelectTab(target);
+                    event.currentTarget
+                      .closest('[role="tablist"]')
+                      ?.querySelector<HTMLButtonElement>(`[data-tab-id="${CSS.escape(target)}"]`)
+                      ?.focus();
                   }}
                 >
                   {live ? (
