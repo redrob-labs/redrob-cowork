@@ -434,11 +434,13 @@ export function ModelSelect({
               disabled={disabled}
               aria-label={t("session.change_model")}
               aria-keyshortcuts="Meta+Alt+/"
-              className="flex h-9 max-h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
+              className="flex h-9 max-h-9 min-w-0 max-w-full items-center gap-1.5 rounded-md px-2.5 text-sm text-subtle-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-60"
             />
           }
         >
-          <span className="max-w-48 truncate">
+          {/* Shrinks with the row and truncates; only a very narrow action row (under 16rem) hides the
+              name, and the tooltip still carries it. */}
+          <span className="min-w-0 max-w-48 truncate @max-[16rem]/composer-actions:hidden">
             {hideValue
               ? t("model_select.select_model")
               : (shownTitle || t("model_select.select_model"))}
@@ -448,7 +450,7 @@ export function ModelSelect({
             so this control shows the model and nothing else. Two settings on one button, one of them
             read-only, is what made the interaction unreadable.
           */}
-          <ChevronDown className="h-3 w-3" />
+          <ChevronDown className="h-3 w-3 shrink-0" />
         </TooltipTrigger>
         <TooltipContent>
           {t("session.change_model")}
@@ -456,9 +458,9 @@ export function ModelSelect({
       </Tooltip>
       <PopoverContent
         // border-0 rounded-none: the DS PopoverContent defaults to `rounded-lg border`,
-        // which drew a second rounded border around the ModelMenu's own rounded-2xl
-        // container (round 5, item 7). The menu supplies the only frame now.
-        // Round 14, item G: the base PopoverContent also sets `backdrop-blur-xl
+        // which would draw a second rounded border around the ModelMenu's own rounded-2xl
+        // container; the menu supplies the only frame.
+        // The base PopoverContent also sets `backdrop-blur-xl
         // backdrop-saturate-150`, which tailwind-merge does NOT override here — a backdrop-filter on
         // a rounded-none box paints a HARD GREY SQUARE pane behind the rounded menu. Cancel it so the
         // only painted/filtered surface is the ModelMenu's own rounded card.

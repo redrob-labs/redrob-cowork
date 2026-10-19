@@ -2,14 +2,12 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ComposerMode,
   ComposerStatus,
   CrossCheckSetting,
   IconButton,
   MemoryScope,
   PrivacyProtection,
   icons,
-  type ComposerModeOption,
   type ComposerStatusItem,
   type CrossCheckLevel,
   type CrossCheckValue,
@@ -33,12 +31,11 @@ import {
 } from "../../domains/session/voice/voice-dictation";
 import { createCoworkServices } from "../services/real-services";
 import { privacyLevelLabel } from "../shell/nav";
-import type { ChatMemory, ChatMode, PrivacyLevel } from "../services/types";
+import type { ChatMemory, PrivacyLevel } from "../services/types";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
 import {
   memoryFor,
-  modeFor,
   transcriptHandler,
   useCoworkComposerStore,
   type CoworkCrossCheck,
@@ -74,13 +71,6 @@ export function micFailureText(error: unknown): string | undefined {
   return error instanceof Error ? error.message : undefined;
 }
 
-function modeOptions(): ComposerModeOption[] {
-  return [
-    { value: "plan", label: t("cowork.mode_plan"), icon: "route", hint: t("cowork.mode_plan_hint") },
-    { value: "run", label: t("cowork.mode_run"), icon: "play", hint: t("cowork.mode_run_hint") },
-  ];
-}
-
 export type CoworkComposerToolsViewProps = {
   mic: MicPhase["kind"];
   /** Seconds left while recording; shown beside the mic. */
@@ -89,13 +79,12 @@ export type CoworkComposerToolsViewProps = {
   micUnavailable: string | null;
   onMicPress: () => void;
   onMicRelease: () => void;
-  mode: ChatMode;
-  onModeChange: (mode: ChatMode) => void;
   /** The model control, last. */
   children?: ReactNode;
 };
 
-/** Mic, then Plan or Run, then the model: the composer's tools inside the Cowork frame. */
+/** Mic, then the model: the composer's tools inside the Cowork frame. The Plan/Run toggle was
+ *  removed: mode is decided automatically at send (effectiveCoworkMode), no user control. */
 export function CoworkComposerToolsView(props: CoworkComposerToolsViewProps) {
   const recording = props.mic === "recording";
   const label = props.micUnavailable
@@ -137,12 +126,6 @@ export function CoworkComposerToolsView(props: CoworkComposerToolsViewProps) {
           {t("cowork.mic_seconds_left", { seconds: props.secondsLeft })}
         </span>
       ) : null}
-      <ComposerMode
-        label={t("cowork.mode_label")}
-        options={modeOptions()}
-        value={props.mode}
-        onChange={(value) => props.onModeChange(value === "plan" ? "plan" : "run")}
-      />
       {props.children}
     </span>
   );
@@ -156,11 +139,9 @@ export type CoworkComposerToolsProps = {
   children?: ReactNode;
 };
 
-/** The tools wired up: Plan or Run per chat, and the mic writing into the draft. */
+/** The tools wired up: the mic writing into the draft. The Plan/Run toggle was removed;
+ *  mode is resolved automatically at send, so this component no longer reads or sets it. */
 export function CoworkComposerTools(props: CoworkComposerToolsProps) {
-  const { prefs } = useLocal();
-  const mode = useCoworkComposerStore((state) => modeFor(state.chats, props.chatKey, prefs.coworkNewChatMode));
-  const setMode = useCoworkComposerStore((state) => state.setMode);
   const setVoice = useFrameStore((state) => state.setVoice);
   const showToast = useFrameStore((state) => state.showToast);
   const client = useCoworkConnection((state) => state.client);
@@ -278,8 +259,6 @@ export function CoworkComposerTools(props: CoworkComposerToolsProps) {
         const now = Date.now();
         apply(micRelease(phaseRef.current, now), now);
       }}
-      mode={mode}
-      onModeChange={(next) => setMode(props.chatKey, next)}
     >
       {props.children}
     </CoworkComposerToolsView>

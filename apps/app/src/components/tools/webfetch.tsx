@@ -9,12 +9,19 @@ import type { WebFetchToolPart } from "@/lib/build-in-tools"
 import { cn } from "@/lib/utils"
 import { Tool } from "@/components/ui/tool"
 import { t } from "@/i18n"
+import { WebResearchGroup } from "@/components/chat/web-research-group"
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 
 interface WebfetchToolProps {
   part: WebFetchToolPart
 }
 
 export function WebfetchTool({ part }: WebfetchToolProps) {
+  // Round 9: in the Cowork thread a single page read joins the web research table (static globe,
+  // no loader), like a single search does since round 8b.
+  const inCoworkFrame = useInCoworkFrame()
+  if (inCoworkFrame) return <WebResearchGroup parts={[part]} />
+
   if (part.state === "output-error") {
     return <Tool toolPart={part} />
   }

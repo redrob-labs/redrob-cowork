@@ -15,6 +15,10 @@ import {
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { cn } from "@/lib/utils"
+import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
+import { WebResearchGroup } from "@/components/chat/web-research-group"
+import { FileEditGroup, isFileEditParts } from "@/components/chat/file-edit-group"
+import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 
 const ROW_CAP = 8
 
@@ -46,6 +50,20 @@ function failureReason(part: AnyToolPart): string | null {
  * dot, monospace action, per-item duration — capped with "Show N more".
  */
 export function ToolAggregateGroup({ parts, className }: ToolAggregateGroupProps) {
+  // In the Cowork thread, a run of web searches / page reads reads as the
+  // web research table (WebResearchGroup) instead of the monospace "Ran 3 searches" list.
+  const inCoworkFrame = useInCoworkFrame()
+  if (inCoworkFrame && parts.length > 0 && parts.every((part) => isWebSearchToolPart(part) || isWebFetchToolPart(part))) {
+    return <WebResearchGroup parts={parts} className={className} />
+  }
+  // File edits read as the same dropdown table ("Created 1 file"), not this list.
+  if (inCoworkFrame && isFileEditParts(parts)) {
+    return <FileEditGroup parts={parts} className={className} />
+  }
+  return <ToolAggregateList parts={parts} className={className} />
+}
+
+function ToolAggregateList({ parts, className }: ToolAggregateGroupProps) {
   const groupKey = parts[0]?.toolCallId ?? "aggregate"
   const latestToolCallId = parts.at(-1)?.toolCallId ?? groupKey
   const [expanded, setExpandedState] = useState(() => expandedByGroupKey.get(groupKey) ?? false)

@@ -1,6 +1,7 @@
 import { isReasoningUIPart, isToolUIPart, type DynamicToolUIPart, type FileUIPart, type ToolUIPart, type UIMessage } from "ai"
 import type { ThreadStatus } from "@/lib/messages"
-import { isAggregatableToolPart } from "@/lib/tool-aggregate"
+import { continuesAggregate, isAggregatableToolPart } from "@/lib/tool-aggregate"
+import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { t } from "@/i18n"
 
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -174,6 +175,39 @@ type AssistantRenderGroup =
   | { kind: "tool-aggregate"; parts: (ToolUIPart | DynamicToolUIPart)[] }
 
 /**
+ * Whether a render group is web research only: a web search / web fetch call, or an aggregate made
+ * solely of them. The live Cowork run keeps these in place (every other tool call folds into the
+ * activity row), so a search shows as it happens.
+ */
+export function isWebResearchGroup(group: AssistantRenderGroup): boolean {
+  const isWeb = (part: ToolUIPart | DynamicToolUIPart) => isWebSearchToolPart(part) || isWebFetchToolPart(part)
+  if (group.kind === "tool") return isWeb(group.part)
+  if (group.kind === "tool-aggregate") return group.parts.length > 0 && group.parts.every(isWeb)
+  return false
+}
+
+/** A live run's activity: its tool calls in order and the reasoning shown for it. */
+export type LiveActivity = { parts: (ToolUIPart | DynamicToolUIPart)[]; reasoning: string }
+
+/**
+ * The activity across a run's assistant messages: every tool call, plus the reasoning that has text
+ * (when thinking is shown). Null when there is none yet, which is exactly when the live activity row
+ * does not show; the message group and the bottom run status both key off this one test.
+ */
+export function liveActivityOf(messages: readonly UIMessage[], showThinking: boolean): LiveActivity | null {
+  const parts: (ToolUIPart | DynamicToolUIPart)[] = []
+  const reasoning: string[] = []
+  for (const message of messages) {
+    if (message.role !== "assistant") continue
+    for (const part of message.parts) {
+      if (isToolUIPart(part)) parts.push(part)
+      else if (showThinking && isReasoningUIPart(part) && part.text.trim()) reasoning.push(part.text)
+    }
+  }
+  return parts.length > 0 || reasoning.length > 0 ? { parts, reasoning: reasoning.join("\n\n") } : null
+}
+
+/**
  * Steps often arrive as one assistant message per tool call. When a
  * message contains nothing but aggregatable tool parts (plus step
  * markers / hidden reasoning), return those parts so consecutive
@@ -181,7 +215,9 @@ type AssistantRenderGroup =
  */
 export function getAggregateOnlyParts(
   message: UIMessage,
-  showThinking: boolean
+  showThinking: boolean,
+  /** Fold web search/fetch into the search family (Cowork frame only, see getToolFamily). */
+  foldWeb = false
 ): (ToolUIPart | DynamicToolUIPart)[] | null {
   const tools: (ToolUIPart | DynamicToolUIPart)[] = []
   for (const part of message.parts) {
@@ -194,7 +230,7 @@ export function getAggregateOnlyParts(
       if (part.text.trim()) return null
       continue
     }
-    if (isToolUIPart(part) && isAggregatableToolPart(part)) {
+    if (isToolUIPart(part) && isAggregatableToolPart(part, foldWeb)) {
       tools.push(part)
       continue
     }
@@ -235,7 +271,9 @@ export function splitTurnAtAnswer(message: UIMessage): { steps: UIMessage; answe
 
 export function getAssistantRenderGroups(
   parts: UIMessage["parts"],
-  showThinking: boolean
+  showThinking: boolean,
+  /** Fold web search/fetch into the search family (Cowork frame only, see getToolFamily). */
+  foldWeb = false
 ): AssistantRenderGroup[] {
   const filteredParts = parts.filter((part) => showThinking || !isReasoningUIPart(part))
   const groups: AssistantRenderGroup[] = []
@@ -299,10 +337,11 @@ export function getAssistantRenderGroups(
       // collapse into one aggregate group. Prose, files, and other tools
       // break the run; reasoning does not — thinking models emit a
       // reasoning part before nearly every call, and letting it split the
-      // run degrades every aggregate to a single call.
-      if (isAggregatableToolPart(part)) {
+      // run degrades every aggregate to a single call. In the Cowork frame a
+      // change of lane (web / edit / other) also starts a new aggregate.
+      if (isAggregatableToolPart(part, foldWeb)) {
         const previous = groups.findLast((group) => group.kind !== "reasoning")
-        if (previous?.kind === "tool-aggregate") {
+        if (previous?.kind === "tool-aggregate" && continuesAggregate(previous.parts.at(-1), part, foldWeb)) {
           previous.parts.push(part)
         } else {
           groups.push({ kind: "tool-aggregate", parts: [part] })

@@ -48,8 +48,19 @@ export function crossCheckPlan(levels: CoworkCrossCheck, input: { question: stri
 }
 
 /** What the check agent is asked: the question, the answer, and which checks. */
-export function checkPrompt(input: { question: string; answer: string; plan: CheckPlan }): string {
+export function checkPrompt(input: { question: string; answer: string; plan: CheckPlan; document?: CheckedDocument | null }): string {
   const asked = [input.plan.fact ? "a Fact check" : null, input.plan.challenge ? "a Challenge" : null].filter(Boolean);
+  // When the run wrote a deliverable, THAT document is what gets checked, not the
+  // short chat note that announced it.
+  if (input.document) {
+    return [
+      `Run ${asked.join(" and ")} on the document below, the deliverable this run wrote. Leave out the check you were not asked for.`,
+      "## The question",
+      input.question.trim() || "(not given)",
+      `## The document (${input.document.path})`,
+      input.document.content.trim(),
+    ].join("\n\n");
+  }
   return [
     `Run ${asked.join(" and ")} on the answer below. Leave out the check you were not asked for.`,
     "## The question",
@@ -57,6 +68,22 @@ export function checkPrompt(input: { question: string; answer: string; plan: Che
     "## The answer",
     input.answer.trim(),
   ].join("\n\n");
+}
+
+/** A file the run wrote in full: where, and its whole body. */
+export type CheckedDocument = { path: string; content: string };
+
+/**
+ * The deliverable of the turn that just answered - the newest full-file write in the
+ * assistant messages after the person's last message - or null when the run wrote no file. Pure.
+ */
+export function checkedDocument(messages: TranscriptMessage[]): CheckedDocument | null {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (!message || message.role === "user") return null;
+    if (message.document && message.document.content.trim()) return message.document;
+  }
+  return null;
 }
 
 /** A check agent's answer, read for its one block. */
@@ -71,11 +98,31 @@ export type TranscriptMessage = {
   /** The engine's finish reason; "tool-calls" means the turn is not over. */
   finish?: string;
   text: string;
+  /** The newest file this message wrote in full (a `write` tool call), if any. */
+  document?: CheckedDocument;
 };
 
 /** The last assistant message with something said, or null. */
 export function lastAnswer(messages: TranscriptMessage[]): TranscriptMessage | null {
   return messages.findLast((message) => message.role === "assistant" && message.text.trim().length > 0) ?? null;
+}
+
+/**
+ * The answer of the turn that just ran (the assistant messages after the person's last message):
+ * its newest message with text, else, when the turn wrote a deliverable but said nothing, its
+ * newest assistant message. Null when the turn has neither, so a check never lands on an earlier
+ * turn's answer. Pure.
+ */
+export function turnAnswer(messages: TranscriptMessage[]): TranscriptMessage | null {
+  let latest: TranscriptMessage | null = null;
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (!message || message.role === "user") break;
+    if (message.role !== "assistant") continue;
+    if (message.text.trim()) return message;
+    latest ??= message;
+  }
+  return latest && checkedDocument(messages) ? latest : null;
 }
 
 /** The model the chat sent with, so the check runs on the same one. */
@@ -88,6 +135,8 @@ export type CrossCheckDeps = {
   messages(sessionId: string): Promise<TranscriptMessage[]>;
   /** A session for the check, out of the chat's transcript. Returns its id. */
   createCheckSession(parentId: string): Promise<string>;
+  /** Removes a finished check's session from the engine. */
+  deleteCheckSession(checkSessionId: string): Promise<void>;
   prompt(sessionId: string, text: string, agent: string, model: CheckModel): Promise<void>;
   sleep(ms: number): Promise<void>;
   start(messageId: string, input: { planned: boolean; request: CheckRequest } & CheckPlan): void;
@@ -97,6 +146,8 @@ export type CrossCheckDeps = {
   untrack(checkSessionId: string): void;
   /** True once the check asked for something and was told no: it cannot finish. */
   stopped(checkSessionId: string): boolean;
+  /** Aborted when the hook that started the check goes away; the check then stops as failed. */
+  signal?: AbortSignal;
 };
 
 export const CHECK_POLL_MS = 2_000;
@@ -116,22 +167,27 @@ export async function runCrossCheck(
   let checkId: string | null = null;
   const { levels: _levels, plan: _plan, ...request } = input;
   try {
-    const answer = lastAnswer(await deps.messages(input.sessionId));
-    if (!answer) return;
+    const transcript = await deps.messages(input.sessionId);
+    const answer = turnAnswer(transcript);
+    if (!answer || deps.signal?.aborted) return;
     answerId = answer.id;
-    const plan = input.plan ?? crossCheckPlan(input.levels, { question: input.question, answer: answer.text });
+    // The deliverable the run wrote, when there is one, is what gets checked. The
+    // verdict chips still sit under the answer that announced it.
+    const document = checkedDocument(transcript);
+    const subject = document ? document.content : answer.text;
+    const plan = input.plan ?? crossCheckPlan(input.levels, { question: input.question, answer: subject });
     deps.start(answer.id, { planned: input.planned, request, ...plan });
     if (!plan.fact && !plan.challenge) return;
 
     checkId = await deps.createCheckSession(input.sessionId);
     deps.track(checkId, answer.id);
-    await deps.prompt(checkId, checkPrompt({ question: input.question, answer: answer.text, plan }), COWORK_CHECK_AGENT, {
+    await deps.prompt(checkId, checkPrompt({ question: input.question, answer: answer.text, plan, document }), COWORK_CHECK_AGENT, {
       ...(input.model ? { model: input.model } : {}),
       ...(input.variant ? { variant: input.variant } : {}),
     });
     for (let waited = 0; waited < CHECK_TIMEOUT_MS; waited += CHECK_POLL_MS) {
       await deps.sleep(CHECK_POLL_MS);
-      if (deps.stopped(checkId)) break;
+      if (deps.stopped(checkId) || deps.signal?.aborted) break;
       const reply = lastAnswer(await deps.messages(checkId));
       if (reply?.completed && reply.finish !== "tool-calls") {
         deps.settle(answer.id, parseCheckAnswer(reply.text));
@@ -142,7 +198,11 @@ export async function runCrossCheck(
   } catch {
     if (answerId) deps.settle(answerId, null);
   } finally {
-    if (checkId) deps.untrack(checkId);
+    if (checkId) {
+      deps.untrack(checkId);
+      // The check session is machinery: never leave it behind. A failed delete does not change the result.
+      await deps.deleteCheckSession(checkId).catch(() => undefined);
+    }
   }
 }
 

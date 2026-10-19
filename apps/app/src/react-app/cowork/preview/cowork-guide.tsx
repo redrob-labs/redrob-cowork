@@ -30,7 +30,10 @@ import {
   type GuideUse,
 } from "../guide/model-guide";
 import { CoworkShell } from "../shell/cowork-shell";
+import { useCoworkConnection } from "../shell/cowork-connection";
+import { useCoworkStartStore } from "../skills/start-chat";
 import { ModelChartHome, type ChartPick } from "./model-chart-home";
+import { TRENDING, trendLabel, trendingEditionDate, type TrendItem } from "./chart-trending";
 import { ChartDetail } from "./chart-detail";
 import { CHART_MODELS } from "./chart-models";
 
@@ -63,19 +66,27 @@ export function ProfessionGuideView(props: {
   locale: Language;
   onChoose?: (model: ModelRef, variant: string | null) => void;
   onStartChat?: () => void;
+  /** Starts a normal chat for a selected trending search. */
+  onTrendPick: (item: TrendItem) => void;
 }) {
-  // Round 8, item 10: the chart-style browse layer. Null = the Spotify/Apple-Music home (banners +
+  // The chart-style browse layer. Null = the chart home (banners +
   // tiles); a pick drills into the existing ModelGuide ranking for that profession or output.
   const [pick, setPick] = useState<ChartPick | null>(null);
-  // Round 37 (item 8): opening a chart (or switching charts) kept the shell's
-  // scroll position, so a detail could open scrolled to the middle. The scrolling
-  // container is the DS shell's #rr-shell-main; reset it to the top whenever the
-  // pick changes (enter a detail, switch charts, or return to the home).
+  // A chart opens at the top: the DS shell's #rr-shell-main keeps its scroll position
+  // otherwise, so reset it whenever the pick changes (detail, chart switch, or home).
   useEffect(() => {
     document.getElementById("rr-shell-main")?.scrollTo({ top: 0 });
   }, [pick]);
   if (!pick) {
-    return <ModelChartHome research={props.research} locale={props.locale} onOpen={setPick} />;
+    return (
+      <ModelChartHome
+        research={props.research}
+        locale={props.locale}
+        trendingEdition={trendingEditionDate(TRENDING.asOf, props.locale)}
+        onOpen={setPick}
+        onTrendPick={props.onTrendPick}
+      />
+    );
   }
   return (
     <ChartDetail
@@ -218,6 +229,21 @@ export function GuideScreen() {
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const local = useLocalOptional();
   const navigate = useNavigate();
+  const workspaceId = useCoworkConnection((state) => state.workspaceId);
+  const requestChat = useCoworkStartStore((state) => state.request);
+  const openTrend = (item: TrendItem) => {
+    if (!workspaceId) {
+      toast.warning(t("cowork.chart_trending_no_project"));
+      navigate("/chat");
+      return;
+    }
+    requestChat({
+      workspaceId,
+      prompt: t("cowork.chart_trending_prompt", { topic: trendLabel(item, locale) }),
+      mode: "run",
+    });
+    navigate("/chat");
+  };
   // New chats start on the default model; chats that exist keep theirs.
   const chooseForNewChats = local
     ? (model: ModelRef, variant: string | null) => {
@@ -225,8 +251,7 @@ export function GuideScreen() {
         markNewChatUsesDefault();
       }
     : undefined;
-  // Round 11 (Trending AI): the "By price" view was dropped and the header + tab strip removed, so
-  // the screen is the profession chart only. The pricing query and tab state are gone with them.
+  // The screen is the profession chart only: no price view, header or tab strip.
   const research = useQuery({
     queryKey: GUIDE_RESEARCH_KEY,
     queryFn: () => loadGuideResearch(guideFetch(isDesktopRuntime())),
@@ -241,7 +266,13 @@ export function GuideScreen() {
         ) : !research.data ? (
           <EmptyState title={t("cowork.guide_profession_error")} description={t("cowork.settings_try_again")} />
         ) : (
-          <ProfessionGuideView research={research.data} locale={locale} onChoose={chooseForNewChats} onStartChat={() => navigate("/chat")} />
+          <ProfessionGuideView
+            research={research.data}
+            locale={locale}
+            onChoose={chooseForNewChats}
+            onStartChat={() => navigate("/chat")}
+            onTrendPick={openTrend}
+          />
         )}
       </div>
     </CoworkShell>

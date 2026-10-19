@@ -20,7 +20,6 @@ import {
   Undo2,
   Volume2,
 } from "lucide-react"
-import { PaperGrainGradient } from "@redrob/ui/react"
 import {
   DynamicToolUIPart,
   isFileUIPart,
@@ -48,6 +47,7 @@ import { WebfetchTool } from "@/components/tools/webfetch"
 import { WebsearchTool } from "@/components/tools/websearch"
 import { useMessageList, useSessionErrorMessage } from "@/components/chat/message-list-provider"
 import { ArtifactList } from "@/components/chat/artifact"
+import { ArtifactCardList } from "@/components/chat/artifact-card"
 import { TaskSuggestions } from "@/components/chat/task-suggestions"
 import { RedrobPayNotice } from "@/react-app/domains/billing/redrob-pay-sheet"
 import {
@@ -97,6 +97,8 @@ import {
   MessageContent,
 } from "@/components/ui/message"
 import { Tool } from "@/components/ui/tool"
+import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader"
+import { useSmoothReveal } from "@/components/chat/use-smooth-reveal"
 import { CapabilityCallLine } from "@/components/chat/capability-call-line"
 import {
   isLiveStepAtBottom,
@@ -108,6 +110,7 @@ import { hasPreservedMcpAppResult, McpAppFrame } from "@/components/chat/mcp-app
 import { ReasoningBlock } from "@/components/chat/reasoning-block"
 import { SubagentRunLine } from "@/components/chat/subagent-run-line"
 import { ToolAggregateGroup } from "@/components/chat/tool-aggregate-group"
+import { isWebStepInFlight, UnifiedActivity } from "@/components/chat/unified-activity"
 import {
   isApplyPatchToolPart,
   isBashToolPart,
@@ -136,12 +139,15 @@ import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
-import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
-import type { AnyToolPart } from "@/lib/tool-aggregate"
+import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, isWebResearchGroup, liveActivityOf, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
+import { continuesAggregate, type AnyToolPart } from "@/lib/tool-aggregate"
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/cowork-blocks"
 import { CoworkAnswerFooter, CoworkBlocksView, CoworkMemoryNote, CoworkRunStatus } from "@/react-app/cowork/thread/cowork-thread"
 import { memorySavedFrom } from "@/react-app/cowork/thread/thread-logic"
+import { withoutTodoToolParts } from "@/react-app/cowork/thread/hide-todo-tools"
+import { isInvisibleCoworkText } from "@/react-app/cowork/thread/invisible-blocks"
+import { useCoworkThread } from "@/react-app/cowork/thread/cowork-thread-context"
 import { useFrameStore } from "@/react-app/cowork/store/frame-store"
 
 const SEARCH_HIGHLIGHT_MARK_CLASS = "rounded px-0.5 bg-warning-soft/70 text-current"
@@ -496,6 +502,12 @@ type AssistantMessageProps = {
   isLastStep: boolean
   /** Set when the turn's collapsed step run shows this reasoning instead. */
   hideReasoning?: boolean
+  /**
+   * Set while the unified live activity row stands in for this turn's steps: hide reasoning AND
+   * every tool/tool-aggregate group so the answer text renders alone and the steps are not drawn
+   * twice (once in the row, once here).
+   */
+  hideSteps?: boolean
 }
 
 /**
@@ -529,18 +541,69 @@ function AnswerOptionChips({
   )
 }
 
+/**
+ * The assistant's answer prose. While the latest message is streaming, the text is revealed
+ * letter-by-letter at a smooth constant velocity with an opening burst (see useSmoothReveal),
+ * and a steady Redrob-Blue typing cursor rides the end of the reveal via the
+ * `data-streaming-cursor` hook on `.markdown-content`. Non-streaming messages render in full
+ * with no cursor, exactly as before.
+ */
+const AssistantAnswerText = React.memo(
+  ({ body, isStreaming, highlightQuery }: { body: string; isStreaming: boolean; highlightQuery?: string }) => {
+    const { revealed, revealing } = useSmoothReveal(body, isStreaming)
+    return (
+      <MessageContent
+        // The assistant reply is plain prose on the page surface
+        // -- NO bubble. Override the DS MessageContent base (bg-secondary rounded-lg p-2) here
+        // via the cn(base, className) twMerge: bg-transparent, no radius, no inset padding.
+        data-surface="ai"
+        // Shows the steady brand-blue typing cursor only while the reveal is behind the text.
+        data-streaming-cursor={revealing ? "" : undefined}
+        className="bg-transparent rounded-none p-0 text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
+        markdown
+        isStreaming={isStreaming}
+        highlightQuery={highlightQuery}
+      >
+        {revealed}
+      </MessageContent>
+    )
+  },
+)
+AssistantAnswerText.displayName = "AssistantAnswerText"
+
 const AssistantMessage = React.memo(
-  ({ message, isLastMessage, isStreaming, hideReasoning }: AssistantMessageProps) => {
+  ({ message, isLastMessage, isStreaming, hideReasoning, hideSteps }: AssistantMessageProps) => {
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
     // Inside the Cowork frame, Plan's and Cross-check's fenced blocks render as the design system's.
     const inCoworkFrame = useInCoworkFrame()
+    // Where this message's Plan questions / plan stand, from the raw transcript.
+    const coworkQuestions = useCoworkThread()?.questions
+    const questionsOpen = coworkQuestions ? !coworkQuestions.answered.has(message.id) : isLastMessage
+    const planHeld = coworkQuestions?.heldPlans.has(message.id) ?? false
     const assistantRenderGroups = React.useMemo(
       () => {
-        const groups = getAssistantRenderGroups(message.parts, showThinking)
-        return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
+        // Per-message grouping stays per-kind here; the unified Cowork activity row is assembled
+        // once at the GROUP level (MessageGroup) over the whole run, since a run spans several
+        // assistant messages and folding per message would draw one stray row per message.
+        // Keys are taken BEFORE filtering, so a group keeps its key (and the answer keeps its
+        // reveal state) when the live row starts hiding the steps around it mid-stream.
+        const groups = getAssistantRenderGroups(message.parts, showThinking, inCoworkFrame)
+          .map((group, index) => ({ group, key: `${group.kind}-${index}` }))
+          // A text group that is only an answered questions block, a held plan, or a cross-check
+          // block (drawn in the footer) renders nothing; drop it so no empty wrapper keeps the gap.
+          .filter(({ group }) => !(inCoworkFrame && group.kind === "text" && isInvisibleCoworkText(group.text, { questionsOpen, planHeld })))
+        if (hideSteps) {
+          // The live activity row shows reasoning and tool calls; keep text, files and web
+          // research, which shows in place as it happens instead of a blank band until the run ends.
+          return groups.filter(({ group }) => group.kind === "text" || group.kind === "file" || isWebResearchGroup(group))
+        }
+        return hideReasoning ? groups.filter(({ group }) => group.kind !== "reasoning") : groups
       },
-      [hideReasoning, message.parts, showThinking]
+      [hideReasoning, hideSteps, inCoworkFrame, message.parts, planHeld, questionsOpen, showThinking]
     )
+
+    // A message whose parts all folded into the live row renders nothing, not an empty wrapper.
+    if (assistantRenderGroups.length === 0) return null
 
     return (
       <Message
@@ -549,7 +612,7 @@ const AssistantMessage = React.memo(
         data-message-role={message.role}
       >
         <div className="group flex w-full flex-col gap-0 space-y-2">
-          {assistantRenderGroups.map((group, index) => {
+          {assistantRenderGroups.map(({ group, key }) => {
             if (group.kind === "text") {
               /*
                 The options marker is taken off the text and rendered as chips instead.
@@ -568,25 +631,15 @@ const AssistantMessage = React.memo(
               const coworkBlocks = blocks && hasCoworkBlocks(blocks) ? blocks : null
               const body = coworkBlocks ? coworkBlocks.prose : parsed.body
               return (
-                <React.Fragment key={`text-${index}`}>
-                  {coworkBlocks && !body ? null : <MessageContent
-                    // Round 32/34 (Claude-style): the assistant reply is plain prose on
-                    // the page surface -- NO bubble. The DS MessageContent base paints a
-                    // filled bubble (bg-secondary rounded-lg p-2); round 33 added
-                    // data-surface="ai" + a text className but did NOT override that base,
-                    // so the grey bubble still rendered (Felix "still not done"). Override
-                    // the base here -- bg-transparent, no radius, no inset padding -- via
-                    // the cn(base, className) twMerge in MessageContent. The right-aligned
-                    // darker USER bubble now carries the "machine vs person" distinction.
-                    data-surface="ai"
-                    className="bg-transparent rounded-none p-0 text-foreground prose w-full min-w-0 flex-1 leading-relaxed"
-                    markdown
-                    isStreaming={isStreaming}
-                    highlightQuery={highlightQuery}
-                  >
-                    {body}
-                  </MessageContent>}
-                  {coworkBlocks ? <CoworkBlocksView blocks={coworkBlocks} isLatest={isLastMessage} /> : null}
+                <React.Fragment key={key}>
+                  {coworkBlocks && !body ? null : (
+                    <AssistantAnswerText
+                      body={body}
+                      isStreaming={isStreaming}
+                      highlightQuery={highlightQuery}
+                    />
+                  )}
+                  {coworkBlocks ? <CoworkBlocksView blocks={coworkBlocks} isLatest={isLastMessage} messageId={message.id} /> : null}
                   {parsed.options.length > 0 ? (
                     <AnswerOptionChips options={parsed.options} onPick={setPrompt} />
                   ) : null}
@@ -597,7 +650,7 @@ const AssistantMessage = React.memo(
             if (group.kind === "reasoning") {
               return (
                 <ReasoningBlock
-                  key={`reasoning-${index}`}
+                  key={key}
                   text={group.text}
                   isStreaming={group.isStreaming}
                 />
@@ -606,7 +659,7 @@ const AssistantMessage = React.memo(
 
             if (group.kind === "file") {
               return (
-                <div key={`file-${index}`} className="w-fit max-w-full">
+                <div key={key} className="w-fit max-w-full">
                   <FileMessage part={group.part} tone="assistant" />
                 </div>
               )
@@ -614,14 +667,14 @@ const AssistantMessage = React.memo(
 
             if (group.kind === "tool-aggregate") {
               return (
-                <div key={`tool-aggregate-${index}`} className="w-full">
+                <div key={key} className="w-full">
                   <ToolAggregateGroup parts={group.parts} />
                 </div>
               )
             }
 
             return (
-              <div key={`tool-${index}`} className="w-full">
+              <div key={key} className="w-full">
                 <ToolMessage part={group.part} />
               </div>
             )
@@ -779,7 +832,7 @@ const UserMessage = React.memo(
               >
                 {hasContent ? (
                   <MessageContent
-                    // Round 32 (Claude-style): a tighter, subtly darker sent bubble.
+                    // A tighter, subtly darker sent bubble.
                     // --muted is --surface-sunken; mixing a little --border in steps it
                     // one tone darker in BOTH themes (border is darker than muted light,
                     // lighter-but-distinct dark). Tighter inset (px-3 py-2) + leading-snug.
@@ -901,10 +954,12 @@ type MessageComponentProps = {
   isStreaming: boolean
   isLastStep: boolean
   hideReasoning?: boolean
+  /** Hide reasoning + tool groups because the unified live activity row already shows them. */
+  hideSteps?: boolean
 }
 
 const MessageComponent = React.memo(
-  ({ message, isLastMessage, isStreaming, isLastStep, hideReasoning }: MessageComponentProps) => {
+  ({ message, isLastMessage, isStreaming, isLastStep, hideReasoning, hideSteps }: MessageComponentProps) => {
     if (isSessionErrorMessage(message)) {
       return <ErrorMessage error={getMessagesText([message]) || "Session failed"} />
     }
@@ -921,6 +976,7 @@ const MessageComponent = React.memo(
           isStreaming={isStreaming}
           isLastStep={isLastStep}
           hideReasoning={hideReasoning}
+          hideSteps={hideSteps}
         />
       )
     }
@@ -939,20 +995,15 @@ MessageComponent.displayName = "MessageComponent"
 const LoadingMessage = React.memo(({ label }: { label?: string }) => (
   <Message className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}>
     <div className="group flex w-full flex-col gap-0">
-      <div className="flex items-center gap-1.5 px-1 py-1 text-sm text-muted-foreground">
-        <div style={{ width: 20, height: 20, borderRadius: "50%", overflow: "hidden" }}>
-          <PaperGrainGradient
-            speed={12}
-            softness={0.1}
-            intensity={1}
-            noise={0.05}
-            shape="sphere"
-            colors={["#818cf8", "#fb7185", "#fbbf24", "#34d399"]}
-            colorBack="#ffffff00"
-            style={{ backgroundColor: "#818cf8", width: "100%", height: "100%", borderRadius: "50%" }}
-          />
-        </div>
-        <span>{label ?? t("session.assistant_thinking")}</span>
+      {/*
+        The bare surface's "assistant is thinking" loader (the Cowork frame shows CoworkRunStatus
+        instead): the Redrob Liquid Loader at the brand's 96px animated-symbol minimum, with its
+        label beneath. The loader already announces the label (role=status), so the visible copy
+        is hidden from assistive tech to avoid reading it twice.
+      */}
+      <div className="flex flex-col items-start gap-1.5 px-1 py-2 text-sm text-muted-foreground">
+        <RedrobLiquidLoader size={96} label={label ?? t("session.assistant_thinking")} />
+        <span aria-hidden="true">{label ?? t("session.assistant_thinking")}</span>
       </div>
     </div>
   </Message>
@@ -1196,6 +1247,16 @@ function MessageGroup({
     })
   })
 
+  // In the Cowork frame a LIVE run renders as one in-place UnifiedActivity row. Every message in the
+  // group is scanned, since a live turn's reasoning and tool calls arrive interleaved with the answer.
+  const liveActivity = React.useMemo(
+    () =>
+      inCoworkFrame && isLiveGroup
+        ? liveActivityOf(items.flatMap((item) => (isSessionErrorMessage(item.message) ? [] : [item.message])), showThinking)
+        : null,
+    [inCoworkFrame, isLiveGroup, items, showThinking],
+  )
+
   if (!lastItem || isMessageEmptyGroup(items)) {
     return null;
   }
@@ -1250,7 +1311,7 @@ function MessageGroup({
   // a collapsed run shows it and the message below renders text only.
   const proseReasoning = proseItems.flatMap((item) =>
     item.message.role === "assistant" && !isSessionErrorMessage(item.message)
-      ? getAssistantRenderGroups(item.message.parts, showThinking).flatMap((group, groupIndex) =>
+      ? getAssistantRenderGroups(item.message.parts, showThinking, inCoworkFrame).flatMap((group, groupIndex) =>
         group.kind === "reasoning"
           ? [{ key: `${item.message.id}-${groupIndex}`, text: group.text, isStreaming: group.isStreaming }]
           : []
@@ -1264,7 +1325,7 @@ function MessageGroup({
       (total, item) =>
         total +
         (item.message.role === "assistant" && !isSessionErrorMessage(item.message)
-          ? getAssistantRenderGroups(item.message.parts, showThinking).reduce(
+          ? getAssistantRenderGroups(item.message.parts, showThinking, inCoworkFrame).reduce(
             (rows, group) => rows + (group.kind === "tool-aggregate" ? group.parts.length : 1),
             0
           )
@@ -1291,17 +1352,21 @@ function MessageGroup({
     ))
     : []
 
-  const renderItem = (item: UIMessageWithIndex, groupIndex: number, hideReasoning?: boolean) => {
+  const useUnifiedLiveActivity = liveActivity !== null
+
+  const renderItem = (item: UIMessageWithIndex, groupIndex: number, hideReasoning?: boolean, hideSteps?: boolean) => {
     const isLastMessage = item.index === messages.length - 1
 
     return (
-      <div key={item.message.id}>
+      // empty:hidden: a message that folded entirely into the live row must not keep the column gap.
+      <div key={item.message.id} className="empty:hidden">
         <MessageComponent
           message={item.message}
           isLastMessage={isLastMessage}
           isStreaming={isLastMessage && isStreaming}
           isLastStep={groupIndex === items.length - 1}
           hideReasoning={hideReasoning}
+          hideSteps={hideSteps}
         />
       </div>
     )
@@ -1310,7 +1375,7 @@ function MessageGroup({
   // Consecutive step messages that contain nothing but command/edit/read/
   // search tool calls merge into one aggregate line (Paper "Recurring
   // actions"); any prose, reasoning, or other tool breaks the run.
-  const renderItems = (slice: UIMessageWithIndex[], offset: number, hideReasoning?: boolean) => {
+  const renderItems = (slice: UIMessageWithIndex[], offset: number, hideReasoning?: boolean, hideSteps?: boolean) => {
     const nodes: React.ReactNode[] = []
     let run: { parts: AnyToolPart[]; key: string } | null = null
     const flush = () => {
@@ -1325,28 +1390,55 @@ function MessageGroup({
       run = null
     }
     slice.forEach((item, sliceIndex) => {
+      // Under hideSteps (live unified row) the tool calls belong to the activity row, so do not
+      // aggregate them into a separate line here - just render the message's non-step content.
       const aggregateParts =
-        item.message.role === "assistant" && !isSessionErrorMessage(item.message)
-          ? getAggregateOnlyParts(item.message, showThinking)
+        !hideSteps && item.message.role === "assistant" && !isSessionErrorMessage(item.message)
+          ? getAggregateOnlyParts(item.message, showThinking, inCoworkFrame)
           : null
       if (aggregateParts) {
-        if (!run) run = { parts: [], key: item.message.id }
-        run.parts.push(...aggregateParts)
+        // A message may itself span lanes (web, then edits); each lane change starts a new line.
+        for (const part of aggregateParts) {
+          if (run && !continuesAggregate(run.parts.at(-1), part, inCoworkFrame)) flush()
+          if (!run) run = { parts: [], key: part.toolCallId }
+          run.parts.push(part)
+        }
         return
       }
       flush()
-      nodes.push(renderItem(item, offset + sliceIndex, hideReasoning))
+      nodes.push(renderItem(item, offset + sliceIndex, hideReasoning, hideSteps))
     })
     flush()
     return nodes
   }
+
+  // The live run row (loader, label, timer) trails the newest content of the turn: questions, plan
+  // and run can share one group, and a leading loader would sit above all of them.
+  const openingUser = messages[(items[0]?.index ?? 0) - 1]
+  const liveRunStartedAt = openingUser?.role === "user" ? (getMessageCreated(openingUser) ?? stepsStartedAt) : stepsStartedAt
+  const liveActivityRow = liveActivity ? (
+    <div className={CHAT_COLUMN} data-live-activity-row="">
+      <UnifiedActivity
+        parts={liveActivity.parts}
+        reasoning={liveActivity.reasoning}
+        /* Stable key for the whole turn so the row (and its timer) never remounts per tool. */
+        activityKey={`${items[0]?.message.id ?? "live"}-activity`}
+        /* Continuous elapsed from the run's server start (the user message that opened it), so it
+           matches the bottom status it replaces and never resets on a remount. */
+        startedAt={liveRunStartedAt}
+      />
+    </div>
+  ) : null
 
   return (
       <div className="flex flex-col gap-2 group/message-group">
       {/* The scroll area keeps the same 8px rhythm the parts inside a single
           message use, so a step row is spaced identically whether or not a
           message boundary happens to fall between it and the previous row. */}
-      {stepItems.length > 0 ? (
+      {/* The step scroll area is skipped while the live row stands in for it; the leading step
+          messages still render their web research rows in place, so opening searches show live. */}
+      {useUnifiedLiveActivity && stepItems.length > 0 ? renderItems(stepItems, 0, false, true) : null}
+      {!useUnifiedLiveActivity && stepItems.length > 0 ? (
         collapseSteps ? (
           <CompletedStepRun label={stepRunLabel}>
             <div data-scrollable="" className="flex max-h-[520px] flex-col gap-2 overflow-y-auto overscroll-y-contain">
@@ -1375,17 +1467,27 @@ function MessageGroup({
           <McpAppFrame part={part} />
         </Message>
       ))}
-      {renderItems(proseItems, stepItems.length, collapseSteps)}
-      {/* Paper artifact strip: one FILES row per turn, at the end. */}
-      <ArtifactList
-        messages={items.map((item) => item.message)}
-        includeTargetFallbacks={false}
-      />
+      {/* While the unified live row stands in, hide the reasoning/tool rows the prose messages
+          would otherwise render (they are already folded into the row above); the answer text
+          still renders. hideReasoning=true drops reasoning groups, and the tool/aggregate groups
+          are the activity's job now. */}
+      {renderItems(proseItems, stepItems.length, collapseSteps, useUnifiedLiveActivity)}
+      {/* In the Cowork frame the turn's artifacts show as rounded, clickable cards
+          with a "writing" caret while still being written; the bare surface keeps the FILES strip. */}
+      {inCoworkFrame ? (
+        <ArtifactCardList messages={items.map((item) => item.message)} />
+      ) : (
+        <ArtifactList
+          messages={items.map((item) => item.message)}
+          includeTargetFallbacks={false}
+        />
+      )}
       {memoryNotes.map((text, index) => (
         <div key={`memory-${index}`} className={CHAT_COLUMN}>
           <CoworkMemoryNote text={text} />
         </div>
       ))}
+      {liveActivityRow}
       {showCoworkReceipt && lastRealItem ? (
         <div className={CHAT_COLUMN}>
           <CoworkAnswerFooter
@@ -1580,10 +1682,15 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
   )
 }
 
-export function MessageList({ messages, status, retryStatus, blockedStatus }: MessageListProps) {
+export function MessageList({ messages: rawMessages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
-  const showLoading = shouldShowMessageListLoading(status, messages.length)
   const inCoworkFrame = useInCoworkFrame()
+  // In the Cowork frame the to-do tool calls are not drawn: the plan's own checklist carries progress.
+  const messages = React.useMemo(
+    () => (inCoworkFrame ? withoutTodoToolParts(rawMessages) : rawMessages),
+    [inCoworkFrame, rawMessages],
+  )
+  const showLoading = shouldShowMessageListLoading(status, messages.length)
   const items = React.useMemo(() => groupMessages(messages, status), [messages, status]);
   /*
     Which rows a context compaction owns. The engine's summary arrives as real messages - a marked user
@@ -1602,13 +1709,43 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
     () => redrobPaymentRefusalFromMessages(messages) ?? classifyRedrobPaymentRefusal(error),
     [messages, error],
   )
-  const liveActionLabel = isStreaming
-    ? getActiveToolLabel(collectLatestAssistantToolParts(messages))
-    : null
+  const latestToolParts = React.useMemo(() => (isStreaming ? collectLatestAssistantToolParts(messages) : []), [isStreaming, messages])
+  const liveActionLabel = isStreaming ? getActiveToolLabel(latestToolParts) : null
+  // A web search or page read in flight shows a static globe, not the liquid loader.
+  const liveActionWeb = isStreaming && isWebStepInFlight(latestToolParts as AnyToolPart[])
+
+  /*
+    The running turn's loader is the inline UnifiedActivity row once the live run has any activity.
+    The bottom CoworkRunStatus hides on the SAME test (liveActivityOf over the trailing run of
+    assistant messages), so the two loaders never both show or both hide.
+  */
+  const { showThinking } = useMessageList()
+  // When the running turn started: the newest user message's server time, shared by both run timers.
+  const runStartedAt = React.useMemo(() => {
+    const lastUser = messages.findLast((message) => message.role === "user")
+    return lastUser ? getMessageCreated(lastUser) : null
+  }, [messages])
+  const hasInlineActivity = React.useMemo(() => {
+    if (!inCoworkFrame || !isStreaming) return false
+    const trailingRun: UIMessage[] = []
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      const message = messages[i]
+      if (message?.role !== "assistant") break // stop at the user turn that opened this run
+      if (!isSessionErrorMessage(message)) trailingRun.push(message)
+    }
+    return liveActivityOf(trailingRun, showThinking) !== null
+  }, [inCoworkFrame, isStreaming, messages, showThinking])
 
   return (
     <div className={cn("flex flex-col gap-2 @container/message-list")}>
-      {messages.length === 0 && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
+      {/*
+        The in-list starter cards are the bare session surface's empty state. In the Cowork
+        frame the real home is session-empty-hero ("Let's make something good."), so these
+        cards are a second, redundant home -- and because the message list mounts empty for a
+        frame when a new chat opens, they FLASH on the way into a session. Gate them out of the
+        Cowork frame entirely so only the real home shows; the bare surface keeps them.
+      */}
+      {messages.length === 0 && !inCoworkFrame && <TaskSuggestions className="mx-auto w-full max-w-[var(--ow-chat-column)] shrink-0 px-3 pb-3 md:px-5 md:pb-5 grow" />}
 
       {items.map((item) => {
         if (isMessageGroup(item)) {
@@ -1646,15 +1783,19 @@ export function MessageList({ messages, status, retryStatus, blockedStatus }: Me
               isStreaming={isLastMessage && isStreaming}
               isLastStep={isLastStep}
             />
-            <ArtifactList messages={[item.message]} includeTargetFallbacks={false} />
+            {inCoworkFrame ? (
+              <ArtifactCardList messages={[item.message]} />
+            ) : (
+              <ArtifactList messages={[item.message]} includeTargetFallbacks={false} />
+            )}
           </div>
         )
       })}
 
       {showLoading && !inCoworkFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
-      {showLoading && inCoworkFrame ? (
+      {showLoading && inCoworkFrame && !hasInlineActivity ? (
         <div className={CHAT_COLUMN}>
-          <CoworkRunStatus label={liveActionLabel} />
+          <CoworkRunStatus label={liveActionLabel} web={liveActionWeb} startedAt={runStartedAt} />
         </div>
       ) : null}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}

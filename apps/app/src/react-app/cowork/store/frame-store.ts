@@ -14,8 +14,8 @@ import { create } from "zustand";
 
 import { systemTimers, type CoworkTimers, type TimerHandle } from "../timers";
 
-/** Which tab the side panel shows: the in-app browser, or the workspace file list. */
-export type PanelTab = "browser" | "files";
+/** Which tab the side panel shows: artifacts for this chat, the workspace file list, or the in-app browser. */
+export type PanelTab = "artifacts" | "files" | "browser";
 /** The in-app browser's hand-off state: Cowork is reading, the person has taken over, or finished. */
 export type BrowserCowork = "reading" | "you" | "done";
 export type FrameModal =
@@ -41,7 +41,14 @@ export type ChatHeader = { title: string; findSessionId: string | null } | null;
 
 export type FrameState = {
   /** The side panel: whether it is open, which tab, the file it shows (Files tab), and the tab to reopen on. */
-  panel: { open: boolean; tab: PanelTab; file: string | null; lastTab: PanelTab };
+  panel: {
+    open: boolean;
+    tab: PanelTab;
+    file: string | null;
+    lastTab: PanelTab;
+    /** The artifact the Artifacts tab shows on its own (its target id), or none for the list. */
+    artifact?: string | null;
+  };
   /** The in-app browser: the active provider tab id and the Cowork/you hand-off state. */
   browser: { tab: string | null; cowork: BrowserCowork };
   /** The modal currently open over the frame, or null. */
@@ -54,7 +61,7 @@ export type FrameState = {
   /** The open chat's header, published by the session page; see {@link ChatHeader}. */
   chatHeader: ChatHeader;
 
-  /** Opens on `tab`; without one, on whatever was last there (Files the first time). */
+  /** Opens on `tab`; without one, on whatever was last there (Artifacts the first time). */
   openPanel(tab?: PanelTab): void;
   /** Closes the side panel, remembering its tab so {@link openPanel} can reopen there. */
   closePanel(): void;
@@ -64,6 +71,8 @@ export type FrameState = {
   toggleBrowser(): void;
   /** Opens a file in the panel; null goes back to the list. */
   openFile(id: string | null): void;
+  /** Opens an artifact (by target id) on the Artifacts tab; null goes back to its list. */
+  openArtifact(id: string | null): void;
   /** Selects the active in-app browser tab (null = none). */
   setBrowserTab(tab: string | null): void;
   /** Sets the in-app browser hand-off state (Cowork reading / person / done). */
@@ -120,7 +129,7 @@ export function createFrameStore(options: { timers?: CoworkTimers; storage?: Sto
       set({ panel: { open: true, tab, file, lastTab: tab } });
 
     return {
-      panel: { open: false, tab: "files", file: null, lastTab: "files" },
+      panel: { open: false, tab: "artifacts", file: null, lastTab: "artifacts" },
       browser: { tab: null, cowork: "done" },
       modal: null,
       toast: null,
@@ -137,6 +146,7 @@ export function createFrameStore(options: { timers?: CoworkTimers; storage?: Sto
         else openOn("browser");
       },
       openFile: (id) => openOn("files", id),
+      openArtifact: (id) => set((state) => ({ panel: { ...state.panel, open: true, tab: "artifacts", lastTab: "artifacts", artifact: id } })),
       setBrowserTab: (tab) => set((state) => ({ browser: { ...state.browser, tab } })),
       setCowork: (cowork) => set((state) => ({ browser: { ...state.browser, cowork } })),
       openModal: (modal) => set({ modal }),

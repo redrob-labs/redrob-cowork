@@ -7,10 +7,12 @@ import { CoworkMemoryScreen } from "../memory/cowork-memory";
 import { CoworkPrivacyScreen } from "../privacy/cowork-privacy";
 import { GuideScreen } from "../preview/cowork-guide";
 import { HistoryScreen } from "../preview/cowork-history";
+import { RadarScreen } from "../preview/radar-screen";
 import { ScheduledScreen } from "../preview/cowork-scheduled";
 import { ProjectScreen, ProjectsScreen } from "../projects/cowork-projects";
 import { SkillScreen } from "../skills/cowork-skill";
 import { SkillsScreen } from "../skills/cowork-skills";
+import { WorkflowScreen } from "../skills/cowork-workflow";
 import { RouteReady } from "./route-ready";
 
 export { RouteReady };
@@ -29,7 +31,7 @@ export function RedirectToChat() {
   return <Navigate to={chatPath(sessionId)} replace />;
 }
 
-/** `/` and any unknown path land on Model Chart — the default landing (round 8, item 2). */
+/** `/` and any unknown path land on Model Chart — the default landing. */
 export function RedirectToGuide() {
   return <Navigate to="/guide" replace />;
 }
@@ -58,6 +60,8 @@ export function coworkRoutes(chat: ReactNode) {
     <Route key="memory" path="/memory" element={ready(<CoworkMemoryScreen />)} />,
     <Route key="memory-scope" path="/memory/:scope" element={ready(<CoworkMemoryScreen />)} />,
     <Route key="skills" path="/skills" element={ready(<SkillsScreen />)} />,
+    // A featured workflow (several skills for one job); an unknown id returns to Skills.
+    <Route key="workflow" path="/skills/workflow/:id" element={ready(<WorkflowScreen />)} />,
     <Route key="skill" path="/skill/:name" element={ready(<SkillScreen />)} />,
     // Playbooks became skills: old links land on Skills.
     <Route key="playbooks" path="/playbooks" element={<Navigate to="/skills" replace />} />,
@@ -67,6 +71,8 @@ export function coworkRoutes(chat: ReactNode) {
     <Route key="scheduled" path="/scheduled" element={ready(<ScheduledScreen />)} />,
     <Route key="history" path="/history" element={ready(<HistoryScreen />)} />,
     <Route key="guide" path="/guide" element={ready(<GuideScreen />)} />,
+    // Radar subpages under Trending AI: /radar/news and /radar/social (an unknown feed returns to /guide).
+    <Route key="radar" path="/radar/:feed" element={ready(<RadarScreen />)} />,
     <Route key="root" path="/" element={<RedirectToGuide />} />,
     <Route key="fallback" path="*" element={<RedirectToGuide />} />,
   ];

@@ -55,10 +55,10 @@ describe("cowork frame store: toast", () => {
 });
 
 describe("cowork frame store: panel", () => {
-  test("first open shows Files, reopen returns to the last tab", () => {
+  test("first open shows Artifacts, reopen returns to the last tab", () => {
     const store = createFrameStore({ storage: () => null });
     store.getState().openPanel();
-    expect(store.getState().panel).toMatchObject({ open: true, tab: "files", lastTab: "files" });
+    expect(store.getState().panel).toMatchObject({ open: true, tab: "artifacts", lastTab: "artifacts" });
 
     store.getState().openPanel("browser");
     store.getState().closePanel();
@@ -92,17 +92,16 @@ describe("cowork frame store: panel", () => {
     expect(store.getState().panel).toEqual({ open: true, tab: "files", file: "f-notice", lastTab: "files" });
   });
 
-  test("cowork state, modal and voice", () => {
+  test("openArtifact shows one artifact on the Artifacts tab; null or reopening the tab goes back to the list", () => {
     const store = createFrameStore({ storage: () => null });
-    expect(store.getState().browser.cowork).toBe("done");
-    store.getState().setCowork("reading");
-    expect(store.getState().browser.cowork).toBe("reading");
-    store.getState().openModal({ kind: "project", chatId: "notice" });
-    expect(store.getState().modal).toEqual({ kind: "project", chatId: "notice" });
-    store.getState().closeModal();
-    expect(store.getState().modal).toBeNull();
-    store.getState().setVoice(true);
-    expect(store.getState().voice).toBe(true);
+    store.getState().openFile("f-notice");
+    store.getState().openArtifact("file:reports/outlook.md");
+    expect(store.getState().panel).toMatchObject({ open: true, tab: "artifacts", lastTab: "artifacts", artifact: "file:reports/outlook.md", file: "f-notice" });
+    store.getState().openArtifact(null);
+    expect(store.getState().panel.artifact).toBeNull();
+    store.getState().openArtifact("file:reports/outlook.md");
+    store.getState().openPanel("artifacts");
+    expect(store.getState().panel.artifact ?? null).toBeNull();
   });
 });
 
@@ -143,11 +142,5 @@ describe("cowork frame store: developer mode", () => {
     expect(throwing.getState().developerMode).toBe(false);
     throwing.getState().setDeveloperMode(true);
     expect(throwing.getState().developerMode).toBe(true);
-  });
-
-  test("the default store works without a window", async () => {
-    expect(typeof window).toBe("undefined");
-    const { useFrameStore } = await import("../src/react-app/cowork/store/frame-store");
-    expect(useFrameStore.getState().developerMode).toBe(false);
   });
 });

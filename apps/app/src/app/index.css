@@ -298,8 +298,7 @@
  * rule is written against its rail. `--app-product-*` because the design system
  * scopes its own `--product-*` to `.rr-shell`.
  */
-/* Round 37 (item 2 / DS 1.6.0): the design system renamed the product from "cowork"
-   to "cowork" (--product-cowork* -> --product-cowork*, data-product="cowork"); follow it. */
+/* Follows the design system's product name: --product-cowork* and data-product="cowork". */
 [data-product="cowork"] {
   --app-product-mark: var(--product-cowork);
   --app-product-wash: var(--product-cowork-wash);
@@ -331,12 +330,11 @@
 }
 
 /*
-  Round 12 (revised): the Cowork sidebar as an Apple-Music-style FLOATING POPUP CARD. Per the
-  reference it is not a flush rail - it is a rounded rectangle inset from the window on all sides,
-  with a soft shadow and a more vibrant translucent gradient tint.
+  The Cowork sidebar as a floating card: a rounded rectangle inset from the window on all sides,
+  with a soft shadow and a translucent gradient tint.
 
   How it floats inside a CSS-grid column: the DS lays `.rr-shell__side` as the first grid column, so
-  we inset the panel WITHIN that column with margin + border-radius + a drop shadow, letting the
+  the panel is inset WITHIN that column with margin + border-radius + a drop shadow, letting the
   window ground show in the gap around it. backdrop-filter is progressive enhancement (true blur only
   where the window is vibrant, e.g. macOS; a richer translucent tint otherwise). The inner scroll
   area (#rr-shell-side) keeps its own overflow, so the rounded corners read without clipping scroll.
@@ -345,12 +343,8 @@
   margin: var(--space-2);
   border-radius: 16px;
   overflow: hidden;
-  /* Round 15/35: the floating card matches the MAIN WORK SECTION. Round 35:
-     Felix sees the grey card framed by the white window gap as "left is white,
-     right is grey" -- so match BOTH surfaces to WHITE (--surface-base), the same
-     tone as the gap/body, instead of grey (--surface-raised). The card still
-     FLOATS -- border + shadow + radius keep it lifted -- but there is no longer
-     a grey-vs-white edge anywhere. */
+  /* The floating card uses the same white surface (--surface-base) as the window gap and the
+     main work area, so no grey-vs-white edge appears; border, shadow and radius keep it lifted. */
   background-color: var(--surface-base);
   background-image: none;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, transparent);
@@ -374,10 +368,8 @@
 }
 
 /*
-  Round 32/35: the main work area matches the floating sidebar card. Round 35:
-  both are now --surface-base (white), the same tone as the window gap/body, so
-  the left panel and right body read as one continuous white surface with no
-  grey-vs-white edge. (Was --surface-raised grey.)
+  The main work area uses the same white surface as the floating sidebar card and the window gap,
+  so the left panel and right body read as one continuous surface.
 */
 .cowork-shell #rr-shell-main {
   background-color: var(--surface-base);
@@ -400,8 +392,8 @@
 
 /*
   The empty new-chat home has no title and nothing to put in the shell's top header,
-  so that header rendered as an empty 57px strip with only the (inert here) side-panel
-  toggle in it (round 3, item 1). Hide it on the home; the work flexes to fill. On the
+  so that header would render as an empty 57px strip with only the (inert here) side-panel
+  toggle in it. Hide it on the home; the work flexes to fill. On the
   desktop app the custom window title bar (window-title-bar.tsx) owns the drag region,
   so no drag strip is lost here.
 */
@@ -410,29 +402,28 @@
 }
 
 /*
-  Round 19: `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
+  `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
   work subtree's overflow. `--bare-top` is the EMPTY CHAT HOME, which has no scrolling transcript and
   needs overflow:visible so an upward status popover isn't clipped (see the rule further down). A tall
   SCROLLING screen that merely has no header - Trending AI - must keep its scroll container, so it uses
-  this instead. Reusing `--bare-top` there turned #rr-shell-main to overflow:visible and clipped the
-  lower shelves (the "missing scrollbar"). Same header-hide, different overflow contract.
+  this instead; `--bare-top` there would set #rr-shell-main to overflow:visible and clip the lower
+  shelves. Same header-hide, different overflow contract.
 */
 .cowork-shell--headless .rr-shell__top {
   display: none;
 }
 
 /*
-  Sidebar brand lockup (round 4, item 6). CoworkShell now passes product="Redrob
-  Cowork", so the wordmark renders beside the mark. Make the mark a touch larger
-  with rounded corners, and set the wordmark in the design system's own sans at a
-  sidebar-appropriate size. Scoped to the Cowork shell brand row.
+  Sidebar brand lockup: CoworkShell passes product="Redrob Cowork", so the wordmark renders beside
+  the mark. The wordmark is set in the design system's own sans at a sidebar-appropriate size.
+  Scoped to the Cowork shell brand row.
 */
 .cowork-shell .rr-shell__brand .rr-mark,
 .cowork-shell .rr-shell__brand .rr-mark img,
 .cowork-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
   width: 34px;
   height: 34px;
-  border-radius: 4px; /* less rounded than before (round 5, item 6) */
+  border-radius: 4px; /* a softer corner than the DS default */
   overflow: hidden;
 }
 .cowork-shell .rr-shell__product {
@@ -441,34 +432,27 @@
   letter-spacing: -0.01em;
   color: var(--ink-primary);
 }
-/*
-  Round 7, item 2: the DS brand row leaves too much space between the mark and the
-  "Redrob Cowork" wordmark. Tighten the gap so the lockup reads as one unit.
-*/
+/* Tighten the DS brand row's gap so the mark and the "Redrob Cowork" wordmark read as one unit. */
 .cowork-shell .rr-shell__brand {
   gap: 8px;
 }
 
 /*
-  Round 5, item 4: the brand row's own fold toggle (.rr-shell__fold, right of the
-  "Redrob Cowork" wordmark) is redundant now that the window title bar carries the
-  sidebar toggle (round 4, item 5) -- both flip the same sidebarOpen store. Hide it.
+  The brand row's own fold toggle (.rr-shell__fold) is redundant: the window title bar carries the
+  sidebar toggle, and both flip the same sidebarOpen store. Hide it.
 */
 .cowork-shell .rr-shell__fold {
   display: none;
 }
 
-/*
-  Round 8, item 6: the sidebar brand lockup keeps only the "Redrob Cowork" wordmark; drop the
-  square mark image (the title bar now carries the Cowork mark). Scoped to the Cowork shell.
-*/
+/* The sidebar lockup is the "Redrob Cowork" wordmark only; the title bar carries the Cowork mark. */
 .cowork-shell .rr-shell__brand .rr-mark,
 .cowork-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
   display: none;
 }
 
 /*
-  Round 8, item 5: the left sidebar is draggable. The CoworkShell has no right rail, so the DS grid is
+  The left sidebar is resizable. The CoworkShell has no right rail, so the DS grid is
   `232px minmax(0,1fr)`; drive that first column from --app-side-width (set from the UI store, clamped
   220-420 to match the store), and lay a thin drag handle on the sidebar's right edge.
 */
@@ -485,9 +469,8 @@
   background: transparent;
 }
 /*
-  Round 11, item 4: the handle keeps its 8px hit area, but on hover/drag it draws only a thin
-  2px line centred in that area (via ::before) instead of filling the whole 8px with colour - the
-  old full-width 35% fill read as a border that thickened too much. Lower opacity too.
+  The handle keeps an 8px hit area, but on hover/drag it draws only a thin 2px line centred in it
+  (via ::before), so it reads as a guide rather than a border that thickens.
 */
 .cowork-shell__side-resizer::before {
   content: "";
@@ -505,11 +488,10 @@
 }
 
 /*
-  Round 8, item 7: the title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS
-  64px mini-rail. When the shell carries cowork-shell--side-hidden, drop to a SINGLE 1fr column so the
-  work fills the whole width. (A two-track `0 minmax(0,1fr)` left the sidebar's `display:none` grid
-  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track - the whole
-  page measured 0 wide. One column has nowhere else to flow.)
+  The title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS 64px mini-rail.
+  When the shell carries cowork-shell--side-hidden, drop to a SINGLE 1fr column so the work fills the
+  whole width. (A two-track `0 minmax(0,1fr)` would auto-place the lone #rr-shell-main into the
+  collapsed 0px FIRST track once the sidebar is display:none, and the page would measure 0 wide.)
 */
 .cowork-shell--side-hidden .rr-shell--norail {
   grid-template-columns: minmax(0, 1fr);
@@ -520,19 +502,16 @@
 }
 
 /*
-  Round 9, item 3: the account block (the "Log in or sign up" / profile row) is the VERY
-  bottom section, with the theme switch directly ABOVE it. DOM order in the DS foot is
-  aside (account) then theme, and the DS pins theme to the bottom with `margin-top:auto`.
-  To make account last we flip the visual order with `order` (the foot is a flex column -
-  `margin-top:auto` already works on it) and move the auto margin onto the theme row so the
-  free space collapses above the pair, dropping theme + account to the bottom together.
-  Result top-to-bottom: [free space] -> theme -> account.
+  The account block (the "Log in or sign up" / profile row) is the very bottom section, with the
+  theme switch directly above it. DOM order in the DS foot is aside (account) then theme, and the DS
+  pins theme to the bottom with `margin-top:auto`. To make account last, flip the visual order with
+  `order` (the foot is a flex column) and move the auto margin onto the theme row so the free space
+  collapses above the pair. Result top-to-bottom: [free space] -> theme -> account.
 */
 .cowork-shell .rr-shell__theme {
   order: 0;
   margin-top: auto;
-  /* Round 11, item 12: pull the account block closer to the theme row - trim the DS theme row's
-     own bottom padding so the gap above "Log in or sign up" is smaller. */
+  /* Keep the account block close to the theme row: trim the DS theme row's own bottom padding. */
   padding-bottom: var(--space-1);
 }
 .cowork-shell .rr-shell__aside {
@@ -544,10 +523,9 @@
 }
 
 /*
-  Round 11, item 6: the chat-session header (the DS shell top bar carrying the "New session" title +
-  Invite + panel button) was taller than the app chrome. Match the 48px chrome height - the DS default
-  is padding var(--space-3) top+bottom with no fixed height, which read as too thick. Fix the strip to
-  48px with tighter vertical padding (border-box so the 1px bottom border is included).
+  The chat-session header (the DS shell top bar with the session title, Invite and the panel button)
+  matches the 48px app chrome: the DS default (padding var(--space-3), no fixed height) is thicker.
+  border-box so the 1px bottom border is included.
 */
 .cowork-shell .rr-shell__top {
   box-sizing: border-box;
@@ -556,7 +534,8 @@
   padding-block: 0;
 }
 
-/* Round 6, item 3: the not-connected account placeholder avatar (neutral person glyph). */
+/* The account avatar frame. It hosts the secure-connection avatar (a web component), clipped to
+   the circle. */
 .cowork-account__avatar-placeholder {
   display: inline-flex;
   align-items: center;
@@ -567,6 +546,7 @@
   border-radius: 999px;
   background: var(--surface-sunken);
   color: var(--ink-muted);
+  overflow: hidden; /* Clip the square storm avatar into the circular frame. */
 }
 
 /*
@@ -675,7 +655,38 @@
  */
 .cowork-shell--panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 440px;
+  /* The panel column is resizable: its width comes from the right-sidebar width store
+     (--app-panel-width, clamped 320-960). */
+  grid-template-columns: minmax(0, 1fr) var(--app-panel-width, 440px);
+}
+
+/* The grip that resizes the right panel: an 8px hit strip straddling the panel's left edge,
+   drawing a thin 2px line on hover/drag (mirrors .cowork-shell__side-resizer). */
+.cowork-panel__resizer {
+  position: absolute;
+  top: var(--app-titlebar-height, 0px);
+  bottom: 0;
+  right: var(--app-panel-width, 440px);
+  width: 8px;
+  transform: translateX(4px);
+  cursor: col-resize;
+  z-index: 40;
+  background: transparent;
+}
+.cowork-panel__resizer::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: transparent;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-panel__resizer:hover::before,
+.cowork-panel__resizer:focus-visible::before,
+.cowork-panel__resizer[data-resizing]::before {
+  background: color-mix(in srgb, var(--spectrum-sky) 22%, transparent);
 }
 
 .cowork-shell--panel > div {
@@ -689,12 +700,8 @@
   min-width: 0;
   min-height: 0;
   border-left: 1px solid var(--border-subtle);
-  /* Round 15: match the MAIN WORK SECTION (--surface-raised).
-     Round 36 (item 5): round 35 flipped the SHELL containers (#rr-shell-main,
-     .rr-shell__side) to white (--surface-base) but left THIS content pane grey,
-     so the left float read white and the right body read grey -- the seam Felix
-     reported. Match the pane to the shell/float: --surface-base (white). The
-     border-left divider stays (Felix: keep it) as a deliberate column line. */
+  /* The same white surface (--surface-base) as the shell and the floating sidebar, so no seam shows;
+     the border-left divider stays as a deliberate column line. */
   background: var(--surface-base);
   animation: cowork-panel-in var(--duration-base) var(--easing-entrance);
 }
@@ -706,16 +713,45 @@
   justify-content: space-between;
   gap: var(--space-2);
   box-sizing: border-box;
-  min-height: 57px;
-  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  /* The panel sits beside the shell top bar (.rr-shell__top), so its header matches that bar's
+     48px height and the two bottom borders meet. This value is the one knob for that seam. */
+  height: 48px;
+  padding: 0 var(--space-2) 0 var(--space-3);
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.cowork-panel__title {
-  margin: 0;
-  font: var(--text-body-strong);
-  font-weight: 600;
+/* Left-aligned icon tabs (Artifacts, Files, Browser), glyph-only with a hover title. */
+.cowork-panel__tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.cowork-panel__tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm, 6px);
+  color: var(--ink-secondary);
+  transition: background var(--duration-fast, 120ms), color var(--duration-fast, 120ms);
+}
+
+.cowork-panel__tab:hover {
+  background: var(--surface-sunken);
   color: var(--ink-primary);
+}
+
+.cowork-panel__tab[data-active] {
+  /* Active icon tab: brand-tinted glyph on a soft brand wash. */
+  color: var(--primary);
+  background: var(--surface-brand-subtle);
 }
 
 .cowork-panel__actions {
@@ -754,13 +790,19 @@
 
 @media (max-width: 1180px) {
   .cowork-shell--panel {
-    grid-template-columns: minmax(0, 1fr) 400px;
+    /* Still resizable here, with a narrower 400px default so the work column keeps room. */
+    grid-template-columns: minmax(0, 1fr) var(--app-panel-width, 400px);
   }
 }
 
 @media (max-width: 900px) {
   .cowork-shell--panel {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Below 900px the panel is an overlay sheet; the resizer is hidden (too narrow to drag). */
+  .cowork-panel__resizer {
+    display: none;
   }
 
   .cowork-panel {
@@ -951,48 +993,128 @@
   min-height: 0;
 }
 
+/* One 12px inset (--cowork-browser-inset) for the tab strip, the nav bar and the agent bar, so
+   their left edges line up; tabs and the bar's controls share a 32px row. */
+.cowork-browser {
+  --cowork-browser-inset: var(--space-3, 12px);
+}
+
 .cowork-browser__tabs {
   display: flex;
   flex: none;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-1);
-  overflow-x: auto;
-  padding: var(--space-2) var(--space-3) 0;
+  height: 40px;
+  padding: 0 var(--cowork-browser-inset);
   border-bottom: 1px solid var(--border-subtle);
   background: var(--surface-sunken);
 }
 
-.cowork-browser__tab {
-  display: inline-flex;
+.cowork-browser__tabs > :last-child {
+  align-self: center;
+  flex: none;
+}
+
+/* The draggable strip: tabs shrink evenly (Chrome-style) between 72px and 190px. */
+.cowork-browser__tablist {
+  display: flex;
   flex: 0 1 auto;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-end;
+  gap: 2px;
   min-width: 0;
+  overflow: hidden;
+}
+
+.cowork-browser__tab {
+  position: relative;
+  display: flex;
+  flex: 1 1 190px;
+  align-items: center;
+  min-width: 72px;
   max-width: 190px;
-  height: 34px;
+  height: 32px;
   margin-bottom: -1px;
-  padding: 0 var(--space-3);
   border: 1px solid transparent;
   border-bottom: 0;
   border-radius: --theme(--radius-md) --theme(--radius-md) 0 0;
   background: transparent;
-  font: var(--text-meta);
-  font-weight: 500;
   color: var(--ink-secondary);
-  cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
 }
 
-.cowork-browser__tab[aria-selected="true"] {
+.cowork-browser__tab:hover {
+  background: color-mix(in srgb, var(--surface-base) 55%, transparent);
+}
+
+.cowork-browser__tab[data-active] {
   border-color: var(--border-subtle);
   background: var(--surface-base);
-  font-weight: 600;
   color: var(--ink-primary);
 }
 
-.cowork-browser__tab:focus-visible,
+.cowork-browser__tab-select {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 10px;
+  border: 0;
+  background: none;
+  font: var(--text-meta);
+  font-weight: 500;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.cowork-browser__tab[data-active] .cowork-browser__tab-select {
+  font-weight: 600;
+}
+
+/* The x: on the active tab always, on others on hover or keyboard focus. */
+.cowork-browser__tab-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: --theme(--radius-sm);
+  background: none;
+  color: var(--ink-muted);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.cowork-browser__tab[data-active] .cowork-browser__tab-close,
+.cowork-browser__tab:hover .cowork-browser__tab-close,
+.cowork-browser__tab:focus-within .cowork-browser__tab-close {
+  opacity: 1;
+}
+
+.cowork-browser__tab-close:hover {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+
+.cowork-browser__tab-select:focus-visible,
+.cowork-browser__tab-close:focus-visible,
 .cowork-browser__pages button:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cowork-browser__tab-close {
+    transition: none;
+  }
 }
 
 .cowork-browser__tab-title {
@@ -1027,14 +1149,15 @@
   flex: none;
   align-items: center;
   gap: 2px;
-  padding: var(--space-2) var(--space-3);
+  height: 48px;
+  padding: 0 var(--cowork-browser-inset);
   border-bottom: 1px solid var(--border-subtle);
 }
 
 .cowork-browser__address {
   flex: 1 1 auto;
   min-width: 0;
-  margin-left: 6px;
+  margin-left: var(--space-2, 8px);
 }
 
 .cowork-browser__address label {
@@ -1070,7 +1193,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px var(--space-3);
-  padding: 10px var(--space-4);
+  padding: 10px var(--cowork-browser-inset);
   border-bottom: 1px solid var(--border-ai);
   background: var(--surface-ai);
   font: var(--text-meta);
@@ -1165,8 +1288,8 @@
  * the design system's class names.
  */
 .cowork-account {
-  /* Round 12, item 3: the "Log in or sign up" block took too much vertical space. Trim its own
-     top margin + padding (space-2 -> space-1) so the row sits closer under the theme switch. */
+  /* A compact "Log in or sign up" block: trimmed top margin and padding keep it close under the
+     theme switch. */
   margin-top: var(--space-1);
   padding-top: var(--space-1);
   border-top: 1px solid var(--border-subtle);
@@ -1179,10 +1302,21 @@
 .cowork-account > div > button {
   width: 100%;
   height: auto;
-  /* Round 12, item 3: shorter button - trim vertical padding (space-2 -> space-1), keep the
-     horizontal padding so the avatar + label still breathe. */
+  /* A shorter button: trimmed vertical padding; the horizontal padding lets the avatar and label breathe. */
   padding: var(--space-1) var(--space-2);
   justify-content: space-between;
+}
+
+/*
+  The "View all" link under the Recent heading: the heading's size (.rr-shell__navhead, 11px/16px),
+  one weight heavier and a step lighter in tone, so it reads as part of the heading row.
+*/
+.cowork-nav__view-all {
+  font-size: 11px;        /* Same as the Recent heading. */
+  line-height: 16px;      /* Same as the Recent heading. */
+  font-weight: 700;       /* Bold, a step heavier than the heading's 600. */
+  color: var(--ink-muted);/* The faintest ink token... */
+  opacity: 0.7;           /* ...taken a step lighter still than the Recent heading. */
 }
 
 .cowork-account__label {
@@ -1346,7 +1480,7 @@
 }
 
 /* History (/history): a flat, full-width clickable list - title left, relative time right,
-   hairline dividers, no cards (Claude-style). Rows link to the chat. */
+   hairline dividers, no cards. Rows link to the chat. */
 .cowork-history {
   display: flex;
   flex-direction: column;
@@ -1591,10 +1725,8 @@
   flex: 1 1 auto;
   flex-direction: column;
   /*
-    Round 32: center the hero (line + composer) in the available height rather
-    than pinning it to the top. The hero is content-light so it fits; justify
-    stays safe-start if it ever grows past the viewport (center + auto overflow
-    keeps a tall hero scrollable from the top instead of clipping its head).
+    Center the hero (line + composer) in the available height. Justify stays safe-start if it ever
+    grows past the viewport, so a tall hero scrolls from the top instead of clipping its head.
   */
   justify-content: center;
   overflow-y: auto;
@@ -1606,8 +1738,7 @@
 
 /*
   The hero (greeting + composer + status chips) is vertically centered in the
-  available height (round 4, item 2). It keeps the old 720px measure and the
-  gap between its own rows.
+  available height. It keeps the 720px measure and the gap between its own rows.
 */
 .cowork-new__center {
   flex: 1 1 auto;
@@ -1621,7 +1752,7 @@
   min-height: 0;
 }
 
-/* A quiet one-line disclaimer pinned at the bottom of the home (round 4, item 3). */
+/* A quiet one-line disclaimer pinned at the bottom of the home. */
 .cowork-new__disclaimer {
   flex: none;
   margin: 0;
@@ -1632,14 +1763,12 @@
 }
 
 /*
-  Round 36 (item 4): the greeting <-> composer gap read too tight. Add ~30% more
-  space ONLY between those two (not composer <-> connect-provider). .cowork-new__center
-  has a flex gap of --space-5 (24px); the greeting's own margin-bottom (set on the
-  real .cowork-new__line rule below) stacks on top of that gap, so greeting->composer
-  becomes ~24px + 30% ~= 31px while every other center child-gap stays 24px.
+  The greeting gets extra space only above the composer: its own margin-bottom (on the
+  .cowork-new__line rule below) stacks on .cowork-new__center's flex gap, while every other
+  center child keeps the plain gap.
 */
 
-/* Round 7, item 7: the same quiet disclaimer under the IN-CHAT composer (the home one lives in SessionEmptyHero and only shows on the new-chat screen). Lighter top padding since it sits under the status chips, not a tall hero. */
+/* The same quiet disclaimer under the in-chat composer (the home one lives in SessionEmptyHero). Lighter top padding since it sits under the status chips, not a tall hero. */
 .cowork-chat__disclaimer {
   margin: 0;
   padding: var(--space-2) 0 0;
@@ -1648,46 +1777,12 @@
   color: var(--ink-muted);
 }
 
-/*
-  Round 11, item 13: when the prompt box holds the caret, show a very subtle Redrob-blue glow
-  OUTSIDE the field (like Kiro), not a wash inside it. The ::before sits BEHIND the field (negative
-  inset + z-index:-1) and is blurred, so the colour blooms around the box rather than tinting its
-  surface. Light and subtle: ~10% sky, fades in on focus-within, pointer-transparent, reduced-motion
-  safe. Replaces the round-8 inner-wash overlay.
-*/
-.cowork-composer-field::before {
-  content: "";
-  position: absolute;
-  inset: -5px;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  background: color-mix(in srgb, var(--spectrum-sky) 10%, transparent);
-  filter: blur(10px);
-  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease);
-  z-index: -1;
-}
-.cowork-composer-field:focus-within::before {
-  opacity: 1;
-}
-/* Keep the field's own content above the overlay. */
-.cowork-composer-field > * {
-  position: relative;
-  z-index: 1;
-}
-
 .cowork-new__line {
-  /* Round 36 (item 4): add clearly perceptible air between the greeting and the
-     composer. The .cowork-new__center flex gap is --space-5 (20px here); a 0.3x
-     margin (6px) was too subtle to read, so use --space-4 (16px) margin-bottom
-     -> greeting->composer reads ~36px while other center child-gaps stay 20px. */
+  /* Clear air between the greeting and the composer, on top of the center flex gap. */
   margin: 0 0 var(--space-4);
   /*
-    Round 35, item 4: the greeting now matches the Trending AI section-header
-    STYLE -- sans (no serif), bold, tight tracking -- rather than the old big
-    serif, and is CENTER-aligned to the prompt box below (dropped the left inset
-    that aligned it to the composer's text edge). Kept at a hero size so it still
-    anchors the screen, just in the sans family/weight of the chart headers.
+    The greeting uses the Trending AI section-header style (sans, bold, tight tracking),
+    centered over the prompt box, at a hero size so it still anchors the screen.
   */
   text-align: center;
   font-size: 30px;
@@ -1710,10 +1805,15 @@
   color: var(--ink-secondary);
 }
 
+/* May shrink so the model label truncates; the mic (first child) keeps its fixed slot. */
 .cowork-composer-tools {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
   gap: var(--space-2);
+}
+.cowork-composer-tools > :first-child {
+  flex-shrink: 0;
 }
 
 .cowork-composer-status {
@@ -1722,7 +1822,7 @@
 }
 
 /*
-  Round 33: a fixed-height stand-in while the status row's data resolves on a real
+  A fixed-height stand-in while the status row's data resolves on a real
   workspace, so the hero does not shift and no default values (Privacy Off, etc.)
   flash before the true ones. Height matches one chip line.
 */
@@ -2006,7 +2106,7 @@
   color: var(--ink-muted);
 }
 
-/* Skills: the filters above the list, and each row's name, tags and actions. */
+/* Skills marketplace: horizontal shelves, app lockups, and product detail page. */
 .cowork-skills__filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -2014,51 +2114,12 @@
   align-items: end;
 }
 
-.cowork-skills__row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-  /* Round 33: a card, not a flat hairline row -- surface + border + radius + hover lift. */
-  padding: var(--space-4);
-  border-radius: 12px;
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-raised);
-  margin-bottom: var(--space-3);
-  transition: box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
-}
-.cowork-skills__row:hover {
-  box-shadow: 0 8px 22px -16px color-mix(in srgb, var(--redrob-black) 35%, transparent);
-}
-
-.cowork-skills__name {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  color: var(--ink-primary);
-  text-decoration: none;
-}
-
-.cowork-skills__name:hover {
-  text-decoration: underline;
-}
-
-.cowork-skills__actions {
-  display: flex;
-  flex-shrink: 0;
-  gap: var(--space-2);
-}
-
-/*
-  Round 32: the "What's a skill?" explainer header for non-technical readers. A
-  quiet raised card so it reads as a friendly intro, not a warning banner. Opaque
-  --surface-sunken on the raised work area, so it sits a step in from the page.
-*/
+/* The explainer sits on the page surface like the shelves below it, with no framed panel. */
 .cowork-skills__explainer {
-  margin-bottom: var(--space-4);
-  padding: var(--space-4);
-  border-radius: 12px;
-  background-color: var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink-primary);
 }
 .cowork-skills__explainer-title {
   margin: 0 0 var(--space-1);
@@ -2068,74 +2129,562 @@
   color: var(--ink-primary);
 }
 .cowork-skills__explainer-body {
+  max-width: 68ch;
   margin: 0;
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
-  max-width: 68ch;
 }
 
-/* Round 33: browse-by-category tiles (profession album art) + the quiet refine filters below. */
-.cowork-skills__browse-heading {
-  margin: var(--space-2) 0 var(--space-2);
-  font-size: 13px;
-  font-weight: 600;
+/* Shelves sit on the page surface with the Trending AI shelf rhythm (.model-chart: 24px between
+   shelves, 16px bold headings, 12px heading gap). */
+.cowork-skills__marketplace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 24px);
+  min-width: 0;
+  background: transparent;
+  color: var(--ink-primary);
+}
+.cowork-skills__shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  min-width: 0;
+}
+.cowork-skills__shelf-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.cowork-skills__shelf-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink-primary);
 }
-.cowork-skills__categories {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
+/* Shelf paging chevrons overlay the row edges, centred on the icons, and fade in only on
+   shelf hover or keyboard focus inside the shelf, and only toward a side that can still scroll
+   (data-show). Same look as the Trending AI .model-chart__chevron. */
+.cowork-skills__shelf-viewport {
+  position: relative;
+  min-width: 0;
 }
-.cowork-skills__category {
+.cowork-skills__chevron {
+  position: absolute;
+  top: 56px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--redrob-black) 45%, transparent);
+  color: var(--ink-primary);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), background var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skills__chevron--prev {
+  left: -6px;
+}
+.cowork-skills__chevron--next {
+  right: -6px;
+}
+.cowork-skills__shelf:hover .cowork-skills__chevron[data-show],
+.cowork-skills__shelf:focus-within .cowork-skills__chevron[data-show] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.cowork-skills__chevron:hover {
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  transform: translateY(-50%) scale(1.06);
+}
+.cowork-skills__chevron:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring, var(--spectrum-sky));
+  outline-offset: 2px;
+}
+[data-theme="dark"] .cowork-skills__chevron {
+  border-color: color-mix(in srgb, var(--redrob-white) 10%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  color: var(--ink-primary);
+}
+.cowork-skills__shelf-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(148px, 172px);
+  gap: 20px;
+  margin: 0;
+  padding: 8px 2px 4px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: none;
+  list-style: none;
+}
+.cowork-skills__shelf-row::-webkit-scrollbar {
+  display: none;
+}
+.cowork-skills__shelf-row > li {
+  scroll-snap-align: start;
+}
+.cowork-skills__notice {
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+.cowork-skills__notice h2 {
+  margin: 0 0 var(--space-1);
+  font-size: 14px;
+  color: var(--ink-primary);
+}
+.cowork-skills__notice p {
+  margin: 0 0 var(--space-3);
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+.cowork-skills__loading {
+  color: var(--ink-primary);
+}
+.cowork-skills__skeleton-row {
+  display: flex;
+  gap: 16px;
+  overflow: hidden;
+}
+.cowork-skills__skeleton-tile {
+  display: grid;
+  flex: 0 0 156px;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+}
+/* The workflow card's square loading placeholder. */
+.cowork-skills__skeleton-card {
+  display: grid;
+  flex: 0 0 160px;
+  gap: 8px;
+  padding: 8px 2px 4px;
+}
+
+.cowork-skill-tile {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  padding: 12px 8px 14px;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--ink-primary);
   text-align: center;
 }
-.cowork-skills__category-art {
-  display: block;
-  aspect-ratio: 1 / 1;
-  width: 100%;
+/* No hover frame: only the circle lifts (below), like the Trending AI album covers. */
+.cowork-skill-tile__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+  gap: 8px;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+.cowork-skill-tile__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
   border-radius: 12px;
-  overflow: hidden;
-  background: var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
-  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
-.cowork-skills__category-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.cowork-skill-tile__title,
+.cowork-skill-tile__brief {
   display: block;
+  overflow-wrap: anywhere;
 }
-.cowork-skills__category:hover .cowork-skills__category-art {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent);
+.cowork-skill-tile__title {
+  min-height: 36px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
 }
-.cowork-skills__category[data-active="true"] .cowork-skills__category-art {
-  outline: 2px solid var(--spectrum-sky, #2b52ff);
-  outline-offset: 1px;
-}
-.cowork-skills__category-label {
+.cowork-skill-tile__brief {
   font-size: 12px;
   line-height: 16px;
   color: var(--ink-secondary);
 }
-.cowork-skills__category[data-active="true"] .cowork-skills__category-label {
+.cowork-skill-tile__action {
+  min-width: 64px;
+  margin-top: auto;
+  border-radius: 999px;
+}
+/* Titles and full descriptions start on the same line across a row, and the actions line up
+   at the bottom. The row owns four tracks (icon, title, description, action); each tile and its link
+   adopt them through subgrid. Without subgrid the flex column above still holds, with the action
+   pushed to the bottom. */
+@supports (grid-template-rows: subgrid) {
+  .cowork-skills__shelf-row {
+    grid-template-rows: repeat(4, auto);
+    row-gap: 8px;
+  }
+  .cowork-skills__shelf-row > .cowork-skill-tile {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    justify-items: center;
+  }
+  .cowork-skills__shelf-row .cowork-skill-tile__link {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    justify-items: center;
+  }
+  .cowork-skills__shelf-row .cowork-skill-tile__title {
+    min-height: 0;
+  }
+  .cowork-skills__shelf-row .cowork-skill-tile__action {
+    align-self: end;
+    margin-top: 0;
+  }
+}
+.cowork-skill-icon {
+  display: block;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--blue-5);
+  /* The album cover's resting depth (.model-chart__card) under a 1px ring. */
+  box-shadow: 0 8px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-icon[data-size="tile"] {
+  width: 72px;
+  height: 72px;
+}
+.cowork-skill-icon[data-size="hero"] {
+  width: 128px;
+  height: 128px;
+}
+.cowork-skill-icon[data-size="row"] {
+  width: 40px;
+  height: 40px;
+}
+.cowork-skill-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.cowork-skill-icon[data-tone="blue"] {
+  background: linear-gradient(145deg, var(--blue-5), var(--blue-7));
+}
+.cowork-skill-icon[data-tone="sky"] {
+  background: linear-gradient(145deg, var(--accent-sky-3), var(--accent-sky-4));
+}
+.cowork-skill-icon[data-tone="teal"] {
+  background: linear-gradient(145deg, var(--accent-teal-4), var(--accent-teal-5));
+}
+.cowork-skill-icon[data-tone="green"] {
+  background: linear-gradient(145deg, var(--accent-green-3), var(--accent-green-4));
+}
+.cowork-skill-icon[data-tone="violet"] {
+  background: linear-gradient(145deg, var(--accent-violet-3), var(--accent-violet-4));
+}
+.cowork-skill-icon[data-tone="pink"] {
+  background: linear-gradient(145deg, var(--accent-pink-3), var(--accent-pink-4));
+}
+.cowork-skill-icon[data-tone="red"] {
+  background: linear-gradient(145deg, var(--accent-red-3), var(--accent-red-4));
+}
+.cowork-skill-icon[data-tone="orange"] {
+  background: linear-gradient(145deg, var(--accent-orange-3), var(--accent-orange-4));
+}
+/* The album-cover hover (.model-chart__tile:hover .model-chart__card): a 2px lift and a deeper
+   shadow on the circle only; the title, description and button stay put. */
+.cowork-skill-tile:hover .cowork-skill-icon {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+}
+
+/* The skill detail page sits on the page surface, with no grey panel. */
+.cowork-skill-detail {
+  max-width: 760px;
+  background: transparent;
   color: var(--ink-primary);
+}
+.cowork-skill-hero {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  margin: var(--space-4) 0 32px;
+}
+.cowork-skill-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.cowork-skill-hero__brief {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink-secondary);
+}
+.cowork-skill-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.cowork-skill-about,
+.cowork-skill-info {
+  margin-top: var(--space-6);
+  color: var(--ink-primary);
+}
+.cowork-skill-about h2,
+.cowork-skill-info h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink-primary);
+}
+.cowork-skill-about__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+  white-space: pre-line;
+}
+.cowork-skill-info dl {
+  margin: 0;
+  border-top: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--ink-primary);
+}
+.cowork-skill-info__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr);
+  gap: var(--space-4);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.cowork-skill-info dt {
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+.cowork-skill-info dd {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-primary);
+}
+.cowork-skill-info code {
+  font-family: var(--font-mono);
+}
+
+/* ---------- Skills: featured workflows (album-cover cards, workflow page) ---------- */
+.cowork-skill-icon[data-size="fill"] {
+  width: 100%;
+  height: 100%;
+}
+/* The workflow shelf is a plain row of cards: no four-track subgrid like the skill tiles. */
+.cowork-skills__shelf-row.cowork-skills__shelf-row--cards {
+  grid-template-rows: none;
+  grid-auto-columns: 160px;
+  gap: 20px;
+}
+.cowork-skills__shelf--cards .cowork-skills__chevron {
+  top: 88px;
+}
+.cowork-workflow-card {
+  min-width: 0;
+  color: var(--ink-primary);
+}
+.cowork-workflow-card__link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+.cowork-workflow-card__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 18px;
+}
+/* The square cover, styled as .model-chart__card (border, radius, resting shadow, hover). */
+.cowork-workflow-card__art,
+.cowork-workflow-hero__card {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  margin-bottom: 6px;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  border-radius: 18px;
+  background: var(--surface-raised, var(--surface-base));
+  box-shadow: 0 8px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent);
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), border-color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-workflow-hero__card {
+  width: 128px;
+  margin: 0;
+}
+.cowork-workflow-card:hover .cowork-workflow-card__art {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent);
+}
+[data-theme="dark"] .cowork-workflow-card__art,
+[data-theme="dark"] .cowork-workflow-hero__card {
+  border-color: color-mix(in srgb, var(--border-subtle) 90%, transparent);
+  box-shadow: 0 10px 28px -14px color-mix(in srgb, var(--redrob-black) 60%, transparent);
+}
+.cowork-workflow-card__cover {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 72%;
+  aspect-ratio: 1 / 1;
+}
+.cowork-workflow-card__cover-cell {
+  display: block;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
+}
+.cowork-workflow-card__title {
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
+  color: var(--ink-primary);
+}
+.cowork-workflow-card__sub {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+}
+.cowork-workflow-card__count {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-muted);
+}
+.cowork-workflow-hero__eyebrow {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+.cowork-workflow-hero__count {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+.cowork-workflow__group {
+  margin-top: var(--space-6);
+  color: var(--ink-primary);
+}
+.cowork-workflow__group h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink-primary);
+}
+.cowork-workflow__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border-subtle);
+}
+.cowork-workflow__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.cowork-workflow__link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+.cowork-workflow__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.cowork-workflow__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cowork-workflow__title {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+.cowork-workflow__brief {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+}
+/* Same lift as the marketplace circles, on the row icon only; the text stays put. */
+.cowork-workflow__row:hover .cowork-skill-icon {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
 }
 @media (prefers-reduced-motion: reduce) {
-  .cowork-skills__category:hover .cowork-skills__category-art { transform: none; }
-  .cowork-skills__category-art { transition: none; }
-  .cowork-skills__row { transition: none; }
+  .cowork-workflow-card__art {
+    transition: none;
+  }
+  .cowork-workflow-card:hover .cowork-workflow-card__art,
+  .cowork-workflow__row:hover .cowork-skill-icon {
+    transform: none;
+  }
+}
+/* ---------- end featured workflows ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-icon,
+  .cowork-skills__chevron {
+    transition: none;
+  }
+  /* No lift under reduced motion; the shadow change still marks the hover. */
+  .cowork-skill-tile:hover .cowork-skill-icon {
+    transform: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .cowork-skill-hero {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .cowork-skill-icon[data-size="hero"] {
+    width: 88px;
+    height: 88px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -2298,6 +2847,254 @@ html[lang="ko"] {
 }
 .markdown-content li > :is(ul, ol) {
   margin-block: 0.15em;
+}
+
+/*
+  The streaming cursor. While an answer is revealed letter by letter (useSmoothReveal), the chat
+  sets data-streaming-cursor on the .markdown-content root, and the live draft sets data-writing on
+  its body. A blinking Redrob Blue bar rides the end of the last child, so it sits inline after the
+  final character. The blink holds steady under reduced motion.
+*/
+.markdown-content[data-streaming-cursor] > :last-child::after,
+.cowork-live-draft__body[data-writing] .markdown-content > :last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.5ch; /* A slim caret roughly half a character wide. */
+  height: 1em;
+  margin-left: 0.08em;
+  vertical-align: text-bottom;
+  background: var(--primary); /* Redrob Blue via the DS token chain (--primary -> --action-primary). */
+  border-radius: 1px;
+  animation: redrob-caret-blink 1.06s step-end infinite; /* ~1s on/off blink. */
+}
+
+/*
+  The in-chat "working" label shimmer. `redrob-` marks a utility shared by the chat and the side
+  panel (cowork- classes are Cowork-thread only). A colour sweep moves a lighter band across the grey label text, clipped to the glyphs. Base is the muted
+  ink; the sweep is a brighter tint. Held still (plain grey) under reduced motion.
+*/
+@keyframes redrob-text-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.redrob-shimmer-text {
+  background: linear-gradient(
+    100deg,
+    var(--ink-muted) 35%,
+    var(--ink-primary) 50%,
+    var(--ink-muted) 65%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: redrob-text-shimmer 1.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No sweep for motion-sensitive readers: a steady grey label. */
+  .redrob-shimmer-text {
+    animation: none;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--ink-muted);
+  }
+}
+/* Each rotating "working" line fades up into place. Opacity/translate live on the
+   individual property so they stack with the shimmer's background animation instead of replacing it. */
+.cowork-working-line {
+  animation:
+    redrob-text-shimmer 1.8s linear infinite,
+    cowork-working-line-in 360ms ease-out;
+}
+@keyframes cowork-working-line-in {
+  from {
+    opacity: 0;
+    translate: 0 3px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Declared after the rule above so it wins: no fade, no sweep. */
+  .cowork-working-line {
+    animation: none;
+  }
+}
+
+/*
+  The plan inside the chat (CoworkPlan in cowork-thread.tsx). No frame: a 2px Redrob Blue
+  accent rail on the left, a small label with the run's progress, the summary, and the checklist as
+  a stepper. Markers are custom circles joined by a thin line: a ring to do, a brand ring with a
+  dot while active (its label shimmers, .redrob-shimmer-text), a filled brand circle with a tick
+  when done. Every surface sets its background and text colour.
+*/
+.cowork-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  max-width: 76ch;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid var(--action-primary);
+  background: transparent;
+  color: var(--ink-primary);
+}
+.cowork-plan__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+.cowork-plan__label {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-brand);
+}
+.cowork-plan__progress {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.cowork-plan__summary {
+  margin: 0;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--ink-primary);
+}
+.cowork-plan__steps {
+  display: flex;
+  flex-direction: column;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-plan__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 5px 0;
+}
+/* The thin line joining one marker to the next. */
+.cowork-plan__step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 25px;
+  bottom: -5px;
+  left: 8px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--border-subtle);
+}
+.cowork-plan__step[data-state="done"]:not(:last-child)::before {
+  background: var(--action-primary);
+  opacity: 0.35;
+}
+.cowork-plan__marker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-base);
+  color: var(--surface-base);
+}
+.cowork-plan__step[data-state="active"] .cowork-plan__marker {
+  border: 2px solid var(--action-primary);
+  background: var(--surface-brand-subtle);
+}
+.cowork-plan__step[data-state="active"] .cowork-plan__marker::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--action-primary);
+  animation: cowork-plan-pulse 1.4s ease-in-out infinite;
+}
+.cowork-plan__step[data-state="done"] .cowork-plan__marker {
+  border-color: var(--action-primary);
+  background: var(--action-primary);
+  color: var(--ink-on-brand);
+}
+.cowork-plan__task {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 22px;
+}
+/* Colour only when not shimmering: the shimmer paints the text through background-clip. */
+.cowork-plan__task:not(.redrob-shimmer-text) {
+  color: var(--ink-primary);
+}
+.cowork-plan__step[data-state="done"] .cowork-plan__task:not(.redrob-shimmer-text) {
+  color: var(--ink-secondary);
+}
+.cowork-plan__step[data-state="todo"] .cowork-plan__task:not(.redrob-shimmer-text) {
+  color: var(--ink-secondary);
+}
+.cowork-plan__note {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+@keyframes cowork-plan-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.7);
+    opacity: 0.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-plan__step[data-state="active"] .cowork-plan__marker::after {
+    animation: none;
+  }
+}
+
+/* A blinking "writing" caret shown in the artifact card and the right-panel preview while the run
+   is still writing the file; a shared `redrob-` utility like the shimmer. Pure CSS; a thin bar that pulses like a text cursor. */
+.redrob-writing-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: redrob-caret-blink 1s step-end infinite;
+}
+/* The one blink both carets use: on for the first half, off for the second. */
+@keyframes redrob-caret-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  50.01%, 100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Motion-sensitive readers get a steady caret, no blink. */
+  .markdown-content[data-streaming-cursor] > :last-child::after,
+  .cowork-live-draft__body[data-writing] .markdown-content > :last-child::after,
+  .redrob-writing-caret {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .markdown-content [data-redrob-code-block] pre {
@@ -2770,10 +3567,9 @@ select:disabled {
 }
 
 /* The title bar (react-app/shell/window-title-bar.tsx), on design-system tokens. 48px
-   is the height main.mjs gives the Windows caption buttons (round 3, item 4 thickened it
-   from 40px). It sits above
+   is the height main.mjs gives the Windows caption buttons. It sits above
    dialogs so the window can always be moved, minimised and closed. The ground is the sidebar's
-   (sunken on light, raised on dark), so the chrome reads as one band with the menu, as Slack's does. */
+   (sunken on light, raised on dark), so the chrome reads as one band with the menu. */
 .window-titlebar {
   position: fixed;
   inset: 0 0 auto 0;
@@ -2796,7 +3592,7 @@ select:disabled {
   gap: 2px;
   justify-self: start;
 }
-/* Round 8, item 1: the brand lockup + search + window buttons, docked to the right edge. */
+/* The brand lockup + search + window buttons, docked to the right edge. */
 .window-titlebar__right {
   grid-column: 3;
   display: flex;
@@ -2810,8 +3606,8 @@ select:disabled {
   border-radius: 6px;
   object-fit: contain;
 }
-/* Round 13, item 2: the brand marks are buttons now - a bare wrapper with a subtle hover affordance
-   so they read as clickable, and a focus ring for keyboard use. */
+/* The brand marks are buttons: a bare wrapper with a subtle hover affordance so they read as
+   clickable, and a focus ring for keyboard use. */
 .window-titlebar__brand-btn {
   display: inline-flex;
   align-items: center;
@@ -2834,8 +3630,8 @@ select:disabled {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 1px;
 }
-/* Round 14, item B: an in-app tooltip BELOW the button (not the native OS title, which drew outside
-   the frameless window near the top edge). Shows on hover/focus, pointer-transparent, inside the app. */
+/* An in-app tooltip BELOW the button (the native OS title draws outside the frameless window near
+   the top edge). Shows on hover/focus, pointer-transparent, inside the app. */
 .window-titlebar__brand-btn {
   position: relative;
 }
@@ -2924,7 +3720,7 @@ select:disabled {
 }
 
 /*
-  Round 8, item 10: the Model Chart browse layer, laid out like a music-chart app. All colour comes
+  The Model Chart browse layer, laid out like a music-chart app. All colour comes
   from the theme's spectrum tokens so it reads in light and dark; the five tones cycle the banners
   and tiles through the brand's hues.
 */
@@ -2944,8 +3740,8 @@ select:disabled {
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  /* Round 24: a taller featured banner (was 172px) - more vertical presence, like a storefront hero.
-     The title + sub sit centered in the extra height via margin-top:auto on the eyebrow block. */
+  /* A tall featured banner for a storefront-hero presence; the title + sub sit centered in the extra
+     height via margin-top:auto on the eyebrow block. */
   min-height: 210px;
   justify-content: flex-end;
   padding: var(--space-6, 24px) var(--space-6, 24px) var(--space-5, 20px);
@@ -2971,7 +3767,7 @@ select:disabled {
 .model-chart__banner[data-tone="3"] { background: linear-gradient(120deg, var(--spectrum-violet), var(--spectrum-sky)); }
 .model-chart__banner[data-tone="4"] { background: linear-gradient(120deg, var(--spectrum-sky), var(--spectrum-teal)); }
 /*
-  Round 27: real banner artwork as a clean backdrop. The art is a full cover (z-index 0, behind the
+  Banner artwork as a clean backdrop. The art is a full cover (z-index 0, behind the
   gradient fallback + glass); the eyebrow/title/sub render on top of it. A scrim gradient keeps the
   white copy legible over bright or busy art. The scrim and the copy are both default-stacked by the
   generic `.model-chart__banner > *` rule (z-index 1), so DOM order puts the copy above the scrim.
@@ -2994,9 +3790,7 @@ select:disabled {
 }
 .model-chart__banner-eyebrow {
   font: var(--text-caption, 12px/1.4 sans-serif);
-  /* Round 17: normal capitalization, not ALL CAPS. The eyebrow strings are already written in
-     sentence case (e.g. "This month", "By output"); the old text-transform:uppercase + wide
-     caps-tracking shouted them. */
+  /* Sentence case as written (e.g. "This month", "By output"); no uppercase transform. */
   letter-spacing: 0.01em;
   opacity: 0.85;
 }
@@ -3014,6 +3808,11 @@ select:disabled {
   justify-content: center;
   gap: 6px;
   margin-top: var(--space-3, 12px);
+}
+.model-chart__dots-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .model-chart__dot {
   width: 7px;
@@ -3042,11 +3841,10 @@ select:disabled {
   color: var(--ink-primary);
 }
 /*
-  Round 20: each shelf is ONE horizontal scroll-snap row (not a wrapping grid), like a music-app
-  shelf. `.model-chart__shelf` is the positioning context for the two overlay chevrons; `.model-chart__row`
-  is the scroller. The native scrollbar is hidden - the row scrolls by chevron, wheel, trackpad, touch
-  and keyboard. Tiles are a fixed ~121px basis (round-19 was 151px; this is ~20% smaller) and snap to
-  the row's start edge.
+  Each shelf is ONE horizontal scroll-snap row (not a wrapping grid). `.model-chart__shelf` is the
+  positioning context for the two overlay chevrons; `.model-chart__row` is the scroller. The native
+  scrollbar is hidden - the row scrolls by chevron, wheel, trackpad, touch and keyboard. Tiles have a
+  fixed ~121px basis and snap to the row's start edge.
 */
 .model-chart__shelf {
   position: relative;
@@ -3055,15 +3853,15 @@ select:disabled {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  /* Round 23: more horizontal air between cards, closer to an Apple Music / Spotify shelf. */
+  /* Generous horizontal air between cards, like a music-app shelf. */
   gap: 20px;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 2px;
   /* chevrons overlay the edges; a little inline padding keeps the first/last card off the very edge.
-     Round 22: the TOP padding is 8px (not 2px) so the hover lift (translateY) has room inside this
-     overflow-y:hidden scroller - at 2px the lifted card's top border was clipped. */
+     The 8px top padding gives the hover lift (translateY) room inside this overflow-y:hidden
+     scroller, so the lifted card's top border is not clipped. */
   padding: 8px 2px 4px;
   /* Hide the native scrollbar - the shelf scrolls by chevrons / wheel / trackpad / touch. */
   scrollbar-width: none;
@@ -3126,7 +3924,7 @@ select:disabled {
 }
 [data-theme="dark"] .model-chart__chevron {
   background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
-  border-color: color-mix(in srgb, #fff 10%, transparent);
+  border-color: color-mix(in srgb, var(--redrob-white) 10%, transparent);
 }
 /*
   Apple-style "liquid glass" tiles. Each tile is a frosted translucent panel over a soft colour
@@ -3136,8 +3934,8 @@ select:disabled {
   no-backdrop-filter fallback below.
 */
 .model-chart__tile {
-  /* Round 17: an album card - a SQUARE art panel (.model-chart__card) with the caption BELOW it,
-     like a track in a music app. The button itself is just the stack; the card carries the look. */
+  /* An album card: a SQUARE art panel (.model-chart__card) with the caption BELOW it, like a track
+     in a music app. The button itself is just the stack; the card carries the look. */
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -3170,10 +3968,9 @@ select:disabled {
   padding: 0 2px;
 }
 /*
-  Round 25: the album art is now a REAL per-tile IMAGE (user's hand-built set), filling the square and
-  sitting above the glass backdrop. Decorative (aria-hidden) - the caption below carries the meaning.
-  object-fit:cover so the square crop is always full-bleed; it keeps the card's rounded corners via
-  the card's overflow:hidden.
+  The per-tile album art image fills the square and sits above the glass backdrop. Decorative
+  (aria-hidden) - the caption below carries the meaning. object-fit:cover so the square crop is
+  always full-bleed; it keeps the card's rounded corners via the card's overflow:hidden.
 */
 .model-chart__art {
   position: absolute;
@@ -3186,7 +3983,7 @@ select:disabled {
   transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
 }
 .model-chart__tile:hover .model-chart__card {
-  /* Round 22: subtler hover - a 2px lift (was 3), a lighter shadow, same accent border. */
+  /* A subtle hover: a 2px lift, a light shadow and the accent border. */
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -3236,13 +4033,13 @@ select:disabled {
   font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
-  /* Round 22: a title that wraps to 2-3 lines ("Financial Statement Review") was too loose at the
-     default line-height; pull the lines together. Single-line titles are unaffected. */
+  /* Tighter line-height for titles that wrap to 2-3 lines ("Financial Statement Review");
+     single-line titles are unaffected. */
   line-height: 1.15;
   color: var(--ink-primary);
 }
 .model-chart__tile-summary {
-  /* Round 17: the blurb is hand-written and short, and sits in the caption BELOW the square. */
+  /* The blurb is hand-written and short, and sits in the caption BELOW the square. */
   font-size: 12px;
   line-height: 1.35;
   color: var(--ink-secondary);
@@ -3250,7 +4047,7 @@ select:disabled {
 [data-theme="dark"] .model-chart__card {
   background: color-mix(in srgb, var(--surface-base) 46%, transparent);
   border-color: color-mix(in srgb, var(--border-subtle) 90%, transparent);
-  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 28px -14px color-mix(in srgb, var(--redrob-black) 60%, transparent), inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 8%, transparent);
 }
 [data-theme="dark"] .model-chart__glass { opacity: 0.58; }
 /* No backdrop-filter (older engines): keep the frosted look with a solid translucent surface. */
@@ -3288,8 +4085,8 @@ select:disabled {
 }
 
 /*
-  Round 26: the inner chart-detail page - a Spotify / Apple-Music style top-10 model list. A header
-  (album-art cover + title + lede) over a ranked list of rows. One layout for every chart.
+  The inner chart-detail page: a top-10 model list. A header (album-art cover + title + lede) over a
+  ranked list of rows. One layout for every chart.
 */
 .chart-detail {
   display: flex;
@@ -3430,9 +4227,9 @@ select:disabled {
   color: var(--ink-muted);
 }
 /*
-  Round 31: the Needle Test badge - a graded ring with clearer, Apple-Music-style grade colors
-  (green ace, blue strong, amber good, grey fair) so a strong result reads instantly. The caption
-  sits beneath; the full explanation is in the on-hover tooltip.
+  The Needle Test badge: a graded ring with clear grade colors (green ace, blue strong, amber good,
+  grey fair) so a strong result reads instantly. The caption sits beneath; the full explanation is in
+  the on-hover tooltip.
 */
 .chart-detail__score {
   display: flex;
@@ -3457,7 +4254,7 @@ select:disabled {
   background: var(--grade-bg, color-mix(in srgb, var(--status-success) 16%, transparent));
   border: 1.5px solid var(--grade-color, var(--status-success));
 }
-/* Apple-Music-clear grades: saturated ring + soft matching fill + dark readable number. */
+/* Clear grades: saturated ring + soft matching fill + dark readable number. */
 .chart-detail__score-ring[data-grade="ace"]    { --grade-color: var(--status-success); --grade-bg: color-mix(in srgb, var(--status-success) 16%, transparent); }
 .chart-detail__score-ring[data-grade="strong"] { --grade-color: var(--status-info); --grade-bg: color-mix(in srgb, var(--status-info) 16%, transparent); }
 .chart-detail__score-ring[data-grade="good"]   { --grade-color: var(--status-warning); --grade-bg: color-mix(in srgb, var(--status-warning) 18%, transparent); }
@@ -3496,7 +4293,7 @@ select:disabled {
   width: 100%;
 }
 /*
-  Round 34: Redrob Auto - the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
+  Redrob Auto: the featured first row, using the exact model-row grid and anatomy so it is
   the same height as and visually seamless with the ten models: "Featured" sits on the maker line,
   "Always the best" fills the Needle column, and the budget copy fills the cost column. A whisper of
   brand tint is the only thing that sets it apart.
@@ -3563,8 +4360,947 @@ select:disabled {
 @media (prefers-reduced-motion: reduce) {
   .model-chart__banner,
   .model-chart__tile,
-  .cowork-shell__side-resizer::before,
-  .cowork-composer-field::before {
+  .cowork-shell__side-resizer::before {
+    transition: none;
+  }
+}
+
+/*
+  Trending search edition: a compact rotating ticker above the hero, with a dated two-tab list.
+  Every surface owns both its background and text colour; movement stops under reduced motion.
+*/
+.model-chart__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
+.model-chart__topbar {
+  display: flex;
+  justify-content: flex-end;
+}
+.model-chart__trending {
+  display: flex;
+  align-items: center;
+  width: min(360px, 100%);
+  min-width: 0;
+  color: var(--ink-primary);
+}
+.model-chart__trending-track {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+}
+/* One 20px text line for every part of the pill, so icon, label, scope, rank, term, mark and chevron
+   share a single centre line instead of each font's own baseline. */
+.model-chart__trending-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 32px;
+  flex: 1;
+  padding: 0 10px 0 12px;
+  line-height: 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: border-color var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+.model-chart__trending-trigger:hover {
+  border-color: var(--border-strong);
+}
+.model-chart__trending-trigger:focus-visible,
+.model-chart__trending-row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.model-chart__trending-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  color: var(--ink-brand);
+}
+.model-chart__trending-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+/* The label ends in a hairline divider, so the rotating entry reads as its value. */
+.model-chart__trending-label {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
+  flex: 0 0 auto;
+  padding-inline-end: 8px;
+  border-inline-end: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 14px;
+}
+.model-chart__trending-window {
+  display: block;
+  min-width: 0;
+  height: 20px;
+  flex: 1;
+  overflow: hidden;
+}
+.model-chart__trending-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+  animation: model-chart-trending-in var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+@keyframes model-chart-trending-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+/* The scope stays at the start of the window, at the item text's own size; the rank,
+   term and arrow below push to the window's end edge (just before the chevron). */
+.model-chart__trending-scope {
+  flex: 0 0 auto;
+  color: var(--ink-muted);
+  font: var(--text-body-sm);
+}
+/* In the pill the rank hugs its term; the panel rows keep their fixed rank column. */
+.model-chart__trending-entry .model-chart__trending-rank {
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-inline-start: auto;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: start;
+}
+.model-chart__trending-entry .model-chart__trending-item-label {
+  flex: 0 1 auto;
+  line-height: 20px;
+}
+.model-chart__trending-entry .model-chart__trending-mark {
+  flex: 0 0 auto;
+  min-width: 0;
+  height: 20px;
+}
+.model-chart__trending-rank {
+  min-width: 18px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+.model-chart__trending-rank[data-top] {
+  color: var(--ink-brand);
+}
+.model-chart__trending-item-label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-primary);
+  font: var(--text-body-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-chart__trending-chevron {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  color: var(--ink-muted);
+  transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
+}
+.model-chart__trending-chevron[data-open] {
+  transform: rotate(180deg);
+}
+/*
+  Liquid glass, shared by the trending panel and the radar banners and page head: a see-through
+  surface with a strong blur and saturation behind it, a soft inner highlight on the top edge and a
+  hairline light rim, over a gentle drop shadow. Each surface sets its own --cowork-glass-bg, -rim
+  and -shadow for light and dark. Without backdrop-filter, or with reduced transparency, every glass
+  surface falls back to the solid raised surface.
+*/
+.model-chart__trending-panel,
+.model-chart__banner.model-chart__radar-banner,
+.cowork-radar-page__head {
+  border: 1px solid var(--cowork-glass-rim);
+  background: var(--cowork-glass-bg);
+  color: var(--ink-primary);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--cowork-glass-shadow);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .model-chart__trending-panel,
+  .model-chart__banner.model-chart__radar-banner,
+  .cowork-radar-page__head {
+    background: var(--surface-raised);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .model-chart__trending-panel,
+  .model-chart__banner.model-chart__radar-banner,
+  .cowork-radar-page__head {
+    background: var(--surface-raised);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .cowork-radar-mark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* The trending panel stays 78% opaque so text keeps its contrast over the bright banner art. */
+.model-chart__trending-panel {
+  --cowork-glass-bg: color-mix(in srgb, var(--surface-raised) 78%, transparent);
+  --cowork-glass-rim: color-mix(in srgb, var(--border-subtle) 60%, color-mix(in srgb, var(--redrob-white) 50%, transparent));
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 45%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 8%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 45%, transparent);
+  width: min(340px, calc(100vw - 24px));
+  max-height: min(640px, calc(100vh - 140px));
+  gap: 8px;
+  overflow-y: auto;
+  border-radius: 16px;
+}
+[data-theme="dark"] .model-chart__trending-panel {
+  --cowork-glass-bg: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  --cowork-glass-rim: color-mix(in srgb, var(--border-subtle) 70%, color-mix(in srgb, var(--redrob-white) 14%, transparent));
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 12%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 4%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 70%, transparent);
+}
+.model-chart__trending-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* Live clock above the snapshot's own muted "Updated" time, right-aligned under each other. */
+.model-chart__trending-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.model-chart__trending-clock time {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.model-chart__trending-updated {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 14px;
+}
+.model-chart__trending-heading h3 {
+  margin: 0;
+  line-height: 20px;
+  color: var(--ink-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+.model-chart__trending-tabs {
+  width: 100%;
+  background: transparent;
+  color: var(--ink-secondary);
+}
+.model-chart__trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.model-chart__trending-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 30px;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: var(--ink-primary);
+  text-align: start;
+  cursor: pointer;
+}
+.model-chart__trending-row:hover,
+.model-chart__trending-row:focus-visible {
+  background: color-mix(in srgb, var(--ink-primary) 6%, transparent);
+  color: var(--ink-primary);
+}
+.model-chart__trending-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  min-width: 16px;
+  font: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.model-chart__trending-mark svg {
+  width: 8px;
+  height: 8px;
+  fill: currentColor;
+}
+.model-chart__trending-mark--up {
+  color: var(--ink-brand);
+}
+.model-chart__trending-mark--down {
+  color: var(--status-danger);
+}
+.model-chart__trending-mark--down svg {
+  transform: rotate(180deg);
+}
+.model-chart__trending-mark--steady {
+  color: var(--ink-muted);
+}
+.model-chart__trending-mark--steady svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+}
+@media (max-width: 640px) {
+  .model-chart__trending {
+    width: 100%;
+  }
+}
+
+/*
+  Radar: white liquid glass (the shared recipe above). Two frosted panels side by side under the
+  Featured banner (stacked on narrow widths), and the same glass on each subpage header. A soft
+  blurred spectrum tint (news indigo/sky, social teal/sky) sits under the frosted white, so the glass
+  reads even over a flat page; copy uses theme ink. Dark mode is smoked white glass.
+*/
+.model-chart__radar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4, 16px);
+}
+@media (max-width: 760px) {
+  .model-chart__radar-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.model-chart__banner.model-chart__radar-banner,
+.cowork-radar-page__head {
+  --cowork-glass-bg: color-mix(in srgb, var(--redrob-white) 66%, transparent);
+  --cowork-glass-rim: color-mix(in srgb, var(--border-subtle) 55%, color-mix(in srgb, var(--redrob-white) 60%, transparent));
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 85%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 10%, transparent),
+    0 18px 48px -20px color-mix(in srgb, var(--redrob-black) 28%, transparent);
+}
+.model-chart__banner.model-chart__radar-banner {
+  min-height: 248px;
+  gap: 8px;
+  padding-top: 72px;
+  text-decoration: none;
+}
+.model-chart__banner.model-chart__radar-banner:hover {
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 90%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 12%, transparent),
+    0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 34%, transparent);
+}
+.model-chart__radar-banner:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* The tint: blurred colour blobs above the white surface and below the copy. */
+.model-chart__banner > .cowork-radar-tint,
+.cowork-radar-page__head > .cowork-radar-tint {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(28px);
+  opacity: 0.32;
+  background:
+    radial-gradient(45% 55% at 18% 12%, var(--spectrum-indigo), transparent 70%),
+    radial-gradient(50% 60% at 88% 26%, var(--spectrum-sky), transparent 72%),
+    radial-gradient(55% 60% at 60% 110%, var(--spectrum-violet), transparent 75%);
+}
+[data-feed="social"] > .cowork-radar-tint {
+  background:
+    radial-gradient(45% 55% at 18% 12%, var(--spectrum-teal), transparent 70%),
+    radial-gradient(50% 60% at 88% 26%, var(--spectrum-sky), transparent 72%),
+    radial-gradient(55% 60% at 60% 110%, var(--spectrum-indigo), transparent 75%);
+}
+.model-chart__radar-banner .model-chart__banner-title {
+  color: var(--ink-primary);
+  font-size: 20px;
+  line-height: 26px;
+}
+/* The overview is short and always shown in full - no line clamp, no ellipsis. */
+.model-chart__radar-summary {
+  display: block;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  line-height: 19px;
+}
+.cowork-radar-mark {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 24px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 60%, var(--redrob-white));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--redrob-white) 72%, transparent);
+  color: var(--ink-brand);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 90%, transparent);
+}
+.cowork-radar-mark svg {
+  width: 20px;
+  height: 20px;
+}
+/* The Read pill sits at the bottom, so both banners line up whatever their overview length. */
+.model-chart__radar-open {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin-top: auto;
+  padding: 5px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full, 999px);
+  background: color-mix(in srgb, var(--redrob-white) 82%, transparent);
+  color: var(--ink-primary);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 20px;
+}
+.model-chart__radar-open svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__radar-banner:hover .model-chart__radar-open svg,
+.model-chart__radar-banner:focus-visible .model-chart__radar-open svg {
+  transform: translateX(2px);
+}
+/* Dark: smoked white glass - white at a low mix over the dark raised surface, light theme ink. */
+[data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
+[data-theme="dark"] .cowork-radar-page__head {
+  --cowork-glass-rim: color-mix(in srgb, var(--redrob-white) 14%, transparent);
+  --cowork-glass-bg: color-mix(in srgb, var(--redrob-white) 9%, color-mix(in srgb, var(--surface-raised) 70%, transparent));
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 16%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 5%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 65%, transparent);
+}
+[data-theme="dark"] .model-chart__banner.model-chart__radar-banner:hover {
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 20%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 6%, transparent),
+    0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 72%, transparent);
+}
+[data-theme="dark"] .model-chart__banner > .cowork-radar-tint,
+[data-theme="dark"] .cowork-radar-page__head > .cowork-radar-tint {
+  opacity: 0.24;
+}
+[data-theme="dark"] .cowork-radar-mark {
+  border-color: color-mix(in srgb, var(--redrob-white) 18%, transparent);
+  background: color-mix(in srgb, var(--redrob-white) 10%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 18%, transparent);
+}
+[data-theme="dark"] .model-chart__radar-open {
+  border-color: color-mix(in srgb, var(--redrob-white) 16%, transparent);
+  background: color-mix(in srgb, var(--redrob-white) 10%, transparent);
+}
+/*
+  Radar subpage: the same white glass header (tint and feed mark, no hover lift) over a numbered
+  list of story cards. Every surface sets its background and text colour.
+*/
+.cowork-radar-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 20px);
+}
+.cowork-radar-page__head {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 76px var(--space-6, 24px) var(--space-5, 20px);
+  border-radius: 20px;
+}
+.cowork-radar-page__head > * {
+  position: relative;
+  z-index: 1;
+}
+.cowork-radar-page__head > .cowork-radar-mark {
+  position: absolute;
+}
+.cowork-radar-page__eyebrow {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 16px;
+}
+.cowork-radar-page__title {
+  margin: 0;
+  color: var(--ink-primary);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+.cowork-radar-page__lede {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+  line-height: 21px;
+}
+.cowork-radar-page__meta {
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.cowork-radar-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-radar-story__card {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-3, 12px);
+  padding: var(--space-4, 16px) var(--space-5, 20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+}
+.cowork-radar-story__rank {
+  color: var(--ink-brand);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.cowork-radar-story__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.cowork-radar-story__headline {
+  margin: 0;
+  color: var(--ink-primary);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 24px;
+}
+.cowork-radar-story__summary {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+  line-height: 21px;
+}
+.cowork-radar-story__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.cowork-radar-story__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.cowork-radar-story__source:hover {
+  color: var(--ink-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a.cowork-radar-story__source:focus-visible {
+  border-radius: 4px;
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-radar-story__source svg {
+  width: 12px;
+  height: 12px;
+}
+@media (max-width: 640px) {
+  .cowork-radar-page__title {
+    font-size: 22px;
+    line-height: 28px;
+  }
+  .cowork-radar-story__card {
+    grid-template-columns: 22px minmax(0, 1fr);
+    padding: 14px 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-chart__radar-banner:hover {
+    transform: none;
+  }
+  .model-chart__radar-open svg {
+    transition: none;
+  }
+  .model-chart__radar-banner:hover .model-chart__radar-open svg,
+  .model-chart__radar-banner:focus-visible .model-chart__radar-open svg {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-chart__trending-entry {
+    animation: none;
+    transform: none;
+  }
+  .model-chart__trending-trigger,
+  .model-chart__trending-chevron {
+    transition: none;
+    transform: none;
+  }
+}
+
+/*
+  The deliverable being written, live in the side panel's Artifacts tab. The body is revealed letter
+  by letter (useSmoothReveal) with the chat's caret at the end. It sits on the panel's own surface
+  with the same insets as the finished artifact view, so the hand-over to the real file does not
+  jump. Surfaces set both background and text colour.
+*/
+.cowork-live-draft {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface-base, var(--background));
+  color: var(--ink-primary, var(--foreground));
+}
+.cowork-live-draft__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 4px;
+}
+.cowork-live-draft__head .cowork-file__icon {
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+.cowork-live-draft__title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-live-draft__status {
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+.cowork-live-draft__body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 24px;
+  background: transparent;
+  color: inherit;
+}
+.cowork-live-draft__plain {
+  margin: 0;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  color: var(--ink-primary, var(--foreground));
+}
+/* The live draft's caret is the chat's streaming cursor (see .markdown-content[data-streaming-cursor]). */
+
+/*
+  The Artifacts tab list. Roomy rows on the panel's own surface (no grey fill, no
+  card frame): a 40px type tile, the Title Case name, "Artifact · 10:59", and a 2-line preview that
+  the component already ends on a whole sentence or word, so the clip below never shows "...".
+  Hover lifts the tile (2px + shadow, the album-cover hover) and darkens the name; no grey frame.
+*/
+.cowork-artifacts {
+  padding: var(--space-2, 8px) var(--space-2, 8px) var(--space-4, 16px);
+}
+.cowork-artifacts__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-artifact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+  width: 100%;
+  padding: var(--space-3, 12px) var(--space-2, 8px);
+  border: 0;
+  border-radius: var(--radius-lg, 12px);
+  background: none;
+  font: inherit;
+  text-align: start;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.cowork-artifact-row__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-base);
+  color: var(--ink-secondary);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.cowork-artifact-row:hover .cowork-artifact-row__icon {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--ink-primary) 14%, transparent);
+}
+.cowork-artifact-row__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cowork-artifact-row__text b {
+  overflow: hidden;
+  font: var(--text-body-strong);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-artifact-row__meta {
+  font: var(--text-meta);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.cowork-artifact-row__preview {
+  display: block;
+  /* The text is sized for 2 lines at the default width; a narrower panel may wrap it to a third,
+     which shows rather than clips (a clip would cut the sentence off). */
+  max-height: calc(3 * 20px);
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+.cowork-artifact-row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-artifact-row__icon {
+    transition: none;
+  }
+  .cowork-artifact-row:hover .cowork-artifact-row__icon {
+    transform: none;
+  }
+}
+
+/*
+  One artifact on the Artifacts tab, shown as its output only: the document sits directly on the
+  panel's own surface, with no frame, and the "All artifacts" back control above it.
+*/
+.cowork-artifact-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface-base, var(--background));
+  color: var(--ink-primary, var(--foreground));
+}
+/* The back control is inside the scroll body, so it scrolls with the document. */
+.cowork-artifact-view__body > .cowork-file__back {
+  display: inline-flex;
+  margin: 12px 16px 0;
+}
+.cowork-artifact-view__body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  background: transparent;
+  color: inherit;
+}
+.cowork-artifact-view__body [data-redrob-markdown-preview] {
+  height: auto;
+  overflow: visible;
+  padding: 8px 16px 24px;
+}
+
+/*
+  Plan's questions, the app's own card (cowork-questions.tsx). Same tokens as the DS
+  PlanQuestions it replaces, one step smaller type (question 14px, options 13px), and a
+  "Something else" chip that turns into a pill-shaped text field in place. Every surface sets its
+  background and text colour.
+*/
+.cowork-questions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  min-width: 0;
+  padding: var(--space-5, 20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+  --cowork-questions-gutter: 18px; /* The list's marker gutter; the action row uses the same inset. */
+}
+.cowork-questions__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  margin: 0;
+  padding-left: var(--cowork-questions-gutter);
+}
+.cowork-questions__item::marker {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+.cowork-questions__ask {
+  margin: 0 0 var(--space-2, 8px);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+.cowork-questions__any {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-secondary);
+}
+.cowork-questions__opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cowork-questions__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast, 120ms) ease, border-color var(--duration-fast, 120ms) ease;
+}
+.cowork-questions__opt:hover {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+.cowork-questions__opt[aria-pressed="true"] {
+  border-color: var(--action-primary);
+  background: var(--surface-brand-subtle);
+  color: var(--ink-brand);
+}
+.cowork-questions__opt:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-questions__opt svg {
+  flex: none;
+}
+.cowork-questions__opt--other {
+  border-style: dashed;
+  color: var(--ink-secondary);
+}
+/* The chip as a field: same pill, a text cursor, and the brand tint once something is typed. */
+.cowork-questions__opt--input {
+  min-width: min(260px, 100%);
+  padding: 0 12px;
+  border-color: var(--action-primary);
+  cursor: text;
+}
+.cowork-questions__opt--input:hover {
+  background: var(--surface-base);
+}
+.cowork-questions__opt--input[data-filled] {
+  background: var(--surface-brand-subtle);
+  color: var(--ink-brand);
+}
+.cowork-questions__opt--input:focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-questions__opt--input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+.cowork-questions__opt--input input::placeholder {
+  color: var(--ink-muted);
+}
+/* Same inline start inset as .cowork-questions__list (its 18px marker gutter), so Execute lines
+   up with the question text instead of sitting 18px to its left. */
+.cowork-questions__act {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  padding-left: var(--cowork-questions-gutter);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-questions__opt {
     transition: none;
   }
 }

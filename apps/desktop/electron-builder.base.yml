@@ -139,3 +139,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   # Per-user by default, so no UAC prompt is needed for the common case.
   perMachine: false
+  # Installer and uninstaller page copy lives in build/installer.nsh.
+  # Add/Remove Programs shows the flavor's own name (Demo A/B stay distinct), without the version.
+  uninstallDisplayName: ${productName}
+  # Sidebar art: drop build/installerSidebar.bmp and build/uninstallerSidebar.bmp (164x314, 24-bit); see build/README-installer-art.md.

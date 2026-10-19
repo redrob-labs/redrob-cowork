@@ -15,7 +15,7 @@ import { PRIVACY } from "./fixtures/privacy";
 import { PROJECTS } from "./fixtures/projects";
 import { SCHEDULE_BOARD } from "./fixtures/schedules";
 import { SKILL_BODIES, SKILLS, TAXONOMY } from "./fixtures/skills";
-import { consoleCatalogue } from "../skills/console-catalogue";
+import { catalogueDisplay, consoleCatalogue } from "../skills/console-catalogue";
 import type { CoworkResult, CoworkSkill, MemoryNote, Schedule, ScheduleBoard } from "./types";
 import { scheduleName } from "../scheduled/schedules";
 
@@ -142,12 +142,16 @@ export function createFixtureCoworkServices(options: { now?: () => number } = {}
     skills: {
       list: () => preview(copySkills(sampleSkills)),
       // The library is the Console's public catalogue, real data even without a server.
-      library: async (filters = {}) => ({ data: await consoleCatalogue.list(filters), preview: false }),
+      library: async () => ({ data: await consoleCatalogue.list(), preview: false }),
       taxonomy: () => preview(TAXONOMY),
       get: async (name) => {
         const installed = sampleSkills.find((skill) => skill.name === name);
         if (installed) {
+          const catalogue = consoleCatalogue.peek(name);
+          // Catalogue fields fill gaps; the installed skill's own title and summary win, as in the list.
           return preview({
+            ...(catalogue ? catalogueDisplay(catalogue) : {}),
+            ...catalogueDisplay(installed),
             name,
             description: installed.description,
             tags: { ...installed.tags },

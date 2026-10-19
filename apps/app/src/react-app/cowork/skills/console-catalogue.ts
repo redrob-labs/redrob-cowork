@@ -1,27 +1,57 @@
-import type { LibrarySkill, SkillDetail, SkillFilters } from "../services/types";
-import { matchesFilters } from "./skills";
+import type { LibrarySkill, SkillDetail, SkillDisplayFields } from "../services/types";
 
 /*
  * The public Redrob Console skill catalogue, read by the browser directly. It is static
  * files behind CORS `*` (index.json + one SKILL.md per skill), so listing and previewing
  * a library skill needs no workspace connection; only installing does (the server writes
- * the file into the workspace). Offline means an empty library.
+ * the file into the workspace). Offline catalogue requests surface an error so the UI can
+ * distinguish a connection problem from an empty library.
  */
 
 export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
 
-/** One catalogue skill with its instructions; no profession/task/language in the catalogue. */
-export type ConsoleSkill = { name: string; title?: string; description: string; body: string };
+/** How long the catalogue and the Skills queries keep their data; one value for both. */
+export const CATALOGUE_CACHE_MS = 30 * 60_000;
 
+/** One catalogue skill with its instructions and localized marketplace display fields. */
+export type ConsoleSkill = SkillDisplayFields & {
+  name: string;
+  /** Catalogue release version from the SKILL.md frontmatter, when supplied. */
+  version?: string;
+  description: string;
+  /** The SKILL.md instructions, after the frontmatter. */
+  body: string;
+};
+
+/** A catalogue skill's display fields and version, with absent ones left out rather than undefined. */
+export function catalogueDisplay({ title, titleKo, summary, summaryKo, version }: SkillDisplayFields & { version?: string }): SkillDisplayFields & { version?: string } {
+  return {
+    ...(title ? { title } : {}),
+    ...(titleKo ? { titleKo } : {}),
+    ...(summary ? { summary } : {}),
+    ...(summaryKo ? { summaryKo } : {}),
+    ...(version ? { version } : {}),
+  };
+}
+
+/** A catalogue skill as the detail screen reads it: not installed, no tags. */
+export function catalogueDetail(skill: ConsoleSkill): SkillDetail {
+  return { name: skill.name, description: skill.description, tags: {}, body: skill.body, installed: null, ...catalogueDisplay(skill) };
+}
+
+/** Test seams and cache lifetimes for a catalogue instance. */
 type CatalogueOptions = {
   fetchImpl?: typeof fetch;
   baseUrl?: string;
+  /** How long a complete catalogue is served before it is refreshed. */
   ttlMs?: number;
+  /** How soon a failed refresh is tried again. */
   failureTtlMs?: number;
   now?: () => number;
 };
 
-type Snapshot = { skills: ConsoleSkill[]; loadedAt: number; ok: boolean };
+/** One catalogue read. `ok` is false only when no complete catalogue has ever loaded. */
+type Snapshot = { skills: ConsoleSkill[]; expiresAt: number; ok: boolean };
 
 /** `key: value` per line; the Console's own reading of its frontmatter. */
 export function parseConsoleFrontmatter(content: string): { data: Record<string, string>; body: string } {
@@ -35,10 +65,12 @@ export function parseConsoleFrontmatter(content: string): { data: Record<string,
   return { data, body: content.slice(match[0].length) };
 }
 
+/** A cached reader of the public catalogue; one shared instance serves the app. */
 export function createConsoleCatalogue(options: CatalogueOptions = {}) {
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   const baseUrl = options.baseUrl ?? CONSOLE_CATALOGUE_BASE_URL;
-  const ttlMs = options.ttlMs ?? 10 * 60_000;
+  // Matches the Skills queries' gcTime, so a cached page and the catalogue expire together.
+  const ttlMs = options.ttlMs ?? CATALOGUE_CACHE_MS;
   const failureTtlMs = options.failureTtlMs ?? 60_000;
   const now = options.now ?? Date.now;
   let snapshot: Snapshot | null = null;
@@ -50,48 +82,66 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
     return response.text();
   };
 
-  // A skill whose SKILL.md cannot be read is left out rather than shown half-empty.
+  // A request failure rejects (so the whole refresh fails); a SKILL.md with malformed
+  // frontmatter is left out, since retrying cannot fix it and it must not hide the rest.
   const loadSkill = async (name: string): Promise<ConsoleSkill | null> => {
-    try {
-      const { data, body } = parseConsoleFrontmatter(await fetchText(`${encodeURIComponent(name)}/SKILL.md`));
-      if (data.name !== name || !data.description) return null;
-      return { name, description: data.description, body: body.trim(), ...(data.title ? { title: data.title } : {}) };
-    } catch {
-      return null;
-    }
+    const { data, body } = parseConsoleFrontmatter(await fetchText(`${encodeURIComponent(name)}/SKILL.md`));
+    if (data.name !== name || !data.description) return null;
+    return {
+      name,
+      description: data.description,
+      body: body.trim(),
+      ...catalogueDisplay({ title: data.title, titleKo: data.title_ko, summary: data.summary, summaryKo: data.summary_ko, version: data.version }),
+    };
   };
 
+  // Publishes a catalogue only when every member was read. A failed refresh keeps the last
+  // complete catalogue (or reports unavailable) and is retried after the shorter failure TTL.
   const load = async (): Promise<Snapshot> => {
     try {
       const index = JSON.parse(await fetchText("index.json")) as { skills?: Array<{ name?: unknown }> };
-      const names = (index.skills ?? []).map((skill) => skill.name).filter((name): name is string => typeof name === "string");
+      const names = [...new Set((index.skills ?? []).map((skill) => skill.name).filter((name): name is string => typeof name === "string"))];
       const skills = (await Promise.all(names.map(loadSkill))).filter((skill): skill is ConsoleSkill => skill !== null);
-      return { skills, loadedAt: now(), ok: true };
+      return { skills, expiresAt: now() + ttlMs, ok: true };
     } catch {
-      return { skills: [], loadedAt: now(), ok: false };
+      const retryAt = now() + failureTtlMs;
+      return snapshot?.ok ? { ...snapshot, expiresAt: retryAt } : { skills: [], expiresAt: retryAt, ok: false };
     }
   };
 
-  const current = async (): Promise<ConsoleSkill[]> => {
-    if (snapshot && now() - snapshot.loadedAt < (snapshot.ok ? ttlMs : failureTtlMs)) return snapshot.skills;
+  const current = async (): Promise<Snapshot> => {
+    if (snapshot && now() < snapshot.expiresAt) return snapshot;
     inFlight ??= load().then((next) => {
       snapshot = next;
       inFlight = null;
       return next;
     });
-    return (await inFlight).skills;
+    return inFlight;
   };
 
   return {
-    /** The library, filtered; only `q` can match because the catalogue carries no tags. */
-    list: async (filters: SkillFilters = {}): Promise<LibrarySkill[]> =>
-      (await current())
-        .map(({ name, title, description }) => ({ name, description, tags: {}, ...(title ? { title } : {}) }))
-        .filter((skill) => matchesFilters(skill, filters)),
-    /** One library skill with its body, as the detail screen shows it; null when the catalogue lacks it. */
+    /** The whole library; rejects when the catalogue cannot be reached. */
+    list: async (): Promise<LibrarySkill[]> => {
+      const currentSnapshot = await current();
+      if (!currentSnapshot.ok) throw new Error("The skill catalogue is not available");
+      return currentSnapshot.skills.map(({ name, description, title, titleKo, summary, summaryKo }) => ({ name, description, tags: {}, ...catalogueDisplay({ title, titleKo, summary, summaryKo }) }));
+    },
+    /** One library skill with its body, as the detail screen shows it; null when unavailable. */
     get: async (name: string): Promise<SkillDetail | null> => {
-      const skill = (await current()).find((item) => item.name === name);
-      return skill ? { name, description: skill.description, tags: {}, body: skill.body, installed: null } : null;
+      const currentSnapshot = await current();
+      if (!currentSnapshot.ok) return null;
+      const skill = currentSnapshot.skills.find((item) => item.name === name);
+      return skill ? catalogueDetail(skill) : null;
+    },
+    /** Cached catalogue detail only; never starts network work. */
+    peek: (name: string): SkillDetail | null => {
+      if (!snapshot?.ok) return null;
+      const skill = snapshot.skills.find((item) => item.name === name);
+      return skill ? catalogueDetail(skill) : null;
+    },
+    /** Loads the catalogue in the background so Skills paints from memory; never throws. */
+    warm: async (): Promise<void> => {
+      await current().catch(() => undefined);
     },
     /** Drops the cache; tests and a manual refresh. */
     reset: () => {

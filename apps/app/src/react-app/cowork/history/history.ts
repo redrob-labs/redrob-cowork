@@ -1,6 +1,7 @@
 import type { Session, Todo } from "@redrob-labs/sdk/v2/client";
 
 import { t } from "../../../i18n";
+import { shownChatTitle } from "../../../app/lib/session-title";
 import type { RedrobSessionSnapshot } from "../../../app/lib/redrob-server";
 import type { ChatMode, HistoryEntry, HistoryStep } from "../services/types";
 
@@ -24,7 +25,7 @@ export function formatTook(ms: number): string | null {
 const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * When a History row last changed, in words (Claude-style): "just now", "5 minutes ago",
+ * When a History row last changed, in words: "just now", "5 minutes ago",
  * "3 hours ago", "Yesterday", "4 days ago", then the locale date for anything older than a
  * week. Pure and locale-aware; `now` is passed in so it is deterministic in tests.
  */
@@ -70,7 +71,7 @@ export function historyEntryFrom(input: {
     id: session.id,
     at: session.time.updated,
     kind: input.mode === "run" || steps.length > 0 ? "run" : "chat",
-    what: session.title.trim() || t("cowork.history_untitled"),
+    what: shownChatTitle(session.title).trim() || t("cowork.history_untitled"),
     projectId: input.projectId,
     state,
     label,

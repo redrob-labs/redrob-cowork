@@ -1,11 +1,18 @@
 import type { RedrobSkillItem } from "../../../app/lib/redrob-server";
-import type { CoworkSkill, SkillDraft, SkillFilters, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
+import type { CoworkSkill, LibrarySkill, SkillDetail, SkillDisplayFields, SkillDraft, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
+import { catalogueDisplay } from "./console-catalogue";
+import type { PendingCoworkChat } from "./start-chat";
 
 /*
  * Skills are SKILL.md files (the agentskills.io specification) in the workspace's
  * `.opencode/skills/<name>/`: a name, a description the assistant reads to decide when to use the
  * skill, and instructions. The Redrob Console marks the ones it supplies in `metadata.source`.
  */
+
+/** `/skill/<name>` with a route-safe stable skill name. */
+export function skillPath(name: string): string {
+  return `/skill/${encodeURIComponent(name)}`;
+}
 
 /** Where people manage their team's skills. */
 export const CONSOLE_SKILLS_URL = "https://console.redrob.ai/skills";
@@ -76,37 +83,101 @@ export function canSaveSkill(draft: SkillDraft): boolean {
   return isValidSkillName(draft.name) && description.length > 0 && description.length <= SKILL_DESCRIPTION_MAX && draft.instructions.trim().length > 0;
 }
 
-/** The Console's filter: every field optional, combined with AND; `q` searches the name and the description. */
-export function matchesFilters(skill: { name: string; description: string; tags: SkillTags }, filters: SkillFilters): boolean {
-  const query = filters.q?.trim().toLowerCase();
-  return (
-    (!filters.profession || skill.tags.profession === filters.profession) &&
-    (!filters.task || skill.tags.task === filters.task) &&
-    (!filters.language || skill.tags.language === filters.language) &&
-    (!query || skill.name.toLowerCase().includes(query) || skill.description.toLowerCase().includes(query))
-  );
+/** A row on the Skills screen. */
+export type SkillRow = SkillDisplayFields & {
+  name: string;
+  description: string;
+  tags: SkillTags;
+  origin: SkillOrigin;
+  /** The installed record, or null for a catalogue skill this workspace has not added. */
+  installed: CoworkSkill | null;
+};
+
+/** The artwork tones a skill icon can take; each has a `data-tone` rule in index.css. */
+const SKILL_TONES = ["blue", "sky", "teal", "green", "violet", "pink", "red", "orange"] as const;
+/** One of `SKILL_TONES`. */
+export type SkillTone = (typeof SKILL_TONES)[number];
+
+/** FNV-1a 32-bit over the stable name, so a skill keeps one colour everywhere. */
+export function skillTone(name: string): SkillTone {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < name.length; index += 1) {
+    hash ^= name.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return SKILL_TONES[hash % SKILL_TONES.length] ?? "blue";
 }
 
-/** A row on the Skills screen. */
-export type SkillRow = { name: string; title?: string; description: string; tags: SkillTags; origin: SkillOrigin; installed: CoworkSkill | null };
+/** Which group a skill belongs to: the person's installed skills, a profession, or everyday. */
+export type SkillShelfId = "yours" | "lawyer" | "accountant" | "vc" | "everyday";
+
+/** The group a row belongs to; drives the Your skills shelf and the detail page's category badge. */
+export function skillShelf(row: Pick<SkillRow, "name" | "tags" | "installed">): SkillShelfId {
+  if (row.installed !== null) return "yours";
+  if (/^(us|kr)-lawyer-/.test(row.name) || row.tags.profession === "lawyer") return "lawyer";
+  if (/^(us|kr)-accountant-/.test(row.name) || row.tags.profession === "accountant") return "accountant";
+  if (/^(us|kr)-vc-/.test(row.name) || row.tags.profession === "vc") return "vc";
+  return "everyday";
+}
+
+/** Localized display title with catalogue fields preferred over the route slug. */
+export function skillDisplayTitle(row: { name: string; title?: string; titleKo?: string }, locale: string): string {
+  return (locale.startsWith("ko") ? row.titleKo ?? row.title : row.title) ?? row.name;
+}
+
+/** The first sentence of a description, split on Latin or CJK sentence ends. */
+function firstSentence(text: string): string {
+  return text.trim().split(/(?<=[.!?。！？])\s+/u)[0]?.trim() ?? "";
+}
+
+/** Catalogue summary, or the description's first sentence in full when the catalogue has none. */
+export function skillBrief(row: { summary?: string; summaryKo?: string; description: string }, locale: string): string {
+  const korean = locale.startsWith("ko");
+  const summary = korean ? row.summaryKo ?? row.summary : row.summary;
+  if (summary?.trim()) return summary.trim();
+  const sentence = firstSentence(row.description).replace(/^Use when the user asks to\s+/i, "").replace(/^Use when\s+/i, "").trim();
+  if (!sentence) return row.description.trim();
+  if (korean) return sentence;
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+}
+
+/** Sub-pixel tolerance so a shelf at its edge never keeps a chevron with nothing left to reveal. */
+const SHELF_EDGE_EPSILON = 2;
+
+/** Whether a horizontal shelf can scroll back or forward from its current position. */
+export function shelfEdges(scrollLeft: number, scrollWidth: number, clientWidth: number): { canPrev: boolean; canNext: boolean } {
+  const overflow = scrollWidth - clientWidth > SHELF_EDGE_EPSILON;
+  return {
+    canPrev: overflow && scrollLeft > SHELF_EDGE_EPSILON,
+    canNext: overflow && scrollLeft < scrollWidth - clientWidth - SHELF_EDGE_EPSILON,
+  };
+}
 
 const ORIGIN_ORDER: Record<SkillOrigin, number> = { team: 0, mine: 1, library: 2 };
 
 /**
- * The installed skills that match, team first, then the person's, then added library ones; then,
- * unless only installed ones are asked for, the library's that are not installed yet.
+ * Installed skills first in origin order, then library entries not already installed.
+ * Catalogue display fields fill gaps in installed records without replacing local values.
  */
-export function skillRows(input: { installed: readonly CoworkSkill[]; library: readonly { name: string; title?: string; description: string; tags: SkillTags }[] | null; filters: SkillFilters; installedOnly: boolean }): SkillRow[] {
+export function skillRows(input: { installed: readonly CoworkSkill[]; library: readonly LibrarySkill[] | null }): SkillRow[] {
+  const libraryByName = new Map(input.library?.map((skill) => [skill.name, skill]));
   const installed = input.installed
-    .filter((skill) => matchesFilters(skill, input.filters))
+    .map((skill) => ({ ...libraryByName.get(skill.name), ...skill, tags: skill.tags }))
     .sort((a, b) => ORIGIN_ORDER[a.origin] - ORIGIN_ORDER[b.origin] || a.name.localeCompare(b.name))
-    .map((skill): SkillRow => ({ name: skill.name, title: skill.title, description: skill.description, tags: skill.tags, origin: skill.origin, installed: skill }));
-  if (input.installedOnly || !input.library) return installed;
+    .map((skill): SkillRow => ({ ...skill, installed: skill }));
+  if (!input.library) return installed;
   const names = new Set(input.installed.map((skill) => skill.name));
   const available = input.library
-    .filter((skill) => !names.has(skill.name) && matchesFilters(skill, input.filters))
+    .filter((skill) => !names.has(skill.name))
     .map((skill): SkillRow => ({ ...skill, origin: "library", installed: null }));
   return [...installed, ...available];
+}
+
+/** The localized language tag, or null when this skill has no known language. */
+export function languageTagLabel(tags: SkillTags, taxonomy: SkillTaxonomy | null, locale: string): string | null {
+  const language = taxonomy?.languages.find((entry) => entry.id === tags.language);
+  if (!language) return null;
+  return locale.startsWith("ko") ? language.label.ko : language.label.en;
 }
 
 /** The taxonomy's words for a skill's tags, in the person's language (Korean or English). */
@@ -119,10 +190,44 @@ export function tagLabels(tags: SkillTags, taxonomy: SkillTaxonomy | null, local
   return [profession, task, language].flatMap((entry) => (entry ? [pick(entry.label)] : []));
 }
 
-/** What Run sends: the skill by name, and anything the person added. */
-export function skillRunPrompt(name: string, extra = ""): string {
-  const more = extra.trim();
-  return more ? `Use the \`${name}\` skill.\n\n${more}` : `Use the \`${name}\` skill.`;
+/**
+ * A skill page's first frame, built from what is already in memory (the catalogue entry from
+ * `consoleCatalogue.peek` and the cached installed list), so opening a skill paints its real page at
+ * once instead of a slug title over a grey skeleton. Null when neither knows it. The installed
+ * skill's own display fields win over the catalogue's, as they do in `skillRows`.
+ */
+export function seedSkillDetail(
+  name: string,
+  catalogue: SkillDetail | null,
+  installed: readonly CoworkSkill[] | null,
+): SkillDetail | null {
+  const mine = installed?.find((skill) => skill.name === name) ?? null;
+  if (!mine) return catalogue ? { ...catalogue, installed: null } : null;
+  return {
+    ...(catalogue ? catalogueDisplay(catalogue) : {}),
+    ...catalogueDisplay(mine),
+    name,
+    description: mine.description,
+    tags: mine.tags,
+    body: catalogue?.body ?? "",
+    installed: { origin: mine.origin, scope: mine.scope },
+  };
+}
+
+/** Runs a skill in a new Plan chat; false when no workspace is connected. */
+export function runSkill(
+  deps: { workspaceId: string | null; request: (chat: PendingCoworkChat) => void; navigate: (path: string) => void },
+  name: string,
+): boolean {
+  if (!deps.workspaceId) return false;
+  deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name), mode: "plan" });
+  deps.navigate("/chat");
+  return true;
+}
+
+/** What Run sends: the skill by name. */
+export function skillRunPrompt(name: string): string {
+  return `Use the \`${name}\` skill.`;
 }
 
 /** Who may change or remove a skill here: never a team's, never one outside the project. */

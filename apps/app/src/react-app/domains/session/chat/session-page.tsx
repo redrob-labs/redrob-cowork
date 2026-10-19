@@ -16,7 +16,6 @@ import type {
   PendingPermission,
   PendingQuestion,
   ProviderListItem,
-  TodoItem,
   WorkspaceConnectionState,
   WorkspaceSessionGroup,
 } from "../../../../app/types";
@@ -248,7 +247,6 @@ export type SessionPageProps = {
   sidebar: SessionPageSidebarProps;
   surface?: SessionPageSurfaceProps | null;
   history?: SessionPageHistoryControls | null;
-  todos: TodoItem[];
   sessionLoadingById: (sessionId: string | null) => boolean;
   shareWorkspaceModal?: ShareWorkspaceModalProps | null;
   providerAuthModal?: ProviderAuthModalProps | null;
@@ -1455,7 +1453,6 @@ export function SessionPage(props: SessionPageProps) {
                         isControlTarget={activeWorkbenchPane === "primary"}
                         opencodeBaseUrl={reactSessionBaseUrl}
                         redrobToken={reactSessionToken}
-                        todos={props.todos}
                         activePermission={props.activePermission}
                         permissionReplyBusy={props.permissionReplyBusy}
                         respondPermission={props.respondPermission}
@@ -1486,7 +1483,6 @@ export function SessionPage(props: SessionPageProps) {
                             isControlTarget={activeWorkbenchPane === "secondary"}
                             opencodeBaseUrl={reactSessionBaseUrl}
                             redrobToken={reactSessionToken}
-                            todos={[]}
                             onOpenTarget={openTarget}
                           />
                         </ResizablePanel>
@@ -1641,7 +1637,12 @@ export function SessionPage(props: SessionPageProps) {
             </ResizablePanel>
               {sidePanelOpen && !isMobile ? (
               <>
-                <ResizableHandle className="hidden bg-transparent lg:flex" />
+                {/* A visible, grabbable seam at every width so the side panel can be resized
+                    (bounds: min 320px, max 70%, below). */}
+                <ResizableHandle
+                  withHandle
+                  className="w-1.5 bg-border/60 transition-colors hover:bg-primary/40 data-[resize-handle-active]:bg-primary/60 cursor-col-resize"
+                />
                 <ResizablePanel
                   panelRef={browserPanelRef}
                   defaultSize={`${activeSidePanel === "extensions" ? Math.max(browserPanelDefaultWidth, 480) : browserPanelDefaultWidth}px`}
