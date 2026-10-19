@@ -14,7 +14,9 @@ import { availableWorkflows } from "./workflows";
  */
 export function useMarketplaceRows() {
   const { services, scope } = usePreviewServices();
-  const installed = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, gcTime: CATALOGUE_CACHE_MS, retry: 2, placeholderData: keepPreviousData });
+  // No placeholder on the workspace-keyed installed list: a new workspace must never paint the
+  // previous one's private skills. The public catalogue may carry over while it refreshes.
+  const installed = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, gcTime: CATALOGUE_CACHE_MS, retry: 2 });
   const library = useQuery({ queryKey: previewKey(scope, "library"), queryFn: () => services.skills.library(), staleTime: 5 * 60_000, gcTime: CATALOGUE_CACHE_MS, retry: false, placeholderData: keepPreviousData });
   // Paint only once the installed list has data and the catalogue has settled (loaded or failed),
   // so the page never flashes "Your skills" alone before the catalogue arrives.
