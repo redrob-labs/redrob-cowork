@@ -1,5 +1,5 @@
 import type { RedrobSkillItem } from "../../../app/lib/redrob-server";
-import type { CoworkSkill, SkillDraft, SkillFilters, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
+import type { CoworkSkill, LibrarySkill, SkillDraft, SkillFilters, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
 
 /*
  * Skills are SKILL.md files (the agentskills.io specification) in the workspace's
@@ -88,19 +88,93 @@ export function matchesFilters(skill: { name: string; description: string; tags:
 }
 
 /** A row on the Skills screen. */
-export type SkillRow = { name: string; title?: string; description: string; tags: SkillTags; origin: SkillOrigin; installed: CoworkSkill | null };
+export type SkillRow = {
+  name: string;
+  title?: string;
+  titleKo?: string;
+  summary?: string;
+  summaryKo?: string;
+  description: string;
+  tags: SkillTags;
+  origin: SkillOrigin;
+  installed: CoworkSkill | null;
+};
+
+export const SKILL_TONES = ["blue", "sky", "teal", "green", "violet", "pink", "red", "orange"] as const;
+export type SkillTone = (typeof SKILL_TONES)[number];
+
+/** FNV-1a 32-bit over the stable name, so a skill keeps one colour everywhere. */
+export function skillTone(name: string): SkillTone {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < name.length; index += 1) {
+    hash ^= name.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return SKILL_TONES[hash % SKILL_TONES.length] ?? "blue";
+}
+
+export type SkillShelfId = "yours" | "lawyer" | "accountant" | "vc" | "everyday";
+export const SKILL_SHELF_ORDER: readonly SkillShelfId[] = ["yours", "lawyer", "accountant", "vc", "everyday"];
+
+/** The first marketplace shelf that owns a row. */
+export function skillShelf(row: Pick<SkillRow, "name" | "tags" | "installed">): SkillShelfId {
+  if (row.installed !== null) return "yours";
+  if (/^(us|kr)-lawyer-/.test(row.name) || row.tags.profession === "lawyer") return "lawyer";
+  if (/^(us|kr)-accountant-/.test(row.name) || row.tags.profession === "accountant") return "accountant";
+  if (/^(us|kr)-vc-/.test(row.name) || row.tags.profession === "vc") return "vc";
+  return "everyday";
+}
+
+/** Localized display title with catalogue fields preferred over the route slug. */
+export function skillDisplayTitle(row: { name: string; title?: string; titleKo?: string }, locale: string): string {
+  return (locale.startsWith("ko") ? row.titleKo ?? row.title : row.title) ?? row.name;
+}
+
+function firstSentence(text: string): string {
+  return text.trim().split(/(?<=[.!?。！？])\s+/u)[0]?.trim() ?? "";
+}
+
+/** Catalogue summary, or a compact description fallback when the catalogue has none. */
+export function skillBrief(row: { summary?: string; summaryKo?: string; description: string }, locale: string): string {
+  const korean = locale.startsWith("ko");
+  const summary = korean ? row.summaryKo ?? row.summary : row.summary;
+  if (summary?.trim()) return summary.trim();
+  const sentence = firstSentence(row.description).replace(/^Use when the user asks to\s+/i, "").replace(/^Use when\s+/i, "").trim();
+  if (!sentence) return row.description.trim();
+  if (korean) return sentence.length > 40 ? `${sentence.slice(0, 40).trimEnd()}…` : sentence;
+  const normalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  const words = normalized.split(/\s+/);
+  return words.length > 9 ? `${words.slice(0, 9).join(" ")}…` : normalized;
+}
 
 const ORIGIN_ORDER: Record<SkillOrigin, number> = { team: 0, mine: 1, library: 2 };
 
+/** Ordered non-empty marketplace shelves, with localized title sorting outside Your skills. */
+export function shelvesOf(rows: readonly SkillRow[], locale: string): Array<{ id: SkillShelfId; rows: SkillRow[] }> {
+  return SKILL_SHELF_ORDER.flatMap((id) => {
+    const shelfRows = rows.filter((row) => skillShelf(row) === id);
+    if (!shelfRows.length) return [];
+    if (id !== "yours") shelfRows.sort((a, b) => skillDisplayTitle(a, locale).localeCompare(skillDisplayTitle(b, locale), locale));
+    return [{ id, rows: shelfRows }];
+  });
+}
+
 /**
- * The installed skills that match, team first, then the person's, then added library ones; then,
- * unless only installed ones are asked for, the library's that are not installed yet.
+ * Installed skills first in origin order, then library entries not already installed.
+ * Catalogue display fields fill gaps in installed records without replacing local values.
  */
-export function skillRows(input: { installed: readonly CoworkSkill[]; library: readonly { name: string; title?: string; description: string; tags: SkillTags }[] | null; filters: SkillFilters; installedOnly: boolean }): SkillRow[] {
+export function skillRows(input: {
+  installed: readonly CoworkSkill[];
+  library: readonly LibrarySkill[] | null;
+  filters: SkillFilters;
+  installedOnly: boolean;
+}): SkillRow[] {
+  const libraryByName = new Map(input.library?.map((skill) => [skill.name, skill]));
   const installed = input.installed
+    .map((skill) => ({ ...libraryByName.get(skill.name), ...skill, tags: skill.tags }))
     .filter((skill) => matchesFilters(skill, input.filters))
     .sort((a, b) => ORIGIN_ORDER[a.origin] - ORIGIN_ORDER[b.origin] || a.name.localeCompare(b.name))
-    .map((skill): SkillRow => ({ name: skill.name, title: skill.title, description: skill.description, tags: skill.tags, origin: skill.origin, installed: skill }));
+    .map((skill): SkillRow => ({ ...skill, installed: skill }));
   if (input.installedOnly || !input.library) return installed;
   const names = new Set(input.installed.map((skill) => skill.name));
   const available = input.library

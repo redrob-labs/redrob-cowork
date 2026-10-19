@@ -1,115 +1,47 @@
 /** @jsxImportSource react */
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router";
-import { Badge, Button, EmptyState, Input, Select, Skeleton, Switch, icons } from "@redrob-labs/ui";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { Badge, Button, EmptyState, Input, Skeleton, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { openExternal } from "../connectors/cowork-connectors";
 import { PreviewPage } from "../preview/preview-note";
 import { previewKey, usePreviewServices } from "../preview/preview";
-import type { SkillFilters, SkillOrigin, SkillTaxonomy, TeamSkillsState } from "../services/types";
+import type { SkillOrigin, TeamSkillsState } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { canRemoveSkill, CONSOLE_SKILLS_URL, skillRows, tagLabels, type SkillRow } from "./skills";
-import { installSkill, removeSkill } from "./use-skills";
+import { CONSOLE_SKILLS_URL, shelvesOf, skillRows, type SkillShelfId } from "./skills";
+import { installSkill } from "./use-skills";
 import { runSkill } from "./cowork-skill";
 import { useCoworkStartStore } from "./start-chat";
-import { albumArtBase } from "../preview/model-chart-home";
-import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
+import { consoleCatalogue } from "./console-catalogue";
+import { SHELF_LABEL, SkillGrid, SkillShelf } from "./skill-tile";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
-const ALL = "all";
+const SHELF_IDS: readonly SkillShelfId[] = ["yours", "lawyer", "accountant", "vc", "everyday"];
 
 /** `/skill/<name>`. */
 export function skillPath(name: string): string {
   return `/skill/${encodeURIComponent(name)}`;
 }
 
-/** The localized label for where a skill came from (library, team, or the person's own). */
+/** The localized label for where a skill came from. */
 export function originLabel(origin: SkillOrigin): string {
   switch (origin) {
-    case "library":
-      return t("cowork.skills_origin_library");
-    case "team":
-      return t("cowork.skills_origin_team");
-    case "mine":
-      return t("cowork.skills_origin_mine");
+    case "library": return t("cowork.skills_origin_library");
+    case "team": return t("cowork.skills_origin_team");
+    case "mine": return t("cowork.skills_origin_mine");
   }
 }
 
 /** A small tone-coded badge naming a skill's origin. */
-export function OriginBadge(props: { origin: SkillOrigin }) {
-  return (
-    <Badge size="sm" tone={props.origin === "team" ? "info" : props.origin === "mine" ? "success" : "neutral"}>
-      {originLabel(props.origin)}
-    </Badge>
-  );
+export function OriginBadge(props: { /** Origin rendered by this badge. */ origin: SkillOrigin }) {
+  return <Badge size="sm" tone={props.origin === "team" ? "info" : props.origin === "mine" ? "success" : "neutral"}>{originLabel(props.origin)}</Badge>;
 }
 
-/** A filter picked. A new profession clears a task that is not one of its own. */
-export function withFilter(filters: SkillFilters, key: "profession" | "task" | "language", value: string, taxonomy: SkillTaxonomy | null): SkillFilters {
-  const next: SkillFilters = { ...filters };
-  if (value === ALL || !value) delete next[key];
-  else next[key] = value;
-  if (key === "profession") {
-    const tasks = taxonomy?.professions.find((profession) => profession.id === next.profession)?.tasks ?? [];
-    if (!tasks.some((task) => task.id === next.task)) delete next.task;
-  }
-  return next;
-}
-
-/**
- * Round 33: browse-by-category tiles for non-technical users, in place of the three
- * jargon dropdowns as the PRIMARY browse. Each profession is an album-art tile (the
- * same artwork language as Trending AI); picking one sets the profession filter, and
- * picking the active one again clears it. The dropdowns stay below as a quiet "refine".
- */
-export function SkillCategoryTiles(props: {
-  taxonomy: SkillTaxonomy | null;
-  active: string | undefined;
-  locale: string;
-  onPick: (professionId: string | undefined) => void;
-}) {
-  const professions = props.taxonomy?.professions ?? [];
-  if (professions.length === 0) return null;
-  const label = (value: { en: string; ko: string }) => (props.locale.startsWith("ko") ? value.ko : value.en);
-  return (
-    <div className="cowork-skills__categories" role="group" aria-label={t("cowork.skills_browse_heading")}>
-      {professions.map((profession) => {
-        const base = albumArtBase("picked-for-your-profession", profession.id);
-        const isActive = props.active === profession.id;
-        return (
-          <button
-            key={profession.id}
-            type="button"
-            className="cowork-skills__category"
-            data-active={isActive ? "true" : undefined}
-            aria-pressed={isActive}
-            onClick={() => props.onPick(isActive ? undefined : profession.id)}
-          >
-            <span className="cowork-skills__category-art" aria-hidden="true">
-              {base ? (
-                <img
-                  src={resolveExtensionIconSrc(`${base}.png`)}
-                  srcSet={`${resolveExtensionIconSrc(`${base}.png`)} 1x, ${resolveExtensionIconSrc(`${base}@2x.png`)} 2x, ${resolveExtensionIconSrc(`${base}@3x.png`)} 3x`}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                />
-              ) : null}
-            </span>
-            <span className="cowork-skills__category-label">{label(profession.label)}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/** What the team check says, when it is something to act on; null when there is nothing to say. */
+/** What the team check says when it is something to act on. */
 export function teamStatusText(state: TeamSkillsState | null): string | null {
   if (!state) return null;
   if (state.conflicts.length) return t("cowork.skills_team_conflicts", { names: state.conflicts.join(", ") });
@@ -118,215 +50,81 @@ export function teamStatusText(state: TeamSkillsState | null): string | null {
   return null;
 }
 
-/** The profession/task/language dropdowns, the search box and the installed-only switch. */
-export function SkillFiltersView(props: {
-  filters: SkillFilters;
-  installedOnly: boolean;
-  taxonomy: SkillTaxonomy | null;
-  locale: string;
-  onFilters: (filters: SkillFilters) => void;
-  onInstalledOnly: (on: boolean) => void;
-}) {
-  const { filters, taxonomy } = props;
-  const label = (value: { en: string; ko: string }) => (props.locale.startsWith("ko") ? value.ko : value.en);
-  const all = { value: ALL, label: t("cowork.skills_all") };
-  const profession = taxonomy?.professions.find((entry) => entry.id === filters.profession);
-  const set = (key: "profession" | "task" | "language") => (_event: unknown, option?: { value: string | number }) =>
-    props.onFilters(withFilter(filters, key, String(option?.value ?? ALL), taxonomy));
+function SkillsSkeleton() {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="cowork-skills__filters">
-        <Select
-          id="cowork-skills-profession"
-          label={t("cowork.skills_profession")}
-          size="sm"
-          value={filters.profession ?? ALL}
-          options={[all, ...(taxonomy?.professions ?? []).map((entry) => ({ value: entry.id, label: label(entry.label) }))]}
-          onChange={set("profession")}
-        />
-        <Select
-          id="cowork-skills-task"
-          label={t("cowork.skills_task")}
-          size="sm"
-          value={filters.task ?? ALL}
-          disabled={!profession}
-          options={[all, ...(profession?.tasks ?? []).map((entry) => ({ value: entry.id, label: label(entry.label) }))]}
-          onChange={set("task")}
-        />
-        <Select
-          id="cowork-skills-language"
-          label={t("cowork.skills_language")}
-          size="sm"
-          value={filters.language ?? ALL}
-          options={[all, ...(taxonomy?.languages ?? []).map((entry) => ({ value: entry.id, label: label(entry.label) }))]}
-          onChange={set("language")}
-        />
-      </div>
-      <div className="cowork-skills__filters">
-        <Input
-          id="cowork-skills-search"
-          type="search"
-          size="sm"
-          aria-label={t("cowork.skills_search")}
-          placeholder={t("cowork.skills_search")}
-          value={filters.q ?? ""}
-          onChange={(event) => props.onFilters({ ...filters, q: event.target.value })}
-        />
-        <Switch
-          size="sm"
-          label={t("cowork.skills_installed_only")}
-          checked={props.installedOnly}
-          onChange={(event) => props.onInstalledOnly(event.target.checked)}
-        />
-      </div>
+    <div className="cowork-skills__loading" aria-busy="true">
+      <span className="sr-only">{t("cowork.skills_loading_label")}</span>
+      {[0, 1].map((shelf) => (
+        <section key={shelf} className="cowork-skills__shelf">
+          <Skeleton variant="text" width={140} />
+          <div className="cowork-skills__skeleton-row">
+            {Array.from({ length: 8 }, (_, index) => (
+              <div key={index} className="cowork-skills__skeleton-tile">
+                <Skeleton variant="circle" width={72} height={72} />
+                <Skeleton variant="text" width={112} />
+                <Skeleton variant="text" width={128} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
 
-/** Props for the skills list: the rows, taxonomy, filter/empty flags, and the add/remove/use handlers. */
-export type SkillsViewProps = {
-  rows: SkillRow[];
-  taxonomy: SkillTaxonomy | null;
-  locale: string;
-  /** True while nothing matches because of the filters, not because there are no skills. */
-  filtered: boolean;
-  busy: string | null;
-  /** False with no connected workspace: the library still lists, but there is nowhere to install to. */
-  canAdd?: boolean;
-  hrefFor: (name: string) => string;
-  onAdd: (name: string) => void;
-  onRemove: (name: string) => void;
-  /** Round 32: "Use" an installed skill (start a Plan chat). Absent on sample data. */
-  onUse?: (name: string) => void;
-};
-
-/** The skills, each a link to its page, with what it is filed under and where it came from. */
-export function SkillsView(props: SkillsViewProps) {
-  if (!props.rows.length) {
-    return props.filtered ? (
-      <EmptyState title={t("cowork.skills_none_match_title")} description={t("cowork.skills_none_match_text")} />
-    ) : (
-      <EmptyState title={t("cowork.skills_empty_title")} description={t("cowork.skills_empty_text")} />
-    );
-  }
-  return (
-    <ul className="cowork-preview__list" aria-label={t("cowork.nav_skills")}>
-      {props.rows.map((row) => {
-        const tags = tagLabels(row.tags, props.taxonomy, props.locale);
-        return (
-          <li key={row.name} className="cowork-skills__row">
-            <div className="cowork-settings__text">
-              <Link className="cowork-skills__name" to={props.hrefFor(row.name)}>
-                {row.title ?? row.name}
-              </Link>
-              {row.description ? <span className="cowork-settings__description">{row.description}</span> : null}
-              <span className="cowork-preview__meta">
-                <OriginBadge origin={row.origin} />
-                {tags.map((tag) => (
-                  <Badge key={tag} size="sm" variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </span>
-            </div>
-            <span className="cowork-skills__actions">
-              {row.installed === null ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  iconLeft={icons.plus(ICON)}
-                  loading={props.busy === row.name}
-                  disabled={props.canAdd === false}
-                  aria-label={t("cowork.skill_add_label", { name: row.name })}
-                  onClick={() => props.onAdd(row.name)}
-                >
-                  {t("cowork.skill_add")}
-                </Button>
-              ) : (
-                <>
-                  {/* Round 32: an installed skill leads with "Use" (run it now). Remove is
-                      demoted to a quieter secondary action, and only when it can be removed
-                      (team / out-of-project skills keep their guard). */}
-                  {props.onUse ? (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      iconLeft={icons.play(ICON)}
-                      aria-label={t("cowork.skills_use_label", { name: row.name })}
-                      onClick={() => props.onUse?.(row.name)}
-                    >
-                      {t("cowork.skills_use")}
-                    </Button>
-                  ) : null}
-                  {canRemoveSkill(row.installed) ? (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      loading={props.busy === row.name}
-                      aria-label={t("cowork.skill_remove_label", { name: row.name })}
-                      onClick={() => props.onRemove(row.name)}
-                    >
-                      {t("cowork.skill_remove")}
-                    </Button>
-                  ) : null}
-                </>
-              )}
-            </span>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-/** `/skills`: the library, the team's skills and the person's own, real where a server is connected. */
+/** `/skills`: installed skills first, then horizontally scrolling catalogue shelves. */
 export function SkillsScreen() {
   const { services, scope } = usePreviewServices();
   const queryClient = useQueryClient();
   const openModal = useFrameStore((state) => state.openModal);
   const showToast = useFrameStore((state) => state.showToast);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const [filters, setFilters] = useState<SkillFilters>({});
-  const [installedOnly, setInstalledOnly] = useState(false);
+  const [search, setSearch] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
-  // Round 32: an installed skill's primary action is "Use" (start a Plan chat),
-  // wired the same way the skill detail page's Run does.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
-  const useWorkspaceId = useCoworkConnection((state) => state.workspaceId);
+  const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const requestChat = useCoworkStartStore((state) => state.request);
-  // The library is asked without the search, which is matched here as it is typed.
-  const { q, ...tags } = filters;
-  /*
-    "Skills sometimes appears and sometimes does not": both queries used the defaults, so a transient
-    server error or a routine refetch (filter change, refocus, 5-min staleTime) dropped `data` and the
-    list blanked. keepPreviousData keeps the last good rows on screen while a refetch (incl. a new
-    filter key) is in flight, and a short retry rides out a transient listSkills or catalogue
-    failure instead of surfacing it as an empty or error screen.
-  */
+
   const installed = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, retry: 2, placeholderData: keepPreviousData });
-  const library = useQuery({
-    queryKey: [...previewKey(scope, "library"), tags],
-    queryFn: () => services.skills.library(tags),
-    staleTime: 5 * 60_000,
-    enabled: !installedOnly,
-    retry: 2,
-    placeholderData: keepPreviousData,
-  });
-  const taxonomy = useQuery({ queryKey: previewKey(scope, "taxonomy"), queryFn: () => services.skills.taxonomy(), staleTime: 5 * 60_000 });
+  const library = useQuery({ queryKey: previewKey(scope, "library"), queryFn: () => services.skills.library(), staleTime: 5 * 60_000, retry: 2, placeholderData: keepPreviousData });
   const team = useQuery({ queryKey: previewKey(scope, "team"), queryFn: () => services.skills.teamState(), staleTime: 60_000 });
   const preview = installed.data?.preview ?? true;
-  const deps = { skills: services.skills, queryClient, scope, showToast };
-  const act = (run: typeof installSkill) => (name: string) => {
-    setBusy(name);
-    void run(deps, name).finally(() => setBusy(null));
-  };
-  // The library is the Console's public catalogue, fetched by the browser directly, so it shows
-  // with or without a workspace connection. The installed list is the connected workspace's; with
-  // no connection it is empty and installing is refused.
-  const rows = installed.data ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters, installedOnly }) : null;
-  const effectiveTaxonomy = taxonomy.data?.data ?? null;
-  const teamText = teamStatusText(team.data?.data ?? null);
+  const rows = useMemo(
+    () => installed.data ? skillRows({ installed: installed.data.data, library: library.data?.data ?? null, filters: search.trim() ? { q: search } : {}, installedOnly: false }) : null,
+    [installed.data, library.data, search],
+  );
+  const shelves = useMemo(() => rows ? shelvesOf(rows, locale) : [], [rows, locale]);
+  const selectedId = searchParams.get("shelf");
+  const selectedShelf = SHELF_IDS.includes(selectedId as SkillShelfId) ? shelves.find((shelf) => shelf.id === selectedId) : undefined;
   const count = installed.data?.data.length;
+  const teamText = teamStatusText(team.data?.data ?? null);
+  const fromPath = `/skills${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+  const canUse = !preview && Boolean(workspaceId);
+  const deps = { skills: services.skills, queryClient, scope, showToast };
+
+  const add = (name: string) => {
+    setBusy(name);
+    void installSkill(deps, name).finally(() => setBusy(null));
+  };
+  const use = canUse ? (name: string) => void runSkill({ workspaceId, request: requestChat, navigate }, name) : undefined;
+  const showShelf = (id: SkillShelfId) => setSearchParams({ shelf: id });
+  const showAll = () => setSearchParams({});
+  const retryLibrary = () => {
+    consoleCatalogue.reset();
+    void library.refetch();
+  };
+
+  useEffect(() => {
+    const state = location.state as { fromSkill?: string } | null;
+    if (!state?.fromSkill) return;
+    const link = document.querySelector<HTMLElement>(`[data-skill="${CSS.escape(state.fromSkill)}"] .cowork-skill-tile__link`);
+    link?.focus();
+    link?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [location.state, rows]);
+
+  const tileProps = { locale, busy, canAdd: !preview, fromPath, onAdd: add, ...(use ? { onUse: use } : {}) };
 
   return (
     <CoworkShell
@@ -334,86 +132,76 @@ export function SkillsScreen() {
       title={t("cowork.nav_skills")}
       meta={count === undefined ? undefined : t("cowork.skills_meta", { count })}
       actions={
-        <Button size="sm" variant="secondary" iconLeft={icons.plus(ICON)} onClick={() => openModal({ kind: "skill" })}>
-          {t("cowork.skill_new")}
-        </Button>
+        <>
+          <Input
+            className="cowork-skills__header-search"
+            id="cowork-skills-search"
+            type="search"
+            size="sm"
+            aria-label={t("cowork.skills_search")}
+            placeholder={t("cowork.skills_search")}
+            value={search}
+            onChange={(event) => { setSearch(event.target.value); if (selectedId) showAll(); }}
+          />
+          <Button size="sm" variant="secondary" iconLeft={icons.plus(ICON)} onClick={() => openModal({ kind: "skill" })}>{t("cowork.skill_new")}</Button>
+        </>
       }
     >
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
-        {/*
-          Round 32: a warm "What's a skill?" explainer for non-technical users, in place
-          of the bare one-line lede. Plain language + a concrete example so the page does
-          not assume the reader already knows what a skill is.
-        */}
-        <div className="cowork-skills__explainer">
-          <h2 className="cowork-skills__explainer-title">{t("cowork.skills_explainer_title")}</h2>
-          <p className="cowork-skills__explainer-body">{t("cowork.skills_explainer_body")}</p>
-        </div>
-        {/*
-          Round 33: browse-by-category album-art tiles as the primary browse (reuses the
-          Trending AI tile language). Picking a profession sets the filter; the dropdowns
-          below become a quiet refine for task/language/search.
-        */}
-        <h3 className="cowork-skills__browse-heading">{t("cowork.skills_browse_heading")}</h3>
-        <SkillCategoryTiles
-          taxonomy={effectiveTaxonomy}
-          active={filters.profession}
-          locale={locale}
-          onPick={(professionId) => setFilters(withFilter(filters, "profession", professionId ?? ALL, effectiveTaxonomy))}
-        />
+        {count === 0 ? (
+          <div className="cowork-skills__explainer">
+            <h2 className="cowork-skills__explainer-title">{t("cowork.skills_explainer_title")}</h2>
+            <p className="cowork-skills__explainer-body">{t("cowork.skills_explainer_body")}</p>
+          </div>
+        ) : null}
         {teamText ? (
           <p className="cowork-settings__description">
             {teamText}{" "}
-            <a
-              className="cowork-settings__action"
-              href={CONSOLE_SKILLS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(event) => {
-                event.preventDefault();
-                openExternal(CONSOLE_SKILLS_URL);
-              }}
-            >
-              {t("cowork.skills_open_console")}
-              {icons.external({ width: 12, height: 12, "aria-hidden": true })}
+            <a className="cowork-settings__action" href={CONSOLE_SKILLS_URL} target="_blank" rel="noopener noreferrer" onClick={(event) => { event.preventDefault(); openExternal(CONSOLE_SKILLS_URL); }}>
+              {t("cowork.skills_open_console")}{icons.external({ width: 12, height: 12, "aria-hidden": true })}
             </a>
           </p>
         ) : null}
-        <SkillFiltersView
-          filters={filters}
-          installedOnly={installedOnly}
-          taxonomy={effectiveTaxonomy}
-          locale={locale}
-          onFilters={setFilters}
-          onInstalledOnly={setInstalledOnly}
-        />
         {rows === null ? (
-          /*
-            Skeleton ONLY on the very first load, before the INSTALLED list has arrived (rows is null
-            only then). It used to also skeleton on `!installedOnly && library.isLoading`, which blanked
-            the whole screen every time the library query re-fetched - on a filter change, on refocus,
-            or when its 5-min staleTime expired - so the skills "sometimes showed and sometimes did not".
-            Once the installed list is in, rows is non-null (installed-only, or installed+library), so we
-            render it and let the uninstalled library stream in without hiding what is already there.
-          */
           installed.isError ? (
-            <EmptyState title={t("cowork.preview_error_title")} description={t("cowork.settings_try_again")} />
-          ) : (
-            <Skeleton variant="text" lines={5} />
-          )
-        ) : (
-          <SkillsView
-            rows={rows}
-            taxonomy={effectiveTaxonomy}
-            locale={locale}
-            filtered={Boolean(q?.trim() || tags.profession || tags.task || tags.language)}
-            busy={busy}
-            canAdd={!preview}
-            hrefFor={skillPath}
-            onAdd={act(installSkill)}
-            onRemove={act(removeSkill)}
-            onUse={!preview && useWorkspaceId ? (name) => void runSkill({ workspaceId: useWorkspaceId, request: requestChat, navigate }, name) : undefined}
+            <div>
+              <EmptyState title={t("cowork.preview_error_title")} description={t("cowork.settings_try_again")} />
+              <Button size="sm" variant="secondary" onClick={() => void installed.refetch()}>{t("cowork.skills_retry")}</Button>
+            </div>
+          ) : <SkillsSkeleton />
+        ) : rows.length === 0 ? (
+          <EmptyState
+            title={search.trim() ? t("cowork.skills_none_match_title") : t("cowork.skills_empty_title")}
+            description={search.trim() ? t("cowork.skills_none_match_search") : t("cowork.skills_empty_text")}
           />
+        ) : selectedShelf ? (
+          <div className="cowork-skills__marketplace">
+            <div>
+              <div className="cowork-skills__full-heading">
+                <Button size="sm" variant="ghost" aria-label={t("cowork.skills_back_to_all")} onClick={showAll}>{icons.arrowLeft(ICON)}</Button>
+                <h2>{SHELF_LABEL[selectedShelf.id]()}</h2>
+              </div>
+              <SkillGrid rows={selectedShelf.rows} label={SHELF_LABEL[selectedShelf.id]()} {...tileProps} />
+            </div>
+          </div>
+        ) : search.trim() ? (
+          <div className="cowork-skills__marketplace">
+            <section className="cowork-skills__shelf" aria-labelledby="skills-results-heading">
+              <div className="cowork-skills__shelf-heading"><h2 id="skills-results-heading">{t("cowork.skills_results")}</h2></div>
+              <SkillGrid rows={rows} label={t("cowork.skills_results")} {...tileProps} />
+            </section>
+          </div>
+        ) : (
+          <div className="cowork-skills__marketplace">
+            {shelves.map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} onSeeAll={showShelf} {...tileProps} />)}
+            {library.isError ? (
+              <section className="cowork-skills__notice">
+                <h2>{t("cowork.skills_library_offline_title")}</h2>
+                <p>{t("cowork.skills_library_offline_text")}</p>
+                <Button size="sm" variant="secondary" onClick={retryLibrary}>{t("cowork.skills_retry")}</Button>
+              </section>
+            ) : null}
+          </div>
         )}
       </PreviewPage>
     </CoworkShell>

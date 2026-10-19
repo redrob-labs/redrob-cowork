@@ -10,8 +10,17 @@ import { matchesFilters } from "./skills";
 
 export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
 
-/** One catalogue skill with its instructions; no profession/task/language in the catalogue. */
-export type ConsoleSkill = { name: string; title?: string; description: string; body: string };
+/** One catalogue skill with its instructions and localized marketplace display fields. */
+export type ConsoleSkill = {
+  name: string;
+  title?: string;
+  titleKo?: string;
+  summary?: string;
+  summaryKo?: string;
+  version?: string;
+  description: string;
+  body: string;
+};
 
 type CatalogueOptions = {
   fetchImpl?: typeof fetch;
@@ -55,7 +64,16 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
     try {
       const { data, body } = parseConsoleFrontmatter(await fetchText(`${encodeURIComponent(name)}/SKILL.md`));
       if (data.name !== name || !data.description) return null;
-      return { name, description: data.description, body: body.trim(), ...(data.title ? { title: data.title } : {}) };
+      return {
+        name,
+        description: data.description,
+        body: body.trim(),
+        ...(data.title ? { title: data.title } : {}),
+        ...(data.title_ko ? { titleKo: data.title_ko } : {}),
+        ...(data.summary ? { summary: data.summary } : {}),
+        ...(data.summary_ko ? { summaryKo: data.summary_ko } : {}),
+        ...(data.version ? { version: data.version } : {}),
+      };
     } catch {
       return null;
     }
@@ -72,26 +90,48 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
     }
   };
 
-  const current = async (): Promise<ConsoleSkill[]> => {
-    if (snapshot && now() - snapshot.loadedAt < (snapshot.ok ? ttlMs : failureTtlMs)) return snapshot.skills;
+  const current = async (): Promise<Snapshot> => {
+    if (snapshot && now() - snapshot.loadedAt < (snapshot.ok ? ttlMs : failureTtlMs)) return snapshot;
     inFlight ??= load().then((next) => {
       snapshot = next;
       inFlight = null;
       return next;
     });
-    return (await inFlight).skills;
+    return inFlight;
   };
+
+  const displayFields = ({ title, titleKo, summary, summaryKo }: ConsoleSkill) => ({
+    ...(title ? { title } : {}),
+    ...(titleKo ? { titleKo } : {}),
+    ...(summary ? { summary } : {}),
+    ...(summaryKo ? { summaryKo } : {}),
+  });
 
   return {
     /** The library, filtered; only `q` can match because the catalogue carries no tags. */
-    list: async (filters: SkillFilters = {}): Promise<LibrarySkill[]> =>
-      (await current())
-        .map(({ name, title, description }) => ({ name, description, tags: {}, ...(title ? { title } : {}) }))
-        .filter((skill) => matchesFilters(skill, filters)),
-    /** One library skill with its body, as the detail screen shows it; null when the catalogue lacks it. */
+    list: async (filters: SkillFilters = {}): Promise<LibrarySkill[]> => {
+      const currentSnapshot = await current();
+      if (!currentSnapshot.ok) throw new Error("The skill catalogue is not available");
+      return currentSnapshot.skills
+        .map((skill) => ({ name: skill.name, description: skill.description, tags: {}, ...displayFields(skill) }))
+        .filter((skill) => matchesFilters(skill, filters));
+    },
+    /** One library skill with its body, as the detail screen shows it; null when unavailable. */
     get: async (name: string): Promise<SkillDetail | null> => {
-      const skill = (await current()).find((item) => item.name === name);
-      return skill ? { name, description: skill.description, tags: {}, body: skill.body, installed: null } : null;
+      const currentSnapshot = await current();
+      if (!currentSnapshot.ok) return null;
+      const skill = currentSnapshot.skills.find((item) => item.name === name);
+      return skill
+        ? {
+            name,
+            description: skill.description,
+            tags: {},
+            body: skill.body,
+            installed: null,
+            ...displayFields(skill),
+            ...(skill.version ? { version: skill.version } : {}),
+          }
+        : null;
     },
     /** Drops the cache; tests and a manual refresh. */
     reset: () => {

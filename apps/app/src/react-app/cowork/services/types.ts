@@ -93,9 +93,14 @@ export type SkillTags = { profession?: string; task?: string; language?: string 
 /** An installed skill: what the assistant can use, and what a schedule can run. */
 export type CoworkSkill = {
   name: string;
-  /** Human-readable display title (proper English). Falls back to `name` when absent. `name` stays
-   *  the slug id used for routing + SKILL_BODIES lookup. (round 11, item 14) */
+  /** Human-readable English display title; the stable `name` remains the route id. */
   title?: string;
+  /** Human-readable Korean display title supplied by the catalogue. */
+  titleKo?: string;
+  /** Short English catalogue summary used below the title. */
+  summary?: string;
+  /** Short Korean catalogue summary used below the title. */
+  summaryKo?: string;
   description: string;
   origin: SkillOrigin;
   tags: SkillTags;
@@ -103,8 +108,16 @@ export type CoworkSkill = {
   scope: "project" | "user" | "global";
 };
 
+/** Optional catalogue fields shared by lists and details. */
+export type SkillDisplayFields = {
+  title?: string;
+  titleKo?: string;
+  summary?: string;
+  summaryKo?: string;
+};
+
 /** A skill in the Console's library, installed or not. */
-export type LibrarySkill = { name: string; title?: string; description: string; tags: SkillTags };
+export type LibrarySkill = SkillDisplayFields & { name: string; description: string; tags: SkillTags };
 
 /** The Skills screen's filters. Empty means all. */
 export type SkillFilters = SkillTags & { q?: string };
@@ -113,10 +126,12 @@ export type SkillFilters = SkillTags & { q?: string };
 export type SkillTaxonomy = RedrobSkillTaxonomy;
 
 /** One skill to read: installed (with its origin), or one the library has and this workspace has not. */
-export type SkillDetail = {
+export type SkillDetail = SkillDisplayFields & {
   name: string;
   description: string;
   tags: SkillTags;
+  /** Catalogue release version when supplied. */
+  version?: string;
   /** The instructions, in markdown. */
   body: string;
   /** Null for a library skill that is not installed. */
