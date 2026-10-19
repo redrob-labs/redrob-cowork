@@ -1499,7 +1499,7 @@ const en = {
   "cowork.thread_plan_kept": "Kept for later",
   "cowork.thread_plan_label": "Plan",
   "cowork.thread_plan_research_title": "Research plan",
-  "cowork.thread_plan_run": "Run this plan",
+  "cowork.thread_plan_run": "Run",
   "cowork.thread_plan_running": "Approved by you, running",
   "cowork.thread_plan_todo": "To do",
   "cowork.thread_questions_any": "Choose any",

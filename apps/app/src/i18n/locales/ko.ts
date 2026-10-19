@@ -1489,7 +1489,7 @@ const ko = {
   "cowork.thread_plan_kept": "나중을 위해 보관함",
   "cowork.thread_plan_label": "계획",
   "cowork.thread_plan_research_title": "리서치 계획",
-  "cowork.thread_plan_run": "이 계획 실행",
+  "cowork.thread_plan_run": "실행",
   "cowork.thread_plan_running": "승인함, 실행 중",
   "cowork.thread_plan_todo": "할 일",
   "cowork.thread_questions_any": "여러 개 고를 수 있음",

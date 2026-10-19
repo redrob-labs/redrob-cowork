@@ -87,10 +87,14 @@ function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boole
   const thread = useCoworkThread();
   const [answered, setAnswered] = useState<PlanAnswers | null>(null);
   const done = answered !== null || !props.isLatest;
+  // Round 7 C1: once answered (or superseded by a later turn) the questions leave the thread
+  // entirely. The DS fold line ("Answered." / "Answered: a, b") read as an inline comment; the
+  // plan that follows is the visible result of the answers.
+  if (done) return null;
   return (
     <PlanQuestions
       questions={props.questions}
-      done={done}
+      done={false}
       summary={answered ? answersSummary(props.questions, answered) : t("cowork.thread_answered_none")}
       label={t("cowork.thread_questions_label")}
       submitLabel={t("cowork.thread_questions_submit")}
@@ -117,7 +121,7 @@ function editedPlanText(root: HTMLElement | null): string | null {
   return text || null;
 }
 
-/** The plan: Run sends it to the run agent and switches the chat to Run; Keep keeps it here. */
+/** The plan: Run sends it to the run agent and switches the chat to Run (round 7: no Keep). */
 function CoworkPlan(props: {
   plan: PlanDoc;
   isLatest: boolean;
@@ -185,10 +189,10 @@ function CoworkPlan(props: {
         label={t("cowork.thread_plan_label")}
         todoLabel={t("cowork.thread_plan_todo")}
         runLabel={t("cowork.thread_plan_run")}
-        keepLabel={t("cowork.thread_plan_keep")}
         hint={t("cowork.thread_plan_hint")}
         onRun={canRun ? run : undefined}
-        onKeep={canRun && status === "draft" ? () => setStage("kept") : undefined}
+        /* Round 7 C3: no "Keep it for later". The DS draws the Keep button only when onKeep is
+           passed, so omitting onKeep + keepLabel removes it; the plan runs or the person replies. */
         onEdit={() => {
           edited.current = true;
         }}
