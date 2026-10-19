@@ -1,7 +1,8 @@
 /**
- * Radar: the bundled daily edition behind the "Trending news today" and "Trending on social media
- * today" banners and their subpages. Written from public reporting checked on 19 October 2026; every
- * story keeps the article it came from in `source` + `url`. This is a dated editorial snapshot, not a
+ * Radar: the bundled daily edition behind the "On the radar" banners ("The Front Page" for news,
+ * "Everyone's Talking" for social) and their subpages. Written from public reporting checked on 19
+ * October 2026; every story keeps the article it came from in `source` + `url`. This is a dated
+ * editorial snapshot, not a
  * feed. The whole edition lives in this ONE module, shaped so a scheduled job can regenerate it by
  * rewriting `RADAR` alone: { asOf, news: { summary, stories[] }, social: { summary, stories[] } }.
  */

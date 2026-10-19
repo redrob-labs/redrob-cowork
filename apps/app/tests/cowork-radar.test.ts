@@ -122,6 +122,18 @@ describe("radar and ticker copy", () => {
     expect(english.map(([key]) => key).sort()).toEqual(korean.map(([key]) => key).sort());
   });
 
+  test("names the section and banners in the page's marketing voice", () => {
+    expect(en["cowork.radar_heading"]).toBe("On the radar");
+    expect(en["cowork.radar_news_title"]).toBe("The Front Page");
+    expect(en["cowork.radar_social_title"]).toBe("Everyone's Talking");
+    expect(ko["cowork.radar_heading"]).toBe("오늘 눈여겨볼 소식");
+    expect(ko["cowork.radar_news_title"]).toBe("오늘의 1면");
+    expect(ko["cowork.radar_social_title"]).toBe("다들 이 얘기 중");
+    for (const key of ["cowork.radar_news_title", "cowork.radar_social_title"]) {
+      expect(en[key as keyof typeof en]).not.toMatch(/trending|today/i);
+    }
+  });
+
   test("the removed ticker note and pause controls are gone in both languages", () => {
     for (const table of [en, ko] as Array<Record<string, string>>) {
       expect(table["cowork.chart_trending_note"]).toBeUndefined();
