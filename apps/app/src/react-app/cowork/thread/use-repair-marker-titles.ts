@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { unwrap } from "../../../app/lib/opencode";
 import { isBlockMarkerTitle, titleFromPrompt } from "../../../app/lib/session-title";
 import type { Client } from "../../../app/types";
+import { isPlanRunPrompt, isQuestionAnswerPrompt } from "./thread-logic";
 
 /** The bits of a listed chat this repair reads. */
 type TitledSession = { id: string; title?: string | null };
@@ -10,7 +11,8 @@ type TitledSession = { id: string; title?: string | null };
 /** A message as the engine lists it, reduced to what finding the first prompt needs. */
 type ListedMessage = { info: { role: string }; parts: Array<{ type: string; text?: string; synthetic?: boolean }> };
 
-/** Pure: the person's first real prompt in a chat's messages, or "" when there is none. */
+/** Pure: the person's first real prompt in a chat's messages, or "" when there is none. The hidden
+ *  sends the thread makes (question answers, plan runs) are not prompts. */
 export function firstPromptText(messages: readonly ListedMessage[]): string {
   for (const message of messages) {
     if (message.info.role !== "user") continue;
@@ -18,7 +20,7 @@ export function firstPromptText(messages: readonly ListedMessage[]): string {
       .flatMap((part) => (part.type === "text" && !part.synthetic && part.text ? [part.text] : []))
       .join("\n")
       .trim();
-    if (text) return text;
+    if (text && !isPlanRunPrompt(text) && !isQuestionAnswerPrompt(text)) return text;
   }
   return "";
 }
@@ -62,7 +64,8 @@ export function useRepairMarkerTitles(input: {
       let renamed = false;
       for (const id of ids) {
         try {
-          const messages = unwrap(await client.session.messages({ sessionID: id, limit: 4, directory })) as unknown as ListedMessage[];
+          // No limit: the engine's limit keeps the NEWEST messages, and the first prompt is the oldest.
+          const messages = unwrap(await client.session.messages({ sessionID: id, directory })) as unknown as ListedMessage[];
           const title = titleFromPrompt(firstPromptText(messages));
           if (!title || !mounted.current) continue;
           await client.session.update({ sessionID: id, title, directory });

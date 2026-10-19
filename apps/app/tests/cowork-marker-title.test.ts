@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { getDisplaySessionTitle, isBlockMarkerTitle, shownChatTitle, titleFromPrompt } from "../src/app/lib/session-title";
 import { firstPromptText, sessionsNeedingTitle } from "../src/react-app/cowork/thread/use-repair-marker-titles";
+import { answersToPrompt, planRunPrompt } from "../src/react-app/cowork/thread/thread-logic";
 
 // Round 9 (R9-1): a chat the server titled with a Cowork block's fence line is never shown so,
 // and is renamed after the person's first prompt.
@@ -57,6 +58,15 @@ describe("marker title repair helpers", () => {
     ];
     expect(firstPromptText(messages)).toBe("Real ask");
     expect(firstPromptText([])).toBe("");
+  });
+
+  test("hidden plan-run and question-answer sends are not the first prompt", () => {
+    const messages = [
+      { info: { role: "user" }, parts: [{ type: "text", text: planRunPrompt("the plan") }] },
+      { info: { role: "user" }, parts: [{ type: "text", text: answersToPrompt([], {}) }] },
+      { info: { role: "user" }, parts: [{ type: "text", text: "Compare the vendors" }] },
+    ];
+    expect(firstPromptText(messages)).toBe("Compare the vendors");
   });
 
   test("only untried marker titles need a repair", () => {
