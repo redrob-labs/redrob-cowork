@@ -13,8 +13,6 @@ import { popularRows, useMarketplaceRows } from "../skills/use-marketplace";
 import { installSkill } from "../skills/use-skills";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
-/** The diagonal arrow draws smaller than the plus in the same box, so it gets 2px more to match. */
-const USE_ICON = { width: 16, height: 16, "aria-hidden": true };
 
 /** How many featured skills the strip shows. */
 export const SKILL_PICK_COUNT = 5;
@@ -38,7 +36,7 @@ type ComposerSkillPicksProps = {
  * The new-chat composer's featured skills: a horizontal popup under the panel, shown while the
  * text box is focused and still empty. Each pick is a small circle, its title and one small icon
  * button (name in a DS tooltip). Add (plus) installs a library skill and then attaches it; Use
- * (an arrow pointing up-left, at the tray the skill lands in) attaches an installed one. Neither
+ * (sparkle, the Skills nav glyph: "use this skill") attaches an installed one. Neither
  * runs it. "All skills" on the header's right edge opens the Skills page.
  */
 export function ComposerSkillPicks({ attached, onAttach }: ComposerSkillPicksProps) {
@@ -102,7 +100,7 @@ export function ComposerSkillPicks({ attached, onAttach }: ComposerSkillPicksPro
                       {busy ? (
                         <span className="cowork-skill-picks__spin">{icons.refresh(ICON)}</span>
                       ) : installed ? (
-                        icons.arrowUpLeft(USE_ICON)
+                        icons.sparkle(ICON)
                       ) : (
                         icons.plus(ICON)
                       )}
