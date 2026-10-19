@@ -44,6 +44,13 @@ import { useCoworkComposerStore } from "./composer-state";
 const ICON = { width: 16, height: 16, "aria-hidden": true };
 const STALE_MS = 30_000;
 
+/**
+ * Flyout placement: clear the main panel (its 8px DS padding + 1px border) and leave a 4px gap, and
+ * lift the flyout by the same 9px so its first row lines up with the row that opened it, as in
+ * Claude. Base UI's defaults (0 and -3) started it inside the main panel, overlapping it by 9px.
+ */
+const FLYOUT = { sideOffset: 13, alignOffset: -9 } as const;
+
 function isIconName(name: string): name is IconName {
   return Object.hasOwn(icons, name);
 }
@@ -145,7 +152,7 @@ export function ComposerAddMenu(props: ComposerAddMenuProps) {
             {icons.folder(ICON)}
             <span className="cowork-add-menu__text">{t("cowork.add_menu_project")}</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub">
+          <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub" {...FLYOUT}>
             <ProjectItems chatId={props.chatId} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -155,7 +162,7 @@ export function ComposerAddMenu(props: ComposerAddMenuProps) {
             {icons.sparkle(ICON)}
             <span className="cowork-add-menu__text">{t("cowork.nav_skills")}</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub">
+          <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub" {...FLYOUT}>
             <SkillItems attached={props.attachedSkills} onAttach={props.onAttachSkill} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -164,7 +171,7 @@ export function ComposerAddMenu(props: ComposerAddMenuProps) {
             {icons.plug(ICON)}
             <span className="cowork-add-menu__text">{t("cowork.nav_connectors")}</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub">
+          <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub" {...FLYOUT}>
             <ConnectorItems />
           </DropdownMenuSubContent>
         </DropdownMenuSub>

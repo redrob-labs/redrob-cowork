@@ -5697,7 +5697,11 @@ a.cowork-radar-story__source:focus-visible {
   outline-offset: 1px;
 }
 
+/* `position: relative` overrides the DS list's own `position: absolute` (made for the DS Menu, which
+   positions itself). Absolute left Base UI's positioner wrapper 0px tall, so "above the +" put a
+   0px box 8px over the trigger and the real list hung down past the window in a chat. */
 .cowork-add-menu {
+  position: relative;
   min-width: 240px;
 }
 
