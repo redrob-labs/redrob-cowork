@@ -57,7 +57,7 @@ export function webStepsMeta(steps: readonly WebStep[]): string {
   const sources = new Set(steps.flatMap((step) => step.results.map((result) => result.url))).size
   const pages = steps.filter((step) => step.kind === "read").length
   const pieces = [
-    searches > 0 ? t("cowork.web_count", { count: searches }) : null,
+    searches > 0 ? t("cowork.web_searches", { count: searches }) : null,
     sources > 0 ? t("cowork.web_sources", { count: sources }) : null,
     pages > 0 ? t("cowork.web_pages", { count: pages }) : null,
   ]

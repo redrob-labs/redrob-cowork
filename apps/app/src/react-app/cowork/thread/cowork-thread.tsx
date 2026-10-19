@@ -114,7 +114,7 @@ function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boole
 /** A checklist step's marker: a ring to do, a brand ring with a dot while active, a filled tick when done. */
 function StepMarker(props: { state: PlanStepState }) {
   return (
-    <span className="cowork-planx__marker" data-state={props.state} aria-hidden="true">
+    <span className="cowork-plan__marker" data-state={props.state} aria-hidden="true">
       {props.state === "done" ? icons.check({ width: 10, height: 10, strokeWidth: 3 }) : null}
     </span>
   );
@@ -183,26 +183,26 @@ function CoworkPlan(props: {
         : null;
 
   return (
-    <section className="cowork-planx" aria-label={t("cowork.thread_plan_research_title")} data-status={status}>
-      <header className="cowork-planx__head">
-        <span className="cowork-planx__label">{t("cowork.thread_plan_research_title")}</span>
-        {progress ? <span className="cowork-planx__progress">{progress}</span> : null}
+    <section className="cowork-plan" aria-label={t("cowork.thread_plan_research_title")} data-status={status}>
+      <header className="cowork-plan__head">
+        <span className="cowork-plan__label">{t("cowork.thread_plan_research_title")}</span>
+        {progress ? <span className="cowork-plan__progress">{progress}</span> : null}
       </header>
-      {props.plan.summary ? <p className="cowork-planx__summary">{props.plan.summary}</p> : null}
+      {props.plan.summary ? <p className="cowork-plan__summary">{props.plan.summary}</p> : null}
       {labels.length > 0 ? (
-        <ol className="cowork-planx__steps" aria-label={t("cowork.thread_plan_todo")}>
+        <ol className="cowork-plan__steps" aria-label={t("cowork.thread_plan_todo")}>
           {props.plan.todo.map((todo, index) => {
             const state = steps[index] ?? "todo";
             return (
-              <li key={index} className="cowork-planx__step" data-state={state} aria-current={state === "active" ? "step" : undefined}>
+              <li key={index} className="cowork-plan__step" data-state={state} aria-current={state === "active" ? "step" : undefined}>
                 <StepMarker state={state} />
-                <span className={cn("cowork-planx__task", state === "active" && "redrob-shimmer-text")}>{todo.label}</span>
+                <span className={cn("cowork-plan__task", state === "active" && "redrob-shimmer-text")}>{todo.label}</span>
               </li>
             );
           })}
         </ol>
       ) : null}
-      {props.plan.note ? <p className="cowork-planx__note">{props.plan.note}</p> : null}
+      {props.plan.note ? <p className="cowork-plan__note">{props.plan.note}</p> : null}
       {canRun ? (
         <div>
           <Button size="sm" onClick={run}>

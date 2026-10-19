@@ -189,14 +189,14 @@ export function factConfidence(fact: CheckResult["fact"]): CheckVerdict {
  */
 export function challengeOutcome(challenge: CheckResult["challenge"]): CheckVerdict {
   const verdicts = challenge?.verdict ?? [];
-  if (verdicts.length === 0) return { tone: "agree", label: t("cowork.thread_chal_verdict_holds") };
+  if (verdicts.length === 0) return { tone: "agree", label: t("cowork.thread_council_verdict_holds") };
   const broke = verdicts.filter((verdict) => verdict.kind === "broke").length;
   const changed = verdicts.filter((verdict) => verdict.kind === "changed").length;
-  if (broke > 0) return { tone: "differ", label: t("cowork.thread_chal_verdict_challenged") };
-  if (changed === 0) return { tone: "agree", label: t("cowork.thread_chal_verdict_holds") };
+  if (broke > 0) return { tone: "differ", label: t("cowork.thread_council_verdict_challenged") };
+  if (changed === 0) return { tone: "agree", label: t("cowork.thread_council_verdict_holds") };
   const movedRatio = changed / verdicts.length;
-  if (movedRatio <= 0.34) return { tone: "mild", label: t("cowork.thread_chal_verdict_mostly") };
-  return { tone: "differ", label: t("cowork.thread_chal_verdict_weakened") };
+  if (movedRatio <= 0.34) return { tone: "mild", label: t("cowork.thread_council_verdict_mostly") };
+  return { tone: "differ", label: t("cowork.thread_council_verdict_weakened") };
 }
 
 export type PermissionReply = "once" | "always" | "reject";

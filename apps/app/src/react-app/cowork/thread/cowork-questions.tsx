@@ -40,7 +40,7 @@ function OtherChip(props: { questionText: string; value: string; onChange: (text
 
   if (!editing) {
     return (
-      <button type="button" className="cowork-q__opt cowork-q__opt--other" aria-pressed={false} onClick={() => setEditing(true)}>
+      <button type="button" className="cowork-questions__opt cowork-questions__opt--other" aria-pressed={false} onClick={() => setEditing(true)}>
         {icons.edit({ width: 13, height: 13, "aria-hidden": true })}
         {t("cowork.thread_questions_custom")}
       </button>
@@ -56,7 +56,7 @@ function OtherChip(props: { questionText: string; value: string; onChange: (text
     }
   };
   return (
-    <span className="cowork-q__opt cowork-q__opt--input" data-filled={filled ? "" : undefined}>
+    <span className="cowork-questions__opt cowork-questions__opt--input" data-filled={filled ? "" : undefined}>
       <input
         ref={input}
         type="text"
@@ -90,18 +90,18 @@ export function CoworkQuestionsCard(props: {
     if (!props.disabled) props.onSubmit(value, custom);
   };
   return (
-    <section className="cowork-q" aria-label={t("cowork.thread_questions_label")}>
-      <ol className="cowork-q__list">
+    <section className="cowork-questions" aria-label={t("cowork.thread_questions_label")}>
+      <ol className="cowork-questions__list">
         {props.questions.map((question) => {
           const typed = custom[question.id] ?? "";
           const typing = Boolean(typed.trim());
           return (
-            <li key={question.id} className="cowork-q__item">
-              <p className="cowork-q__ask">
+            <li key={question.id} className="cowork-questions__item">
+              <p className="cowork-questions__ask">
                 {question.question}
-                {question.multi ? <span className="cowork-q__any"> {t("cowork.thread_questions_any")}</span> : null}
+                {question.multi ? <span className="cowork-questions__any"> {t("cowork.thread_questions_any")}</span> : null}
               </p>
-              <div className="cowork-q__opts" role="group" aria-label={question.question}>
+              <div className="cowork-questions__opts" role="group" aria-label={question.question}>
                 {question.options.map((option, index) => {
                   // A typed answer replaces the options, so none reads as picked while it is there.
                   const picked = !typing && isPicked(value[question.id], index);
@@ -109,7 +109,7 @@ export function CoworkQuestionsCard(props: {
                     <button
                       key={index}
                       type="button"
-                      className="cowork-q__opt"
+                      className="cowork-questions__opt"
                       aria-pressed={picked}
                       onClick={() => {
                         setValue((prev) => ({ ...prev, [question.id]: toggleOption(question, prev[question.id], index) }));
@@ -132,7 +132,7 @@ export function CoworkQuestionsCard(props: {
           );
         })}
       </ol>
-      <div className="cowork-q__act">
+      <div className="cowork-questions__act">
         <Button onClick={submit} disabled={props.disabled}>
           {t("cowork.thread_questions_submit")}
         </Button>
