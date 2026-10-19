@@ -131,6 +131,9 @@ const TITLE_ACRONYMS = new Set([
   "seo", "ux", "ui", "vc", "b2b", "b2c", "saas", "faq", "pdf", "q1", "q2", "q3", "q4", "h1", "h2", "r&d", "gdp",
 ]);
 
+/** Round 10: acronyms that also appear pluralised in file names ("evs", "suvs", "ceos"), shown "EVs". */
+const TITLE_PLURAL_ACRONYMS = new Set(["ev", "suv", "ceo", "cfo", "cto", "kpi", "okr", "gpu", "cpu", "api", "llm", "ipo", "vc"]);
+
 /** Round 9: short words a Title Case title keeps lowercase unless they open or close it. */
 const TITLE_MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "so", "yet", "of", "on", "in", "at", "to", "by", "up",
@@ -141,6 +144,8 @@ const TITLE_MINOR_WORDS = new Set([
 function titleWord(word: string, first: boolean, last: boolean): string {
   const lower = word.toLowerCase();
   if (TITLE_ACRONYMS.has(lower)) return lower === "saas" ? "SaaS" : word.toUpperCase();
+  // Round 10: a plural acronym keeps a lowercase "s" ("evs" -> "EVs", "llms" is listed already).
+  if (lower.length > 2 && lower.endsWith("s") && TITLE_PLURAL_ACRONYMS.has(lower.slice(0, -1))) return `${lower.slice(0, -1).toUpperCase()}s`;
   // A word written with an inner capital ("OpenAI", "iPhone") is a name: keep it as written.
   if (/[a-z][A-Z]/.test(word)) return word;
   if (!first && !last && TITLE_MINOR_WORDS.has(lower)) return lower;

@@ -7,6 +7,10 @@ describe("prettyArtifactTitle", () => {
   test("strips the extension, turns dashes/underscores into spaces, Title Case with acronyms", () => {
     // Round 9 calibration: Title Case, acronym-aware (round 7 was Sentence case).
     expect(prettyArtifactTitle("us-china-ai-race-2035.md")).toBe("US China AI Race 2035");
+    // Round 10: plural acronyms keep a lowercase "s" (live: "Korea Cheapest Evs 2026").
+    expect(prettyArtifactTitle("korea-cheapest-evs-2026.md")).toBe("Korea Cheapest EVs 2026");
+    expect(prettyArtifactTitle("hiring-ceos.md")).toBe("Hiring CEOs");
+    expect(prettyArtifactTitle("bus-routes.md")).toBe("Bus Routes");
     expect(prettyArtifactTitle("quarterly_report_2026.docx")).toBe("Quarterly Report 2026");
     expect(prettyArtifactTitle("notes.txt")).toBe("Notes");
   });
