@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { getDisplaySessionTitle, isBlockMarkerTitle, titleFromPrompt } from "../src/app/lib/session-title";
+import { getDisplaySessionTitle, isBlockMarkerTitle, shownChatTitle, titleFromPrompt } from "../src/app/lib/session-title";
 import { firstPromptText, sessionsNeedingTitle } from "../src/react-app/cowork/thread/use-repair-marker-titles";
 
 // Round 9 (R9-1): a chat the server titled with a Cowork block's fence line is never shown so,
@@ -24,6 +24,9 @@ describe("isBlockMarkerTitle", () => {
   test("the display falls back instead of showing a marker", () => {
     expect(getDisplaySessionTitle("```redrob-questions", "Fallback")).toBe("Fallback");
     expect(getDisplaySessionTitle("A real title", "Fallback")).toBe("A real title");
+    expect(shownChatTitle("```redrob-questions")).toBe("");
+    expect(shownChatTitle("A real title")).toBe("A real title");
+    expect(shownChatTitle(undefined)).toBe("");
   });
 });
 

@@ -1,6 +1,7 @@
 import type { Session, Todo } from "@redrob-labs/sdk/v2/client";
 
 import { t } from "../../../i18n";
+import { shownChatTitle } from "../../../app/lib/session-title";
 import type { RedrobSessionSnapshot } from "../../../app/lib/redrob-server";
 import type { ChatMode, HistoryEntry, HistoryStep } from "../services/types";
 
@@ -70,7 +71,7 @@ export function historyEntryFrom(input: {
     id: session.id,
     at: session.time.updated,
     kind: input.mode === "run" || steps.length > 0 ? "run" : "chat",
-    what: session.title.trim() || t("cowork.history_untitled"),
+    what: shownChatTitle(session.title).trim() || t("cowork.history_untitled"),
     projectId: input.projectId,
     state,
     label,

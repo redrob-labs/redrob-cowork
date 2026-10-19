@@ -33,6 +33,11 @@ export function isBlockMarkerTitle(title: string | null | undefined): boolean {
   return /^`{0,3}\s*redrob-[a-z-]+\s*`{0,3}$/i.test(trimmed);
 }
 
+/** Round 9: a stored chat title as lists should show it: "" for a block marker, so they fall back. */
+export function shownChatTitle(title: string | null | undefined): string {
+  return title && !isBlockMarkerTitle(title) ? title : "";
+}
+
 /** Longest chat title derived from a prompt, in characters. */
 const PROMPT_TITLE_MAX = 60;
 

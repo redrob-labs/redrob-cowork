@@ -9,6 +9,7 @@ import type { Session } from "@redrob-labs/sdk/v2/client";
 import type { Memory } from "@redrob/types/memory";
 
 import type { RedrobArtifactItem, RedrobServerClient, RedrobWorkspaceInfo } from "../../../app/lib/redrob-server";
+import { shownChatTitle } from "../../../app/lib/session-title";
 import { connectorsFromMcp, type CoworkMcpStatusMap } from "../connectors/connectors";
 import { COWORK_OUTBOX, coworkFileIdFor, displayFileName, fileIconFor, fileKindFor } from "../panel/cowork-files";
 import { chatDefaults, type CoworkServices } from "./cowork-services";
@@ -68,7 +69,8 @@ function scopeTags(scope: MemoryNoteScope, tags: string[] | null = null): string
 }
 
 function toChat(session: Session, projectId: string): Chat {
-  return { id: session.id, title: session.title, projectId, updatedAt: session.time.updated, ...chatDefaults(projectId) };
+  // Round 9: a "```redrob-questions" title reads as untitled until the repair renames the chat.
+  return { id: session.id, title: shownChatTitle(session.title), projectId, updatedAt: session.time.updated, ...chatDefaults(projectId) };
 }
 
 function workspaceName(workspace: RedrobWorkspaceInfo): string {

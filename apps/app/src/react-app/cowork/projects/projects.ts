@@ -1,5 +1,6 @@
 import type { RedrobServerClient, RedrobWorkspaceInfo } from "../../../app/lib/redrob-server";
 import { t } from "../../../i18n";
+import { shownChatTitle } from "../../../app/lib/session-title";
 import { workspaceSessionRoute } from "../../shell/workspace-routes";
 import { CHATS } from "../services/fixtures/chats";
 import { PROJECTS } from "../services/fixtures/projects";
@@ -99,7 +100,7 @@ async function projectChats(client: Pick<ProjectsClient, "listSessions">, id: st
   try {
     const { items } = await client.listSessions(id, { roots: true });
     return items
-      .map((session) => ({ id: session.id, title: session.title, updatedAt: session.time.updated }))
+      .map((session) => ({ id: session.id, title: shownChatTitle(session.title), updatedAt: session.time.updated }))
       .sort((a, b) => b.updatedAt - a.updatedAt);
   } catch {
     return null;
