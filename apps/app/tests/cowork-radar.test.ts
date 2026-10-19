@@ -163,6 +163,29 @@ describe("radar and ticker copy", () => {
     expect(rule).not.toContain("ellipsis");
   });
 
+  test("banners and subpage header wear white liquid glass with theme fallbacks", async () => {
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    const at = css.indexOf("\n.model-chart__banner.model-chart__radar-banner,\n.radar-page__head {");
+    const alt = css.indexOf("\r\n.model-chart__banner.model-chart__radar-banner,\r\n.radar-page__head {");
+    const start = at >= 0 ? at : alt;
+    expect(start).toBeGreaterThanOrEqual(0);
+    const glass = css.slice(start, css.indexOf("}", start));
+    expect(glass).toContain("var(--redrob-white)");
+    expect(glass).toContain("backdrop-filter: blur(");
+    expect(glass).toContain("color: var(--ink-primary)");
+    expect(css).toContain('[data-theme="dark"] .model-chart__banner.model-chart__radar-banner,');
+    const reduced = css.indexOf("@media (prefers-reduced-transparency: reduce) {", start);
+    expect(css.slice(reduced, reduced + 400)).toContain(".radar-page__head");
+    // The old white-on-gradient look is gone: no scrim on the banners or the subpage header.
+    expect(css).not.toContain("radar-page__scrim");
+    for (const file of ["radar-banners.tsx", "radar-screen.tsx"]) {
+      const source = await Bun.file(new URL(`../src/react-app/cowork/preview/${file}`, import.meta.url)).text();
+      expect(source).toContain("model-chart__radar-tint");
+      expect(source).not.toContain("banner-scrim");
+      expect(source).not.toContain("radar-page__scrim");
+    }
+  });
+
   test("the removed ticker note and pause controls are gone in both languages", () => {
     for (const table of [en, ko] as Array<Record<string, string>>) {
       expect(table["cowork.chart_trending_note"]).toBeUndefined();

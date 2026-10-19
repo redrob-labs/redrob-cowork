@@ -4271,9 +4271,11 @@ select:disabled {
 }
 
 /*
-  Radar: two banners side by side under the Featured banner (stacked on narrow widths), in the
-  Featured banner's visual language: a spectrum gradient, the glass sheen, a scrim, white copy, a
-  frosted feed mark in the corner and a pill that says where the banner goes.
+  Radar (round 10): white liquid glass. Two frosted panels side by side under the Featured banner
+  (stacked on narrow widths), and the same glass on each subpage header. A soft blurred spectrum
+  tint (news indigo/sky, social teal/sky) sits under the frosted white, so the glass reads even over
+  a flat page; copy uses theme ink. Dark mode is smoked white glass. Without backdrop-filter, or with
+  reduced transparency, the surface falls back to the solid raised surface.
 */
 .model-chart__radar-grid {
   display: grid;
@@ -4283,28 +4285,65 @@ select:disabled {
 @media (max-width: 760px) {
   .model-chart__radar-grid { grid-template-columns: minmax(0, 1fr); }
 }
-.model-chart__radar-banner {
+.model-chart__banner.model-chart__radar-banner,
+.radar-page__head {
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, color-mix(in srgb, var(--redrob-white) 60%, transparent));
+  background: color-mix(in srgb, var(--redrob-white) 66%, transparent);
+  color: var(--ink-primary);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 85%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 10%, transparent),
+    0 18px 48px -20px color-mix(in srgb, var(--redrob-black) 28%, transparent);
+}
+.model-chart__banner.model-chart__radar-banner {
   min-height: 248px;
   gap: 8px;
   padding-top: 72px;
-  color: #fff;
   text-decoration: none;
+}
+.model-chart__banner.model-chart__radar-banner:hover {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 90%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 12%, transparent),
+    0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 34%, transparent);
 }
 .model-chart__radar-banner:focus-visible {
   outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
   outline-offset: 2px;
 }
+/* The tint: blurred colour blobs above the white surface and below the copy. */
+.model-chart__banner > .model-chart__radar-tint,
+.radar-page__head > .model-chart__radar-tint {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(28px);
+  opacity: 0.32;
+  background:
+    radial-gradient(45% 55% at 18% 12%, var(--spectrum-indigo), transparent 70%),
+    radial-gradient(50% 60% at 88% 26%, var(--spectrum-sky), transparent 72%),
+    radial-gradient(55% 60% at 60% 110%, var(--spectrum-violet), transparent 75%);
+}
+[data-feed="social"] > .model-chart__radar-tint {
+  background:
+    radial-gradient(45% 55% at 18% 12%, var(--spectrum-teal), transparent 70%),
+    radial-gradient(50% 60% at 88% 26%, var(--spectrum-sky), transparent 72%),
+    radial-gradient(55% 60% at 60% 110%, var(--spectrum-indigo), transparent 75%);
+}
 .model-chart__radar-banner .model-chart__banner-title {
+  color: var(--ink-primary);
   font-size: 20px;
   line-height: 26px;
 }
-/* Round 10: the overview is short and always shown in full - no line clamp, no ellipsis. */
+/* The overview is short and always shown in full - no line clamp, no ellipsis. */
 .model-chart__radar-summary {
   display: block;
-  color: #fff;
+  color: var(--ink-secondary);
   font-size: 13px;
   line-height: 19px;
-  opacity: 0.92;
 }
 .model-chart__radar-mark {
   position: absolute;
@@ -4315,29 +4354,30 @@ select:disabled {
   place-items: center;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 60%, var(--redrob-white));
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
+  background: color-mix(in srgb, var(--redrob-white) 72%, transparent);
+  color: var(--ink-brand);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 90%, transparent);
 }
 .model-chart__radar-mark svg {
   width: 20px;
   height: 20px;
 }
+/* The Read pill sits at the bottom, so both banners line up whatever their overview length. */
 .model-chart__radar-open {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: auto;
   padding: 5px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full, 999px);
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  background: color-mix(in srgb, var(--redrob-white) 82%, transparent);
+  color: var(--ink-primary);
   font-size: 13px;
   font-weight: 650;
   line-height: 20px;
@@ -4351,9 +4391,60 @@ select:disabled {
 .model-chart__radar-banner:focus-visible .model-chart__radar-open svg {
   transform: translateX(2px);
 }
+/* Dark: smoked white glass - white at a low mix over the dark raised surface, light theme ink. */
+[data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
+[data-theme="dark"] .radar-page__head {
+  border-color: color-mix(in srgb, var(--redrob-white) 14%, transparent);
+  background: color-mix(in srgb, var(--redrob-white) 9%, color-mix(in srgb, var(--surface-raised) 70%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 16%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 5%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 65%, transparent);
+}
+[data-theme="dark"] .model-chart__banner.model-chart__radar-banner:hover {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 20%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 6%, transparent),
+    0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 72%, transparent);
+}
+[data-theme="dark"] .model-chart__banner > .model-chart__radar-tint,
+[data-theme="dark"] .radar-page__head > .model-chart__radar-tint {
+  opacity: 0.24;
+}
+[data-theme="dark"] .model-chart__radar-mark {
+  border-color: color-mix(in srgb, var(--redrob-white) 18%, transparent);
+  background: color-mix(in srgb, var(--redrob-white) 10%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 18%, transparent);
+}
+[data-theme="dark"] .model-chart__radar-open {
+  border-color: color-mix(in srgb, var(--redrob-white) 16%, transparent);
+  background: color-mix(in srgb, var(--redrob-white) 10%, transparent);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .model-chart__banner.model-chart__radar-banner,
+  .radar-page__head,
+  [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
+  [data-theme="dark"] .radar-page__head {
+    background: var(--surface-raised);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .model-chart__banner.model-chart__radar-banner,
+  .radar-page__head,
+  [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
+  [data-theme="dark"] .radar-page__head {
+    background: var(--surface-raised);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .model-chart__radar-mark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
 /*
-  Radar subpage: a banner-style header (same gradient tones, scrim and feed mark, no hover lift)
-  over a numbered list of story cards. Every surface sets its background and text colour.
+  Radar subpage: the same white glass header (tint and feed mark, no hover lift) over a numbered
+  list of story cards. Every surface sets its background and text colour.
 */
 .radar-page {
   display: flex;
@@ -4368,41 +4459,23 @@ select:disabled {
   flex-direction: column;
   gap: 8px;
   padding: 76px var(--space-6, 24px) var(--space-5, 20px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 20px;
-  background:
-    radial-gradient(60% 120% at 85% -10%, rgba(255, 255, 255, 0.35), transparent 60%),
-    linear-gradient(120deg, var(--spectrum-indigo), var(--spectrum-violet));
-  color: #fff;
-  box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--redrob-black) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-.radar-page__head[data-tone="2"] {
-  background:
-    radial-gradient(60% 120% at 85% -10%, rgba(255, 255, 255, 0.35), transparent 60%),
-    linear-gradient(120deg, var(--spectrum-teal), var(--spectrum-sky));
 }
 .radar-page__head > * {
   position: relative;
   z-index: 1;
 }
-.radar-page__head > .radar-page__scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--redrob-black) 45%, transparent) 100%);
-}
 .radar-page__head > .model-chart__radar-mark {
   position: absolute;
 }
 .radar-page__eyebrow {
+  color: var(--ink-secondary);
   font-size: 12px;
   line-height: 16px;
-  opacity: 0.85;
 }
 .radar-page__title {
   margin: 0;
-  color: #fff;
+  color: var(--ink-primary);
   font-size: 28px;
   font-weight: 700;
   line-height: 34px;
@@ -4411,16 +4484,15 @@ select:disabled {
 .radar-page__lede {
   max-width: 68ch;
   margin: 0;
-  color: #fff;
+  color: var(--ink-secondary);
   font-size: 14px;
   line-height: 21px;
-  opacity: 0.92;
 }
 .radar-page__meta {
+  color: var(--ink-muted);
   font-size: 12px;
   line-height: 16px;
   font-variant-numeric: tabular-nums;
-  opacity: 0.85;
 }
 .radar-page__list {
   display: flex;
