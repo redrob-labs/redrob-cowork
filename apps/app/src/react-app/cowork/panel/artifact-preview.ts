@@ -8,24 +8,42 @@
 /** About two lines of 13px text in the default 440px panel (~55 characters a line beside the icon). */
 export const ARTIFACT_PREVIEW_BUDGET = 104;
 
+/** YAML front matter at the very start, with LF or CRLF line endings. */
+const FRONT_MATTER = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/;
+/** `**`, `*`, `~~` and inline code spans; a backslash-escaped delimiter is literal text. */
+const SYMBOL_EMPHASIS = /(?<!\\)(\*\*|\*|~~|`)(\S(?:.*?\S)?)(?<!\\)\1/g;
+/** `__` and `_` only at word edges, so `snake_case` identifiers survive. */
+const UNDERSCORE_EMPHASIS = /(?<![\w\\])(__|_)(\S(?:.*?\S)?)(?<!\\)\1(?!\w)/g;
+
+/** Pure: strips emphasis delimiters until none remain (nested emphasis peels one layer a pass). */
+function stripEmphasis(text: string): string {
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(SYMBOL_EMPHASIS, "$2").replace(UNDERSCORE_EMPHASIS, "$2");
+  } while (text !== previous);
+  return text.replace(/\\([\\`*_~])/g, "$1");
+}
+
 /** Pure: markdown to one line of plain reading text. */
 export function plainMarkdown(text: string): string {
-  return text
-    .replace(/^---\n[\s\S]*?\n---\n?/, "") // front matter
-    .replace(/```[\s\S]*?```/g, " ") // code blocks
-    .replace(/^\s*\|.*\|\s*$/gm, " ") // table rows
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // images
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // links keep their text
-    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+[.)])\s+/gm, "") // heading, quote and list markers
-    .replace(/(\*\*|__|\*|_|~~|`)(\S(?:.*?\S)?)\1/g, "$2") // emphasis and inline code
-    .replace(/^\s*([-*_]\s*){3,}$/gm, " ") // rules
+  return stripEmphasis(
+    text
+      .replace(FRONT_MATTER, "")
+      .replace(/```[\s\S]*?```/g, " ") // code blocks
+      .replace(/^\s*\|.*\|\s*$/gm, " ") // table rows
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // images
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // links keep their text
+      .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+[.)])\s+/gm, "") // heading, quote and list markers
+      .replace(/^\s*([-*_]\s*){3,}$/gm, " "), // rules
+  )
     .replace(/\s+/g, " ")
     .trim();
 }
 
 /** Pure: the first line of a markdown text, if it is a heading, as plain text ("" otherwise). */
 function leadingHeading(text: string): string {
-  const first = text.replace(/^---\n[\s\S]*?\n---\n?/, "").split(/\r?\n/).find((line) => line.trim()) ?? "";
+  const first = text.replace(FRONT_MATTER, "").split(/\r?\n/).find((line) => line.trim()) ?? "";
   return /^\s{0,3}#{1,6}\s+/.test(first) ? plainMarkdown(first) : "";
 }
 

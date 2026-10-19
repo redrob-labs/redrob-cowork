@@ -2,42 +2,38 @@ import { describe, expect, test } from "bun:test";
 
 import { ARTIFACT_PREVIEW_BUDGET, artifactPreview, plainMarkdown } from "../src/react-app/cowork/panel/artifact-preview";
 
-// Artifact row previews end cleanly - a whole sentence or word, never "...".
+// Artifact row previews are plain text that ends cleanly - a whole sentence or word, never "...".
 
 describe("plainMarkdown", () => {
-  test("strips markdown syntax and keeps reading text", () => {
-    expect(plainMarkdown("## Summary\n- **Chips** are [scarce](https://x.y).\n\n`code`")).toBe("Summary Chips are scarce. code");
-  });
-  test("drops front matter, code blocks and table rows", () => {
-    expect(plainMarkdown("---\ntitle: x\n---\nHello\n```js\nlet a\n```\n| a | b |\nWorld")).toBe("Hello World");
+  test.each([
+    ["syntax stripped", "## Summary\n- **Chips** are [scarce](https://x.y).\n\n`code`", "Summary Chips are scarce. code"],
+    ["front matter, code and tables dropped", "---\ntitle: x\n---\nHello\n```js\nlet a\n```\n| a | b |\nWorld", "Hello World"],
+    ["CRLF front matter dropped", "---\r\ntitle: x\r\n---\r\nHello", "Hello"],
+    ["snake_case kept", "Set max_tokens_per_call and _private_ notes", "Set max_tokens_per_call and private notes"],
+    ["escaped delimiters kept", "2 \\* 3 \\* 4 and \\_x\\_", "2 * 3 * 4 and _x_"],
+    ["nested emphasis peeled", "***bold italic*** and **bold _it_**", "bold italic and bold it"],
+  ])("%s", (_name, input, expected) => {
+    expect(plainMarkdown(input)).toBe(expected);
   });
 });
 
 describe("artifactPreview", () => {
-  test("skips the leading heading (the row already shows the name)", () => {
-    expect(artifactPreview("# US China AI Race 2035\n\nThe gap narrows by 2030.")).toBe("The gap narrows by 2030.");
+  const sentences = `Compute is the binding constraint for the next decade of model training. ${"Export controls widen the gap. ".repeat(6)}`;
+  test.each([
+    ["leading heading skipped", "# US China AI Race 2035\n\nThe gap narrows by 2030.", "The gap narrows by 2030."],
+    ["short text kept whole", "One line.", "One line."],
+    ["title-only file gives no preview", "# Only a title", ""],
+  ])("%s", (_name, input, expected) => {
+    expect(artifactPreview(input)).toBe(expected);
   });
 
-  test("short text is kept whole", () => {
-    expect(artifactPreview("One line.")).toBe("One line.");
-  });
-
-  test("long text ends on a whole sentence when one fits", () => {
-    const text = `${"Compute is the binding constraint for the next decade of model training."} ${"Export controls widen the gap. ".repeat(6)}`;
-    const preview = artifactPreview(text);
+  test.each([
+    ["ends on a whole sentence when one fits", sentences, "."],
+    ["otherwise ends on a whole word", "word ".repeat(60), "word"],
+  ])("%s, within budget and without an ellipsis", (_name, input, ending) => {
+    const preview = artifactPreview(input);
     expect(preview.length).toBeLessThanOrEqual(ARTIFACT_PREVIEW_BUDGET);
-    expect(preview.endsWith(".")).toBe(true);
+    expect(preview.endsWith(ending)).toBe(true);
     expect(preview).not.toMatch(/\.\.\.|\u2026/);
-  });
-
-  test("with no sentence end in range it ends on a whole word, no ellipsis", () => {
-    const text = "word ".repeat(60);
-    const preview = artifactPreview(text);
-    expect(preview.length).toBeLessThanOrEqual(ARTIFACT_PREVIEW_BUDGET);
-    expect(preview.endsWith("word")).toBe(true);
-  });
-
-  test("empty text gives no preview", () => {
-    expect(artifactPreview("# Only a title")).toBe("");
   });
 });
