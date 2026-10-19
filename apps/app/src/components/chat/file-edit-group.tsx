@@ -79,10 +79,10 @@ function rowVerb(step: FileStep): string {
 }
 
 /**
- * Round 10 (R3): a run's file edits as the same Claude-style dropdown table as web research
+ * A run's file edits as the same dropdown table as web research
  * (WebResearchGroup): a header ("Created 1 file", file glyph, chevron) folding a bordered table
  * with one row per file - "Created  <icon> US China AI Race 2035". A row opens the file on its own
- * in the Artifacts tab, the same way the in-chat artifact card does (round 8 M6). A file the panel
+ * in the Artifacts tab, the same way the in-chat artifact card does. A file the panel
  * cannot open yet (still being written, or failed) shows as a plain row.
  */
 export function FileEditGroup(props: { parts: AnyToolPart[]; className?: string }) {

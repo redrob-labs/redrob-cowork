@@ -97,7 +97,7 @@ function SourceRow(props: { result: WebSearchResult }) {
   )
 }
 
-/** A page-read row: "Read  <favicon> host"; opens the page it read. No loader (round 9). */
+/** A page-read row: "Read  <favicon> host"; opens the page it read. No loader. */
 function ReadRow(props: { step: WebStep }) {
   const { step } = props
   const verb = step.running ? t("cowork.web_reading") : t("cowork.web_read")
@@ -117,7 +117,7 @@ function ReadRow(props: { step: WebStep }) {
   )
 }
 
-/** One search row: "Searched the web  <query>" and its sources dropdown. No loader (round 9). */
+/** One search row: "Searched the web  <query>" and its sources dropdown. No loader. */
 function SearchRow(props: { step: WebStep }) {
   const { step } = props
   const [open, setOpenState] = useState(() => openRows.get(step.id) ?? false)
@@ -156,10 +156,10 @@ function SearchRow(props: { step: WebStep }) {
 }
 
 /**
- * Round 8b: a run's web research as a Claude-style dropdown table. The header ("Searched the web",
+ * A run's web research as a dropdown table. The header ("Searched the web",
  * with "3 searches · 24 sources · 2 pages") folds a bordered table with one row per step: a search
  * (query, source count, opening to its sources) or a page read (favicon, host, opening the page).
- * Round 9: always a static globe, never a loader; the live label above the thread says what is
+ * Always a static globe, never a loader; the live label above the thread says what is
  * running.
  */
 export function WebResearchGroup(props: { parts: AnyToolPart[]; className?: string }) {

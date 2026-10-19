@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
 
 /**
- * Round 7 C8: the plan's progress lives in the to-do dock above the composer, so inside the Cowork
+ * The plan's own checklist in the thread shows progress, so inside the Cowork
  * frame the agent's to-do tool calls ("Updated the plan (4)") are not drawn in the transcript.
  * Matches the engine's `todowrite` and `todoread` tools.
  */

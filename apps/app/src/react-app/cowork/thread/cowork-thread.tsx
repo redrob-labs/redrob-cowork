@@ -88,15 +88,15 @@ export function challengeReportProps(challenge: ChallengeData): ChallengeReportP
 function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boolean; messageId?: string }) {
   const thread = useCoworkThread();
   const [answered, setAnswered] = useState(false);
-  // Round 8 (M1): done means the person ANSWERED (here, or by any reply after this message), not
+  // Done means the person ANSWERED (here, or by any reply after this message), not
   // "this is no longer the last message" - the agent often keeps writing after it asks. Without the
   // thread's state (outside a session surface), fall back to the old position rule.
   const repliedLater = props.messageId && thread?.questions ? thread.questions.answered.has(props.messageId) : !props.isLatest;
   const done = answered || repliedLater;
-  // Round 7 C1: once answered (or superseded by a later turn) the questions leave the thread
+  // Once answered (or superseded by a later turn) the questions leave the thread
   // entirely. The plan that follows is the visible result of the answers.
   if (done) return null;
-  // Round 9: the app's own card (typed answers per question, "Execute"), not the DS PlanQuestions.
+  // The app's own card (typed answers per question, "Execute"), not the DS PlanQuestions.
   return (
     <CoworkQuestionsCard
       questions={props.questions}
@@ -121,7 +121,7 @@ function StepMarker(props: { state: PlanStepState }) {
 }
 
 /**
- * Round 9: the plan inside the chat, not a bordered document. A Redrob Blue accent rail on the
+ * The plan inside the chat, not a bordered document. A Redrob Blue accent rail on the
  * left, a small "Research plan" label with the run's progress, the summary, then the checklist as
  * a stepper with custom circle markers: the step the run is on shimmers, finished steps tick, and
  * the rest wait. Progress is guessed from the run's activity (plan-progress.ts). The DS
@@ -154,13 +154,13 @@ function CoworkPlan(props: {
     thread.sendText(planRunPrompt(planToText(props.plan))).catch(() => setStage("draft"));
   };
 
-  // Round 6: auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
+  // Auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
   // -> artifact without a manual Run click. Fires exactly once per plan: only when this is the
   // latest turn, still a draft, and the thread is idle (the plan finished streaming).
   // sawDraftingRef: the plan must belong to a chat that was live while it was open here (the
   // session went busy during this surface's life, or the plan saw the busy state itself), so
   // reopening an old chat whose last turn is an unrun plan never silently runs it; that plan shows
-  // a Run button instead. Round 9: the plan view alone missed the busy state when the plan block
+  // a Run button instead. The plan view alone missed the busy state when the plan block
   // completed in the same moment the run went idle, and the plan stopped with a Run button.
   const autoRanRef = useRef(false);
   const sawDraftingRef = useRef(false);
@@ -215,10 +215,10 @@ function CoworkPlan(props: {
 }
 
 /** The blocks in an assistant answer, as the design system draws them. */
-export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean; /** The message the blocks came in (round 8 M1). */ messageId?: string }) {
+export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean; /** The message the blocks came in. */ messageId?: string }) {
   const { questions, plan } = props.blocks;
   const thread = useCoworkThread();
-  // Round 8 (M1): a plan drafted in the same turn as questions waits for the answers - it is not
+  // A plan drafted in the same turn as questions waits for the answers - it is not
   // shown and never runs; the answers produce a new plan that runs on its own.
   const held = Boolean(questions) || Boolean(props.messageId && thread?.questions?.heldPlans.has(props.messageId));
   // Fact check + Challenge no longer render inline here; they appear as verdict CHIPS in the
@@ -303,8 +303,7 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
   const challengeState = checks?.challenge ?? "off";
   const showFact = factState === "running" || (factState === "done" && Boolean(result?.fact));
   const showChallenge = challengeState === "running" || (challengeState === "done" && Boolean(result?.challenge));
-  // The model chip ("Redrob Auto") is intentionally dropped from the receipt row per round 5, and
-  // round 8 drops the "Plan followed" chip too: only the checks' verdicts remain.
+  // Only the checks' verdicts show under an answer: no model or "Plan followed" chip.
   return (
     <div className="flex w-full flex-col gap-3">
       {showFact || showChallenge ? (

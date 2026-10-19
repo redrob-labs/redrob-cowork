@@ -2069,7 +2069,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
               </div>
             ) : renderedMessages.length === 0 && effectiveActivityStatus !== "idle" && !inCoworkFrame ? (
               <div className="px-6 py-12">
-                {/* Item 5: this is the PaperGrainGradient orb ("gradient circle" loader). In the
+                {/* This is the PaperGrainGradient orb ("gradient circle" loader). In the
                     Cowork frame it painted for one frame right after send - before any message
                     rendered - as a blink next to the globe CoworkRunStatus. The Cowork frame has
                     its own single loader (CoworkRunStatus in MessageList), so suppress this orb

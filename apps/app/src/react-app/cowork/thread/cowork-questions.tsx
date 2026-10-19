@@ -25,8 +25,7 @@ export function initialAnswers(questions: readonly PlanQuestionData[]): PlanAnsw
 }
 
 /**
- * The "Something else" chip. Round 9 (calibration: behind a chip, and the chip becomes a text
- * input): clicked, the chip itself turns into a pill-shaped field in place, focused. Typing there
+ * The "Something else" chip: clicked, the chip itself turns into a pill-shaped field in place, focused. Typing there
  * replaces the options picked for this question; emptying it and leaving (or Escape) turns it back
  * into the chip. Enter sends the whole card.
  */
@@ -74,7 +73,7 @@ function OtherChip(props: { questionText: string; value: string; onChange: (text
 }
 
 /**
- * Round 9: Plan's questions as the Cowork thread's own card (the DS PlanQuestions 1.7.0 has no
+ * Plan's questions as the Cowork thread's own card (the DS PlanQuestions 1.7.0 has no
  * way to type an answer). Slightly smaller type than the DS card, a "Something else" chip under
  * each question that turns into a text field, and one "Execute" button (no "or reply in your own
  * words" hint). Sending posts every answer at once; the plan that comes back runs on its own.

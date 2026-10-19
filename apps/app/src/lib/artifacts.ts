@@ -126,17 +126,17 @@ function getFileExtension(filename: string) {
   return filename.split(".").pop()?.toLowerCase();
 }
 
-/** Round 9: words a title keeps in capitals (matched case-insensitively). */
+/** Words a title keeps in capitals (matched case-insensitively). */
 const TITLE_ACRONYMS = new Set([
   "ai", "ml", "llm", "llms", "api", "apis", "gpu", "gpus", "cpu", "hbm", "euv", "tsmc", "us", "usa", "uk", "eu",
   "un", "uae", "nato", "ceo", "cfo", "cto", "coo", "hr", "pr", "kpi", "kpis", "okr", "okrs", "roi", "ipo", "esg",
   "seo", "ux", "ui", "vc", "b2b", "b2c", "saas", "faq", "pdf", "q1", "q2", "q3", "q4", "h1", "h2", "r&d", "gdp",
 ]);
 
-/** Round 10: acronyms that also appear pluralised in file names ("evs", "suvs", "ceos"), shown "EVs". */
+/** Acronyms that also appear pluralised in file names ("evs", "suvs", "ceos"), shown "EVs". */
 const TITLE_PLURAL_ACRONYMS = new Set(["ev", "suv", "ceo", "cfo", "cto", "kpi", "okr", "gpu", "cpu", "api", "llm", "ipo", "vc"]);
 
-/** Round 9: short words a Title Case title keeps lowercase unless they open or close it. */
+/** Short words a Title Case title keeps lowercase unless they open or close it. */
 const TITLE_MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "so", "yet", "of", "on", "in", "at", "to", "by", "up",
   "as", "vs", "via", "per", "with", "from", "into",
@@ -146,7 +146,7 @@ const TITLE_MINOR_WORDS = new Set([
 function titleWord(word: string, first: boolean, last: boolean): string {
   const lower = word.toLowerCase();
   if (TITLE_ACRONYMS.has(lower)) return lower === "saas" ? "SaaS" : word.toUpperCase();
-  // Round 10: a plural acronym keeps a lowercase "s" ("evs" -> "EVs", "llms" is listed already).
+  // A plural acronym keeps a lowercase "s" ("evs" -> "EVs", "llms" is listed already).
   if (lower.length > 2 && lower.endsWith("s") && TITLE_PLURAL_ACRONYMS.has(lower.slice(0, -1))) return `${lower.slice(0, -1).toUpperCase()}s`;
   // A word written with an inner capital ("OpenAI", "iPhone") is a name: keep it as written.
   if (/[a-z][A-Z]/.test(word)) return word;
@@ -156,9 +156,8 @@ function titleWord(word: string, first: boolean, last: boolean): string {
 
 /**
  * A human title for an artifact path: take the basename, drop its extension, turn `-`/`_` runs
- * into spaces, and render in Title Case. Round 9 calibration (Felix): Title Case, acronym-aware,
- * so `us-china-ai-race-2035.md` -> "US China AI Race 2035" (it was Sentence case, "Us china ai
- * race", which read oddly). Short connecting words stay lowercase inside the title ("Plan for the
+ * into spaces, and render in Title Case, acronym-aware,
+ * so `us-china-ai-race-2035.md` -> "US China AI Race 2035". Short connecting words stay lowercase inside the title ("Plan for the
  * Launch"). An empty or extension-only name falls back to the raw basename.
  */
 export function prettyArtifactTitle(path: string): string {

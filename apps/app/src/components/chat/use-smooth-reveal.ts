@@ -6,20 +6,20 @@ import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion"
  * Letter-by-letter reveal pacing for streaming assistant text.
  *
  * A throttler can only ever reveal text the model has ALREADY emitted - it cannot outrun
- * generation. So "start at 2x Claude, settle to 1x Claude" is implemented as a constant
+ * generation. So "start at 2x, settle to 1x" is implemented as a constant
  * target reading rate with an opening burst: at the start of a turn the model's first
  * tokens land before the reveal catches up (a backlog), so we reveal at 2x the base rate
  * to drain that backlog and feel instantly responsive, then decay smoothly to 1x the base
- * rate - roughly Claude's sustained painted pace - so the reveal never stalls waiting for
+ * rate - a comfortable sustained reading pace - so the reveal never stalls waiting for
  * tokens. When the model races far ahead a bounded extra catch-up keeps the lag from
  * growing without turning the reveal choppy; when streaming ends we snap to the full text.
  *
  * Under prefers-reduced-motion there is no paced reveal: the full text shows immediately.
  */
 
-/** Base sustained reveal rate (chars/sec) ~= Claude's painted reading pace ("1x"). */
+/** Base sustained reveal rate (chars/sec) ~= a comfortable reading pace ("1x"). */
 const BASE_CHARS_PER_SEC = 55
-/** Opening burst multiplier ("2x Claude") that drains the first-token backlog. */
+/** Opening burst multiplier ("2x") that drains the first-token backlog. */
 const BURST_MULTIPLIER = 2
 /** Seconds over which the burst decays from 2x back to 1x. */
 const BURST_DECAY_SECONDS = 1.2
@@ -41,8 +41,8 @@ export type SmoothReveal = {
  * how big the backlog of unrevealed text is. Exported for testing: it carries the whole 2x->1x
  * burst + bounded catch-up policy with no DOM or timers, so the realism can be asserted directly.
  *
- * - At `sinceStartSeconds = 0` the rate is BURST_MULTIPLIER x base (the "2x Claude" opening).
- * - By `BURST_DECAY_SECONDS` it has decayed to 1x base (Claude's sustained pace).
+ * - At `sinceStartSeconds = 0` the rate is BURST_MULTIPLIER x base (the "2x" opening).
+ * - By `BURST_DECAY_SECONDS` it has decayed to 1x base (the sustained pace).
  * - A backlog over CATCHUP_BACKLOG_THRESHOLD raises the floor toward a bounded catch-up so a
  *   model that raced ahead does not leave the reveal permanently behind.
  */

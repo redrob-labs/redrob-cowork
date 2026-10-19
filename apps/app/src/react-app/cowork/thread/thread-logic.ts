@@ -105,7 +105,7 @@ export function isQuestionAnswerPrompt(prompt: string): boolean {
 }
 
 /**
- * Round 8b: the protocol rule a Plan-mode send carries in its system text, for THIS turn.
+ * The protocol rule a Plan-mode send carries in its system text, for THIS turn.
  *
  * Seen live (session ses_eaddde07...): a complex prompt went to the plan agent, which ran three web
  * searches and wrote the whole answer as prose - no questions, no plan, so no run, no artifact and no
@@ -130,7 +130,7 @@ export function planTurnInstruction(prompt: string): string {
 
 /**
  * Whether a prompt is any synthetic Cowork machinery send (a plan being run, or a question-answer
- * reply) that the Cowork transcript should hide while the engine still receives it (item 10).
+ * reply) that the Cowork transcript should hide while the engine still receives it.
  */
 export function isSyntheticCoworkPrompt(prompt: string): boolean {
   return isPlanRunPrompt(prompt) || isQuestionAnswerPrompt(prompt);

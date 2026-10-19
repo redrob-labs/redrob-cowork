@@ -54,7 +54,7 @@ export function modeFor(chats: Record<string, ChatSettings>, key: string, prefer
 }
 
 /**
- * Round 6: auto-pick Plan mode for a complex request. A prompt reads as complex when it is long,
+ * Auto-pick Plan mode for a complex request. A prompt reads as complex when it is long,
  * or it asks for the kind of multi-step work a plan-then-execute flow serves best - research,
  * analysis, a report/document deliverable, a comparison, or an explicit "plan"/"step by step".
  * Deliberately conservative (a short, simple ask stays in Run) and ONE-WAY: it only upgrades Run

@@ -26,7 +26,7 @@ export function toTranscript(entries: Array<{ info: Message; parts: Part[] }>): 
 }
 
 /**
- * Round 8 (M3): the newest file a message wrote in FULL - a `write` tool call carrying the whole body
+ * The newest file a message wrote in FULL - a `write` tool call carrying the whole body
  * (edits and patches carry diffs, so they are not documents). Engine part shape:
  * { type: "tool", tool, state: { status, input: { filePath, content } } }.
  */

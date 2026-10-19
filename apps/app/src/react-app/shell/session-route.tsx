@@ -1098,16 +1098,16 @@ export function SessionRoute() {
             const coworkSystem = inCoworkFrame
               ? coworkSystemText(coworkMemory, envSystemContext || undefined, coworkNotes)
               : envSystemContext;
-            // Round 6: a complex Run prompt auto-upgrades to Plan so the model drafts a plan first,
+            // A complex Run prompt auto-upgrades to Plan so the model drafts a plan first,
             // then the plan auto-runs (CoworkPlan auto-run). A plan being RUN is never upgraded
             // (see effectiveCoworkMode), or the plan would loop back to the Plan agent forever.
             const chosenCoworkMode = modeFor(coworkChats, targetSessionId, local.prefs.coworkNewChatMode);
-            // Round 8b: the answers to Plan's questions go back to the PLAN agent (so it writes the
+            // The answers to Plan's questions go back to the PLAN agent (so it writes the
             // plan), not the run agent - before, short answers stayed in Run and skipped the plan.
             const sendCoworkMode = inCoworkFrame && isQuestionAnswerPrompt(text)
               ? "plan"
               : effectiveCoworkMode(chosenCoworkMode, text, isPlanRunPrompt(text));
-            // Round 8b: every Plan-mode send carries this turn's protocol rule (questions first, then
+            // Every Plan-mode send carries this turn's protocol rule (questions first, then
             // one plan block), so the plan agent cannot skip straight to researching and answering.
             const planRule = inCoworkFrame && sendCoworkMode === "plan" ? planTurnInstruction(text) : null;
             const system = [coworkSystem, planRule].filter(Boolean).join("\n\n") || undefined;

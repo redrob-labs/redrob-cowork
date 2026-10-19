@@ -553,7 +553,7 @@ const AssistantAnswerText = React.memo(
     const { revealed, revealing } = useSmoothReveal(body, isStreaming)
     return (
       <MessageContent
-        // Round 32/34 (Claude-style): the assistant reply is plain prose on the page surface
+        // The assistant reply is plain prose on the page surface
         // -- NO bubble. Override the DS MessageContent base (bg-secondary rounded-lg p-2) here
         // via the cn(base, className) twMerge: bg-transparent, no radius, no inset padding.
         data-surface="ai"
@@ -576,7 +576,7 @@ const AssistantMessage = React.memo(
     const { showThinking, highlightQuery, setPrompt, sessionId } = useMessageList()
     // Inside the Cowork frame, Plan's and Cross-check's fenced blocks render as the design system's.
     const inCoworkFrame = useInCoworkFrame()
-    // Round 8 (M1): where this message's Plan questions / plan stand, from the raw transcript.
+    // Where this message's Plan questions / plan stand, from the raw transcript.
     const coworkQuestions = useCoworkThread()?.questions
     const questionsOpen = coworkQuestions ? !coworkQuestions.answered.has(message.id) : isLastMessage
     const planHeld = coworkQuestions?.heldPlans.has(message.id) ?? false
@@ -832,7 +832,7 @@ const UserMessage = React.memo(
               >
                 {hasContent ? (
                   <MessageContent
-                    // Round 32 (Claude-style): a tighter, subtly darker sent bubble.
+                    // A tighter, subtly darker sent bubble.
                     // --muted is --surface-sunken; mixing a little --border in steps it
                     // one tone darker in BOTH themes (border is darker than muted light,
                     // lighter-but-distinct dark). Tighter inset (px-3 py-2) + leading-snug.
@@ -1469,7 +1469,7 @@ function MessageGroup({
           still renders. hideReasoning=true drops reasoning groups, and the tool/aggregate groups
           are the activity's job now. */}
       {renderItems(proseItems, stepItems.length, collapseSteps, useUnifiedLiveActivity)}
-      {/* Items 4 + 8: in the Cowork frame the turn's artifacts show as rounded, clickable cards
+      {/* In the Cowork frame the turn's artifacts show as rounded, clickable cards
           with a "writing" caret while still being written; the bare surface keeps the FILES strip. */}
       {inCoworkFrame ? (
         <ArtifactCardList messages={items.map((item) => item.message)} />
@@ -1682,8 +1682,7 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
 export function MessageList({ messages: rawMessages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const inCoworkFrame = useInCoworkFrame()
-  // Round 7 C8: in the Cowork frame the to-do tool calls are not drawn (round 9: the plan's own
-  // checklist carries progress; the to-do dock is gone).
+  // In the Cowork frame the to-do tool calls are not drawn: the plan's own checklist carries progress.
   const messages = React.useMemo(
     () => (inCoworkFrame ? withoutTodoToolParts(rawMessages) : rawMessages),
     [inCoworkFrame, rawMessages],
@@ -1709,7 +1708,7 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
   )
   const latestToolParts = React.useMemo(() => (isStreaming ? collectLatestAssistantToolParts(messages) : []), [isStreaming, messages])
   const liveActionLabel = isStreaming ? getActiveToolLabel(latestToolParts) : null
-  // Round 9: a web search or page read in flight shows a static globe, not the liquid loader.
+  // A web search or page read in flight shows a static globe, not the liquid loader.
   const liveActionWeb = isStreaming && isWebStepInFlight(latestToolParts as AnyToolPart[])
 
   /*

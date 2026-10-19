@@ -1,6 +1,6 @@
 import { hasCoworkBlocks, parseCoworkBlocks } from "./cowork-blocks";
 
-/** What the thread knows about a message's blocks beyond its own text (round 8 M1). */
+/** What the thread knows about a message's blocks beyond its own text. */
 export type CoworkTextVisibility = {
   /** Its Plan questions still wait on the person. */
   questionsOpen: boolean;
@@ -9,11 +9,11 @@ export type CoworkTextVisibility = {
 };
 
 /**
- * Round 7 (review of C1/C7), extended in round 8: whether an assistant text group draws NOTHING in
+ * Whether an assistant text group draws NOTHING in
  * the Cowork thread, so the transcript can skip its message wrapper instead of leaving an empty
  * band. True only for a text that is nothing but Cowork blocks that render nothing inline:
- * - Plan questions that are answered (C1),
- * - a plan held back until the answers come (M1),
+ * - Plan questions that are answered,
+ * - a plan held back until the answers come,
  * - a cross-check block (its verdict shows as chips in the answer footer).
  * Any prose, a shown plan, a still-pending block, or questions still waiting keep the group. Pure.
  */

@@ -84,7 +84,7 @@ export type CoworkComposerToolsViewProps = {
 };
 
 /** Mic, then the model: the composer's tools inside the Cowork frame. The Plan/Run toggle was
- *  removed (item 1) - mode is decided automatically at send (effectiveCoworkMode), no user control. */
+ *  removed: mode is decided automatically at send (effectiveCoworkMode), no user control. */
 export function CoworkComposerToolsView(props: CoworkComposerToolsViewProps) {
   const recording = props.mic === "recording";
   const label = props.micUnavailable
@@ -139,7 +139,7 @@ export type CoworkComposerToolsProps = {
   children?: ReactNode;
 };
 
-/** The tools wired up: the mic writing into the draft. The Plan/Run toggle was removed (item 1);
+/** The tools wired up: the mic writing into the draft. The Plan/Run toggle was removed;
  *  mode is resolved automatically at send, so this component no longer reads or sets it. */
 export function CoworkComposerTools(props: CoworkComposerToolsProps) {
   const setVoice = useFrameStore((state) => state.setVoice);

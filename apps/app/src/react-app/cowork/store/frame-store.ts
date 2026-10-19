@@ -46,7 +46,7 @@ export type FrameState = {
     tab: PanelTab;
     file: string | null;
     lastTab: PanelTab;
-    /** Round 8: the artifact the Artifacts tab shows on its own (its target id), or none for the list. */
+    /** The artifact the Artifacts tab shows on its own (its target id), or none for the list. */
     artifact?: string | null;
   };
   /** The in-app browser: the active provider tab id and the Cowork/you hand-off state. */
@@ -71,7 +71,7 @@ export type FrameState = {
   toggleBrowser(): void;
   /** Opens a file in the panel; null goes back to the list. */
   openFile(id: string | null): void;
-  /** Round 8: opens an artifact (by target id) on the Artifacts tab; null goes back to its list. */
+  /** Opens an artifact (by target id) on the Artifacts tab; null goes back to its list. */
   openArtifact(id: string | null): void;
   /** Selects the active in-app browser tab (null = none). */
   setBrowserTab(tab: string | null): void;

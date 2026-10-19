@@ -13,11 +13,11 @@ export type CoworkThread = {
   sessionId: string;
   busy: boolean;
   sendText(text: string): Promise<void>;
-  /** Round 8 (M1): which Plan questions were answered and which plans are held back. */
+  /** Which Plan questions were answered and which plans are held back. */
   questions?: CoworkQuestionState;
-  /** Round 9: how far each plan's run has got, by the plan message's id (see plan-progress.ts). */
+  /** How far each plan's run has got, by the plan message's id (see plan-progress.ts). */
   plans?: ReadonlyMap<string, PlanRunActivity>;
-  /** Round 9: the session was working at some point while this surface was mounted. */
+  /** The session was working at some point while this surface was mounted. */
   liveHere?: boolean;
 };
 

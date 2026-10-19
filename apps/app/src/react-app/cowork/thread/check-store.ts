@@ -74,7 +74,7 @@ function restartChecks(previous: AnswerChecks | undefined, next: AnswerChecks): 
 }
 
 /**
- * Round 8 (M7): settled check results are kept on this device, so a chat reopened later (or after
+ * Settled check results are kept on this device, so a chat reopened later (or after
  * the app restarts) still shows its Fact check and Council chips. Only finished checks are kept:
  * a check still running when the app closed has no result to show and would read as stuck.
  */
@@ -120,7 +120,7 @@ export function writeKeptChecks(storage: CheckStorage, answers: Record<string, A
   }
 }
 
-/** In memory for the app session, with settled results kept on the device (M7). */
+/** In memory for the app session, with settled results kept on the device. */
 export function createCheckStore(options: { storage?: CheckStorage } = {}) {
   const storage = options.storage ?? windowCheckStorage;
   return create<CheckStoreState>()((set, get) => ({
