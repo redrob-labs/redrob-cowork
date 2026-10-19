@@ -30,21 +30,6 @@ export function WebsearchTool({ part }: WebsearchToolProps) {
     return <Tool toolPart={part} />
   }
 
-  // TEMP dev capture (round 6): the raw websearch part shows blank output, so log the real shape
-  // ONCE per finished part to learn where results actually live. Marker: REDROB-WS-CAPTURE.
-  // Remove after diagnosis. part is narrowed to output-available here, so .output is typed.
-  if (import.meta.env?.DEV) {
-    const rawOutput: unknown = part.output
-    // eslint-disable-next-line no-console
-    console.debug("REDROB-WS-CAPTURE", {
-      toolName: part.toolName,
-      input: part.input,
-      outputType: typeof rawOutput,
-      outputPreview: typeof rawOutput === "string" ? rawOutput.slice(0, 2000) : rawOutput,
-      keys: Object.keys(part as unknown as Record<string, unknown>),
-    })
-  }
-
   const results = parseWebSearchResults(part.output)
 
   return (

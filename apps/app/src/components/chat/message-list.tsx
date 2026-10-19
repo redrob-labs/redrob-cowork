@@ -141,7 +141,7 @@ import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
-import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
+import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, isWebResearchGroup, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/cowork-blocks"
@@ -584,12 +584,18 @@ const AssistantMessage = React.memo(
         const groups = getAssistantRenderGroups(message.parts, showThinking)
         if (hideSteps) {
           // The live activity row already shows reasoning + every tool call; keep only text/file.
-          return groups.filter((group) => group.kind === "text" || group.kind === "file")
+          // Round 7 C7: EXCEPT web research - each search/fetch row shows in place as it happens
+          // (the same row a finished turn shows), instead of a blank band until the run ends.
+          return groups.filter((group) => group.kind === "text" || group.kind === "file" || isWebResearchGroup(group))
         }
         return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
       },
       [hideReasoning, hideSteps, message.parts, showThinking]
     )
+
+    // Round 7 C7: a message whose parts all folded into the live row renders NOTHING - not an empty
+    // <Message> wrapper, which still took the column's gap and left blank bands between prose lines.
+    if (assistantRenderGroups.length === 0) return null
 
     return (
       <Message
@@ -1359,7 +1365,9 @@ function MessageGroup({
     const isLastMessage = item.index === messages.length - 1
 
     return (
-      <div key={item.message.id}>
+      // Round 7 C7: empty:hidden - when the message renders nothing (all of it folded into the live
+      // row), the wrapper must not keep the column's 8px gap and stack blank bands between prose.
+      <div key={item.message.id} className="empty:hidden">
         <MessageComponent
           message={item.message}
           isLastMessage={isLastMessage}
@@ -1408,25 +1416,32 @@ function MessageGroup({
     return nodes
   }
 
+  // Round 7 C5: the live run row (loader + "Working on it" + timer) TRAILS the newest content of the
+  // turn. It used to render first in the group; once the hidden question-answer and plan-run sends
+  // folded questions, plan and run into ONE group, the loader sat above them all ("stuck at the top").
+  const liveActivityRow = useUnifiedLiveActivity ? (
+    <div className={CHAT_COLUMN} data-live-activity-row="">
+      <UnifiedActivity
+        parts={liveActivityToolParts}
+        reasoning={liveActivityReasoning}
+        isStreaming
+        /* Stable key for the whole turn so the row (and its timer) never remounts per tool. */
+        activityKey={`${items[0]?.message.id ?? "live"}-activity`}
+        /* Continuous elapsed from the run's server start, not from this render's mount. */
+        startedAt={stepsStartedAt}
+      />
+    </div>
+  ) : null
+
   return (
       <div className="flex flex-col gap-2 group/message-group">
       {/* The scroll area keeps the same 8px rhythm the parts inside a single
           message use, so a step row is spaced identically whether or not a
           message boundary happens to fall between it and the previous row. */}
-      {useUnifiedLiveActivity ? (
-        <div className={CHAT_COLUMN}>
-          <UnifiedActivity
-            parts={liveActivityToolParts}
-            reasoning={liveActivityReasoning}
-            isStreaming
-            /* Stable key for the whole turn so the row (and its timer) never remounts per tool. */
-            activityKey={`${items[0]?.message.id ?? "live"}-activity`}
-            /* Continuous elapsed from the run's server start, not from this render's mount. */
-            startedAt={stepsStartedAt}
-          />
-        </div>
-      ) : null}
-      {/* The step scroll area is skipped entirely while the unified live row stands in for it. */}
+      {/* The step scroll area is skipped entirely while the unified live row stands in for it.
+          Round 7 C7: the leading step messages still render their WEB RESEARCH rows in place (all
+          other steps are the live row's job), so a run that opens with searches shows them live. */}
+      {useUnifiedLiveActivity && stepItems.length > 0 ? renderItems(stepItems, 0, false, true) : null}
       {!useUnifiedLiveActivity && stepItems.length > 0 ? (
         collapseSteps ? (
           <CompletedStepRun label={stepRunLabel}>
@@ -1476,6 +1491,7 @@ function MessageGroup({
           <CoworkMemoryNote text={text} />
         </div>
       ))}
+      {liveActivityRow}
       {showCoworkReceipt && lastRealItem ? (
         <div className={CHAT_COLUMN}>
           <CoworkAnswerFooter

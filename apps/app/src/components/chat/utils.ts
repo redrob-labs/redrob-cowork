@@ -1,6 +1,7 @@
 import { isReasoningUIPart, isToolUIPart, type DynamicToolUIPart, type FileUIPart, type ToolUIPart, type UIMessage } from "ai"
 import type { ThreadStatus } from "@/lib/messages"
 import { isAggregatableToolPart } from "@/lib/tool-aggregate"
+import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { t } from "@/i18n"
 
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -180,6 +181,18 @@ type AssistantRenderGroup =
     table, per the locked calibration); it does not become table rows.
   */
   | { kind: "activity"; parts: (ToolUIPart | DynamicToolUIPart)[]; reasoning: string }
+
+/**
+ * Round 7 C7: a render group that is web research only - a web search / web fetch call, or an
+ * aggregate made solely of them. The live Cowork run keeps these in place in the transcript (every
+ * other tool call folds into the activity row), so a search shows as it happens.
+ */
+export function isWebResearchGroup(group: AssistantRenderGroup): boolean {
+  const isWeb = (part: ToolUIPart | DynamicToolUIPart) => isWebSearchToolPart(part) || isWebFetchToolPart(part)
+  if (group.kind === "tool") return isWeb(group.part)
+  if (group.kind === "tool-aggregate") return group.parts.length > 0 && group.parts.every(isWeb)
+  return false
+}
 
 /**
  * Steps often arrive as one assistant message per tool call. When a
