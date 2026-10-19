@@ -156,12 +156,14 @@ function CoworkPlan(props: {
   // Round 6: auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
   // -> artifact without a manual Run click. Fires exactly once per plan: only when this is the
   // latest turn, still a draft, and the thread is idle (the plan finished streaming).
-  // sawDraftingRef: the plan must have been drafted WHILE this view was mounted (the thread was
-  // busy with it as the latest turn), so reopening an old chat whose last turn is an unrun plan
-  // never silently runs it; that plan shows a Run button instead.
+  // sawDraftingRef: the plan must belong to a chat that was live while it was open here (the
+  // session went busy during this surface's life, or the plan saw the busy state itself), so
+  // reopening an old chat whose last turn is an unrun plan never silently runs it; that plan shows
+  // a Run button instead. Round 9: the plan view alone missed the busy state when the plan block
+  // completed in the same moment the run went idle, and the plan stopped with a Run button.
   const autoRanRef = useRef(false);
   const sawDraftingRef = useRef(false);
-  if (props.isLatest && thread?.busy) sawDraftingRef.current = true;
+  if (props.isLatest && (thread?.busy || thread?.liveHere)) sawDraftingRef.current = true;
   useEffect(() => {
     if (autoRanRef.current || !props.autoRun || !sawDraftingRef.current) return;
     if (!thread || thread.busy) return;
@@ -170,7 +172,7 @@ function CoworkPlan(props: {
     run();
     // run/thread are stable enough for this one-shot; deps kept minimal intentionally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.autoRun, props.isLatest, stage, thread?.busy, activity.started]);
+  }, [props.autoRun, props.isLatest, stage, thread?.busy, thread?.liveHere, activity.started]);
 
   const progress =
     status === "done"

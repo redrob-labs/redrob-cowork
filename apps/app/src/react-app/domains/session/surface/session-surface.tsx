@@ -846,6 +846,15 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
   const chatStreaming = sending || liveStatus.type === "busy" || liveStatus.type === "retry";
+  // Round 9: whether this session has been working at any point while this surface was mounted.
+  // A plan auto-runs only in a chat that was live here (not one reopened from history); a plan
+  // block renders only once it is complete, often in the same moment the run goes idle, so the
+  // plan itself cannot reliably see the busy state.
+  const [wentBusy, setWentBusy] = useState<{ sessionId: string; busy: boolean }>({ sessionId: props.sessionId, busy: false });
+  const sawBusyHere = wentBusy.sessionId === props.sessionId && wentBusy.busy;
+  useEffect(() => {
+    if (chatStreaming && !sawBusyHere) setWentBusy({ sessionId: props.sessionId, busy: true });
+  }, [chatStreaming, props.sessionId, sawBusyHere]);
   // Round 9: the to-do dock above the composer is gone (Felix: it misfired; the plan's own
   // checklist in the thread shows progress now).
 
@@ -1972,7 +1981,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
     },
     questions: coworkQuestions,
     plans: coworkPlans,
-  }), [chatStreaming, coworkPlans, coworkQuestions, props.sessionId, sendDraft]);
+    liveHere: sawBusyHere,
+  }), [chatStreaming, coworkPlans, coworkQuestions, props.sessionId, sawBusyHere, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">

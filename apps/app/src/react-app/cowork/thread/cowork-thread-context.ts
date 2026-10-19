@@ -17,6 +17,8 @@ export type CoworkThread = {
   questions?: CoworkQuestionState;
   /** Round 9: how far each plan's run has got, by the plan message's id (see plan-progress.ts). */
   plans?: ReadonlyMap<string, PlanRunActivity>;
+  /** Round 9: the session was working at some point while this surface was mounted. */
+  liveHere?: boolean;
 };
 
 export const CoworkThreadContext = createContext<CoworkThread | null>(null);
