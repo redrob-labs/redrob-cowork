@@ -1,3 +1,4 @@
 {
-  "redrobCodeVersion": "v0.6.2"
+  "redrobCodeVersion": "v0.6.2",
+  "redrobChatApiUrl": "https://chat-prod.redrob.ai"
 }
