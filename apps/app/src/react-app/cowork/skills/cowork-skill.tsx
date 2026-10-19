@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Badge, Button, EmptyState, Textarea, icons } from "@redrob-labs/ui";
@@ -15,7 +15,7 @@ import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
 import { OriginBadge, originLabel } from "./cowork-skills";
-import { canEditSkill, canRemoveSkill, skillBrief, skillDisplayTitle, skillRunPrompt, skillShelf, tagLabels } from "./skills";
+import { canEditSkill, canRemoveSkill, languageTagLabel, skillBrief, skillDisplayTitle, skillRunPrompt, skillShelf, tagLabels } from "./skills";
 import { SHELF_LABEL } from "./skill-tile";
 import { SkillIcon } from "./skill-icon";
 import { useCoworkStartStore, type PendingCoworkChat } from "./start-chat";
@@ -33,6 +33,11 @@ export function runSkill(
   deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name, extra), mode: "plan" });
   deps.navigate("/chat");
   return true;
+}
+
+/** True when CSS line clamping hides part of an element's text. */
+export function isClamped(node: { scrollHeight: number; clientHeight: number }): boolean {
+  return node.scrollHeight > node.clientHeight + 1;
 }
 
 export type EscapeToListState = {
@@ -66,6 +71,8 @@ export type SkillViewProps = {
   busy: boolean;
   /** Marketplace path preserved for Back and Escape. */
   backPath: string;
+  /** Returns to the marketplace without adding a duplicate history entry. */
+  onBack: () => void;
   /** Updates optional run instructions. */
   onExtra: (text: string) => void;
   /** Starts the skill in a Plan chat. */
@@ -75,22 +82,35 @@ export type SkillViewProps = {
 };
 
 /** Product-page presentation for one installed or library skill. */
-export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPath, onExtra, onRun, onAdd }: SkillViewProps) {
+export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPath, onBack, onExtra, onRun, onAdd }: SkillViewProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [aboutClamped, setAboutClamped] = useState(false);
+  const aboutRef = useRef<HTMLParagraphElement>(null);
   const brief = skillBrief(skill, locale);
   const category = skillShelf({ name: skill.name, tags: skill.tags, installed: null });
-  const tags = tagLabels(skill.tags, taxonomy, locale);
+  // Profession and task only; the language has its own Information row.
+  const topicTags = tagLabels({ profession: skill.tags.profession, task: skill.tags.task }, taxonomy, locale);
+  const language = languageTagLabel(skill.tags, taxonomy, locale);
   const info = [
     { label: t("cowork.skill_info_source"), value: skill.installed ? originLabel(skill.installed.origin) : t("cowork.skill_not_added") },
     ...(category === "everyday" ? [] : [{ label: t("cowork.skill_info_category"), value: SHELF_LABEL[category]() }]),
-    ...(tags.length ? [{ label: t("cowork.skill_info_language"), value: tags.at(-1) ?? "" }] : []),
+    ...(language ? [{ label: t("cowork.skill_info_language"), value: language }] : []),
     ...(skill.version ? [{ label: t("cowork.skill_info_version"), value: skill.version }] : []),
   ];
   const focusRun = () => document.getElementById("cowork-skill-run-extra")?.focus();
+  useEffect(() => {
+    const node = aboutRef.current;
+    if (!node || aboutOpen) return;
+    const measure = () => setAboutClamped(isClamped(node));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [aboutOpen, skill.description]);
 
   return (
     <div className="cowork-skill-detail">
-      <Link className="cowork-settings__action" to={backPath} state={{ fromSkill: skill.name }}>
+      <Link className="cowork-settings__action" to={backPath} state={{ fromSkill: skill.name }} onClick={(event) => { event.preventDefault(); onBack(); }}>
         {icons.arrowLeft(ICON)}{t("cowork.skills_back_to_all")}
       </Link>
       <div className="cowork-skill-hero">
@@ -100,9 +120,10 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
           <div className="cowork-skill-hero__meta">
             {skill.installed ? <OriginBadge origin={skill.installed.origin} /> : <Badge size="sm">{t("cowork.skill_not_added")}</Badge>}
             {category !== "everyday" && category !== "yours" ? <Badge size="sm" variant="outline">{SHELF_LABEL[category]()}</Badge> : null}
+            {topicTags.map((label) => <Badge key={label} size="sm" variant="outline">{label}</Badge>)}
           </div>
           {skill.installed ? (
-            <Button variant="primary" iconLeft={icons.play(ICON)} onClick={focusRun}>{t("cowork.skills_use")}</Button>
+            <Button variant="primary" iconLeft={icons.play(ICON)} disabled={!canRun} onClick={focusRun}>{t("cowork.skills_use")}</Button>
           ) : (
             <Button variant="primary" iconLeft={icons.plus(ICON)} loading={busy} onClick={onAdd}>{t("cowork.skill_add")}</Button>
           )}
@@ -117,8 +138,8 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
       ) : null}
       <section className="cowork-skill-about">
         <h2>{t("cowork.skill_detail_about")}</h2>
-        <p className="cowork-skill-about__text" data-expanded={aboutOpen}>{skill.description}</p>
-        {skill.description.length > 180 ? <Button size="sm" variant="ghost" aria-expanded={aboutOpen} onClick={() => setAboutOpen((value) => !value)}>{aboutOpen ? t("cowork.skill_less") : t("cowork.skill_more")}</Button> : null}
+        <p ref={aboutRef} id="cowork-skill-about-text" className="cowork-skill-about__text" data-expanded={aboutOpen}>{skill.description}</p>
+        {aboutOpen || aboutClamped ? <Button size="sm" variant="ghost" aria-expanded={aboutOpen} aria-controls="cowork-skill-about-text" onClick={() => setAboutOpen((value) => !value)}>{aboutOpen ? t("cowork.skill_less") : t("cowork.skill_more")}</Button> : null}
       </section>
       <section className="cowork-skill-info">
         <h2>{t("cowork.skill_detail_info")}</h2>
@@ -162,6 +183,10 @@ export function SkillScreen() {
   const installed = skill?.installed ?? null;
   const locationState = location.state as { fromPath?: string } | null;
   const backPath = locationState?.fromPath ?? "/skills";
+  const returnToList = useCallback(() => {
+    if (locationState?.fromPath) navigate(-1);
+    else navigate(backPath, { replace: true, state: { fromSkill: name } });
+  }, [backPath, locationState?.fromPath, name, navigate]);
   const deps = { skills: services.skills, queryClient, scope, showToast };
   const act = async (run: typeof installSkill, then?: () => void) => {
     setBusy(true);
@@ -174,11 +199,11 @@ export function SkillScreen() {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target instanceof HTMLElement ? event.target : null;
       if (!shouldEscapeToList({ key: event.key, defaultPrevented: event.defaultPrevented, targetTag: target?.tagName, contentEditable: Boolean(target?.isContentEditable || target?.closest("[contenteditable]")) }, { modalOpen: modal !== null, scheduling })) return;
-      navigate(backPath, { state: { fromSkill: name } });
+      returnToList();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [backPath, modal, name, navigate, scheduling]);
+  }, [modal, returnToList, scheduling]);
 
   const title = skill ? skillDisplayTitle(skill, locale) : name || t("cowork.nav_skills");
 
@@ -197,7 +222,7 @@ export function SkillScreen() {
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
         <PreviewState query={query}>
           {(data) => data ? (
-            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} extra={extra} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onExtra={setExtra} onRun={() => void runSkill({ workspaceId, request, navigate }, name, extra)} onAdd={() => void act(installSkill)} />
+            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} extra={extra} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onExtra={setExtra} onRun={() => void runSkill({ workspaceId, request, navigate }, name, extra)} onAdd={() => void act(installSkill)} />
           ) : <EmptyState title={t("cowork.skill_not_found_title")} description={t("cowork.skill_not_found_text")} />}
         </PreviewState>
       </PreviewPage>

@@ -5,7 +5,8 @@ import { matchesFilters } from "./skills";
  * The public Redrob Console skill catalogue, read by the browser directly. It is static
  * files behind CORS `*` (index.json + one SKILL.md per skill), so listing and previewing
  * a library skill needs no workspace connection; only installing does (the server writes
- * the file into the workspace). Offline means an empty library.
+ * the file into the workspace). Offline catalogue requests surface an error so the UI can
+ * distinguish a connection problem from an empty library.
  */
 
 export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
@@ -121,6 +122,22 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
       const currentSnapshot = await current();
       if (!currentSnapshot.ok) return null;
       const skill = currentSnapshot.skills.find((item) => item.name === name);
+      return skill
+        ? {
+            name,
+            description: skill.description,
+            tags: {},
+            body: skill.body,
+            installed: null,
+            ...displayFields(skill),
+            ...(skill.version ? { version: skill.version } : {}),
+          }
+        : null;
+    },
+    /** Cached catalogue detail only; never starts network work. */
+    peek: (name: string): SkillDetail | null => {
+      if (!snapshot?.ok) return null;
+      const skill = snapshot.skills.find((item) => item.name === name);
       return skill
         ? {
             name,

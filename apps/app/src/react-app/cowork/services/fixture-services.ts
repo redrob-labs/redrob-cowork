@@ -147,7 +147,7 @@ export function createFixtureCoworkServices(options: { now?: () => number } = {}
       get: async (name) => {
         const installed = sampleSkills.find((skill) => skill.name === name);
         if (installed) {
-          const catalogue = await consoleCatalogue.get(name);
+          const catalogue = consoleCatalogue.peek(name);
           return preview({
             ...(catalogue
               ? {
