@@ -15,7 +15,7 @@ import { HeroSkeleton } from "./skill-tile";
 import { useBackToList } from "./use-back-to-list";
 import { useCoworkStartStore } from "./start-chat";
 import { useMarketplaceRows } from "./use-marketplace";
-import { installSkill, installSkills } from "./use-skills";
+import { installSkills, usePendingAdds } from "./use-skills";
 import { WorkflowMosaic } from "./workflow-card";
 import { isWorkflowId, jurisdictionLabel, missingSkills, workflowGroups, workflowPath, workflowRows, workflowSub, workflowTitle, type WorkflowId } from "./workflows";
 
@@ -31,8 +31,8 @@ export type WorkflowViewProps = {
   locale: string;
   /** Whether this workspace can add library skills. */
   canAdd: boolean;
-  /** Skill currently being added on its own. */
-  busy: string | null;
+  /** Skills with a single add request in flight. */
+  pending: ReadonlySet<string>;
   /** Whether "Add all" is running. */
   addingAll: boolean;
   /** Back target; the Skills page by default. */
@@ -48,13 +48,13 @@ export type WorkflowViewProps = {
 };
 
 /** Pure presentation of one workflow: the cover hero, then its skills grouped by country. */
-export function WorkflowView({ id, rows, locale, canAdd, busy, addingAll, backPath, onBack, onAdd, onAddAll, onUse }: WorkflowViewProps) {
+export function WorkflowView({ id, rows, locale, canAdd, pending, addingAll, backPath, onBack, onAdd, onAddAll, onUse }: WorkflowViewProps) {
   const groups = workflowGroups(rows, locale);
   const missing = missingSkills(rows, locale);
   const all = missing.length === rows.length;
   const from = workflowPath(id);
   return (
-    <div className="cowork-skill-detail cowork-workflow">
+    <div className="cowork-skill-detail">
       <Link className="cowork-settings__action" to={backPath} onClick={(event) => { event.preventDefault(); onBack(); }}>
         {icons.arrowLeft(ICON)}{t("cowork.skills_back_to_all")}
       </Link>
@@ -67,7 +67,7 @@ export function WorkflowView({ id, rows, locale, canAdd, busy, addingAll, backPa
           <p className="cowork-skill-hero__brief">{workflowSub(id)}</p>
           <p className="cowork-workflow-hero__count">{t("cowork.skills_workflow_count", { count: rows.length })}</p>
           {missing.length ? (
-            <Button variant="primary" iconLeft={icons.plus(ICON)} loading={addingAll} disabled={!canAdd} onClick={() => onAddAll(missing)}>
+            <Button variant="primary" iconLeft={icons.plus(ICON)} loading={addingAll} disabled={!canAdd || pending.size > 0} onClick={() => onAddAll(missing)}>
               {all ? t("cowork.skills_workflow_add_all", { count: missing.length }) : t("cowork.skills_workflow_add_rest", { count: missing.length })}
             </Button>
           ) : null}
@@ -90,7 +90,7 @@ export function WorkflowView({ id, rows, locale, canAdd, busy, addingAll, backPa
                     </span>
                   </Link>
                   {row.installed === null ? (
-                    <Button size="sm" variant="secondary" iconLeft={icons.plus(ICON)} loading={busy === row.name} disabled={!canAdd || addingAll} aria-label={t("cowork.skill_add_label", { name: title })} onClick={() => onAdd(row.name)}>
+                    <Button size="sm" variant="secondary" iconLeft={icons.plus(ICON)} loading={pending.has(row.name)} disabled={!canAdd || addingAll} aria-label={t("cowork.skill_add_label", { name: title })} onClick={() => onAdd(row.name)}>
                       {t("cowork.skill_add")}
                     </Button>
                   ) : onUse ? (
@@ -123,14 +123,14 @@ function WorkflowScreenFor({ id }: { id: WorkflowId }) {
   const request = useCoworkStartStore((state) => state.request);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const navigate = useNavigate();
-  const [busy, setBusy] = useState<string | null>(null);
   const [addingAll, setAddingAll] = useState(false);
-  const { backPath, back } = useBackToList({ restoreKey: "fromWorkflow", restoreValue: id });
   const deps = { skills: services.skills, queryClient, scope, showToast };
-  const real = preview === false;
+  const { pending, add } = usePendingAdds(deps);
+  // A running add owns the page: Escape must not leave it while installs continue unseen.
+  const { backPath, back } = useBackToList({ restoreKey: "fromWorkflow", restoreValue: id, blocked: addingAll || pending.size > 0 });
 
   const members = rows ? workflowRows(id, rows) : null;
-  const canUse = real && Boolean(workspaceId);
+  const canUse = preview === false && Boolean(workspaceId);
 
   return (
     <CoworkShell current="skills" title={workflowTitle(id)}>
@@ -142,15 +142,12 @@ function WorkflowScreenFor({ id }: { id: WorkflowId }) {
             id={id}
             rows={members}
             locale={locale}
-            canAdd={real}
-            busy={busy}
+            canAdd={canUse}
+            pending={pending}
             addingAll={addingAll}
             backPath={backPath}
             onBack={back}
-            onAdd={(name) => {
-              setBusy(name);
-              void installSkill(deps, name).finally(() => setBusy(null));
-            }}
+            onAdd={add}
             onAddAll={(names) => {
               setAddingAll(true);
               void installSkills(deps, names).finally(() => setAddingAll(false));

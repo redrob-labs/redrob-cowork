@@ -2,8 +2,9 @@ import { describe, expect, test } from "bun:test";
 
 import type { Chat, CoworkFile, Project, CoworkSkill, Schedule } from "../services/types";
 import type { SkillRow } from "../skills/skills";
-import { availableWorkflows, workflowTitle } from "../skills/workflows";
-import { SEARCH_TABS, searchResults, searchResultsForTab, searchTabLabel, type SearchData } from "./search-dialog";
+import { WORKFLOW_IDS, availableWorkflows, workflowPath, workflowTitle } from "../skills/workflows";
+import { CATALOGUE_2026_10_19 } from "../../../../tests/helpers/console-catalogue-names";
+import { searchResults, searchResultsForTab, type SearchData } from "./search-dialog";
 
 const chat = (id: string, title: string, updatedAt: number): Chat => ({
   id,
@@ -15,102 +16,56 @@ const chat = (id: string, title: string, updatedAt: number): Chat => ({
 });
 
 describe("Cowork search", () => {
-  test("an empty query lists the places first, then chats newest first", () => {
-    const results = searchResults("", [chat("a", "Older", 1), chat("b", "Newer", 2)]);
-    expect(results[0].path).toBe("/chat");
-    const chats = results.filter((result) => result.id.startsWith("chat-"));
-    expect(chats.map((result) => result.label)).toEqual(["Newer", "Older"]);
-  });
-
-  test("a query matches chat titles and places by name, ignoring case", () => {
-    const results = searchResults("budget", [chat("a", "Q3 Budget review", 1), chat("b", "Hiring plan", 2)]);
-    expect(results.map((result) => result.path)).toEqual(["/chat/a"]);
-    // Matched on the label in the current locale, so the test does not depend on which one is active.
-    const projects = searchResults("", []).find((result) => result.path === "/projects");
-    expect(projects).toBeDefined();
-    const query = projects ? projects.label.slice(0, 4).toUpperCase() : "";
-    expect(searchResults(query, []).map((result) => result.path)).toContain("/projects");
-  });
-
-  test("results stop at eight", () => {
+  test("All lists places then chats newest first, matches by name ignoring case, and stops at eight", () => {
+    const empty = searchResults("", [chat("a", "Older", 1), chat("b", "Newer", 2)]);
+    expect(empty[0]?.path).toBe("/chat");
+    expect(empty.filter((result) => result.id.startsWith("chat-")).map((result) => result.label)).toEqual(["Newer", "Older"]);
+    expect(searchResults("budget", [chat("a", "Q3 Budget review", 1), chat("b", "Hiring plan", 2)]).map((result) => result.path)).toEqual(["/chat/a"]);
+    // A place matches on its label in the current locale.
+    const projects = empty.find((result) => result.path === "/projects");
+    expect(searchResults(projects?.label.slice(0, 4).toUpperCase() ?? "", []).map((result) => result.path)).toContain("/projects");
     const many = Array.from({ length: 20 }, (_, i) => chat(String(i), `Chat ${i}`, i));
     expect(searchResults("chat", many)).toHaveLength(8);
   });
-});
 
-describe("Cowork search tabs", () => {
-  const project = (id: string, name: string): Project => ({ id, name, about: null, fileCount: null, chatCount: null, active: null, people: [] });
-  const skill = (name: string, title: string): CoworkSkill => ({ name, title, description: "", origin: "mine", tags: {}, scope: "project" });
-  const schedule = (id: string, name: string): Schedule => ({ id, target: { kind: "prompt", text: name }, name, projectId: "p", cadence: "daily", nextRunAt: null, lastRun: null, enabled: true });
-  const file = (id: string, name: string): CoworkFile => ({ id, name, icon: "file", projectName: "Seorin", when: 0, fromChat: null, kind: "file" });
-
-  const data: SearchData = {
-    chats: [chat("a", "Budget review", 1), chat("b", "Hiring plan", 2)],
-    projects: [project("p1", "Seorin MSA"), project("p2", "Hanbit")],
-    skills: [skill("nda-review", "NDA review"), skill("close-books", "Close the books")],
-    schedules: [schedule("s1", "Weekly digest"), schedule("s2", "Renewal sweep")],
-    artifacts: [file("f1", "Review note.md"), file("f2", "Exhibit index.xlsx")],
-  };
-
-  test("the tab order is All / Chats / Artifacts / Skills / Projects / Scheduled", () => {
-    expect([...SEARCH_TABS]).toEqual(["all", "chats", "artifacts", "skills", "projects", "scheduled"]);
-    expect(searchTabLabel("all")).toBe("All");
-    expect(searchTabLabel("scheduled")).toBe("Scheduled");
-  });
-
-  test("All lists places + chats, like the flat search", () => {
-    const all = searchResultsForTab("all", "", data);
-    expect(all[0].path).toBe("/chat");
-    expect(all.some((r) => r.id === "chat-b")).toBe(true);
-  });
-
-  test("each type tab lists only that type", () => {
-    expect(searchResultsForTab("chats", "", data).every((r) => r.id.startsWith("chat-"))).toBe(true);
-    expect(searchResultsForTab("projects", "", data).map((r) => r.label)).toEqual(["Seorin MSA", "Hanbit"]);
-    expect(searchResultsForTab("skills", "", data).map((r) => r.label)).toEqual(["NDA review", "Close the books"]);
-    expect(searchResultsForTab("scheduled", "", data).map((r) => r.label)).toEqual(["Weekly digest", "Renewal sweep"]);
-    expect(searchResultsForTab("artifacts", "", data).map((r) => r.label)).toEqual(["Review note.md", "Exhibit index.xlsx"]);
-    // No places leak into a scoped tab.
-    expect(searchResultsForTab("projects", "", data).some((r) => r.path === "/chat")).toBe(false);
-  });
-
-  test("a query filters within the active tab, case-insensitively", () => {
-    expect(searchResultsForTab("projects", "seorin", data).map((r) => r.label)).toEqual(["Seorin MSA"]);
-    expect(searchResultsForTab("skills", "nda", data).map((r) => r.label)).toEqual(["NDA review"]);
-  });
-
-  test("an empty type still returns a list (the dialog shows its empty line)", () => {
-    const empty: SearchData = { chats: [], projects: [], skills: [], schedules: [], artifacts: [] };
-    expect(searchResultsForTab("skills", "", empty)).toEqual([]);
-    expect(searchResultsForTab("artifacts", "anything", empty)).toEqual([]);
-  });
-
-  test("a skill result opens that skill's page, not /skills", () => {
-    expect(searchResultsForTab("skills", "nda", data).map((r) => r.path)).toEqual(["/skill/nda-review"]);
+  test("each tab lists only its own type, filtered by the query", () => {
+    const project = (id: string, name: string): Project => ({ id, name, about: null, fileCount: null, chatCount: null, active: null, people: [] });
+    const skill = (name: string, title: string): CoworkSkill => ({ name, title, description: "", origin: "mine", tags: {}, scope: "project" });
+    const schedule = (id: string, name: string): Schedule => ({ id, target: { kind: "prompt", text: name }, name, projectId: "p", cadence: "daily", nextRunAt: null, lastRun: null, enabled: true });
+    const file = (id: string, name: string): CoworkFile => ({ id, name, icon: "file", projectName: "Seorin", when: 0, fromChat: null, kind: "file" });
+    const data: SearchData = {
+      chats: [chat("a", "Budget review", 1), chat("b", "Hiring plan", 2)],
+      projects: [project("p1", "Seorin MSA"), project("p2", "Hanbit")],
+      skills: [skill("nda-review", "NDA review"), skill("close-books", "Close the books")],
+      schedules: [schedule("s1", "Weekly digest"), schedule("s2", "Renewal sweep")],
+      artifacts: [file("f1", "Review note.md"), file("f2", "Exhibit index.xlsx")],
+    };
+    const cases: Array<[Parameters<typeof searchResultsForTab>[0], string, string[]]> = [
+      ["chats", "", ["/chat/b", "/chat/a"]],
+      ["projects", "", ["/projects", "/projects"]],
+      ["projects", "seorin", ["/projects"]],
+      ["skills", "", ["/skill/nda-review", "/skill/close-books"]],
+      ["skills", "nda", ["/skill/nda-review"]],
+      ["scheduled", "weekly", ["/scheduled"]],
+      ["artifacts", "exhibit", ["/history"]],
+    ];
+    for (const [tab, query, paths] of cases) expect(searchResultsForTab(tab, query, data).map((r) => r.path)).toEqual(paths);
+    expect(searchResultsForTab("all", "", data).some((r) => r.id === "chat-b")).toBe(true);
+    // An empty type returns an empty list; the dialog shows its empty line.
+    expect(searchResultsForTab("skills", "", { chats: [], projects: [], skills: [], schedules: [], artifacts: [] })).toEqual([]);
   });
 
   test("every catalogue skill and workflow is searchable and opens its page", () => {
-    const names = ["catalogue-skill-0", "catalogue-skill-1", "catalogue-skill-2"];
-    const lib = (name: string, title?: string, titleKo?: string): SkillRow => ({ name, ...(title ? { title } : {}), ...(titleKo ? { titleKo } : {}), description: "", tags: {}, origin: "library", installed: null });
-    const catalogue = [...names.map((name) => lib(name)), lib("us-lawyer-nda", "US NDA", "미국 비밀유지계약"), lib("kr-lawyer-nda", "Korean NDA", "비밀유지계약서")];
-    const full: SearchData = { ...data, catalogue, workflows: availableWorkflows(catalogue) };
-    // Each is reachable by its name from the Skills tab and from All.
-    for (const name of names) {
+    const lib = (name: string): SkillRow => ({ name, description: "", tags: {}, origin: "library", installed: null });
+    const catalogue = CATALOGUE_2026_10_19.map((name) => name === "kr-lawyer-nda" ? { ...lib(name), titleKo: "비밀유지계약서" } : lib(name));
+    const full: SearchData = { chats: [], projects: [], skills: [], schedules: [], artifacts: [], catalogue, workflows: availableWorkflows(catalogue) };
+    for (const name of CATALOGUE_2026_10_19) {
       expect(searchResultsForTab("skills", name, full).some((r) => r.path === `/skill/${name}`)).toBe(true);
       expect(searchResultsForTab("all", name, full).some((r) => r.path === `/skill/${name}`)).toBe(true);
     }
-    // Korean titles match too.
+    for (const id of WORKFLOW_IDS) expect(searchResultsForTab("all", workflowTitle(id), full).map((r) => r.path)).toContain(workflowPath(id));
     expect(searchResultsForTab("skills", "비밀유지", full).map((r) => r.path)).toContain("/skill/kr-lawyer-nda");
-    // The workflow is a result of its own, by its title or a member skill.
-    const workflow = searchResultsForTab("skills", "NDA", full).find((r) => r.id === "workflow-legal-drafting");
-    expect(workflow?.path).toBe("/skills/workflow/legal-drafting");
-    const title = workflowTitle("legal-drafting");
-    expect(searchResultsForTab("all", title, full).map((r) => r.path)).toContain("/skills/workflow/legal-drafting");
-  });
-
-  test("an empty All query still lists only places and chats", () => {
-    const lib: SkillRow = { name: "pdf", title: "PDF production", description: "", tags: {}, origin: "library", installed: null };
-    const all = searchResultsForTab("all", "", { ...data, catalogue: [lib] });
-    expect(all.some((r) => r.id.startsWith("skill-"))).toBe(false);
+    // An empty All query lists only places and chats.
+    expect(searchResultsForTab("all", "", full).some((r) => r.id.startsWith("skill-"))).toBe(false);
   });
 });

@@ -3,6 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
+import { SkillView } from "../src/react-app/cowork/skills/cowork-skill";
 import { WorkflowView, type WorkflowViewProps } from "../src/react-app/cowork/skills/cowork-workflow";
 import type { SkillRow } from "../src/react-app/cowork/skills/skills";
 import { installSkills } from "../src/react-app/cowork/skills/use-skills";
@@ -16,18 +17,9 @@ import {
   workflowGroups,
   workflowRows,
 } from "../src/react-app/cowork/skills/workflows";
-
-/** The live catalogue's 96 names on 2026-10-19 (console.redrob.ai/skills/index.json). A typo in WORKFLOW_SKILLS fails here. */
-const CATALOGUE_2026_10_19 = [
-  "verify-before-claiming", "korean-localization", "commit-and-pr", "caveman", "ponytail", "eli5",
-  "us-lawyer-nda", "us-lawyer-master-services-agreement", "us-lawyer-contract-review", "us-lawyer-demand-letter", "us-lawyer-cease-and-desist", "us-lawyer-privacy-policy", "us-lawyer-board-written-consent", "us-lawyer-engagement-letter", "us-lawyer-offer-letter-piia", "us-lawyer-83b-election", "us-lawyer-data-processing-addendum", "us-lawyer-certificate-of-incorporation", "us-lawyer-litigation-hold",
-  "us-accountant-financial-statements", "us-accountant-bank-reconciliation", "us-accountant-adjusting-entries", "us-accountant-variance-analysis", "us-accountant-audit-workpaper", "us-accountant-book-to-tax", "us-accountant-mdna-memo", "us-accountant-sox-narrative", "us-accountant-form-1040-schedule-c", "us-accountant-asc606-revenue-memo", "us-accountant-asc842-lease-memo", "us-accountant-sales-tax-nexus-memo", "us-accountant-rnd-credit-memo",
-  "us-vc-investment-memo", "us-vc-term-sheet-review", "us-vc-safe-convertible-analysis", "us-vc-cap-table-dilution", "us-vc-option-pool-analysis", "us-vc-diligence-summary", "us-vc-lp-update-letter", "us-vc-screening-pass-email", "us-vc-409a-valuation-review", "us-vc-management-rights-letter", "us-vc-side-letter-review", "us-vc-data-room-ddq", "us-vc-asc820-valuation-memo",
-  "kr-lawyer-nda", "kr-lawyer-service-agreement", "kr-lawyer-contract-review", "kr-lawyer-demand-letter", "kr-lawyer-corporate-minutes", "kr-lawyer-articles-of-incorporation", "kr-lawyer-complaint-and-answer", "kr-lawyer-legal-opinion", "kr-lawyer-employment-rules", "kr-lawyer-shareholders-agreement", "kr-lawyer-stock-option-agreement", "kr-lawyer-privacy-policy", "kr-lawyer-provisional-remedies",
-  "kr-accountant-financial-statements", "kr-accountant-account-reconciliation", "kr-accountant-adjusting-entries", "kr-accountant-vat-return", "kr-accountant-corporate-tax-adjustment", "kr-accountant-audit-workpaper", "kr-accountant-variance-icfr-memo", "kr-accountant-financial-ratios", "kr-accountant-year-end-settlement", "kr-accountant-capital-gains-tax", "kr-accountant-inheritance-gift-tax", "kr-accountant-deemed-interest-memo", "kr-accountant-entertainment-expense",
-  "kr-vc-investment-memo", "kr-vc-term-sheet-review", "kr-vc-rcps-cb-safe-analysis", "kr-vc-cap-table-dilution", "kr-vc-diligence-summary", "kr-vc-lp-report", "kr-vc-decline-message", "kr-vc-deal-screening", "kr-vc-fund-agreement", "kr-vc-fund-of-funds-proposal", "kr-vc-carried-interest", "kr-vc-option-pool-design", "kr-vc-redemption-conversion",
-  "documents-docx", "resume-cover-letter", "presentations-pptx", "pdf", "spreadsheets-xlsx", "hangul-hwpx", "graphic-design", "charts-infographics", "ui-ux-design", "image-prompts", "humanize-writing", "slop-check",
-];
+import { POPULAR_SKILLS } from "../src/react-app/cowork/skills/popular-skills";
+import { marketplaceSections, popularRows } from "../src/react-app/cowork/skills/use-marketplace";
+import { CATALOGUE_2026_10_19 } from "./helpers/console-catalogue-names";
 
 const row = (name: string, overrides: Partial<SkillRow> = {}): SkillRow => ({
   name,
@@ -85,14 +77,29 @@ describe("featured workflows data", () => {
   });
 });
 
-describe("workflow markup", () => {
+describe("Popular shelf", () => {
+  test("every Popular name is a real, unique catalogue skill; the shelf keeps curated order and skips gaps", () => {
+    for (const list of [POPULAR_SKILLS.en, POPULAR_SKILLS.ko]) {
+      expect(new Set(list).size).toBe(list.length);
+      for (const name of list) expect(CATALOGUE_2026_10_19).toContain(name);
+    }
+    const rows = allRows().reverse().filter((entry) => entry.name !== POPULAR_SKILLS.en[0]);
+    expect(popularRows(rows, "en").map((entry) => entry.name)).toEqual(POPULAR_SKILLS.en.slice(1));
+    expect(popularRows(rows, "ko-KR").map((entry) => entry.name)).toEqual(POPULAR_SKILLS.ko.filter((name) => name !== POPULAR_SKILLS.en[0]));
+    // Page order: Your skills, then workflows, then Popular.
+    expect(Object.keys(marketplaceSections(rows, "en"))).toEqual(["yours", "workflows", "popular"]);
+  });
+});
+
+describe("Add controls", () => {
   const render = (node: React.ReactElement) => renderToStaticMarkup(React.createElement(MemoryRouter, null, node));
+  const added = (entry: SkillRow): SkillRow => ({ ...entry, installed: { name: entry.name, description: "", origin: "library", tags: {}, scope: "project" } });
   const props = (overrides: Partial<WorkflowViewProps> = {}): WorkflowViewProps => ({
     id: "legal-company",
     rows: workflowRows("legal-company", allRows()),
     locale: "en",
     canAdd: true,
-    busy: null,
+    pending: new Set(),
     addingAll: false,
     backPath: "/skills",
     onBack: () => {},
@@ -100,21 +107,27 @@ describe("workflow markup", () => {
     onAddAll: () => {},
     ...overrides,
   });
+  const addAll = (html: string) => html.match(/<button[^>]*>(?:(?!<\/button>)[\s\S])*?Add all 5/)?.[0]?.match(/<button[^>]*>/)?.[0] ?? "";
 
-  test("the page groups skills, links each to its page and offers Add all", () => {
+  test("follow the workspace, a running add, and what is already added", () => {
     const html = render(React.createElement(WorkflowView, props()));
-    expect(html).toContain("United States");
-    expect(html).toContain("Korea");
     expect(html.indexOf("United States")).toBeLessThan(html.indexOf("Korea"));
     expect(html).toContain('href="/skill/us-lawyer-83b-election"');
-    expect(html).toContain("Add all 5");
-  });
-
-  test("Add all hides when everything is added and is disabled without a project", () => {
-    const installed = props().rows.map((entry) => ({ ...entry, installed: { name: entry.name, description: "", origin: "library" as const, tags: {}, scope: "project" as const } }));
-    expect(render(React.createElement(WorkflowView, props({ rows: installed })))).not.toContain("Add all");
-    const disabled = render(React.createElement(WorkflowView, props({ canAdd: false })));
-    expect(disabled).toMatch(/<button[^>]*disabled[^>]*>[\s\S]*?Add all 5/);
+    expect(addAll(html)).not.toContain("disabled");
+    // Without a workspace, Add all is disabled; while a single add runs it waits too.
+    expect(addAll(render(React.createElement(WorkflowView, props({ canAdd: false }))))).toContain("disabled");
+    expect(addAll(render(React.createElement(WorkflowView, props({ pending: new Set(["us-lawyer-83b-election"]) }))))).toContain("disabled");
+    // Everything added: no Add all at all.
+    expect(render(React.createElement(WorkflowView, props({ rows: props().rows.map(added) })))).not.toContain("Add all");
+    // A deep-linked library skill offers Add only when a workspace is connected.
+    const detail = (connected: boolean) => render(React.createElement(SkillView, {
+      skill: { name: "pdf", description: "Use when making a PDF.", tags: {}, body: "", installed: null },
+      taxonomy: null, locale: "en", connected, busy: false, backPath: "/skills", onBack: () => {}, onRun: () => {}, onAdd: () => {},
+    }));
+    // The library skill's only button is Add.
+    const addButton = (html: string) => html.match(/<button[^>]*>/)?.[0] ?? "";
+    expect(addButton(detail(false))).toContain("disabled");
+    expect(addButton(detail(true))).not.toContain("disabled");
   });
 });
 

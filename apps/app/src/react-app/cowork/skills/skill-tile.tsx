@@ -64,8 +64,8 @@ type SkillTileProps = {
   row: SkillRow;
   /** Current locale for catalogue title and summary selection. */
   locale: string;
-  /** Skill currently running an add request. */
-  busy: string | null;
+  /** Skills with an add request in flight. */
+  pending: ReadonlySet<string>;
   /** Whether this workspace can install library skills. */
   canAdd: boolean;
   /** Path restored when the detail page closes. */
@@ -79,7 +79,7 @@ type SkillTileProps = {
 };
 
 /** App Store style skill lockup: icon, title, the full short description, then the action. */
-export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse, shelf }: SkillTileProps) {
+export function SkillTile({ row, locale, pending, canAdd, fromPath, onAdd, onUse, shelf }: SkillTileProps) {
   const title = skillDisplayTitle(row, locale);
   const brief = skillBrief(row, locale);
   const briefId = shelf ? `skill-brief-${shelf}-${row.name}` : `skill-brief-${row.name}`;
@@ -101,7 +101,7 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse, s
           size="sm"
           variant="secondary"
           iconLeft={icons.plus(ICON)}
-          loading={busy === row.name}
+          loading={pending.has(row.name)}
           disabled={!canAdd}
           aria-label={t("cowork.skill_add_label", { name: title })}
           onClick={() => onAdd(row.name)}

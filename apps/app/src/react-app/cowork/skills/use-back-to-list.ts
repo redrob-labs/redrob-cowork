@@ -7,8 +7,8 @@ import { useFrameStore } from "../store/frame-store";
 export type EscapeToListState = {
   /** Whether a frame modal currently owns Escape. */
   modalOpen: boolean;
-  /** Whether a page dialog (e.g. scheduling) currently owns Escape. */
-  scheduling: boolean;
+  /** Whether the page itself holds Escape: an open dialog or a running add. */
+  blocked: boolean;
 };
 
 /** Pure guard for when Escape may return from a detail page to the marketplace. */
@@ -16,7 +16,7 @@ export function shouldEscapeToList(
   event: { key: string; defaultPrevented: boolean; targetTag?: string; contentEditable?: boolean },
   state: EscapeToListState,
 ): boolean {
-  if (event.key !== "Escape" || event.defaultPrevented || state.modalOpen || state.scheduling || event.contentEditable) return false;
+  if (event.key !== "Escape" || event.defaultPrevented || state.modalOpen || state.blocked || event.contentEditable) return false;
   return !["INPUT", "TEXTAREA", "SELECT"].includes(event.targetTag ?? "");
 }
 
@@ -31,7 +31,7 @@ export function useBackToList(options: {
   restoreKey: "fromSkill" | "fromWorkflow";
   /** The skill name or workflow id to refocus. */
   restoreValue: string;
-  /** Whether a page dialog currently owns Escape. */
+  /** Whether the page holds Escape: an open dialog or a running add. */
   blocked?: boolean;
 }): { backPath: string; back: () => void } {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ export function useBackToList(options: {
       const target = event.target instanceof HTMLElement ? event.target : null;
       const escape = shouldEscapeToList(
         { key: event.key, defaultPrevented: event.defaultPrevented, targetTag: target?.tagName, contentEditable: Boolean(target?.isContentEditable || target?.closest("[contenteditable]")) },
-        { modalOpen, scheduling: blocked },
+        { modalOpen, blocked },
       );
       if (escape) back();
     };

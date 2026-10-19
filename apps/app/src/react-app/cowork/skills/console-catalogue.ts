@@ -39,15 +39,19 @@ export function catalogueDetail(skill: ConsoleSkill): SkillDetail {
   return { name: skill.name, description: skill.description, tags: {}, body: skill.body, installed: null, ...catalogueDisplay(skill) };
 }
 
+/** Test seams and cache lifetimes for a catalogue instance. */
 type CatalogueOptions = {
   fetchImpl?: typeof fetch;
   baseUrl?: string;
+  /** How long a complete catalogue is served before it is refreshed. */
   ttlMs?: number;
+  /** How soon a failed refresh is tried again. */
   failureTtlMs?: number;
   now?: () => number;
 };
 
-type Snapshot = { skills: ConsoleSkill[]; loadedAt: number; ok: boolean };
+/** One catalogue read. `ok` is false only when no complete catalogue has ever loaded. */
+type Snapshot = { skills: ConsoleSkill[]; expiresAt: number; ok: boolean };
 
 /** `key: value` per line; the Console's own reading of its frontmatter. */
 export function parseConsoleFrontmatter(content: string): { data: Record<string, string>; body: string } {
@@ -61,6 +65,7 @@ export function parseConsoleFrontmatter(content: string): { data: Record<string,
   return { data, body: content.slice(match[0].length) };
 }
 
+/** A cached reader of the public catalogue; one shared instance serves the app. */
 export function createConsoleCatalogue(options: CatalogueOptions = {}) {
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   const baseUrl = options.baseUrl ?? CONSOLE_CATALOGUE_BASE_URL;
@@ -77,35 +82,35 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
     return response.text();
   };
 
-  // A skill whose SKILL.md cannot be read is left out rather than shown half-empty.
+  // A request failure rejects (so the whole refresh fails); a SKILL.md with malformed
+  // frontmatter is left out, since retrying cannot fix it and it must not hide the rest.
   const loadSkill = async (name: string): Promise<ConsoleSkill | null> => {
-    try {
-      const { data, body } = parseConsoleFrontmatter(await fetchText(`${encodeURIComponent(name)}/SKILL.md`));
-      if (data.name !== name || !data.description) return null;
-      return {
-        name,
-        description: data.description,
-        body: body.trim(),
-        ...catalogueDisplay({ title: data.title, titleKo: data.title_ko, summary: data.summary, summaryKo: data.summary_ko, version: data.version }),
-      };
-    } catch {
-      return null;
-    }
+    const { data, body } = parseConsoleFrontmatter(await fetchText(`${encodeURIComponent(name)}/SKILL.md`));
+    if (data.name !== name || !data.description) return null;
+    return {
+      name,
+      description: data.description,
+      body: body.trim(),
+      ...catalogueDisplay({ title: data.title, titleKo: data.title_ko, summary: data.summary, summaryKo: data.summary_ko, version: data.version }),
+    };
   };
 
+  // Publishes a catalogue only when every member was read. A failed refresh keeps the last
+  // complete catalogue (or reports unavailable) and is retried after the shorter failure TTL.
   const load = async (): Promise<Snapshot> => {
     try {
       const index = JSON.parse(await fetchText("index.json")) as { skills?: Array<{ name?: unknown }> };
-      const names = (index.skills ?? []).map((skill) => skill.name).filter((name): name is string => typeof name === "string");
+      const names = [...new Set((index.skills ?? []).map((skill) => skill.name).filter((name): name is string => typeof name === "string"))];
       const skills = (await Promise.all(names.map(loadSkill))).filter((skill): skill is ConsoleSkill => skill !== null);
-      return { skills, loadedAt: now(), ok: true };
+      return { skills, expiresAt: now() + ttlMs, ok: true };
     } catch {
-      return { skills: [], loadedAt: now(), ok: false };
+      const retryAt = now() + failureTtlMs;
+      return snapshot?.ok ? { ...snapshot, expiresAt: retryAt } : { skills: [], expiresAt: retryAt, ok: false };
     }
   };
 
   const current = async (): Promise<Snapshot> => {
-    if (snapshot && now() - snapshot.loadedAt < (snapshot.ok ? ttlMs : failureTtlMs)) return snapshot;
+    if (snapshot && now() < snapshot.expiresAt) return snapshot;
     inFlight ??= load().then((next) => {
       snapshot = next;
       inFlight = null;
