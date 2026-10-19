@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import type { Chat, CoworkFile, Project, CoworkSkill, Schedule } from "../services/types";
+import type { SkillRow } from "../skills/skills";
+import { availableWorkflows, workflowTitle } from "../skills/workflows";
 import { SEARCH_TABS, searchResults, searchResultsForTab, searchTabLabel, type SearchData } from "./search-dialog";
 
 const chat = (id: string, title: string, updatedAt: number): Chat => ({
@@ -81,5 +83,34 @@ describe("Cowork search tabs", () => {
     const empty: SearchData = { chats: [], projects: [], skills: [], schedules: [], artifacts: [] };
     expect(searchResultsForTab("skills", "", empty)).toEqual([]);
     expect(searchResultsForTab("artifacts", "anything", empty)).toEqual([]);
+  });
+
+  test("round 10: a skill result opens that skill's page, not /skills", () => {
+    expect(searchResultsForTab("skills", "nda", data).map((r) => r.path)).toEqual(["/skill/nda-review"]);
+  });
+
+  test("round 10: every catalogue skill and workflow is searchable and opens its page", () => {
+    const names = Array.from({ length: 96 }, (_, i) => `catalogue-skill-${i}`);
+    const lib = (name: string, title?: string, titleKo?: string): SkillRow => ({ name, ...(title ? { title } : {}), ...(titleKo ? { titleKo } : {}), description: "", tags: {}, origin: "library", installed: null });
+    const catalogue = [...names.map((name) => lib(name)), lib("us-lawyer-nda", "US NDA", "미국 비밀유지계약"), lib("kr-lawyer-nda", "Korean NDA", "비밀유지계약서")];
+    const full: SearchData = { ...data, catalogue, workflows: availableWorkflows(catalogue) };
+    // Each of the 96 is reachable by its name from the Skills tab and from All.
+    for (const name of names) {
+      expect(searchResultsForTab("skills", name, full).some((r) => r.path === `/skill/${name}`)).toBe(true);
+      expect(searchResultsForTab("all", name, full).some((r) => r.path === `/skill/${name}`)).toBe(true);
+    }
+    // Korean titles match too.
+    expect(searchResultsForTab("skills", "비밀유지", full).map((r) => r.path)).toContain("/skill/kr-lawyer-nda");
+    // The workflow is a result of its own, by its title or a member skill.
+    const workflow = searchResultsForTab("skills", "NDA", full).find((r) => r.id === "workflow-legal-drafting");
+    expect(workflow?.path).toBe("/skills/workflow/legal-drafting");
+    const title = workflowTitle("legal-drafting");
+    expect(searchResultsForTab("all", title, full).map((r) => r.path)).toContain("/skills/workflow/legal-drafting");
+  });
+
+  test("round 10: an empty All query still lists only places and chats", () => {
+    const lib: SkillRow = { name: "pdf", title: "PDF production", description: "", tags: {}, origin: "library", installed: null };
+    const all = searchResultsForTab("all", "", { ...data, catalogue: [lib] });
+    expect(all.some((r) => r.id.startsWith("skill-"))).toBe(false);
   });
 });
