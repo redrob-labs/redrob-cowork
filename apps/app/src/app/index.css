@@ -2435,6 +2435,99 @@
   margin-top: auto;
   border-radius: 999px;
 }
+
+/* Your skills: compact horizontal cards on a raised surface (not the catalogue's circle tiles), so
+   the person's own set reads as theirs. Icon left, title + origin badge and one line of
+   description, Use on the right. A wrapping grid instead of a scroller: all of them stay in view. */
+.cowork-your-skills {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  min-width: 0;
+}
+.cowork-your-skills__count {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.cowork-your-skills__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-your-skill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  box-shadow: 0 6px 18px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent);
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-your-skill:hover {
+  border-color: color-mix(in srgb, var(--ink-primary) 16%, transparent);
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--redrob-black) 45%, transparent);
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-your-skill,
+  .cowork-your-skill:hover {
+    transition: none;
+    transform: none;
+  }
+}
+/* Overrides the shared tile link (kept for focus restore) from a column into a row. */
+.cowork-your-skill .cowork-your-skill__link {
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.cowork-your-skill .cowork-your-skill__link > .cowork-skill-icon {
+  margin-bottom: 0;
+}
+.cowork-your-skill__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cowork-your-skill__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.cowork-your-skill__title {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-your-skill__brief {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-your-skill__action {
+  flex: none;
+  border-radius: 999px;
+}
 .cowork-skill-icon {
   display: block;
   flex: none;

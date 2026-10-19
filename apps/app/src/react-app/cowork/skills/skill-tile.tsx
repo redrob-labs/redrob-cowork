@@ -132,12 +132,64 @@ type SkillShelfProps = Omit<SkillTileProps, "row"> & {
   rows: SkillRow[];
 };
 
-/** One horizontally scrolling marketplace shelf of skill tiles. */
-export function SkillShelf({ id, rows, ...tileProps }: SkillShelfProps) {
+/**
+ * Your skills: compact horizontal cards on a raised surface, so the person's own set reads as theirs
+ * and not as more of the catalogue's circles. A small circle on the left, the title with its origin
+ * (Team, Mine, Library) and one line of description, and Use on the right. A grid, not a scroller:
+ * these are the skills you reach for, so all of them stay in view.
+ */
+export function SkillShelf({ id, rows, locale, fromPath, onUse }: SkillShelfProps) {
+  const headingId = `skill-shelf-${id}`;
   return (
-    <MarketplaceShelf id={id} label={SHELF_LABEL[id]()} count={rows.length}>
-      {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
-    </MarketplaceShelf>
+    <section className="cowork-your-skills" aria-labelledby={headingId}>
+      <div className="cowork-skills__shelf-heading">
+        <h2 id={headingId}>
+          {SHELF_LABEL[id]()}
+          <span className="cowork-your-skills__count">{rows.length}</span>
+        </h2>
+      </div>
+      <ul className="cowork-your-skills__grid" role="list" aria-labelledby={headingId}>
+        {rows.map((row) => <YourSkillCard key={row.name} row={row} locale={locale} fromPath={fromPath} onUse={onUse} />)}
+      </ul>
+    </section>
+  );
+}
+
+/** One of the person's skills as a compact horizontal card. */
+function YourSkillCard(props: { row: SkillRow; locale: string; fromPath: string; onUse?: (name: string) => void }) {
+  const { row, locale, fromPath, onUse } = props;
+  const title = skillDisplayTitle(row, locale);
+  const briefId = `skill-brief-yours-${row.name}`;
+  return (
+    <li className="cowork-your-skill" data-skill={row.name}>
+      <Link
+        className="cowork-skill-tile__link cowork-your-skill__link"
+        to={skillPath(row.name)}
+        state={{ fromSkill: row.name, fromPath }}
+        aria-describedby={briefId}
+      >
+        <SkillIcon name={row.name} size="row" />
+        <span className="cowork-your-skill__text">
+          <span className="cowork-your-skill__head">
+            <span className="cowork-your-skill__title">{title}</span>
+            <OriginBadge origin={row.origin} />
+          </span>
+          <span id={briefId} className="cowork-your-skill__brief">{skillBrief(row, locale)}</span>
+        </span>
+      </Link>
+      {onUse ? (
+        <Button
+          className="cowork-your-skill__action"
+          size="sm"
+          variant="secondary"
+          iconLeft={icons.play(ICON)}
+          aria-label={t("cowork.skills_use_label", { name: title })}
+          onClick={() => onUse(row.name)}
+        >
+          {t("cowork.skills_use")}
+        </Button>
+      ) : null}
+    </li>
   );
 }
 
