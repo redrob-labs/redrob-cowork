@@ -2586,12 +2586,91 @@ html[lang="ko"] {
   }
 }
 
-/* Items 3 + 9: the Cowork plan reads as a clean "Research plan" + To-do list. The DS PlanDocument
-   always paints a header strip (the "Plan.md" file chip + the "Approved by you" status line); no
-   prop suppresses it, so hide the whole header on our wrapper. The body title ("Research plan")
-   and the To-do list remain. */
-.cowork-plan .rr-plandoc__h {
-  display: none;
+/*
+  Round 9: the plan inside the chat (CoworkPlan in cowork-thread.tsx). No frame: a 2px Redrob Blue
+  accent rail on the left, a small label with the run's progress, the summary, and the checklist as
+  a stepper. Markers are custom circles joined by a thin line: a ring to do, a brand ring with a
+  dot while active (its label shimmers, .redrob-shimmer-text), a filled brand circle with a tick
+  when done. Every surface sets its background and text colour.
+*/
+.cowork-planx {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  max-width: 76ch;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid var(--action-primary);
+  background: transparent;
+  color: var(--ink-primary);
+}
+.cowork-planx__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.cowork-planx__label { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink-brand); }
+.cowork-planx__progress { font-size: 12px; line-height: 20px; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+.cowork-planx__summary { margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-primary); }
+.cowork-planx__steps { display: flex; flex-direction: column; margin: 2px 0 0; padding: 0; list-style: none; }
+.cowork-planx__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 5px 0;
+}
+/* The thin line joining one marker to the next. */
+.cowork-planx__step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 25px;
+  bottom: -5px;
+  left: 8px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--border-subtle);
+}
+.cowork-planx__step[data-state="done"]:not(:last-child)::before { background: var(--action-primary); opacity: 0.35; }
+.cowork-planx__marker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-base);
+  color: var(--surface-base);
+}
+.cowork-planx__step[data-state="active"] .cowork-planx__marker {
+  border: 2px solid var(--action-primary);
+  background: var(--surface-brand-subtle);
+}
+.cowork-planx__step[data-state="active"] .cowork-planx__marker::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--action-primary);
+  animation: cowork-planx-pulse 1.4s ease-in-out infinite;
+}
+.cowork-planx__step[data-state="done"] .cowork-planx__marker {
+  border-color: var(--action-primary);
+  background: var(--action-primary);
+  color: var(--ink-on-brand, #fff);
+}
+.cowork-planx__task { min-width: 0; font-size: 14px; line-height: 22px; }
+/* Colour only when not shimmering: the shimmer paints the text through background-clip. */
+.cowork-planx__task:not(.redrob-shimmer-text) { color: var(--ink-primary); }
+.cowork-planx__step[data-state="done"] .cowork-planx__task:not(.redrob-shimmer-text) { color: var(--ink-secondary); }
+.cowork-planx__step[data-state="todo"] .cowork-planx__task:not(.redrob-shimmer-text) { color: var(--ink-secondary); }
+.cowork-planx__note { margin: 2px 0 0; font-size: 13px; line-height: 20px; color: var(--ink-secondary); }
+@keyframes cowork-planx-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.7); opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-planx__step[data-state="active"] .cowork-planx__marker::after { animation: none; }
 }
 
 /* Item 8: a blinking "writing" caret shown in the artifact card and the right-panel preview while

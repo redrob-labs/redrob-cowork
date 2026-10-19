@@ -1530,6 +1530,8 @@ const ko = {
   "cowork.thread_plan_keep": "나중을 위해 보관",
   "cowork.thread_plan_kept": "나중을 위해 보관함",
   "cowork.thread_plan_label": "계획",
+  "cowork.thread_plan_progress": "{total}개 중 {done}개 완료",
+  "cowork.thread_plan_progress_done": "완료",
   "cowork.thread_plan_research_title": "리서치 계획",
   "cowork.thread_plan_run": "실행",
   "cowork.thread_plan_running": "승인함, 실행 중",

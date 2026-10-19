@@ -51,6 +51,10 @@ import { useReactRenderWatchdog } from "@/react-app/shell/react-render-watchdog"
 import { SessionDebugPanel } from "./debug-panel";
 import { deriveRenderedSessionMessages, mergedSessionMessages, resolveRenderedSessionSnapshot } from "./session-render-state";
 import { coworkQuestionState, EMPTY_QUESTION_STATE, sameQuestionState, type CoworkQuestionState } from "@/react-app/cowork/thread/question-state";
+import { planRunActivities, samePlanActivities, type PlanRunActivity } from "@/react-app/cowork/thread/plan-progress";
+
+/** Stable empty plan-activity map, so the thread context keeps its identity outside the frame. */
+const EMPTY_PLAN_ACTIVITIES: ReadonlyMap<string, PlanRunActivity> = new Map();
 import { useLocal } from "@/react-app/kernel/local-provider";
 import { resolveAttachmentFileMetadata } from "@/react-app/domains/session/sync/attachment-file-part";
 import { deriveSessionRenderModel } from "@/react-app/domains/session/sync/transition-controller";
@@ -883,6 +887,15 @@ export function SessionSurface(props: SessionSurfaceProps) {
     coworkQuestionsRef.current = next;
     return next;
   }, [snapshot, transcriptState, inCoworkFrame]);
+  // Round 9: how far each plan's run has got (the plan's live checklist), from the same raw
+  // transcript. Kept as the same object while nothing it reads changed, like the questions.
+  const coworkPlansRef = useRef<ReadonlyMap<string, PlanRunActivity>>(EMPTY_PLAN_ACTIVITIES);
+  const coworkPlans = useMemo(() => {
+    const next = inCoworkFrame ? planRunActivities(mergedSessionMessages({ transcriptState, snapshot }), chatStreaming) : EMPTY_PLAN_ACTIVITIES;
+    if (samePlanActivities(coworkPlansRef.current, next)) return coworkPlansRef.current;
+    coworkPlansRef.current = next;
+    return next;
+  }, [snapshot, transcriptState, inCoworkFrame, chatStreaming]);
   const renderedMessages = useMemo(() => {
     if (evalMarkdownMessages.length === 0) return baseRenderedMessages;
 
@@ -1958,7 +1971,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
       await sendDraft(textDraft(text));
     },
     questions: coworkQuestions,
-  }), [chatStreaming, coworkQuestions, props.sessionId, sendDraft]);
+    plans: coworkPlans,
+  }), [chatStreaming, coworkPlans, coworkQuestions, props.sessionId, sendDraft]);
 
   return (
     <DevProfiler id="SessionSurface">

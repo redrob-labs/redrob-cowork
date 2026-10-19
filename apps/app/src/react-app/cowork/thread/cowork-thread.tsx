@@ -6,8 +6,8 @@ import {
   ChallengeReport,
   FactCheckReport,
   Loader,
-  PlanDocument,
   ThreadNote,
+  icons,
   type ChallengeReportProps,
   type FactCheckReportProps,
 } from "@redrob-labs/ui";
@@ -16,6 +16,7 @@ import { t } from "../../../i18n";
 import { cn } from "../../../lib/utils";
 import { useWorkingLine } from "../../../lib/working-lines";
 import { CoworkQuestionsCard } from "./cowork-questions";
+import { IDLE_PLAN_ACTIVITY, planStepStates, type PlanStepState } from "./plan-progress";
 import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader/RedrobLiquidLoader";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { useCoworkComposerStore } from "../composer/composer-state";
@@ -109,94 +110,104 @@ function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boole
   );
 }
 
-/** The plan as the person changed it in place: the document without its header and buttons. */
-function editedPlanText(root: HTMLElement | null): string | null {
-  const article = root?.querySelector("article");
-  if (!article) return null;
-  const copy = article.cloneNode(true);
-  if (!(copy instanceof HTMLElement)) return null;
-  copy.querySelectorAll("header, footer").forEach((node) => node.remove());
-  const text = (copy.innerText || copy.textContent || "").trim();
-  return text || null;
+/** A checklist step's marker: a ring to do, a brand ring with a dot while active, a filled tick when done. */
+function StepMarker(props: { state: PlanStepState }) {
+  return (
+    <span className="cowork-planx__marker" data-state={props.state} aria-hidden="true">
+      {props.state === "done" ? icons.check({ width: 10, height: 10, strokeWidth: 3 }) : null}
+    </span>
+  );
 }
 
-/** The plan: Run sends it to the run agent and switches the chat to Run (round 7: no Keep). */
+/**
+ * Round 9: the plan inside the chat, not a bordered document. A Redrob Blue accent rail on the
+ * left, a small "Research plan" label with the run's progress, the summary, then the checklist as
+ * a stepper with custom circle markers: the step the run is on shimmers, finished steps tick, and
+ * the rest wait. Progress is guessed from the run's activity (plan-progress.ts). The DS
+ * PlanDocument it replaces drew a frame, a file header and in-place editing; none of those stay.
+ */
 function CoworkPlan(props: {
   plan: PlanDoc;
   isLatest: boolean;
+  /** The message the plan came in, to find its run's activity. */
+  messageId?: string;
   /** Whether the plan may run itself once drafted; false while open questions sit beside it. */
   autoRun: boolean;
 }) {
   const thread = useCoworkThread();
   const setMode = useCoworkComposerStore((state) => state.setMode);
   const [stage, setStage] = useState<PlanStage>("draft");
-  const edited = useRef(false);
-  const root = useRef<HTMLDivElement>(null);
-  const status = planStatus({ local: stage, isLatest: props.isLatest, busy: thread?.busy ?? false });
-  const canRun = Boolean(thread) && (status === "draft" || status === "kept");
+  const activity = (props.messageId ? thread?.plans?.get(props.messageId) : undefined) ?? IDLE_PLAN_ACTIVITY;
+  const ran = stage === "running" || activity.started;
+  const status = activity.finished ? "done" : ran ? "running" : planStatus({ local: stage, isLatest: props.isLatest, busy: thread?.busy ?? false });
+  const canRun = Boolean(thread) && !ran && (status === "draft" || status === "kept") && !(thread?.busy ?? false);
+  const labels = props.plan.todo.map((todo) => todo.label);
+  // Before the run's send lands in the transcript, the step it starts on is already active.
+  const steps = planStepStates(labels, ran && !activity.started ? { ...activity, started: true } : activity);
+  const doneCount = steps.filter((state) => state === "done").length;
 
   const run = () => {
     if (!thread) return;
-    const text = (edited.current ? editedPlanText(root.current) : null) ?? planToText(props.plan);
     setMode(thread.sessionId, "run");
     setStage("running");
-    thread.sendText(planRunPrompt(text)).catch(() => setStage("draft"));
+    thread.sendText(planRunPrompt(planToText(props.plan))).catch(() => setStage("draft"));
   };
 
   // Round 6: auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
-  // -> artifact without a manual Run click (Felix: "run till execution is complete automatically").
-  // Fires exactly once per plan: only when this is the latest turn, still a draft, the thread is
-  // idle (the plan finished streaming), and the user has not edited it (an edit means they want to
-  // review first). autoRanRef guards against a second fire on re-render.
+  // -> artifact without a manual Run click. Fires exactly once per plan: only when this is the
+  // latest turn, still a draft, and the thread is idle (the plan finished streaming).
   // sawDraftingRef: the plan must have been drafted WHILE this view was mounted (the thread was
-  // busy with it as the latest turn). Without it, reopening an old chat whose last turn is an
-  // unrun or kept plan (Keep is local state, lost on remount) would silently run that plan.
+  // busy with it as the latest turn), so reopening an old chat whose last turn is an unrun plan
+  // never silently runs it; that plan shows a Run button instead.
   const autoRanRef = useRef(false);
   const sawDraftingRef = useRef(false);
   if (props.isLatest && thread?.busy) sawDraftingRef.current = true;
   useEffect(() => {
     if (autoRanRef.current || !props.autoRun || !sawDraftingRef.current) return;
     if (!thread || thread.busy) return;
-    if (!props.isLatest || stage !== "draft" || edited.current) return;
+    if (!props.isLatest || stage !== "draft" || activity.started) return;
     autoRanRef.current = true;
     run();
     // run/thread are stable enough for this one-shot; deps kept minimal intentionally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.autoRun, props.isLatest, stage, thread?.busy]);
+  }, [props.autoRun, props.isLatest, stage, thread?.busy, activity.started]);
+
+  const progress =
+    status === "done"
+      ? t("cowork.thread_plan_progress_done")
+      : status === "running" && labels.length > 0
+        ? t("cowork.thread_plan_progress", { done: doneCount, total: labels.length })
+        : null;
 
   return (
-    <div ref={root} className="cowork-plan">
-      {/* Items 3 + 9: a clean "Research plan" + detailed To-do list. `sections` and `file` are no
-          longer passed (the narrative + filename chip are dropped); the title renders in the body.
-          The DS PlanDocument ALWAYS paints a header strip (file chip + status), so it is hidden by
-          CSS on .cowork-plan .rr-plandoc__h (index.css) - there is no prop that suppresses it.
-          planToText still sends everything to the run agent; this change is display-only. */}
-      <PlanDocument
-        title={t("cowork.thread_plan_research_title")}
-        summary={props.plan.summary}
-        todo={props.plan.todo}
-        done={status === "done" ? props.plan.todo.length : undefined}
-        note={props.plan.note}
-        status={status}
-        statusLabels={{
-          draft: t("cowork.thread_plan_draft"),
-          edited: t("cowork.thread_plan_edited"),
-          running: t("cowork.thread_plan_running"),
-          done: t("cowork.thread_plan_done"),
-          kept: t("cowork.thread_plan_kept"),
-        }}
-        label={t("cowork.thread_plan_label")}
-        todoLabel={t("cowork.thread_plan_todo")}
-        runLabel={t("cowork.thread_plan_run")}
-        hint={t("cowork.thread_plan_hint")}
-        onRun={canRun ? run : undefined}
-        /* Round 7 C3: no "Keep it for later". The DS draws the Keep button only when onKeep is
-           passed, so omitting onKeep + keepLabel removes it; the plan runs or the person replies. */
-        onEdit={() => {
-          edited.current = true;
-        }}
-      />
-    </div>
+    <section className="cowork-planx" aria-label={t("cowork.thread_plan_research_title")} data-status={status}>
+      <header className="cowork-planx__head">
+        <span className="cowork-planx__label">{t("cowork.thread_plan_research_title")}</span>
+        {progress ? <span className="cowork-planx__progress">{progress}</span> : null}
+      </header>
+      {props.plan.summary ? <p className="cowork-planx__summary">{props.plan.summary}</p> : null}
+      {labels.length > 0 ? (
+        <ol className="cowork-planx__steps" aria-label={t("cowork.thread_plan_todo")}>
+          {props.plan.todo.map((todo, index) => {
+            const state = steps[index] ?? "todo";
+            return (
+              <li key={index} className="cowork-planx__step" data-state={state} aria-current={state === "active" ? "step" : undefined}>
+                <StepMarker state={state} />
+                <span className={cn("cowork-planx__task", state === "active" && "redrob-shimmer-text")}>{todo.label}</span>
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
+      {props.plan.note ? <p className="cowork-planx__note">{props.plan.note}</p> : null}
+      {canRun ? (
+        <div>
+          <Button size="sm" onClick={run}>
+            {t("cowork.thread_plan_run")}
+          </Button>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -212,7 +223,7 @@ export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolea
   return (
     <>
       {questions ? <CoworkQuestions questions={questions} isLatest={props.isLatest} messageId={props.messageId} /> : null}
-      {plan && !held ? <CoworkPlan plan={plan} isLatest={props.isLatest} autoRun /> : null}
+      {plan && !held ? <CoworkPlan plan={plan} isLatest={props.isLatest} messageId={props.messageId} autoRun /> : null}
     </>
   );
 }

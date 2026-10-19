@@ -1543,6 +1543,8 @@ const en = {
   "cowork.thread_plan_keep": "Keep it for later",
   "cowork.thread_plan_kept": "Kept for later",
   "cowork.thread_plan_label": "Plan",
+  "cowork.thread_plan_progress": "{done} of {total} done",
+  "cowork.thread_plan_progress_done": "Done",
   "cowork.thread_plan_research_title": "Research plan",
   "cowork.thread_plan_run": "Run",
   "cowork.thread_plan_running": "Approved by you, running",
