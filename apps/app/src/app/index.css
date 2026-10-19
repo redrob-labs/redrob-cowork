@@ -2154,14 +2154,48 @@
   letter-spacing: -0.01em;
   color: var(--ink-primary);
 }
-.cowork-skills__shelf-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+/* Round 8: shelf paging chevrons overlay the row edges, centred on the icons, and fade in only on
+   shelf hover or keyboard focus inside the shelf, and only toward a side that can still scroll
+   (data-show). Same look as the Trending AI .model-chart__chevron. */
+.cowork-skills__shelf-viewport { position: relative; min-width: 0; }
+.cowork-skills__chevron {
+  position: absolute;
+  top: 56px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--redrob-black) 45%, transparent);
+  color: var(--ink-primary);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), background var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
-.cowork-skills__shelf-controls [aria-disabled="true"] {
-  cursor: default;
-  opacity: 0.45;
+.cowork-skills__chevron--prev { left: -6px; }
+.cowork-skills__chevron--next { right: -6px; }
+.cowork-skills__shelf:hover .cowork-skills__chevron[data-show],
+.cowork-skills__shelf:focus-within .cowork-skills__chevron[data-show] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.cowork-skills__chevron:hover { background: var(--surface-raised); color: var(--ink-primary); transform: translateY(-50%) scale(1.06); }
+.cowork-skills__chevron:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring, var(--spectrum-sky));
+  outline-offset: 2px;
+}
+[data-theme="dark"] .cowork-skills__chevron {
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  color: var(--ink-primary);
 }
 .cowork-skills__shelf-row {
   display: grid;
@@ -2318,7 +2352,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cowork-skill-tile,
-  .cowork-skill-icon { transition: none; }
+  .cowork-skill-icon,
+  .cowork-skills__chevron { transition: none; }
   .cowork-skill-tile:hover .cowork-skill-icon,
   .cowork-skill-tile:active .cowork-skill-icon { transform: none; }
 }
@@ -2326,8 +2361,6 @@
 @media (max-width: 620px) {
   .cowork-skill-hero { grid-template-columns: 88px minmax(0, 1fr); gap: 16px; }
   .cowork-skill-icon[data-size="hero"] { width: 88px; height: 88px; }
-  .cowork-skills__shelf-controls > button:first-child,
-  .cowork-skills__shelf-controls > button:nth-child(2) { display: none; }
 }
 
 @media (max-width: 900px) {

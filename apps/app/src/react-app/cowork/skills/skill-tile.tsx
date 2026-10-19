@@ -1,10 +1,11 @@
 /** @jsxImportSource react */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { Button, IconButton, icons } from "@redrob-labs/ui";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button, icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
-import { skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
+import { shelfEdges, skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
 import { SkillIcon } from "./skill-icon";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
@@ -105,16 +106,16 @@ type SkillShelfProps = Omit<SkillGridProps, "rows" | "label"> & {
   onSeeAll: (id: SkillShelfId) => void;
 };
 
-/** One horizontally scrolling marketplace shelf with keyboard-reachable controls. */
+/** One horizontally scrolling marketplace shelf; edge chevrons appear on hover or keyboard focus. */
 export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps) {
   const scroller = useRef<HTMLUListElement>(null);
-  const [edges, setEdges] = useState({ start: true, end: false });
+  const [edges, setEdges] = useState({ canPrev: false, canNext: false });
   const headingId = `skill-shelf-${id}`;
   const label = SHELF_LABEL[id]();
   const measure = useCallback(() => {
     const node = scroller.current;
     if (!node) return;
-    setEdges({ start: node.scrollLeft <= 1, end: node.scrollLeft + node.clientWidth >= node.scrollWidth - 1 });
+    setEdges(shelfEdges(node.scrollLeft, node.scrollWidth, node.clientWidth));
   }, []);
   useEffect(() => {
     const node = scroller.current;
@@ -126,40 +127,55 @@ export function SkillShelf({ id, rows, onSeeAll, ...tileProps }: SkillShelfProps
   }, [measure, rows.length]);
   const move = (direction: -1 | 1) => {
     const node = scroller.current;
-    if (node) node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: "smooth" });
+    if (!node) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: reduced ? "auto" : "smooth" });
   };
 
   return (
     <section className="cowork-skills__shelf" aria-labelledby={headingId}>
       <div className="cowork-skills__shelf-heading">
         <h2 id={headingId}>{label}</h2>
-        <div className="cowork-skills__shelf-controls">
-          <IconButton
-            size="sm"
-            label={t("cowork.skills_scroll_left", { shelf: label })}
-            aria-disabled={edges.start}
-            data-disabled={edges.start ? "" : undefined}
-            onClick={() => { if (!edges.start) move(-1); }}
-          >
-            {icons.arrowLeft(ICON)}
-          </IconButton>
-          <IconButton
-            size="sm"
-            label={t("cowork.skills_scroll_right", { shelf: label })}
-            aria-disabled={edges.end}
-            data-disabled={edges.end ? "" : undefined}
-            onClick={() => { if (!edges.end) move(1); }}
-          >
-            {icons.arrowRight(ICON)}
-          </IconButton>
-          <Button id={`${headingId}-see-all`} size="sm" variant="ghost" aria-label={t("cowork.skills_see_all_label", { shelf: label })} onClick={() => onSeeAll(id)}>
-            {t("cowork.skills_see_all")}
-          </Button>
-        </div>
+        <Button id={`${headingId}-see-all`} size="sm" variant="ghost" aria-label={t("cowork.skills_see_all_label", { shelf: label })} onClick={() => onSeeAll(id)}>
+          {t("cowork.skills_see_all")}
+        </Button>
       </div>
-      <ul ref={scroller} className="cowork-skills__shelf-row" role="list" aria-label={label} onScroll={measure}>
-        {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
-      </ul>
+      <div className="cowork-skills__shelf-viewport">
+        <ShelfChevron direction={-1} label={t("cowork.skills_scroll_left", { shelf: label })} show={edges.canPrev} onMove={move} />
+        <ul ref={scroller} className="cowork-skills__shelf-row" role="list" aria-label={label} onScroll={measure}>
+          {rows.map((row) => <SkillTile key={row.name} row={row} {...tileProps} />)}
+        </ul>
+        <ShelfChevron direction={1} label={t("cowork.skills_scroll_right", { shelf: label })} show={edges.canNext} onMove={move} />
+      </div>
     </section>
+  );
+}
+
+type ShelfChevronProps = {
+  /** Which way this chevron pages the shelf: -1 left, 1 right. */
+  direction: -1 | 1;
+  /** Localized accessible name; there is no hover text. */
+  label: string;
+  /** Whether there is anything left to scroll in this direction. */
+  show: boolean;
+  /** Pages the shelf in the given direction. */
+  onMove: (direction: -1 | 1) => void;
+};
+
+/** A plain overlay button (not IconButton, which sets title) that leaves the tab order at an edge. */
+function ShelfChevron({ direction, label, show, onMove }: ShelfChevronProps) {
+  const Icon = direction < 0 ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      className={`cowork-skills__chevron cowork-skills__chevron--${direction < 0 ? "prev" : "next"}`}
+      aria-label={label}
+      aria-hidden={!show}
+      tabIndex={show ? 0 : -1}
+      data-show={show || undefined}
+      onClick={() => { if (show) onMove(direction); }}
+    >
+      <Icon width={18} height={18} aria-hidden />
+    </button>
   );
 }

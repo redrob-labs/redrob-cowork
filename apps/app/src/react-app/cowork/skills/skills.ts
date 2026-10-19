@@ -161,6 +161,18 @@ export function skillBrief(row: { summary?: string; summaryKo?: string; descript
   return sentence.charAt(0).toUpperCase() + sentence.slice(1);
 }
 
+/** Sub-pixel tolerance so a shelf at its edge never keeps a chevron with nothing left to reveal. */
+const SHELF_EDGE_EPSILON = 2;
+
+/** Whether a horizontal shelf can scroll back or forward from its current position. */
+export function shelfEdges(scrollLeft: number, scrollWidth: number, clientWidth: number): { canPrev: boolean; canNext: boolean } {
+  const overflow = scrollWidth - clientWidth > SHELF_EDGE_EPSILON;
+  return {
+    canPrev: overflow && scrollLeft > SHELF_EDGE_EPSILON,
+    canNext: overflow && scrollLeft < scrollWidth - clientWidth - SHELF_EDGE_EPSILON,
+  };
+}
+
 const ORIGIN_ORDER: Record<SkillOrigin, number> = { team: 0, mine: 1, library: 2 };
 
 /** Ordered non-empty marketplace shelves, with localized title sorting outside Your skills. */

@@ -9,11 +9,12 @@ import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-c
 import { isClamped, shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillIcon } from "../src/react-app/cowork/skills/skill-icon";
-import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
+import { SkillShelf, SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
   languageTagLabel,
   matchesFilters,
+  shelfEdges,
   shelvesOf,
   shouldRestoreListFocus,
   skillBrief,
@@ -138,6 +139,13 @@ describe("skills marketplace helpers", () => {
     expect(isClamped({ scrollHeight: 61, clientHeight: 60 })).toBe(false);
   });
 
+  test("shows a shelf chevron only toward a side that can still scroll", () => {
+    expect(shelfEdges(0, 600, 600)).toEqual({ canPrev: false, canNext: false });
+    expect(shelfEdges(0, 1200, 600)).toEqual({ canPrev: false, canNext: true });
+    expect(shelfEdges(300, 1200, 600)).toEqual({ canPrev: true, canNext: true });
+    expect(shelfEdges(599, 1200, 600)).toEqual({ canPrev: true, canNext: false });
+  });
+
   test("shelf control labels read naturally in both locales", () => {
     expect(en["cowork.skills_scroll_left"]).toBe("{shelf}: scroll left");
     expect(en["cowork.skills_scroll_right"]).toBe("{shelf}: scroll right");
@@ -206,6 +214,19 @@ describe("skill marketplace markup", () => {
     expect(html).toContain("A very long skill title that clamps");
     expect(html).toContain(`<span id="skill-brief-long" class="cowork-skill-tile__brief">${summary}</span>`);
     expect(html).not.toContain("tooltip");
+    expect(html).not.toContain(" title=");
+  });
+
+  test("renders shelf chevrons as labelled plain buttons with no hover text", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(MemoryRouter, null,
+        React.createElement(SkillShelf, { id: "lawyer", rows: [row("us-lawyer-a", { title: "A" }), row("us-lawyer-b", { title: "B" })], locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {}, onSeeAll: () => {} }),
+      ),
+    );
+    expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--prev"');
+    expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--next"');
+    expect(html).toContain(`aria-label="${en["cowork.skills_scroll_left"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
+    expect(html).toContain(`aria-label="${en["cowork.skills_scroll_right"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
     expect(html).not.toContain(" title=");
   });
 
