@@ -1,19 +1,22 @@
 /** @jsxImportSource react */
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { EmptyState, IconButton, icons } from "@redrob-labs/ui";
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon";
-import { getArtifactsFromMessages, type ArtifactItem, canOpenArtifact } from "@/lib/artifacts";
+import { getArtifactsFromMessages, getArtifactTypeLabel, type ArtifactItem, canOpenArtifact } from "@/lib/artifacts";
 import { usePanelTabStore } from "../../domains/session/panel/panel-tab-store";
 import { isCollectibleArtifactTarget } from "../../domains/session/artifacts/open-target";
 
-import { t } from "../../../i18n";
+import { currentLocale, subscribeToLocale, t } from "../../../i18n";
+import { formatNavTime } from "../shell/nav";
+import { artifactPreview } from "./artifact-preview";
 import { getSidePanelSessionKey } from "../../domains/session/panel/side-panel-session";
 import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
 import { CoworkBrowser } from "./cowork-browser";
 import { CoworkPanelFiles, CoworkFilePreview } from "./cowork-panel-files";
-import { fileFromTarget } from "./cowork-files";
+import { fileFromTarget, filePreviewKind } from "./cowork-files";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { prettyArtifactTitle } from "@/lib/artifacts";
 import type { OpenTarget } from "../../domains/session/artifacts/open-target";
@@ -110,24 +113,47 @@ function CoworkPanelBrowser(props: { sessionKey: string }) {
 }
 
 /**
- * One artifact row: type icon + name; clicking opens it on its own in the Artifacts tab (round 8,
- * via the frame store's openArtifact). The panel lives in the Cowork shell, OUTSIDE the session
- * surface's OpenTargetProvider, so the open-target hook would be a silent no-op here.
+ * Round 10 (R6): one artifact row, roomier: type icon, Title Case name, "Artifact" + when it was
+ * written, and a 2-line plain-text preview that ends on a whole sentence or word (artifactPreview),
+ * never on "...". The preview reads the file through the same cached query the artifact view
+ * uses, so opening the row afterwards costs no second read. Clicking opens it on its own in the
+ * Artifacts tab (round 8, via the frame store's openArtifact). The panel lives in the Cowork shell,
+ * OUTSIDE the session surface's OpenTargetProvider, so the open-target hook would be a no-op here.
  */
-function CoworkArtifactRow(props: { artifact: ArtifactItem }) {
+function CoworkArtifactRow(props: { artifact: ArtifactItem; chatId: string; now: number; locale: string }) {
   const openArtifact = useFrameStore((state) => state.openArtifact);
+  const client = useCoworkConnection((state) => state.client);
+  const workspaceId = useCoworkConnection((state) => state.workspaceId);
+  const file = useMemo(() => fileFromTarget(props.artifact.legacy_target, "", props.chatId), [props.artifact.legacy_target, props.chatId]);
+  const readable = filePreviewKind(file.name) === "markdown" || filePreviewKind(file.name) === "text";
+  const preview = useQuery({
+    // Same key as CoworkFilePreview, so the row and the opened view share one read.
+    queryKey: ["cowork-file-preview", workspaceId, file.id],
+    enabled: readable && !file.body && Boolean(client && workspaceId && file.path),
+    queryFn: async () => ({ kind: "text" as const, text: (await client!.readWorkspaceFile(workspaceId!, file.path!)).content }),
+    retry: false,
+    staleTime: 30_000,
+  });
+  const source = file.body ?? (preview.data && "text" in preview.data ? String(preview.data.text) : "");
+  const snippet = source ? artifactPreview(source) : "";
   const open = () => {
     if (!canOpenArtifact(props.artifact)) return;
     openArtifact(props.artifact.legacy_target.id);
   };
+  const when = props.artifact.updatedAt ? formatNavTime(props.artifact.updatedAt, props.now, props.locale) : "";
   return (
     <li>
-      <button type="button" className="cowork-file-row" onClick={open}>
-        <span className="cowork-file__icon">
-          <ArtifactIcon className="size-4 text-muted-foreground" type={props.artifact.type} />
+      <button type="button" className="cowork-artifact-row" onClick={open}>
+        <span className="cowork-artifact-row__icon">
+          <ArtifactIcon className="size-4" type={props.artifact.type} />
         </span>
-        <span className="cowork-file-row__text">
+        <span className="cowork-artifact-row__text">
           <b>{prettyArtifactTitle(props.artifact.path)}</b>
+          <span className="cowork-artifact-row__meta">
+            {getArtifactTypeLabel(props.artifact.type)}
+            {when ? <> · {when}</> : null}
+          </span>
+          {snippet ? <span className="cowork-artifact-row__preview">{snippet}</span> : null}
         </span>
       </button>
     </li>
@@ -172,6 +198,8 @@ function CoworkPanelArtifacts(props: { sessionKey: string }) {
   const finishDraft = useLiveDraftStore((state) => state.finish);
   const openArtifact = useFrameStore((state) => state.openArtifact);
   const selectedId = useFrameStore((state) => state.panel.artifact ?? null);
+  const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+  const [now] = useState(Date.now);
   // Derived once per targets change, not on every panel render (the store re-renders this often).
   const artifacts = useMemo(
     () => getArtifactsFromMessages([], (targets ?? []).filter(isCollectibleArtifactTarget), { includeTargetFallbacks: true }),
@@ -222,10 +250,10 @@ function CoworkPanelArtifacts(props: { sessionKey: string }) {
   }
 
   return (
-    <div className="cowork-files">
-      <ul className="cowork-files__list">
+    <div className="cowork-files cowork-artifacts">
+      <ul className="cowork-artifacts__list">
         {artifacts.map((artifact) => (
-          <CoworkArtifactRow key={artifact.id} artifact={artifact} />
+          <CoworkArtifactRow key={artifact.id} artifact={artifact} chatId={props.sessionKey} now={now} locale={locale} />
         ))}
       </ul>
     </div>

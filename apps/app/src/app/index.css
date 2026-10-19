@@ -4720,6 +4720,71 @@ a.radar-story__source:focus-visible {
 }
 
 /*
+  Round 10 (R6): the Artifacts tab list. Roomy rows on the panel's own surface (no grey fill, no
+  card frame): a 40px type tile, the Title Case name, "Artifact · 10:59", and a 2-line preview that
+  the component already ends on a whole sentence or word, so the clip below never shows "...".
+  Hover lifts the tile (2px + shadow, the album-cover hover) and darkens the name; no grey frame.
+*/
+.cowork-artifacts { padding: var(--space-2, 8px) var(--space-2, 8px) var(--space-4, 16px); }
+.cowork-artifacts__list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.cowork-artifact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+  width: 100%;
+  padding: var(--space-3, 12px) var(--space-2, 8px);
+  border: 0;
+  border-radius: var(--radius-lg, 12px);
+  background: none;
+  font: inherit;
+  text-align: start;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.cowork-artifact-row__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-base);
+  color: var(--ink-secondary);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.cowork-artifact-row:hover .cowork-artifact-row__icon {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--ink-primary) 14%, transparent);
+}
+.cowork-artifact-row__text { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.cowork-artifact-row__text b {
+  overflow: hidden;
+  font: var(--text-body-strong);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-artifact-row__meta { font: var(--text-meta); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.cowork-artifact-row__preview {
+  display: block;
+  /* The text is sized for 2 lines at the default width; a narrower panel may wrap it to a third,
+     which shows rather than clips (a clip would cut the sentence off). */
+  max-height: calc(3 * 20px);
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-secondary);
+}
+.cowork-artifact-row:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) {
+  .cowork-artifact-row__icon { transition: none; }
+  .cowork-artifact-row:hover .cowork-artifact-row__icon { transform: none; }
+}
+
+/*
   Round 8 M6: one artifact on the Artifacts tab, shown as its output only. No frame, no border, no
   grey surface: the document sits directly on the panel, with the "All artifacts" back control above.
   Round 9: on the panel's own --surface-base (it was --surface-raised, a grey that read as a frame).
