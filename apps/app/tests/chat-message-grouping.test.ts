@@ -5,6 +5,7 @@ import {
   getAssistantRenderGroups,
   getMessageCompleted,
   getMessageCreated,
+  isWebResearchGroup,
   liveActivityOf,
   splitTurnAtAnswer,
 } from "../src/components/chat/utils";
@@ -166,5 +167,22 @@ describe("liveActivityOf", () => {
     expect(liveActivityOf(messages, false)).toEqual({ parts: [bashPart("c1")], reasoning: "" });
     // A bare reasoning part (how thinking starts streaming) puts up no row.
     expect(liveActivityOf([{ id: "a3", role: "assistant", parts: [empty] }], true)).toBeNull();
+  });
+});
+
+describe("web research groups", () => {
+  const web = (toolName: string, id: string): DynamicToolUIPart =>
+    ({ type: "dynamic-tool", toolName, toolCallId: id, state: "output-available", input: { query: "q", url: "https://example.com" }, output: "" }) as unknown as DynamicToolUIPart;
+
+  test("web calls fold into one group only in the Cowork frame, which reads it as web research", () => {
+    const parts = [web("websearch", "w1"), web("webfetch", "w2")];
+    const folded = getAssistantRenderGroups(parts, true, true);
+    expect(folded).toHaveLength(1);
+    expect(folded[0] && isWebResearchGroup(folded[0])).toBe(true);
+    // The bare surface keeps one row per call (each with its own sources popover).
+    expect(getAssistantRenderGroups(parts, true).map((group) => group.kind)).toEqual(["tool", "tool"]);
+    expect(isWebResearchGroup({ kind: "tool-aggregate", parts: [web("websearch", "w3"), bashPart("c1")] })).toBe(false);
+    expect(isWebResearchGroup({ kind: "tool", part: bashPart("c2") })).toBe(false);
+    expect(isWebResearchGroup({ kind: "text", text: "hello" })).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 
 import type { RedrobSessionSnapshot } from "../../../../app/lib/redrob-server";
+import { getMessagesText } from "../../../../components/chat/utils";
 import { isSyntheticCoworkPrompt } from "../../../cowork/thread/thread-logic";
 import { mergeSnapshotAndLiveMessages } from "../sync/message-merge";
 import { applyRevertCursor } from "../sync/transcript-reconcile";
@@ -24,19 +25,6 @@ export function resolveRenderedSessionSnapshot(input: {
 }
 
 /**
- * The leading text of a USER message, concatenating its text parts in order. Used only to read a
- * synthetic-send provenance sentinel off the front; non-text parts are ignored.
- */
-function userMessageText(message: UIMessage): string {
-  if (message.role !== "user") return "";
-  let text = "";
-  for (const part of message.parts) {
-    if (part.type === "text") text += part.text;
-  }
-  return text;
-}
-
-/**
  * Hide synthetic USER sends from the Cowork transcript: the plan-run prompt and the
  * question-answer reply are machinery, not conversation. The engine still received them (they
  * were really sent); this only drops them from the RENDER, and only inside the Cowork frame.
@@ -44,7 +32,7 @@ function userMessageText(message: UIMessage): string {
  * cursor still resolves.
  */
 export function filterSyntheticCoworkMessages(messages: UIMessage[]): UIMessage[] {
-  return messages.filter((message) => !isSyntheticCoworkPrompt(userMessageText(message)));
+  return messages.filter((message) => message.role !== "user" || !isSyntheticCoworkPrompt(getMessagesText([message])));
 }
 
 /**

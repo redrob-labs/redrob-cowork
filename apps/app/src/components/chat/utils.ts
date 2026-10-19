@@ -215,7 +215,9 @@ export function liveActivityOf(messages: readonly UIMessage[], showThinking: boo
  */
 export function getAggregateOnlyParts(
   message: UIMessage,
-  showThinking: boolean
+  showThinking: boolean,
+  /** Fold web search/fetch into the search family (Cowork frame only, see getToolFamily). */
+  foldWeb = false
 ): (ToolUIPart | DynamicToolUIPart)[] | null {
   const tools: (ToolUIPart | DynamicToolUIPart)[] = []
   for (const part of message.parts) {
@@ -228,7 +230,7 @@ export function getAggregateOnlyParts(
       if (part.text.trim()) return null
       continue
     }
-    if (isToolUIPart(part) && isAggregatableToolPart(part)) {
+    if (isToolUIPart(part) && isAggregatableToolPart(part, foldWeb)) {
       tools.push(part)
       continue
     }
@@ -269,7 +271,9 @@ export function splitTurnAtAnswer(message: UIMessage): { steps: UIMessage; answe
 
 export function getAssistantRenderGroups(
   parts: UIMessage["parts"],
-  showThinking: boolean
+  showThinking: boolean,
+  /** Fold web search/fetch into the search family (Cowork frame only, see getToolFamily). */
+  foldWeb = false
 ): AssistantRenderGroup[] {
   const filteredParts = parts.filter((part) => showThinking || !isReasoningUIPart(part))
   const groups: AssistantRenderGroup[] = []
@@ -334,7 +338,7 @@ export function getAssistantRenderGroups(
       // break the run; reasoning does not — thinking models emit a
       // reasoning part before nearly every call, and letting it split the
       // run degrades every aggregate to a single call.
-      if (isAggregatableToolPart(part)) {
+      if (isAggregatableToolPart(part, foldWeb)) {
         const previous = groups.findLast((group) => group.kind !== "reasoning")
         if (previous?.kind === "tool-aggregate") {
           previous.parts.push(part)

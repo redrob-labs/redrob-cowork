@@ -587,7 +587,7 @@ const AssistantMessage = React.memo(
         // assistant messages and folding per message would draw one stray row per message.
         // Keys are taken BEFORE filtering, so a group keeps its key (and the answer keeps its
         // reveal state) when the live row starts hiding the steps around it mid-stream.
-        const groups = getAssistantRenderGroups(message.parts, showThinking)
+        const groups = getAssistantRenderGroups(message.parts, showThinking, inCoworkFrame)
           .map((group, index) => ({ group, key: `${group.kind}-${index}` }))
           // A text group that is only an answered questions block, a held plan, or a cross-check
           // block (drawn in the footer) renders nothing; drop it so no empty wrapper keeps the gap.
@@ -1312,7 +1312,7 @@ function MessageGroup({
   // a collapsed run shows it and the message below renders text only.
   const proseReasoning = proseItems.flatMap((item) =>
     item.message.role === "assistant" && !isSessionErrorMessage(item.message)
-      ? getAssistantRenderGroups(item.message.parts, showThinking).flatMap((group, groupIndex) =>
+      ? getAssistantRenderGroups(item.message.parts, showThinking, inCoworkFrame).flatMap((group, groupIndex) =>
         group.kind === "reasoning"
           ? [{ key: `${item.message.id}-${groupIndex}`, text: group.text, isStreaming: group.isStreaming }]
           : []
@@ -1326,7 +1326,7 @@ function MessageGroup({
       (total, item) =>
         total +
         (item.message.role === "assistant" && !isSessionErrorMessage(item.message)
-          ? getAssistantRenderGroups(item.message.parts, showThinking).reduce(
+          ? getAssistantRenderGroups(item.message.parts, showThinking, inCoworkFrame).reduce(
             (rows, group) => rows + (group.kind === "tool-aggregate" ? group.parts.length : 1),
             0
           )
@@ -1395,7 +1395,7 @@ function MessageGroup({
       // aggregate them into a separate line here - just render the message's non-step content.
       const aggregateParts =
         !hideSteps && item.message.role === "assistant" && !isSessionErrorMessage(item.message)
-          ? getAggregateOnlyParts(item.message, showThinking)
+          ? getAggregateOnlyParts(item.message, showThinking, inCoworkFrame)
           : null
       if (aggregateParts) {
         if (!run) run = { parts: [], key: item.message.id }

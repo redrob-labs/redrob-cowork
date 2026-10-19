@@ -1,12 +1,12 @@
 import type { UIMessage } from "ai";
 
+import { getMessagesText } from "../../../components/chat/utils";
 import { parseCoworkBlocks } from "./cowork-blocks";
 import { isPlanRunPrompt } from "./thread-logic";
 
 /**
- * Round 9 (R9-7): how far the run of a plan has got, guessed from what the run is doing
- * (calibration: "guess from activity", no agent instruction). The run's own todo list is not read;
- * the to-do dock that showed it is gone.
+ * How far the run of a plan has got, guessed from what the run is doing (no agent instruction and
+ * no to-do list is read).
  *
  * Activity is read from the RAW transcript: after a plan message, the hidden plan-run send starts its
  * run, and every assistant message up to the next user message belongs to that run.
@@ -24,16 +24,17 @@ export type PlanRunActivity = {
   finished: boolean;
 };
 
+/** A plan whose run has not started: nothing done yet. */
 export const IDLE_PLAN_ACTIVITY: PlanRunActivity = { started: false, webSteps: 0, writing: "none", writes: 0, finished: false };
 
 /** How each step of the checklist reads right now. */
 export type PlanStepState = "done" | "active" | "todo";
 
+/** The fields of a message part this module reads to classify a tool call. */
 type ToolLike = { type: string; toolName?: string; state?: string };
 
-function textOf(message: UIMessage): string {
-  return message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("\n");
-}
+/** A message's text, as the thread renders and parses it. */
+const textOf = (message: UIMessage): string => getMessagesText([message]);
 
 /** A tool part's name, for both `dynamic-tool` and typed `tool-<name>` parts. */
 function toolName(part: ToolLike): string | null {
@@ -41,7 +42,9 @@ function toolName(part: ToolLike): string | null {
   return part.type.startsWith("tool-") ? part.type.slice(5).toLowerCase() : null;
 }
 
+/** Tool names counted as a web step (search or page read), with or without an underscore. */
 const WEB_TOOLS = new Set(["websearch", "webfetch", "web_search", "web_fetch"]);
+/** Tool names counted as writing a file, including a server-prefixed name ("redrob_write"). */
 const WRITE_TOOLS = /(^|[._:/-])(write|edit|multiedit|patch|apply_patch)$/;
 
 /**
@@ -140,7 +143,7 @@ export function planStepStates(labels: readonly string[], activity: PlanRunActiv
     done = writeAt + activity.writes;
   } else {
     // A file is written and the run is still going (a last pass): only the last step remains.
-    done = Math.max(writeAt + activity.writes, total - 1);
+    done = total - 1;
   }
   done = Math.min(total - 1, Math.max(0, done));
   return labels.map((_, index) => (index < done ? "done" : index === done ? "active" : "todo"));

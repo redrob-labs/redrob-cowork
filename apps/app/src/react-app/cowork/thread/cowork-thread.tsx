@@ -245,10 +245,10 @@ export function canRetryChecks(checks: AnswerChecks | undefined): boolean {
 
 /** The tone classes for a verdict chip: agree (green), mild (amber), differ (muted/strong). */
 function verdictToneClass(tone: CheckVerdict["tone"]): string {
-  // Each pairs a text colour with the matching icon; backgrounds come from the chip base below.
-  if (tone === "agree") return "text-[color:var(--ds-success,#1a7f52)]";
-  if (tone === "mild") return "text-[color:var(--ds-warning,#9a6b00)]";
-  return "text-[color:var(--ds-danger,#a1432b)]"; // differ
+  // The design system's tone ink colours; backgrounds come from the chip base below.
+  if (tone === "agree") return "text-success-ink";
+  if (tone === "mild") return "text-warning-ink";
+  return "text-destructive"; // differ
 }
 
 /**
