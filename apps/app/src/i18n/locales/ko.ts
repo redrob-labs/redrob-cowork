@@ -473,6 +473,7 @@ const ko = {
   "cowork.browser_live": "데스크가 이 탭을 쓰고 있습니다",
   "cowork.browser_new_tab": "새 탭",
   "cowork.browser_new_tab_lede": "여기서 로그인한 사이트는 이 컴퓨터에서만 데스크를 위해 로그인 상태로 남습니다.",
+  "cowork.browser_close_tab": "{title} 닫기",
   "cowork.browser_new_tab_title": "새 탭",
   "cowork.browser_read_for": "{chat} 대화용",
   "cowork.browser_read_none": "데스크가 대화를 위해 읽은 페이지가 여기에 표시됩니다.",

@@ -787,6 +787,7 @@ const en = {
   "cowork.browser_live": "Cowork is using this tab",
   "cowork.browser_new_tab": "New tab",
   "cowork.browser_new_tab_lede": "Sites you sign in to here stay signed in for Cowork, on this computer only.",
+  "cowork.browser_close_tab": "Close {title}",
   "cowork.browser_new_tab_title": "New tab",
   "cowork.browser_read_for": "for {chat}",
   "cowork.browser_read_none": "Pages Cowork reads for your chats appear here.",

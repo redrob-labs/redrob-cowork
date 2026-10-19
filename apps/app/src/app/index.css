@@ -1024,48 +1024,112 @@
   min-height: 0;
 }
 
+/* Round 10 (R5): one 12px inset (--cowork-browser-inset) for the tab strip, the nav bar and the
+   agent bar, so their left edges line up; tabs and the bar's controls share a 32px row. */
+.cowork-browser { --cowork-browser-inset: var(--space-3, 12px); }
+
 .cowork-browser__tabs {
   display: flex;
   flex: none;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-1);
-  overflow-x: auto;
-  padding: var(--space-2) var(--space-3) 0;
+  height: 40px;
+  padding: 0 var(--cowork-browser-inset);
   border-bottom: 1px solid var(--border-subtle);
   background: var(--surface-sunken);
 }
 
-.cowork-browser__tab {
-  display: inline-flex;
+.cowork-browser__tabs > :last-child { align-self: center; flex: none; }
+
+/* The draggable strip: tabs shrink evenly (Chrome-style) between 72px and 190px. */
+.cowork-browser__tablist {
+  display: flex;
   flex: 0 1 auto;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-end;
+  gap: 2px;
   min-width: 0;
+  overflow: hidden;
+}
+
+.cowork-browser__tab {
+  position: relative;
+  display: flex;
+  flex: 1 1 190px;
+  align-items: center;
+  min-width: 72px;
   max-width: 190px;
-  height: 34px;
+  height: 32px;
   margin-bottom: -1px;
-  padding: 0 var(--space-3);
   border: 1px solid transparent;
   border-bottom: 0;
   border-radius: --theme(--radius-md) --theme(--radius-md) 0 0;
   background: transparent;
-  font: var(--text-meta);
-  font-weight: 500;
   color: var(--ink-secondary);
-  cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
 }
 
-.cowork-browser__tab[aria-selected="true"] {
+.cowork-browser__tab:hover { background: color-mix(in srgb, var(--surface-base) 55%, transparent); }
+
+.cowork-browser__tab[data-active] {
   border-color: var(--border-subtle);
   background: var(--surface-base);
-  font-weight: 600;
   color: var(--ink-primary);
 }
 
-.cowork-browser__tab:focus-visible,
+.cowork-browser__tab-select {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 10px;
+  border: 0;
+  background: none;
+  font: var(--text-meta);
+  font-weight: 500;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.cowork-browser__tab[data-active] .cowork-browser__tab-select { font-weight: 600; }
+
+/* The x: on the active tab always, on others on hover or keyboard focus. */
+.cowork-browser__tab-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: --theme(--radius-sm);
+  background: none;
+  color: var(--ink-muted);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.cowork-browser__tab[data-active] .cowork-browser__tab-close,
+.cowork-browser__tab:hover .cowork-browser__tab-close,
+.cowork-browser__tab:focus-within .cowork-browser__tab-close { opacity: 1; }
+
+.cowork-browser__tab-close:hover { background: var(--surface-sunken); color: var(--ink-primary); }
+
+.cowork-browser__tab-select:focus-visible,
+.cowork-browser__tab-close:focus-visible,
 .cowork-browser__pages button:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cowork-browser__tab-close { transition: none; }
 }
 
 .cowork-browser__tab-title {
@@ -1100,14 +1164,15 @@
   flex: none;
   align-items: center;
   gap: 2px;
-  padding: var(--space-2) var(--space-3);
+  height: 48px;
+  padding: 0 var(--cowork-browser-inset);
   border-bottom: 1px solid var(--border-subtle);
 }
 
 .cowork-browser__address {
   flex: 1 1 auto;
   min-width: 0;
-  margin-left: 6px;
+  margin-left: var(--space-2, 8px);
 }
 
 .cowork-browser__address label {
@@ -1143,7 +1208,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px var(--space-3);
-  padding: 10px var(--space-4);
+  padding: 10px var(--cowork-browser-inset);
   border-bottom: 1px solid var(--border-ai);
   background: var(--surface-ai);
   font: var(--text-meta);
