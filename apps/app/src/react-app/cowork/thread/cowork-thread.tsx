@@ -350,15 +350,22 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
  * smaller than the chat text and grey (Claude-like), with a ChatGPT-style colour-sweep shimmer
  * over the text, and a mm:ss elapsed timer on the right counting since the run row appeared.
  */
-export function CoworkRunStatus(props: { label: string | null }) {
+export function CoworkRunStatus(props: { label: string | null; /** Round 9: a web step is in flight. */ web?: boolean }) {
   // Round 8c: with no specific step to show, a friendly line rotates (fades in each time).
   const working = useWorkingLine(props.label === null);
   const label = props.label ?? working.text;
   const elapsed = useElapsedClock();
   return (
     <div className="flex items-center gap-2 py-1">
-      {/* Inline loader, a touch larger than before so it reads clearly beside the text. */}
-      <RedrobLiquidLoader size={32} label={label} />
+      {props.web ? (
+        /* Round 9: reading or searching the web shows a static globe, like the web research rows. */
+        <span className="inline-flex size-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
+          {icons.globe({ width: 16, height: 16 })}
+        </span>
+      ) : (
+        /* Inline loader, a touch larger than before so it reads clearly beside the text. */
+        <RedrobLiquidLoader size={32} label={label} />
+      )}
       {/* Grey label with a sweeping shimmer, at the chat body size. */}
       <span
         key={props.label === null ? `working-${working.index}` : "label"}

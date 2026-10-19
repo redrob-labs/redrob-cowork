@@ -56,13 +56,17 @@ export function computeRevealRate(sinceStartSeconds: number, backlog: number): n
 
 /** Round 9: seconds the leftover text takes to drain once the stream has ended. */
 const DRAIN_SECONDS = 0.8
+/** Round 9: the drain never goes faster than this (chars/sec, ~25 per frame at 60fps). */
+const MAX_DRAIN_CHARS_PER_SEC = 1500
 
 /**
  * Pure drain rate (chars/sec) after the stream has ended: whatever is left finishes in about
- * DRAIN_SECONDS, never slower than the bounded catch-up pace (so the tail does not crawl).
+ * DRAIN_SECONDS, capped at MAX_DRAIN_CHARS_PER_SEC so a very long leftover still reads as text
+ * moving, and never slower than the bounded catch-up pace (so the tail does not crawl).
  */
 export function drainRate(sinceStartSeconds: number, backlog: number): number {
-  return Math.max(computeRevealRate(sinceStartSeconds, backlog), backlog / DRAIN_SECONDS, MAX_CATCHUP_CHARS_PER_SEC)
+  const target = Math.min(backlog / DRAIN_SECONDS, MAX_DRAIN_CHARS_PER_SEC)
+  return Math.max(computeRevealRate(sinceStartSeconds, backlog), target, MAX_CATCHUP_CHARS_PER_SEC)
 }
 
 /** True when the OS asks for reduced motion (read once per hook instance, kept live). */

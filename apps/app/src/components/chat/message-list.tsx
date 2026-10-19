@@ -112,7 +112,7 @@ import { hasPreservedMcpAppResult, McpAppFrame } from "@/components/chat/mcp-app
 import { ReasoningBlock } from "@/components/chat/reasoning-block"
 import { SubagentRunLine } from "@/components/chat/subagent-run-line"
 import { ToolAggregateGroup } from "@/components/chat/tool-aggregate-group"
-import { UnifiedActivity } from "@/components/chat/unified-activity"
+import { isWebStepInFlight, UnifiedActivity } from "@/components/chat/unified-activity"
 import {
   isApplyPatchToolPart,
   isBashToolPart,
@@ -1699,7 +1699,8 @@ function MessageTurnFacts({ messages, className }: { messages: UIMessage[]; clas
 export function MessageList({ messages: rawMessages, status, retryStatus, blockedStatus }: MessageListProps) {
   const isStreaming = status === "streaming" || status === "retrying"
   const inCoworkFrame = useInCoworkFrame()
-  // Round 7 C8: in the Cowork frame the to-do tool calls are not drawn (the dock carries progress).
+  // Round 7 C8: in the Cowork frame the to-do tool calls are not drawn (round 9: the plan's own
+  // checklist carries progress; the to-do dock is gone).
   const messages = React.useMemo(
     () => (inCoworkFrame ? withoutTodoToolParts(rawMessages) : rawMessages),
     [inCoworkFrame, rawMessages],
@@ -1723,9 +1724,10 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
     () => redrobPaymentRefusalFromMessages(messages) ?? classifyRedrobPaymentRefusal(error),
     [messages, error],
   )
-  const liveActionLabel = isStreaming
-    ? getActiveToolLabel(collectLatestAssistantToolParts(messages))
-    : null
+  const latestToolParts = React.useMemo(() => (isStreaming ? collectLatestAssistantToolParts(messages) : []), [isStreaming, messages])
+  const liveActionLabel = isStreaming ? getActiveToolLabel(latestToolParts) : null
+  // Round 9: a web search or page read in flight shows a static globe, not the liquid loader.
+  const liveActionWeb = isStreaming && isWebStepInFlight(latestToolParts as AnyToolPart[])
 
   /*
     Round 6: the running turn's loader is the inline UnifiedActivity row, which the live MessageGroup
@@ -1810,7 +1812,7 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
       {showLoading && !inCoworkFrame && <LoadingMessage label={liveActionLabel ?? undefined} />}
       {showLoading && inCoworkFrame && !hasInlineActivity ? (
         <div className={CHAT_COLUMN}>
-          <CoworkRunStatus label={liveActionLabel} />
+          <CoworkRunStatus label={liveActionLabel} web={liveActionWeb} />
         </div>
       ) : null}
       {retryStatus ? <RetryMessage status={retryStatus} /> : null}

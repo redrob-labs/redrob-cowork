@@ -43,11 +43,13 @@ describe("useSmoothReveal rate policy", () => {
 });
 
 describe("round 9: drain after the stream ends", () => {
-  test("a big leftover finishes in about 0.8s, not in one frame", () => {
-    // 1,562 characters left (measured live): ~1,950 chars/sec, about 33 per 60fps frame.
+  test("a big leftover drains at a capped pace, not in one frame", () => {
+    // 1,562 characters left (measured live): capped at 1,500 chars/sec, 25 per 60fps frame.
     const rate = drainRate(10, 1562);
-    expect(rate).toBeCloseTo(1562 / 0.8, 0);
-    expect(rate / 60).toBeLessThan(40);
+    expect(rate).toBe(1500);
+    expect(rate / 60).toBeLessThanOrEqual(25);
+    // A medium leftover still finishes in about 0.8s.
+    expect(drainRate(10, 800)).toBeCloseTo(1000, 0);
   });
 
   test("a small tail never crawls below the catch-up pace", () => {
