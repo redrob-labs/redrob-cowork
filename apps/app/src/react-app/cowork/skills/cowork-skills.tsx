@@ -165,7 +165,7 @@ export function SkillsScreen() {
         </>
       }
     >
-      <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
+      <PreviewPage note={t("cowork.skills_preview_note")} preview={preview} wide>
         {count === 0 ? (
           <div className="cowork-skills__explainer">
             <h2 className="cowork-skills__explainer-title">{t("cowork.skills_explainer_title")}</h2>
