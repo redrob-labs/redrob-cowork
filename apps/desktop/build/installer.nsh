@@ -1,43 +1,41 @@
-; Redrob Cowork - Windows installer / uninstaller UI (NSIS, assisted mode).
+; Redrob Cowork - Windows installer / uninstaller page copy (NSIS, assisted mode).
 ;
-; uiux-refresh round 3: redesigned to match the approved browser preview. This file is
-; PRESENTATION ONLY - warm copy, branded page text, and friendly-but-informative status
-; metaphors. It does NOT change any build, signing, publish, or install LOGIC: electron-builder
-; still drives the real copy/shortcut/registry work through its own assistedInstaller sections.
-; The branded sidebar bitmaps (build/installerSidebar.bmp, build/uninstallerSidebar.bmp,
-; 164x314, 24-bit) are picked up automatically by electron-builder when present; see
+; Presentation only: these macros set the text of the stock MUI pages. electron-builder still
+; does the real copy, shortcut and registry work in its own sections. MUI2 reads a page's text
+; defines when that page is inserted, so each define lives in the electron-builder hook that runs
+; right before its page (see app-builder-lib templates/nsis/assistedInstaller.nsh). Uninstaller
+; pages read the same MUI_WELCOMEPAGE_* / MUI_FINISHPAGE_* names as installer pages. The assisted
+; installer has no welcome page, so there is no installer welcome copy.
+; Sidebar art: build/installerSidebar.bmp and build/uninstallerSidebar.bmp; see
 ; build/README-installer-art.md.
-;
-; No feedback step: the current OS installer/uninstaller flow has none, and it stays that way.
 
-; --- Warm welcome / finish copy (overrides the stock MUI strings) -----------------------------
-!macro customHeader
-  ; Short hyphens only, warm and plain, Redrob Group voice.
-  !define MUI_WELCOMEPAGE_TITLE "Welcome to Redrob Cowork"
-  !define MUI_WELCOMEPAGE_TEXT "You're a couple of clicks from doing real work with AI on your own files, all on your computer. We'll put Cowork where you want it and leave the rest to you.$\r$\n$\r$\nSelect Next to begin."
+; Installer Finish page copy; this hook runs before MUI_PAGE_INSTFILES, and that page leaves the
+; finish defines alone, so they are still set when MUI_PAGE_FINISH is inserted after it.
+!macro customPageAfterChangeDir
   !define MUI_FINISHPAGE_TITLE "Redrob Cowork is ready"
-  !define MUI_FINISHPAGE_TEXT "That's it, everything's in place. Open Cowork and make something good."
+  !define MUI_FINISHPAGE_TEXT "Redrob Cowork is installed. Open it to start working with your files."
   !define MUI_FINISHPAGE_RUN_TEXT "Open Redrob Cowork now"
-  ; Uninstaller welcome / finish copy: warm, no pressure.
-  !define MUI_UNWELCOMEPAGE_TITLE "We're sorry to see you go"
-  !define MUI_UNWELCOMEPAGE_TEXT "This removes Redrob Cowork from your computer. Your files stay exactly where they are, we only take out what we put in. You're always welcome back.$\r$\n$\r$\nSelect Next to continue."
-  !define MUI_UNFINISHPAGE_TITLE "All done, take care"
-  !define MUI_UNFINISHPAGE_TEXT "Redrob Cowork has been removed. Thanks for giving it a try. The door's open whenever you want to come back."
 !macroend
 
-; --- Install progress: friendly metaphors naming the real step --------------------------------
-; Each line is shown on the progress page as that step runs. The metaphor is the warm part; the
-; parenthetical is what is actually happening, so the copy stays informative, not gamey.
+; Uninstaller Welcome page: replaces the default page, so it sets the copy and inserts the page.
+!macro customUnWelcomePage
+  !define MUI_WELCOMEPAGE_TITLE "Remove Redrob Cowork"
+  !define MUI_WELCOMEPAGE_TEXT "This removes the Redrob Cowork app from this computer. Your own files are not touched. Your settings and chats stay in your user folder, so a later install picks up where you left off.$\r$\n$\r$\nSelect Next to continue."
+  !insertmacro MUI_UNPAGE_WELCOME
+!macroend
+
+; Uninstaller Finish page copy; this hook runs right before MUI_UNPAGE_FINISH, so it only sets text.
+!macro customUninstallPage
+  !define MUI_FINISHPAGE_TITLE "Redrob Cowork is removed"
+  !define MUI_FINISHPAGE_TEXT "The app is no longer on this computer. Your files are where you left them."
+!macroend
+
+; One status line at the end of the install section, after electron-builder's own steps.
 !macro customInstall
-  DetailPrint "Clearing a space for your work (preparing the install folder)"
-  DetailPrint "Unpacking the workshop (copying application files)"
-  DetailPrint "Hanging the tools on the wall (writing Start menu and desktop shortcuts)"
-  DetailPrint "Introducing Cowork to Windows (registering the redrob:// link handler)"
-  DetailPrint "Handing the keys to the launcher (linking Redrob Launcher)"
-  DetailPrint "Tidying up (finishing touches)"
+  DetailPrint "Finishing setup"
 !macroend
 
-; --- Existing cleanup (unchanged): remove the brand shortcut we recorded at install -----------
+; Removes the brand shortcut path the app recorded at first launch.
 !macro customUnInstall
   StrCpy $1 ""
   FileOpen $0 "$APPDATA\io.redrob.work\windows-brand-shortcut.txt" r
