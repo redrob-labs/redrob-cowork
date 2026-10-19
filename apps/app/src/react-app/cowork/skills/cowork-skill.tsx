@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
-import { Badge, Button, EmptyState, Textarea, icons } from "@redrob-labs/ui";
+import { Badge, Button, EmptyState, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { PreviewPage, PreviewState } from "../preview/preview-note";
@@ -25,10 +25,9 @@ const ICON = { width: 14, height: 14, "aria-hidden": true };
 export function runSkill(
   deps: { workspaceId: string | null; request: (chat: PendingCoworkChat) => void; navigate: (path: string) => void },
   name: string,
-  extra = "",
 ): boolean {
   if (!deps.workspaceId) return false;
-  deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name, extra), mode: "plan" });
+  deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name), mode: "plan" });
   deps.navigate("/chat");
   return true;
 }
@@ -56,8 +55,6 @@ export type SkillViewProps = {
   taxonomy: SkillTaxonomy | null;
   /** Current locale for catalogue title and summary. */
   locale: string;
-  /** Optional instructions appended to the run prompt. */
-  extra: string;
   /** Whether a connected workspace can run this skill. */
   canRun: boolean;
   /** Whether the add or remove request is active. */
@@ -66,8 +63,6 @@ export type SkillViewProps = {
   backPath: string;
   /** Returns to the marketplace without adding a duplicate history entry. */
   onBack: () => void;
-  /** Updates optional run instructions. */
-  onExtra: (text: string) => void;
   /** Starts the skill in a Plan chat. */
   onRun: () => void;
   /** Installs a library skill. */
@@ -75,7 +70,7 @@ export type SkillViewProps = {
 };
 
 /** Product-page presentation for one installed or library skill. */
-export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPath, onBack, onExtra, onRun, onAdd }: SkillViewProps) {
+export function SkillView({ skill, taxonomy, locale, canRun, busy, backPath, onBack, onRun, onAdd }: SkillViewProps) {
   const brief = skillBrief(skill, locale);
   const category = skillShelf({ name: skill.name, tags: skill.tags, installed: null });
   // Profession and task only; the language has its own Information row.
@@ -87,7 +82,6 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
     ...(language ? [{ label: t("cowork.skill_info_language"), value: language }] : []),
     ...(skill.version ? [{ label: t("cowork.skill_info_version"), value: skill.version }] : []),
   ];
-  const focusRun = () => document.getElementById("cowork-skill-run-extra")?.focus();
 
   return (
     <div className="cowork-skill-detail">
@@ -104,19 +98,13 @@ export function SkillView({ skill, taxonomy, locale, extra, canRun, busy, backPa
             {topicTags.map((label) => <Badge key={label} size="sm" variant="outline">{label}</Badge>)}
           </div>
           {skill.installed ? (
-            <Button variant="primary" iconLeft={icons.play(ICON)} disabled={!canRun} onClick={focusRun}>{t("cowork.skills_use")}</Button>
+            <Button variant="primary" iconLeft={icons.play(ICON)} disabled={!canRun} onClick={onRun}>{t("cowork.skills_use")}</Button>
           ) : (
             <Button variant="primary" iconLeft={icons.plus(ICON)} loading={busy} onClick={onAdd}>{t("cowork.skill_add")}</Button>
           )}
         </div>
       </div>
       {skill.installed?.origin === "team" ? <p className="cowork-settings__description">{t("cowork.skill_team_note")}</p> : null}
-      {skill.installed ? (
-        <section className="cowork-settings__group">
-          <Textarea id="cowork-skill-run-extra" label={t("cowork.skill_run_extra_label")} hint={t("cowork.skill_run_extra_hint")} rows={2} value={extra} onChange={(event) => onExtra(event.target.value)} />
-          <div><Button variant="primary" iconLeft={icons.play(ICON)} disabled={!canRun} onClick={onRun}>{t("cowork.skill_run")}</Button></div>
-        </section>
-      ) : null}
       <section className="cowork-skill-about">
         <h2>{t("cowork.skill_detail_about")}</h2>
         <p className="cowork-skill-about__text">{skill.description}</p>
@@ -145,7 +133,6 @@ export function SkillScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const [extra, setExtra] = useState("");
   const [scheduling, setScheduling] = useState(false);
   const [busy, setBusy] = useState(false);
   const query = useQuery({ queryKey: [...previewKey(scope, "skills"), "one", name], queryFn: () => services.skills.get(name), staleTime: 30_000 });
@@ -194,7 +181,7 @@ export function SkillScreen() {
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
         <PreviewState query={query}>
           {(data) => data ? (
-            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} extra={extra} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onExtra={setExtra} onRun={() => void runSkill({ workspaceId, request, navigate }, name, extra)} onAdd={() => void act(installSkill)} />
+            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onRun={() => void runSkill({ workspaceId, request, navigate }, name)} onAdd={() => void act(installSkill)} />
           ) : <EmptyState title={t("cowork.skill_not_found_title")} description={t("cowork.skill_not_found_text")} />}
         </PreviewState>
       </PreviewPage>

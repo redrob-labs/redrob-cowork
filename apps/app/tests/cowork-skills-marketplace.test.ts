@@ -195,11 +195,20 @@ describe("skill marketplace markup", () => {
     React.createElement(MemoryRouter, null,
       React.createElement(SkillView, {
         skill: { name: "sample", description: longDescription, tags: {}, body: "# Secret instructions", installed: installedSkill } as unknown as SkillViewProps["skill"],
-        taxonomy: null, locale: "en", extra: "", canRun: true, busy: false, backPath: "/skills",
-        onBack: () => {}, onExtra: () => {}, onRun: () => {}, onAdd: () => {},
+        taxonomy: null, locale: "en", canRun: true, busy: false, backPath: "/skills",
+        onBack: () => {}, onRun: () => {}, onAdd: () => {},
       } as SkillViewProps),
     ),
   );
+
+  test("installed page has no Anything to add box and shows the full description", () => {
+    const html = view(installed("sample"));
+    expect(html).not.toContain("<textarea");
+    expect(html).not.toContain("cowork-skill-run-extra");
+    expect(html).toContain(`<p class="cowork-skill-about__text">${longDescription}</p>`);
+    expect(html).toContain(en["cowork.skills_use"]);
+    expect(html).not.toContain(" title=");
+  });
 
   test("detail page shows the full description with no More toggle and no instructions accordion", () => {
     const html = view(null);
