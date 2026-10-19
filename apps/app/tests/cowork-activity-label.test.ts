@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { DynamicToolUIPart } from "ai";
 
-import { currentActivityLabel, latestReasoningLead } from "../src/components/chat/unified-activity";
+import { currentActivityLabel, isWebStepInFlight, latestReasoningLead } from "../src/components/chat/unified-activity";
 import { nextWorkingLineIndex, workingLine, WORKING_LINE_COUNT } from "../src/lib/working-lines";
 
 // Round 8 M2: the "Working on it" line follows what the run is doing now.
@@ -73,5 +73,16 @@ describe("round 8c: rotating working lines", () => {
   test("the first line can be any of them", () => {
     expect(nextWorkingLineIndex(null, 10, () => 0)).toBe(0);
     expect(nextWorkingLineIndex(null, 10, () => 0.9999)).toBe(9);
+  });
+});
+
+
+describe("round 9: web steps show a static globe, not the loader", () => {
+  test("a running search or read counts; a finished one or a running non-web tool does not", () => {
+    expect(isWebStepInFlight([tool("websearch", "input-available", { query: "q" })])).toBe(true);
+    expect(isWebStepInFlight([tool("webfetch", "input-available", { url: "https://a.example" })])).toBe(true);
+    expect(isWebStepInFlight([tool("webfetch", "output-available", { url: "https://a.example" })])).toBe(false);
+    expect(isWebStepInFlight([tool("bash", "input-available", { command: "ls" })])).toBe(false);
+    expect(isWebStepInFlight([])).toBe(false);
   });
 });

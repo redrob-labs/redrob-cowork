@@ -1,6 +1,6 @@
 /** @jsxImportSource react */
 import * as React from "react"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Globe } from "lucide-react"
 
 import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader/RedrobLiquidLoader"
 import { FileChip } from "@/components/chat/file-chip"
@@ -11,6 +11,7 @@ import {
   type AnyToolPart,
 } from "@/lib/tool-aggregate"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
+import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { useWorkingLine } from "@/lib/working-lines"
 import { t } from "@/i18n"
@@ -82,6 +83,15 @@ export function currentActivityLabel(parts: AnyToolPart[], reasoning: string, fa
   return last ? getToolActivityLabel(last) : (fallback ?? t("cowork.thread_working"))
 }
 
+/** Round 9: whether the newest tool still running is a web search or page read. Pure. */
+export function isWebStepInFlight(parts: AnyToolPart[]): boolean {
+  for (let i = parts.length - 1; i >= 0; i -= 1) {
+    const part = parts[i]
+    if (part && isToolPartInFlight(part)) return isWebSearchToolPart(part) || isWebFetchToolPart(part)
+  }
+  return false
+}
+
 /** A step row's status dot: in flight, errored, or finished. */
 function rowStatus(part: AnyToolPart): "running" | "failed" | "done" {
   if (isToolPartInFlight(part)) return "running"
@@ -129,6 +139,7 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, st
   const working = useWorkingLine(isStreaming)
   const liveLabel = isStreaming ? currentActivityLabel(parts, reasoning, working.text) : null
   const showingWorkingLine = isStreaming && liveLabel === working.text
+  const liveWebStep = isStreaming && isWebStepInFlight(parts)
 
   // Header: live current-activity label while streaming; past-tense summary once done.
   const header = isStreaming
@@ -149,7 +160,13 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, st
         aria-expanded={expanded}
         className="group flex min-w-0 max-w-full cursor-pointer items-center gap-2 text-start transition-colors"
       >
-        {isStreaming ? (
+        {isStreaming && liveWebStep ? (
+          /* Round 9: while the run reads or searches the web, a static globe (like the web
+             research rows) stands in for the liquid loader. */
+          <span className="inline-flex size-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
+            <Globe className="size-4" />
+          </span>
+        ) : isStreaming ? (
           <RedrobLiquidLoader size={32} label={header} />
         ) : (
           <ChevronRight
