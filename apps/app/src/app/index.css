@@ -5896,6 +5896,12 @@ a.cowork-radar-story__source:focus-visible {
   transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), background-color var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 
+/* The DS icon set has only the horizontal `more` glyph; the row buttons turn it 90deg so they
+   read as a vertical three-dot (kebab) button. Same glyph, stroke and size as the DS one. */
+.cowork-row-more > svg {
+  transform: rotate(90deg);
+}
+
 .cowork-row-more:hover,
 .cowork-row-more[data-popup-open] {
   background: var(--border-subtle);
