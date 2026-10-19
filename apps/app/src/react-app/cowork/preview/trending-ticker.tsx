@@ -12,7 +12,9 @@ import {
   type TrendItem,
   type TrendScope,
 } from "./chart-trending";
+import { formatEditionStamp, formatLiveClock } from "./edition-clock";
 import { useAutoRotate } from "./use-auto-rotate";
+import { useMinuteClock } from "./use-minute-clock";
 
 const TICKER_MS = 3000;
 
@@ -48,6 +50,12 @@ function TrendMark(props: { item: TrendItem; compact?: boolean }) {
       <span className="sr-only">{accessible}</span>
     </span>
   );
+}
+
+/** The reader's current day and time, ticking each minute while the panel is open. */
+function LiveClock(props: { locale: Language }) {
+  const now = useMinuteClock();
+  return <time dateTime={now.toISOString()}>{formatLiveClock(now, props.locale)}</time>;
 }
 
 /** One tab's ordered, keyboard-navigable search list. */
@@ -198,9 +206,13 @@ export function TrendingTicker(props: TrendingTickerProps) {
         >
           <div className="model-chart__trending-heading">
             <h3>{t("cowork.chart_trending_title")}</h3>
-            <span>{props.edition}</span>
+            <span className="model-chart__trending-clock">
+              <LiveClock locale={props.locale} />
+              <span className="model-chart__trending-updated">
+                {t("cowork.chart_trending_updated", { time: formatEditionStamp(props.data.updatedAt, props.locale) })}
+              </span>
+            </span>
           </div>
-          <p className="model-chart__trending-note">{t("cowork.chart_trending_note")}</p>
           <Tabs
             variant="line"
             label={t("cowork.chart_trending_title")}
