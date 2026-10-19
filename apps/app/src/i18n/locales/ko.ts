@@ -499,6 +499,7 @@ const ko = {
   "cowork.check_when": "중요할 때란 믿고 쓰거나 남에게 전할 답을 말해요. 결정, 숫자, 규칙이나 사실에 관한 주장, 누군가에게 보낼 내용이 해당돼요. 간단한 질문, 초안, 아이디어 정리는 확인하지 않아요.",
   "cowork.composer_placeholder": "조사, 제작, 자동화. 모델은 Cowork가 골라요",
   "cowork.composer_picks_label": "추천 스킬",
+  "cowork.composer_picks_all": "전체 스킬",
   "cowork.composer_tray_label": "이번 메시지에 쓸 스킬",
   "cowork.composer_tray_remove": "{name} 빼기",
   "cowork.connectors_connected_title": "연결됨",

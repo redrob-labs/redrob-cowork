@@ -1872,12 +1872,42 @@
     animation: none;
   }
 }
+/* Header row: "Featured skills" on the left, the "All skills" link on the right edge. */
+.cowork-skill-picks__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .cowork-skill-picks__label {
   margin: 0;
   font-size: 12px;
   line-height: 16px;
   font-weight: 600;
   color: var(--ink-secondary);
+}
+/* A quiet text link; it reads as ink until hovered, then takes the brand blue. */
+.cowork-skill-picks__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-picks__all:hover {
+  color: var(--blue-6, #2b52ff);
+}
+[data-theme="dark"] .cowork-skill-picks__all:hover {
+  color: var(--blue-5, #507fff);
+}
+.cowork-skill-picks__all:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .cowork-skill-picks__row {
   display: grid;
@@ -1887,15 +1917,14 @@
   padding: 0;
   list-style: none;
 }
+/* No frame: each pick sits straight on the popup surface, separated only by the grid gap. */
 .cowork-skill-picks__item {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--surface-sunken);
+  padding: 4px 2px;
   color: var(--ink-primary);
 }
 .cowork-skill-picks__title {
@@ -1910,9 +1939,56 @@
   color: var(--ink-primary);
   overflow-wrap: anywhere;
 }
+/* Add / Use as a small 28px round icon button (name in the DS tooltip), sitting under the title. */
 .cowork-skill-picks__action {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
   margin-top: auto;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
   border-radius: 999px;
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease), background-color var(--duration-fast, 150ms) var(--easing-standard, ease), color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-picks__action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--blue-6, #2b52ff) 45%, transparent);
+  background: color-mix(in srgb, var(--blue-6, #2b52ff) 8%, transparent);
+  color: var(--blue-6, #2b52ff);
+}
+[data-theme="dark"] .cowork-skill-picks__action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--blue-5, #507fff) 45%, transparent);
+  background: color-mix(in srgb, var(--blue-5, #507fff) 12%, transparent);
+  color: var(--blue-5, #507fff);
+}
+.cowork-skill-picks__action:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-skill-picks__action:disabled {
+  cursor: progress;
+  color: var(--ink-secondary);
+}
+/* While Add installs: the refresh glyph turns (static under reduced motion). */
+.cowork-skill-picks__spin {
+  display: grid;
+  animation: cowork-skill-picks-spin 900ms linear infinite;
+}
+@keyframes cowork-skill-picks-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-picks__action {
+    transition: none;
+  }
+  .cowork-skill-picks__spin {
+    animation: none;
+  }
 }
 .cowork-composer-status {
   margin-top: var(--space-2);
