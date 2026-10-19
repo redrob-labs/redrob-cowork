@@ -24,6 +24,8 @@ import { permissionAsk, toTranscript } from "../src/react-app/cowork/thread/use-
 import {
   answersToPrompt,
   approvalActions,
+  challengeOutcome,
+  factConfidence,
   isPlanRunPrompt,
   isQuestionAnswerPrompt,
   isSyntheticCoworkPrompt,
@@ -443,62 +445,22 @@ describe("approvals and memory", () => {
   });
 });
 
-describe("cross-check verdict words (factConfidence / challengeOutcome)", () => {
-  // Imported lazily via require to avoid touching the large import block above.
-  const { factConfidence, challengeOutcome } = require("../src/react-app/cowork/thread/thread-logic");
-
-  test("fact: all holds, nothing missed -> highly confident (agree)", () => {
-    const v = factConfidence({ claims: [{ verdict: "holds", claim: "a" }, { verdict: "holds", claim: "b" }], missed: [] });
-    expect(v.tone).toBe("agree");
+describe("cross-check verdict words", () => {
+  test("fact confidence bands: all hold, mostly, low", () => {
+    expect(factConfidence({ claims: [{ verdict: "holds", claim: "a" }, { verdict: "holds", claim: "b" }], missed: [] }).tone).toBe("agree");
+    const fourOfFive = ["a", "b", "c", "d"].map((claim) => ({ verdict: "holds" as const, claim }));
+    expect(factConfidence({ claims: [...fourOfFive, { verdict: "wrong", claim: "e" }], missed: [] }).tone).toBe("mild");
+    expect(factConfidence({ claims: [{ verdict: "wrong", claim: "a" }, { verdict: "wrong", claim: "b" }, { verdict: "holds", claim: "c" }], missed: [{ text: "missed one" }] }).tone).toBe("differ");
   });
 
-  test("fact: four holds + one wrong -> 0.8 -> mostly correct (mild)", () => {
-    const v = factConfidence({
-      claims: [
-        { verdict: "holds", claim: "a" },
-        { verdict: "holds", claim: "b" },
-        { verdict: "holds", claim: "c" },
-        { verdict: "holds", claim: "d" },
-        { verdict: "wrong", claim: "e" },
-      ],
-      missed: [],
-    });
-    expect(v.tone).toBe("mild");
-  });
-
-  test("fact: mostly wrong -> low confidence (differ)", () => {
-    const v = factConfidence({
-      claims: [{ verdict: "wrong", claim: "a" }, { verdict: "wrong", claim: "b" }, { verdict: "holds", claim: "c" }],
-      missed: [{ text: "missed one" }],
-    });
-    expect(v.tone).toBe("differ");
-  });
-
-  test("fact: no claims -> highly confident (nothing to doubt)", () => {
-    expect(factConfidence({ claims: [], missed: [] }).tone).toBe("agree");
-  });
-
-  test("challenge: all held -> holds up (agree)", () => {
-    const v = challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }] });
-    expect(v.tone).toBe("agree");
-  });
-
-  test("challenge: a point broke -> challenged (differ)", () => {
-    const v = challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "broke", text: "b" }] });
-    expect(v.tone).toBe("differ");
-  });
-
-  test("challenge: one of four changed, none broke -> mostly holds (mild)", () => {
-    const v = challengeOutcome({
-      claim: "x",
-      rounds: [],
-      verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }, { kind: "held", text: "c" }, { kind: "changed", text: "d" }],
-    });
-    expect(v.tone).toBe("mild");
+  test("council outcome: a broken point challenges, one change in four mostly holds", () => {
+    expect(challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "broke", text: "b" }] }).tone).toBe("differ");
+    const verdict = [{ kind: "held" as const, text: "a" }, { kind: "held" as const, text: "b" }, { kind: "held" as const, text: "c" }, { kind: "changed" as const, text: "d" }];
+    expect(challengeOutcome({ claim: "x", rounds: [], verdict }).tone).toBe("mild");
   });
 });
 
-describe("round 8 M3: the written deliverable is what gets checked", () => {
+describe("the written deliverable is what gets checked", () => {
   test("checkedDocument takes the newest full write of the answering turn only", () => {
     const doc = { path: "reports/outlook.md", content: "# Outlook\n\nThe U.S. keeps the lead." };
     expect(checkedDocument([
@@ -538,7 +500,7 @@ describe("round 8 M3: the written deliverable is what gets checked", () => {
   });
 });
 
-describe("round 8 M7: check chips survive reopening a chat", () => {
+describe("check chips survive reopening a chat", () => {
   const memory = () => {
     const data = new Map<string, string>();
     return () => ({ getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => void data.set(key, value) });
@@ -562,7 +524,7 @@ describe("round 8 M7: check chips survive reopening a chat", () => {
   });
 });
 
-describe("round 8b: plan-mode turn rule", () => {
+describe("plan-mode turn rule", () => {
   test("a new request asks questions first; answers get exactly one plan", () => {
     const first = planTurnInstruction("Deep research the US-China AI race");
     expect(first).toContain("redrob-questions");

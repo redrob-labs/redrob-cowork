@@ -18,13 +18,13 @@ import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion"
  */
 
 /** Base sustained reveal rate (chars/sec) ~= a comfortable reading pace ("1x"). */
-const BASE_CHARS_PER_SEC = 55
+export const BASE_CHARS_PER_SEC = 55
 /** Opening burst multiplier ("2x") that drains the first-token backlog. */
 const BURST_MULTIPLIER = 2
 /** Seconds over which the burst decays from 2x back to 1x. */
-const BURST_DECAY_SECONDS = 1.2
+export const BURST_DECAY_SECONDS = 1.2
 /** Cap on how far ahead of the base pace we will catch up when the model races (chars/sec). */
-const MAX_CATCHUP_CHARS_PER_SEC = BASE_CHARS_PER_SEC * 6
+export const MAX_CATCHUP_CHARS_PER_SEC = BASE_CHARS_PER_SEC * 6
 /** Backlog (chars not yet revealed) above which the bounded catch-up kicks in. */
 const CATCHUP_BACKLOG_THRESHOLD = 240
 
@@ -59,7 +59,7 @@ export function computeRevealRate(sinceStartSeconds: number, backlog: number): n
 /** Seconds the leftover text takes to drain once the stream has ended. */
 const DRAIN_SECONDS = 0.8
 /** The drain never goes faster than this (chars/sec, ~25 per frame at 60fps). */
-const MAX_DRAIN_CHARS_PER_SEC = 1500
+export const MAX_DRAIN_CHARS_PER_SEC = 1500
 
 /**
  * Re-render throttle. Each committed count re-parses the growing markdown, so the reveal commits a

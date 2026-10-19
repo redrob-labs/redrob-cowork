@@ -51,7 +51,7 @@ describe("classifyStep", () => {
       kind: "web",
       label: "browser.open_url",
       url: "https://law.go.kr/x",
-      // A browser capability always navigates, so the panel may open (item 7a).
+      // A browser capability always navigates, so the panel may open.
       navigation: true,
     });
     expect(classifyStep(toolPart("redrob_execute", { id: "settings.panel.open" }))?.kind).toBe("model");
@@ -68,7 +68,7 @@ describe("classifyStep", () => {
   });
 
   test("web fetch and search are web; neither navigates, so neither opens the browser panel", () => {
-    // Round 9: reading a page is a background read; only real browser tools open the panel.
+    // Reading a page is a background read; only real browser tools open the panel.
     expect(classifyStep(toolPart("webfetch", { url: "https://federalreserve.gov/rates" }))).toMatchObject({
       kind: "web",
       url: "https://federalreserve.gov/rates",
@@ -161,7 +161,7 @@ describe("reduceRunEvent", () => {
     ]);
   });
 
-  test("round 9: a chat titled with a block fence line carries no chat title", () => {
+  test("a chat titled with a block fence line carries no chat title", () => {
     const { emitted } = replay([
       { type: "session.updated", properties: { info: { id: "chat-1", title: "```redrob-questions" } } },
       partEvent(toolPart("webfetch", { url: "https://a.example" }, "completed", "w2")),
@@ -223,7 +223,7 @@ describe("the frame's response to Cowork events", () => {
     expect(pages.getState().pages).toMatchObject([{ host: "law.go.kr", chatId: "chat-1", chatTitle: "Notice" }]);
   });
 
-  test("a bare web SEARCH (no navigation, no url) does not open the browser panel (item 7a)", () => {
+  test("a bare web SEARCH (no navigation, no url) does not open the browser panel", () => {
     const { frame, pages, run } = targets();
     // A websearch step: kind web, navigation false, no url. It must not pop the panel or mark reading.
     run({ type: "step.started", runId: "chat-1", label: "websearch", kind: "web", navigation: false });

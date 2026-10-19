@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 
 import { isTodoToolPart, withoutTodoToolParts } from "../src/react-app/cowork/thread/hide-todo-tools";
 
-// Round 7 C8: "Updated the plan (4)" boxes are not drawn in the Cowork transcript.
+// "Updated the plan (4)" boxes are not drawn in the Cowork transcript.
 
 const tool = (toolName: string): UIMessage["parts"][number] =>
   ({ type: "dynamic-tool", toolName, toolCallId: toolName, state: "output-available", input: {}, output: "" }) as unknown as UIMessage["parts"][number];
@@ -14,6 +14,9 @@ describe("withoutTodoToolParts", () => {
     const input: UIMessage[] = [{ id: "a", role: "assistant", parts: [text("one"), tool("todowrite"), tool("websearch"), tool("todoread"), text("two")] }];
     const [message] = withoutTodoToolParts(input);
     expect(message?.parts.map((part) => (part.type === "text" ? part.text : (part as { toolName: string }).toolName))).toEqual(["one", "websearch", "two"]);
+    expect(isTodoToolPart(tool("TodoWrite"))).toBe(true);
+    expect(isTodoToolPart(tool("write"))).toBe(false);
+    expect(isTodoToolPart(text("todowrite"))).toBe(false);
   });
 
   test("returns the same array and message objects when there is nothing to remove", () => {
@@ -24,10 +27,4 @@ describe("withoutTodoToolParts", () => {
     expect(withoutTodoToolParts(input)).toBe(input);
   });
 
-  test("only to-do tools match", () => {
-    expect(isTodoToolPart(tool("todowrite"))).toBe(true);
-    expect(isTodoToolPart(tool("TodoWrite"))).toBe(true);
-    expect(isTodoToolPart(tool("write"))).toBe(false);
-    expect(isTodoToolPart(text("todowrite"))).toBe(false);
-  });
 });
