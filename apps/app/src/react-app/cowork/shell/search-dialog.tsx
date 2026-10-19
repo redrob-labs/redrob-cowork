@@ -177,11 +177,13 @@ export function SearchDialog(props: { onClose: () => void }) {
   const library = useQuery({ queryKey: previewKey(workspaceId ?? "preview", "library"), queryFn: () => services.skills.library(), staleTime: 5 * 60_000, gcTime: CATALOGUE_CACHE_MS, retry: false });
 
   const installedSkills = useMemo(() => unwrap(skills.data, [] as CoworkSkill[]), [skills.data]);
-  // Catalogue rows and the workflows built from them change only with the data, not per keystroke.
+  // Skill hits wait for the catalogue to settle, so a library skill never reads as "no result"
+  // and then appears. When the catalogue fails, installed skills are searched on their own.
   const { catalogue, workflows } = useMemo(() => {
+    if (library.isPending) return { catalogue: [], workflows: [] };
     const rows = skillRows({ installed: installedSkills, library: library.data?.data ?? null });
     return { catalogue: rows, workflows: availableWorkflows(rows) };
-  }, [installedSkills, library.data]);
+  }, [installedSkills, library.data, library.isPending]);
   const data: SearchData = {
     chats: unwrap(chats.data, [] as Chat[]),
     projects: unwrap(projects.data, [] as Project[]),
@@ -196,6 +198,12 @@ export function SearchDialog(props: { onClose: () => void }) {
   const [tab, setTab] = useState<SearchTab>("all");
   const [active, setActive] = useState(0);
   const results = searchResultsForTab(tab, query, data);
+  // Results can shrink under the cursor when a query resolves; keep the active row on the list.
+  const current = Math.min(active, results.length - 1);
+  // Where skill hits can appear, say when the catalogue is still loading or is unavailable.
+  const skillStatus = tab === "skills" || (tab === "all" && query.trim())
+    ? library.isPending ? t("cowork.skills_loading_label") : library.isError ? t("cowork.skills_library_offline_title") : null
+    : null;
 
   const go = (result: SearchResult | undefined) => {
     if (!result) return;
@@ -206,10 +214,10 @@ export function SearchDialog(props: { onClose: () => void }) {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       const step = event.key === "ArrowDown" ? 1 : -1;
-      setActive((index) => (results.length ? (index + step + results.length) % results.length : 0));
+      setActive(results.length ? (Math.max(current, 0) + step + results.length) % results.length : 0);
     } else if (event.key === "Enter") {
       event.preventDefault();
-      go(results[active]);
+      go(results[current]);
     }
   };
   const pickTab = (next: SearchTab) => {
@@ -228,7 +236,7 @@ export function SearchDialog(props: { onClose: () => void }) {
             role="combobox"
             aria-expanded="true"
             aria-controls="cowork-search-results"
-            aria-activedescendant={results[active] ? `cowork-search-${results[active].id}` : undefined}
+            aria-activedescendant={results[current] ? `cowork-search-${results[current].id}` : undefined}
             aria-label={t("titlebar.search_placeholder")}
             placeholder={t("titlebar.search_placeholder")}
             value={query}
@@ -259,7 +267,7 @@ export function SearchDialog(props: { onClose: () => void }) {
               key={result.id}
               id={`cowork-search-${result.id}`}
               role="option"
-              aria-selected={index === active}
+              aria-selected={index === current}
               className="cowork-search__result"
               onMouseEnter={() => setActive(index)}
               onMouseDown={(event) => {
@@ -271,7 +279,8 @@ export function SearchDialog(props: { onClose: () => void }) {
               {result.meta ? <span className="cowork-search__meta">{result.meta}</span> : null}
             </li>
           ))}
-          {results.length === 0 ? <li className="cowork-search__empty">{emptyLabel(tab)}</li> : null}
+          {skillStatus ? <li className="cowork-search__empty">{skillStatus}</li> : null}
+          {results.length === 0 && !(skillStatus && library.isPending) ? <li className="cowork-search__empty">{emptyLabel(tab)}</li> : null}
         </ul>
       </div>
     </CoworkDialog>
