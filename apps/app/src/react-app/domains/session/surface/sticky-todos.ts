@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 import type { TodoItem } from "@/app/types";
 
@@ -38,9 +38,12 @@ export function nextStickyTodos(prev: StickyTodoMemo | null, input: StickyTodoIn
 
 /** The dock's list for this render, remembered across renders of the same surface. */
 export function useStickyTodos(sessionId: string, todos: TodoItem[], busy: boolean): TodoItem[] {
+  // The ref holds the last COMMITTED memo: derived during render from it, written back only after
+  // commit, so a render React abandons (concurrent rendering) cannot leak into the next one.
   const memoRef = useRef<StickyTodoMemo | null>(null);
   const { memo, shown } = nextStickyTodos(memoRef.current, { sessionId, todos, busy });
-  // Render-phase ref write is intentional and idempotent: the same inputs produce the same memo.
-  memoRef.current = memo;
+  useLayoutEffect(() => {
+    memoRef.current = memo;
+  });
   return shown;
 }

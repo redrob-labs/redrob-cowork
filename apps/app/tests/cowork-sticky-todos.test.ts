@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import type { TodoItem } from "../src/app/types";
 import { nextStickyTodos, type StickyTodoMemo } from "../src/react-app/domains/session/surface/sticky-todos";
+import { shouldSeedSnapshotTodos } from "../src/react-app/domains/session/sync/session-sync";
 
 // Round 7 C4: the to-do dock stays up until the task is completed, without flicker.
 
@@ -50,5 +51,18 @@ describe("nextStickyTodos", () => {
   test("never carries one session's list into another", () => {
     const [, other] = run([{ todos: plan, busy: true }, { todos: [], busy: true, sessionId: "s2" }]);
     expect(other).toEqual([]);
+  });
+});
+
+describe("snapshot vs live to-do writes (C4 review)", () => {
+  test("a snapshot fetched before the latest live event does not overwrite the list", () => {
+    expect(shouldSeedSnapshotTodos(1_000, 2_000)).toBe(false);
+    expect(shouldSeedSnapshotTodos(2_000, 2_000)).toBe(true);
+    expect(shouldSeedSnapshotTodos(3_000, 2_000)).toBe(true);
+  });
+
+  test("with no event yet, or no recorded fetch start, the snapshot seeds as before", () => {
+    expect(shouldSeedSnapshotTodos(1_000, undefined)).toBe(true);
+    expect(shouldSeedSnapshotTodos(undefined, 2_000)).toBe(true);
   });
 });
