@@ -32,6 +32,7 @@ import { dragEventHasFiles } from "./drag-files";
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
 import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/composer/cowork-composer";
 import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
+import { attachSkill, ComposerSkillTray, detachSkill } from "@/react-app/cowork/composer/skill-tray";
 
 type MentionItem = {
   id: string;
@@ -46,9 +47,12 @@ type ComposerProps = {
   draft: string;
   mentions: Record<string, ComposerMentionKind>;
   onDraftChange: (value: string) => void;
-  onSend: () => void | Promise<void>;
-  onSteer: () => void | Promise<void>;
-  onQueue: () => void | Promise<void>;
+  /** Sends the draft. `skills` are the tray's attached skills, to prepend as `[skill name]` tokens. */
+  onSend: (skills?: readonly string[]) => void | Promise<void>;
+  /** Steers the running turn with the draft, plus the tray's attached skills. */
+  onSteer: (skills?: readonly string[]) => void | Promise<void>;
+  /** Queues the draft for when the run finishes, plus the tray's attached skills. */
+  onQueue: (skills?: readonly string[]) => void | Promise<void>;
   onStop: () => void | Promise<void>;
   busy: boolean;
   steering: boolean;
@@ -339,18 +343,38 @@ export function ReactSessionComposer(props: ComposerProps) {
     });
   }, []);
 
+  /*
+   * Skills attached to this message (the tray). They stay out of the text until send, and a new
+   * session starts with an empty tray. They are cleared once the send went through, i.e. the parent
+   * emptied the draft; a failed send keeps both the text and the skills for a retry.
+   */
+  const [traySkills, setTraySkills] = useState<string[]>([]);
+  useEffect(() => {
+    setTraySkills([]);
+  }, [props.sessionId]);
+  const submitWithTray = useCallback(
+    (run: (skills?: readonly string[]) => void | Promise<void>) => {
+      const skills = traySkills.length ? traySkills : undefined;
+      return Promise.resolve(run(skills)).finally(() => {
+        if (skills && !draftRef.current.trim()) setTraySkills([]);
+        focusEditor();
+      });
+    },
+    [focusEditor, traySkills],
+  );
+
   // Editor submit (Enter). While idle this sends normally; while busy
   // Enter queues until the agent finishes, and Cmd/Ctrl+Enter steers.
   const handleEditorSubmit = useCallback((options: { queue: boolean }) => {
-    const hasContent = props.draft.trim().length > 0 || props.attachments.length > 0;
+    const hasContent = props.draft.trim().length > 0 || props.attachments.length > 0 || traySkills.length > 0;
     if (!hasContent) return;
     if (props.busy) {
-      if (options.queue) void Promise.resolve(props.onSteer()).finally(focusEditor);
-      else void Promise.resolve(props.onQueue()).finally(focusEditor);
+      if (options.queue) void submitWithTray(props.onSteer);
+      else void submitWithTray(props.onQueue);
       return;
     }
-    void Promise.resolve(props.onSend()).finally(focusEditor);
-  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue, focusEditor]);
+    void submitWithTray(props.onSend);
+  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue, submitWithTray, traySkills.length]);
 
   const slashCommandQuery = getSlashCommandQuery(props.draft);
   const slashOpenNext = slashCommandQuery !== null;
@@ -676,7 +700,7 @@ export function ReactSessionComposer(props: ComposerProps) {
     })),
     ...skills.filter((skill) => !localCommandSkillNames.has(skill.name)),
   ];
-  const canSend = props.draft.trim().length > 0 || props.attachments.length > 0;
+  const canSend = props.draft.trim().length > 0 || props.attachments.length > 0 || traySkills.length > 0;
 
   const renderConnectionRows = () => {
     const servers = props.mcpServers ?? [];
@@ -749,23 +773,14 @@ export function ReactSessionComposer(props: ComposerProps) {
   };
 
   const applySkillSelection = (input: string | SkillCard, options?: { replaceSkillDraft?: boolean }) => {
-    const skill = typeof input === "string"
-      ? { name: input, path: "", origin: "local" as const }
-      : input;
-    const name = skill.name;
-    if (options?.replaceSkillDraft) {
-      props.onDraftChange(`[skill ${name}] `);
-    } else {
-      const editor = editorRef.current;
-      if (editor) {
-        editor.insertSkillAtSelection(name);
-      } else {
-        const separator = props.draft.length > 0 && !/\s$/.test(props.draft) ? " " : "";
-        props.onDraftChange(`${props.draft}${separator}[skill ${name}] `);
-      }
-    }
+    const name = typeof input === "string" ? input : input.name;
+    // The skill goes to the tray, not into the text. A `/query` that picked it is dropped from the
+    // draft; a pick from the + menu leaves what was typed alone.
+    setTraySkills((current) => attachSkill(current, name));
+    if (options?.replaceSkillDraft) props.onDraftChange("");
     setSlashOpen(false);
     setToolMenuOpen(false);
+    focusEditor();
   };
 
   const applyAgentSelection = (name: string | null) => {
@@ -1206,6 +1221,8 @@ export function ReactSessionComposer(props: ComposerProps) {
           ) : null}
 
           <div className="px-4 pt-3 pb-2">
+            {/* Attached skills sit in the panel's upper section, above the text. */}
+            <ComposerSkillTray skills={traySkills} onRemove={(name) => setTraySkills((current) => detachSkill(current, name))} />
             {/* Editor */}
             <LexicalPromptEditor
               ref={editorRef}
@@ -1615,7 +1632,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                         ? undefined
                         : // Clicking the button takes focus out of the editor, so it is restored on the
                           // same path Enter uses. Without this, sending by click always cost a click back.
-                          () => void Promise.resolve(props.onSend()).finally(focusEditor)
+                          () => void submitWithTray(props.onSend)
                   }
                   disabled={props.disabled || (!props.busy && !canSend)}
                   aria-label={props.busy ? t("composer.stop") : t("composer.run_task")}

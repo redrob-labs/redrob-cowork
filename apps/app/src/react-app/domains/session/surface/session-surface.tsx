@@ -65,6 +65,7 @@ import { getSessionActivityStatusLabel, useSessionActivityStore, type SessionAct
 import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permission-approval-modal";
 import { CoworkThreadContext, textDraft, type CoworkThread } from "@/react-app/cowork/thread/cowork-thread-context";
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
+import { withSkillTokens } from "@/react-app/cowork/composer/skill-tray";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
 import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
@@ -1193,9 +1194,10 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // Initial send (agent idle) and explicit "Steer" follow-up (agent busy)
   // share the same immediate path.
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(async (skills?: readonly string[]) => {
     const originalDraft = draft;
-    const text = originalDraft.trim();
+    // The composer's attached skills (its tray) ride in front of the text as `[skill name]` tokens.
+    const text = withSkillTokens(originalDraft.trim(), skills).trim();
     if (!text && attachments.length === 0) return;
     /*
       Fan-out commands are taken here, in the live send path, and not in the actions store: that store
@@ -1259,15 +1261,15 @@ export function SessionSurface(props: SessionSurfaceProps) {
     void handleSend();
   }, [chatStreaming, draft, handleSend, model.transitionState, props.modelUnavailable, props.sessionId]);
 
-  const handleSteer = useCallback(async () => {
+  const handleSteer = useCallback(async (skills?: readonly string[]) => {
     setSteering(true);
-    await handleSend();
+    await handleSend(skills);
   }, [handleSend]);
 
   // Queue: hold the draft locally and clear the composer. The drain effect
   // sends it once the session reports idle.
-  const handleQueue = useCallback(() => {
-    const text = draft.trim();
+  const handleQueue = useCallback((skills?: readonly string[]) => {
+    const text = withSkillTokens(draft.trim(), skills).trim();
     if (!text && attachments.length === 0) return;
     const queuedDraft = withoutRevertTarget(buildDraft(text, attachments));
     if (!queuedDraft) return;

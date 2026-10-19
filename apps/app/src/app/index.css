@@ -2404,6 +2404,72 @@
   width: 40px;
   height: 40px;
 }
+/* The hero composer's recommended-skills strip. */
+.cowork-skill-icon[data-size="pick"] {
+  width: 28px;
+  height: 28px;
+}
+/* The composer's attached-skills tray. */
+.cowork-skill-icon[data-size="mini"] {
+  width: 22px;
+  height: 22px;
+}
+
+/* Composer skill tray: attached skills as small circles in the panel's upper section. Hover or focus
+   shows the title (DS tooltip) and a remove badge; clicking the chip detaches the skill. */
+.cowork-skill-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.cowork-skill-tray__item {
+  display: flex;
+}
+.cowork-skill-tray__chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.cowork-skill-tray__chip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-skill-tray__remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--ink-primary);
+  color: var(--surface-raised, #fff);
+  box-shadow: 0 0 0 2px var(--surface-raised, #fff);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-tray__chip:hover .cowork-skill-tray__remove,
+.cowork-skill-tray__chip:focus-visible .cowork-skill-tray__remove {
+  opacity: 1;
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-tray__remove {
+    transition: none;
+  }
+}
 .cowork-skill-icon img {
   display: block;
   width: 100%;

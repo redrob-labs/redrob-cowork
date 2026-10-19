@@ -14,6 +14,7 @@ import {
   type PastedTextChip,
 } from "@/react-app/domains/session/surface/composer/pasted-text";
 import { resolveAttachmentFileMetadata } from "@/react-app/domains/session/sync/attachment-file-part";
+import { withSkillTokens } from "@/react-app/cowork/composer/skill-tray";
 
 /**
  * Workspace-scoped wiring for the new-task composer. Everything here is
@@ -190,8 +191,10 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
     props.onDraftChange(props.draft.replaceAll(`[attachment ${id}]`, ""));
   };
 
-  const handleRunTask = () => {
-    props.onRunTask(resolvePastedTextPlaceholders(props.draft, pastedText), attachments);
+  const handleRunTask = (skills?: readonly string[]) => {
+    // The composer's attached skills (its tray) ride in front of the text as `[skill name]` tokens,
+    // which the route turns into skill parts when it seeds the new session.
+    props.onRunTask(withSkillTokens(resolvePastedTextPlaceholders(props.draft, pastedText), skills), attachments);
   };
 
   const handleUnsupportedFileLinks = (links: string[]) => {
