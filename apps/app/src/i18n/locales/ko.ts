@@ -860,6 +860,7 @@ const ko = {
   "cowork.file_reveal_failed": "폴더에서 파일을 보여 주지 못했습니다",
   "cowork.file_show_folder": "폴더에서 보기",
   "cowork.files_back": "모든 파일",
+  "cowork.artifacts_back": "모든 아티팩트",
   "cowork.files_lede": "이번 주에 데스크가 만든 파일입니다. 최근 파일이 먼저 나옵니다.",
   "cowork.fold_menu": "메뉴 접기",
   "cowork.guide_auto_cost": "보통 {profile} 한 번에 약 {cost}입니다.",

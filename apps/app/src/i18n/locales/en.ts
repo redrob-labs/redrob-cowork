@@ -857,6 +857,7 @@ const en = {
   "cowork.file_reveal_failed": "Could not show the file in its folder",
   "cowork.file_show_folder": "Show in folder",
   "cowork.files_back": "All files",
+  "cowork.artifacts_back": "All artifacts",
   "cowork.files_lede": "What Cowork wrote for you this week, newest first.",
   "cowork.fold_menu": "Fold the menu",
   "cowork.guide_auto_cost": "A typical {profile} costs about {cost}.",

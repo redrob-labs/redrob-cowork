@@ -9,9 +9,9 @@ import {
   isArtifactWriteInFlight,
   prettyArtifactTitle,
   useArtifacts,
-  usePreviewArtifact,
   type ArtifactItem,
 } from "@/lib/artifacts";
+import { CHAT_COLUMN } from "@/components/chat/chat-column";
 import { t } from "@/i18n";
 import { useFrameStore } from "@/react-app/cowork/store/frame-store";
 
@@ -30,17 +30,18 @@ interface ArtifactCardProps {
  * shimmer in place of the type label, resolving to the finished type label once the file settles.
  */
 function ArtifactCard({ artifact, writing }: ArtifactCardProps) {
-  const previewArtifact = usePreviewArtifact();
   const openPanel = useFrameStore((state) => state.openPanel);
+  const openArtifact = useFrameStore((state) => state.openArtifact);
   // Round 7 C6: while the file is being written the card opens the live draft in the Artifacts tab.
+  // Round 8 M6: a written artifact opens on its own in the Artifacts tab (not the Files tab).
   const canOpen = writing || canOpenArtifact(artifact);
   const title = prettyArtifactTitle(artifact.path);
   return (
     <button
       type="button"
       disabled={!canOpen}
-      onClick={() => (writing ? openPanel("artifacts") : previewArtifact(artifact))}
-      title={t("cowork.artifact_open", { title })}
+      onClick={() => (writing ? openPanel("artifacts") : openArtifact(artifact.legacy_target.id))}
+      aria-label={t("cowork.artifact_open", { title })}
       className="group/artifact-card flex w-full max-w-md items-center gap-3 rounded-xl border border-border/70 bg-muted/30 px-3.5 py-3 text-left transition-colors hover:bg-muted disabled:cursor-default disabled:hover:bg-muted/30"
     >
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background">
@@ -79,7 +80,8 @@ export function ArtifactCardList({ messages }: ArtifactCardListProps) {
   const artifacts = useArtifacts(messages, { includeTargetFallbacks: false, includeInFlightWrites: true, writtenOnly: true });
   if (artifacts.length === 0) return null;
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-2 md:px-10" data-artifact-cards>
+    // Round 8 M5: the cards sit on the SAME column as the prose (CHAT_COLUMN), left-aligned with it.
+    <div className={`${CHAT_COLUMN} flex flex-col gap-2`} data-artifact-cards>
       {artifacts.map((artifact) => (
         <ArtifactCard
           key={artifact.id}

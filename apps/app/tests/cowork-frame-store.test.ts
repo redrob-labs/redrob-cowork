@@ -92,6 +92,18 @@ describe("cowork frame store: panel", () => {
     expect(store.getState().panel).toEqual({ open: true, tab: "files", file: "f-notice", lastTab: "files" });
   });
 
+  test("openArtifact shows one artifact on the Artifacts tab; null or reopening the tab goes back to the list", () => {
+    const store = createFrameStore({ storage: () => null });
+    store.getState().openFile("f-notice");
+    store.getState().openArtifact("file:reports/outlook.md");
+    expect(store.getState().panel).toMatchObject({ open: true, tab: "artifacts", lastTab: "artifacts", artifact: "file:reports/outlook.md", file: "f-notice" });
+    store.getState().openArtifact(null);
+    expect(store.getState().panel.artifact).toBeNull();
+    store.getState().openArtifact("file:reports/outlook.md");
+    store.getState().openPanel("artifacts");
+    expect(store.getState().panel.artifact ?? null).toBeNull();
+  });
+
   test("cowork state, modal and voice", () => {
     const store = createFrameStore({ storage: () => null });
     expect(store.getState().browser.cowork).toBe("done");

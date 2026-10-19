@@ -12,7 +12,11 @@ import { getSidePanelSessionKey } from "../../domains/session/panel/side-panel-s
 import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
 import { CoworkBrowser } from "./cowork-browser";
-import { CoworkPanelFiles } from "./cowork-panel-files";
+import { CoworkPanelFiles, CoworkFilePreview } from "./cowork-panel-files";
+import { fileFromTarget } from "./cowork-files";
+import { useCoworkConnection } from "../shell/cowork-connection";
+import { prettyArtifactTitle } from "@/lib/artifacts";
+import type { OpenTarget } from "../../domains/session/artifacts/open-target";
 import { CoworkLiveDraft } from "./cowork-live-draft";
 import { artifactPathMatches, useLiveDraftStore } from "./live-draft";
 
@@ -106,28 +110,49 @@ function CoworkPanelBrowser(props: { sessionKey: string }) {
 }
 
 /**
- * One artifact row: type icon + name; clicking opens it in the panel's file view. The panel lives
- * in the Cowork shell, OUTSIDE the session surface's OpenTargetProvider, so the open-target hook
- * would be a silent no-op here; the frame store's openFile (the same path a chat file chip takes)
- * is the one that works.
+ * One artifact row: type icon + name; clicking opens it on its own in the Artifacts tab (round 8,
+ * via the frame store's openArtifact). The panel lives in the Cowork shell, OUTSIDE the session
+ * surface's OpenTargetProvider, so the open-target hook would be a silent no-op here.
  */
 function CoworkArtifactRow(props: { artifact: ArtifactItem }) {
-  const openFile = useFrameStore((state) => state.openFile);
+  const openArtifact = useFrameStore((state) => state.openArtifact);
   const open = () => {
     if (!canOpenArtifact(props.artifact)) return;
-    openFile(props.artifact.legacy_target.id);
+    openArtifact(props.artifact.legacy_target.id);
   };
   return (
     <li>
-      <button type="button" className="cowork-file-row" onClick={open} title={props.artifact.path}>
+      <button type="button" className="cowork-file-row" onClick={open}>
         <span className="cowork-file__icon">
           <ArtifactIcon className="size-4 text-muted-foreground" type={props.artifact.type} />
         </span>
         <span className="cowork-file-row__text">
-          <b>{props.artifact.name}</b>
+          <b>{prettyArtifactTitle(props.artifact.path)}</b>
         </span>
       </button>
     </li>
+  );
+}
+
+/**
+ * Round 8 (M6): one artifact, shown as its output and nothing else - no frame, no folder or time
+ * line, no "Written in the chat", no Office / folder buttons. The only control is "All artifacts",
+ * back to the list. It reads the file the same way the Files tab previews do (CoworkFilePreview).
+ */
+function CoworkArtifactView(props: { target: OpenTarget; chatId: string; onBack: () => void }) {
+  const client = useCoworkConnection((state) => state.client);
+  const workspaceId = useCoworkConnection((state) => state.workspaceId);
+  const file = useMemo(() => fileFromTarget(props.target, "", props.chatId), [props.chatId, props.target]);
+  return (
+    <div className="cowork-artifact-view">
+      <button type="button" className="cowork-file__back" onClick={props.onBack}>
+        {icons.arrowLeft({ width: 14, height: 14, "aria-hidden": true })}
+        {t("cowork.artifacts_back")}
+      </button>
+      <div className="cowork-artifact-view__body">
+        <CoworkFilePreview file={file} client={client} workspaceId={workspaceId} />
+      </div>
+    </div>
   );
 }
 
@@ -143,7 +168,8 @@ function CoworkPanelArtifacts(props: { sessionKey: string }) {
   // Round 7 C6: the file being written right now, revealed live above the list.
   const draft = useLiveDraftStore((state) => state.drafts[props.sessionKey] ?? null);
   const finishDraft = useLiveDraftStore((state) => state.finish);
-  const openFile = useFrameStore((state) => state.openFile);
+  const openArtifact = useFrameStore((state) => state.openArtifact);
+  const selectedId = useFrameStore((state) => state.panel.artifact ?? null);
   // Derived once per targets change, not on every panel render (the store re-renders this often).
   const artifacts = useMemo(
     () => getArtifactsFromMessages([], (targets ?? []).filter(isCollectibleArtifactTarget), { includeTargetFallbacks: true }),
@@ -158,12 +184,12 @@ function CoworkPanelArtifacts(props: { sessionKey: string }) {
     const written = artifacts.find((artifact) => artifactPathMatches(artifact.path, draft.path) && canOpenArtifact(artifact));
     if (written) {
       finishDraft(props.sessionKey, draft.callId);
-      openFile(written.legacy_target.id);
+      openArtifact(written.legacy_target.id);
       return;
     }
     const timer = window.setTimeout(() => finishDraft(props.sessionKey, draft.callId), DRAFT_HANDOFF_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
-  }, [artifacts, draft, finishDraft, openFile, props.sessionKey, revealedCallId]);
+  }, [artifacts, draft, finishDraft, openArtifact, props.sessionKey, revealedCallId]);
 
   if (draft) {
     return (
@@ -173,6 +199,11 @@ function CoworkPanelArtifacts(props: { sessionKey: string }) {
         onDone={() => setRevealedCallId(draft.callId)}
       />
     );
+  }
+
+  const selected = selectedId ? (targets ?? []).find((target) => target.id === selectedId && isCollectibleArtifactTarget(target)) : null;
+  if (selected) {
+    return <CoworkArtifactView target={selected} chatId={props.sessionKey} onBack={() => openArtifact(null)} />;
   }
 
   if (artifacts.length === 0) {

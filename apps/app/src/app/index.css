@@ -4137,3 +4137,25 @@ select:disabled {
 @media (prefers-reduced-motion: reduce) {
   .cowork-live-draft__body[data-writing] .markdown-content > :last-child::after { animation: none; }
 }
+
+/*
+  Round 8 M6: one artifact on the Artifacts tab, shown as its output only. No frame, no border, no
+  grey surface: the document sits directly on the panel, with the "All artifacts" back control above.
+*/
+.cowork-artifact-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface-raised, var(--background));
+  color: var(--ink-primary, var(--foreground));
+}
+.cowork-artifact-view > .cowork-file__back { align-self: flex-start; margin: 12px 16px 0; }
+.cowork-artifact-view__body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  background: transparent;
+  color: inherit;
+}
+.cowork-artifact-view__body [data-redrob-markdown-preview] { height: auto; overflow: visible; padding: 8px 16px 24px; }
