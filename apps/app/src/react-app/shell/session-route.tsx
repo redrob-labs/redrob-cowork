@@ -49,6 +49,7 @@ import {
   getDesktopHomeDir,
   joinDesktopPath,
   revealDesktopItemInDir,
+  desktopFocusWindow,
   pickDirectory,
   resolveWorkspaceListSelectedId,
   workspaceBootstrap,
@@ -673,7 +674,24 @@ export function SessionRoute() {
     },
     [errorsByWorkspaceId, retryingWorkspaceIds, sessionsByWorkspaceId, workspaces],
   );
-  useSessionGroupSync({ workspaces, endpointForWorkspace });
+  // `open_desk` from the app bridge: focus the window, expand the desk, open its latest task.
+  const openDeskFromServer = useCallback((workspaceId: string, groupId: string) => {
+    if (isDesktopRuntime()) void desktopFocusWindow().catch(() => undefined);
+    else window.focus();
+    const groupState = sessionManagementStore.getState().groupsByWorkspace[workspaceId];
+    if (groupState?.collapsedGroupIds?.includes(groupId)) {
+      sessionManagementStore.getState().toggleGroupExpanded(workspaceId, groupId);
+    }
+    const assignments = groupState?.assignments ?? {};
+    const latest = (sessionsByWorkspaceId[workspaceId] ?? [])
+      .filter((session) => assignments[session.id] === groupId)
+      .reduce<{ id: string; updated: number } | null>((best, session) => {
+        const updated = session.time?.updated ?? session.time?.created ?? 0;
+        return best && best.updated >= updated ? best : { id: session.id, updated };
+      }, null);
+    navigateToWorkspaceSession(workspaceId, latest?.id);
+  }, [navigateToWorkspaceSession, sessionsByWorkspaceId]);
+  useSessionGroupSync({ workspaces, endpointForWorkspace, onOpenDesk: openDeskFromServer });
   const selectedWorkspaceGroupState = sessionManagementStore((state) => (
     selectedWorkspaceId ? state.groupsByWorkspace[selectedWorkspaceId] : undefined
   ));

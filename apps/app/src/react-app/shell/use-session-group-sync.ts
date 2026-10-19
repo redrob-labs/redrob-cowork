@@ -15,10 +15,17 @@ import type { RouteWorkspace } from "./route-workspaces";
 import { SessionGroupEventPoller } from "./session-group-event-poller";
 
 const MIGRATION_PREFIX = "redrob.sessionGroups.migrated.v2";
+/**
+ * An `opened` event older than this is not acted on. The feed replays from cursor 0 on every app
+ * start, and a desk someone asked for minutes ago must not steal the window on the next launch.
+ */
+const OPEN_DESK_MAX_AGE_MS = 15_000;
 
 type UseSessionGroupSyncInput = {
   workspaces: RouteWorkspace[];
   endpointForWorkspace: (workspace: RouteWorkspace | null | undefined) => ResolvedWorkspaceEndpoint | null;
+  /** The server asked to bring this desk to the front (`open_desk`). `workspaceId` is the route id. */
+  onOpenDesk?: (workspaceId: string, groupId: string) => void;
 };
 
 function hasGroupData(state: SessionGroupServerState | WorkspaceGroupState | undefined): boolean {
@@ -84,9 +91,10 @@ function writeMigrationComplete(endpoint: ResolvedWorkspaceEndpoint): void {
 }
 
 export function useSessionGroupSync(input: UseSessionGroupSyncInput): void {
-  const { workspaces, endpointForWorkspace } = input;
+  const { workspaces, endpointForWorkspace, onOpenDesk } = input;
   const workspacesRef = useRef(workspaces);
   const endpointForWorkspaceRef = useRef(endpointForWorkspace);
+  const onOpenDeskRef = useRef(onOpenDesk);
   const eventPollerRef = useRef(new SessionGroupEventPoller());
   const pollInFlightRef = useRef(false);
   const groupSyncKey = useMemo(
@@ -101,6 +109,10 @@ export function useSessionGroupSync(input: UseSessionGroupSyncInput): void {
   useEffect(() => {
     endpointForWorkspaceRef.current = endpointForWorkspace;
   }, [endpointForWorkspace]);
+
+  useEffect(() => {
+    onOpenDeskRef.current = onOpenDesk;
+  }, [onOpenDesk]);
 
   useEffect(() => {
     setSessionGroupSyncHandler({
@@ -203,7 +215,14 @@ export function useSessionGroupSync(input: UseSessionGroupSyncInput): void {
             await eventPollerRef.current.poll(
               key,
               (options) => endpoint.client.listSessionGroupEvents(endpoint.workspaceId, options),
-              () => syncWorkspace(workspace, false),
+              async (items) => {
+                await syncWorkspace(workspace, false);
+                const now = Date.now();
+                const open = items.findLast(
+                  (item) => item.action === "opened" && item.groupId && now - item.timestamp < OPEN_DESK_MAX_AGE_MS,
+                );
+                if (open?.groupId) onOpenDeskRef.current?.(workspace.id, open.groupId);
+              },
             );
             if (cancelled) return;
           } catch {

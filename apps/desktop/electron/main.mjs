@@ -1707,6 +1707,14 @@ const desktopCommandHandlers = {
   "desktopNotificationShow": async (event, ...args) => {
       return showDesktopNotification(args[0] ?? {});
   },
+  "desktopFocusWindow": async (event) => {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (!win || win.isDestroyed()) return { ok: false };
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+      return { ok: true };
+  },
   "desktopSentrySetSession": async (event, ...args) => {
       const input = args[0] ?? {};
       return {
