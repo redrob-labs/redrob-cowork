@@ -263,6 +263,8 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
       twoLineDefault
       // The hero shows the recommended-skills popup while its empty text box is focused.
       skillPicks
+      // Add to project here picks the project the new chat starts in.
+      newChat
       placeholderOverride={props.placeholderOverride}
       draftScopeKey={`new-task:${workspaceId ?? "chat-first"}`}
     />

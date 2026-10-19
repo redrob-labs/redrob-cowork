@@ -34,6 +34,7 @@ import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/co
 import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
 import { attachSkill, ComposerSkillTray, detachSkill } from "@/react-app/cowork/composer/skill-tray";
 import { ComposerSkillPicks } from "@/react-app/cowork/composer/skill-picks";
+import { ComposerAddMenu, ComposerProjectChip } from "@/react-app/cowork/composer/add-menu";
 
 type MentionItem = {
   id: string;
@@ -129,6 +130,8 @@ type ComposerProps = {
   twoLineDefault?: boolean;
   /** Show the recommended-skills popup while the empty text box is focused (the new-chat hero only). */
   skillPicks?: boolean;
+  /** The new-chat composer: Add to project picks the project the chat starts in, shown as a chip. */
+  newChat?: boolean;
   topAccessory?: ReactNode;
 };
 
@@ -1247,7 +1250,9 @@ export function ReactSessionComposer(props: ComposerProps) {
           ) : null}
 
           <div className="px-4 pt-3 pb-2">
-            {/* Attached skills sit in the panel's upper section, above the text. */}
+            {/* The new chat's project, picked in Add to project, then the attached skills: both sit
+                in the panel's upper section, above the text. */}
+            {props.newChat && inCoworkFrame ? <ComposerProjectChip /> : null}
             <ComposerSkillTray skills={traySkills} onRemove={(name) => setTraySkills((current) => detachSkill(current, name))} />
             {/* Editor */}
             <LexicalPromptEditor
@@ -1539,6 +1544,22 @@ export function ReactSessionComposer(props: ComposerProps) {
                     document.body,
                   ) : null}
                 </div>
+                {/* In the Cowork frame the paperclip is the Add menu: files, project, skills and
+                    connectors. Elsewhere it stays the plain attach button. */}
+                {inCoworkFrame ? (
+                  <ComposerAddMenu
+                    attachmentsEnabled={props.attachmentsEnabled}
+                    attachmentsDisabledReason={props.attachmentsDisabledReason}
+                    onAddFiles={() => fileInput?.click()}
+                    attachedSkills={traySkills}
+                    onAttachSkill={(name) => {
+                      setTraySkills((current) => attachSkill(current, name));
+                      focusEditor();
+                    }}
+                    chatId={props.newChat ? null : (props.sessionId ?? null)}
+                    editor={() => rootRef.current?.querySelector<HTMLElement>("[contenteditable='true']") ?? null}
+                  />
+                ) : (
                 <button
                   type="button"
                   className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent ${
@@ -1553,6 +1574,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 >
                   <Paperclip size={16} />
                 </button>
+                )}
 
                 {/* Agent picker (#2101/#1971). Only shown once a non-default
                     agent is selected. Switching back to Default agent lives in

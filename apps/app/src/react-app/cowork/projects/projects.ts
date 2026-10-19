@@ -255,3 +255,47 @@ export async function createProject(
   deps.navigate(projectPath(projectId));
   return { status: "created", projectId };
 }
+
+/** A project the composer's Add to project offers, and whether the chat is already in it. */
+export type ProjectChoice = { id: string; name: string; current: boolean };
+
+/**
+ * The composer's Add to project list: every project, most recently active first, with the one the
+ * open chat (or the new chat) already belongs to marked so it reads as chosen and cannot be picked
+ * again. `currentId` is that project's id, or null when there is none.
+ */
+export function projectChoices(rows: readonly Pick<ProjectRow, "id" | "name">[], currentId: string | null): ProjectChoice[] {
+  return rows.map((row) => ({ id: row.id, name: row.name, current: row.id === currentId }));
+}
+
+export type MoveChatDeps = {
+  client: Pick<ProjectsClient, "moveSession"> | null;
+  navigate: (path: string) => void;
+  toast: (title: string, text?: string, tone?: "success" | "danger") => void;
+  setMemory: (chatId: string, memory: ChatMemory) => void;
+};
+
+/**
+ * Add to project, for an open chat: moves it into an existing project (the same server call Save as
+ * a project uses), puts its memory on the project, says so and opens it there. On failure the chat
+ * stays where it was and the toast says so. Resolves true when the chat moved.
+ */
+export async function moveChatToProject(
+  deps: MoveChatDeps,
+  input: { chatId: string; workspaceId: string; project: Pick<ProjectRow, "id" | "name"> },
+): Promise<boolean> {
+  if (!deps.client) {
+    deps.toast(t("cowork.project_offline_title"), t("cowork.project_offline_text"), "danger");
+    return false;
+  }
+  try {
+    await deps.client.moveSession(input.workspaceId, input.chatId, input.project.id);
+  } catch {
+    deps.toast(t("cowork.project_move_failed_title"), t("cowork.settings_try_again"), "danger");
+    return false;
+  }
+  deps.setMemory(input.chatId, "project");
+  deps.toast(t("cowork.project_moved_title"), t("cowork.project_moved_text", { name: input.project.name }));
+  deps.navigate(projectChatPath(input.project.id, input.chatId));
+  return true;
+}
