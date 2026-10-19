@@ -8,6 +8,7 @@ import { createCheckStore, settleChecks, startChecks } from "../src/react-app/co
 import {
   checkMatters,
   checkPrompt,
+  checkedDocument,
   crossCheckPlan,
   COWORK_CHECK_AGENT,
   parseCheckAnswer,
@@ -529,5 +530,45 @@ describe("cross-check verdict words (factConfidence / challengeOutcome)", () => 
       verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }, { kind: "held", text: "c" }, { kind: "changed", text: "d" }],
     });
     expect(v.tone).toBe("mild");
+  });
+});
+
+describe("round 8 M3: the written deliverable is what gets checked", () => {
+  test("checkedDocument takes the newest full write of the answering turn only", () => {
+    const doc = { path: "reports/outlook.md", content: "# Outlook\n\nThe U.S. keeps the lead." };
+    expect(checkedDocument([
+      { id: "u1", role: "user", completed: false, text: "Write the memo" },
+      { id: "a1", role: "assistant", completed: true, text: "", document: doc },
+      { id: "a2", role: "assistant", completed: true, text: "Saved the memo." },
+    ])).toEqual(doc);
+    // A file written in an EARLIER turn is not this answer's deliverable.
+    expect(checkedDocument([
+      { id: "a0", role: "assistant", completed: true, text: "", document: doc },
+      { id: "u1", role: "user", completed: false, text: "Thanks, one question" },
+      { id: "a1", role: "assistant", completed: true, text: "Sure." },
+    ])).toBeNull();
+  });
+
+  test("checkPrompt checks the document when there is one, the chat answer otherwise", () => {
+    const plan = { fact: true, challenge: true };
+    const withDoc = checkPrompt({ question: "Forecast", answer: "Saved the memo.", plan, document: { path: "reports/outlook.md", content: "BODY" } });
+    expect(withDoc).toContain("on the document below");
+    expect(withDoc).toContain("## The document (reports/outlook.md)");
+    expect(withDoc).toContain("BODY");
+    expect(withDoc).not.toContain("Saved the memo.");
+    expect(checkPrompt({ question: "Q", answer: "A", plan })).toContain("## The answer\n\nA");
+  });
+
+  test("toTranscript keeps a write tool call's body as the message's document", () => {
+    const [message] = toTranscript([{
+      info: { id: "a1", role: "assistant", time: { created: 1, completed: 2 }, finish: "stop" } as never,
+      parts: [
+        { type: "text", text: "Saved." } as never,
+        { type: "tool", tool: "write", state: { status: "completed", input: { filePath: "/w/r.md", content: "# R" } } } as never,
+        { type: "tool", tool: "edit", state: { status: "completed", input: { filePath: "/w/x.md", content: "diff" } } } as never,
+      ],
+    }]);
+    expect(message?.document).toEqual({ path: "/w/r.md", content: "# R" });
+    expect(message?.text).toBe("Saved.");
   });
 });

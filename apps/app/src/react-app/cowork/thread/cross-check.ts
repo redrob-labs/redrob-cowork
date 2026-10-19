@@ -48,8 +48,19 @@ export function crossCheckPlan(levels: CoworkCrossCheck, input: { question: stri
 }
 
 /** What the check agent is asked: the question, the answer, and which checks. */
-export function checkPrompt(input: { question: string; answer: string; plan: CheckPlan }): string {
+export function checkPrompt(input: { question: string; answer: string; plan: CheckPlan; document?: CheckedDocument | null }): string {
   const asked = [input.plan.fact ? "a Fact check" : null, input.plan.challenge ? "a Challenge" : null].filter(Boolean);
+  // Round 8 (M3): when the run wrote a deliverable, THAT document is what gets checked, not the
+  // short chat note that announced it.
+  if (input.document) {
+    return [
+      `Run ${asked.join(" and ")} on the document below, the deliverable this run wrote. Leave out the check you were not asked for.`,
+      "## The question",
+      input.question.trim() || "(not given)",
+      `## The document (${input.document.path})`,
+      input.document.content.trim(),
+    ].join("\n\n");
+  }
   return [
     `Run ${asked.join(" and ")} on the answer below. Leave out the check you were not asked for.`,
     "## The question",
@@ -57,6 +68,22 @@ export function checkPrompt(input: { question: string; answer: string; plan: Che
     "## The answer",
     input.answer.trim(),
   ].join("\n\n");
+}
+
+/** A file the run wrote in full: where, and its whole body. */
+export type CheckedDocument = { path: string; content: string };
+
+/**
+ * Round 8 (M3): the deliverable of the turn that just answered - the newest full-file write in the
+ * assistant messages after the person's last message - or null when the run wrote no file. Pure.
+ */
+export function checkedDocument(messages: TranscriptMessage[]): CheckedDocument | null {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (!message || message.role === "user") return null;
+    if (message.document && message.document.content.trim()) return message.document;
+  }
+  return null;
 }
 
 /** A check agent's answer, read for its one block. */
@@ -71,6 +98,8 @@ export type TranscriptMessage = {
   /** The engine's finish reason; "tool-calls" means the turn is not over. */
   finish?: string;
   text: string;
+  /** Round 8 (M3): the newest file this message wrote in full (a `write` tool call), if any. */
+  document?: CheckedDocument;
 };
 
 /** The last assistant message with something said, or null. */
@@ -116,16 +145,21 @@ export async function runCrossCheck(
   let checkId: string | null = null;
   const { levels: _levels, plan: _plan, ...request } = input;
   try {
-    const answer = lastAnswer(await deps.messages(input.sessionId));
+    const transcript = await deps.messages(input.sessionId);
+    const answer = lastAnswer(transcript);
     if (!answer) return;
     answerId = answer.id;
-    const plan = input.plan ?? crossCheckPlan(input.levels, { question: input.question, answer: answer.text });
+    // Round 8 (M3): the deliverable the run wrote, when there is one, is what gets checked. The
+    // verdict chips still sit under the answer that announced it.
+    const document = checkedDocument(transcript);
+    const subject = document ? document.content : answer.text;
+    const plan = input.plan ?? crossCheckPlan(input.levels, { question: input.question, answer: subject });
     deps.start(answer.id, { planned: input.planned, request, ...plan });
     if (!plan.fact && !plan.challenge) return;
 
     checkId = await deps.createCheckSession(input.sessionId);
     deps.track(checkId, answer.id);
-    await deps.prompt(checkId, checkPrompt({ question: input.question, answer: answer.text, plan }), COWORK_CHECK_AGENT, {
+    await deps.prompt(checkId, checkPrompt({ question: input.question, answer: answer.text, plan, document }), COWORK_CHECK_AGENT, {
       ...(input.model ? { model: input.model } : {}),
       ...(input.variant ? { variant: input.variant } : {}),
     });

@@ -8,17 +8,39 @@ import { subscribeSessionSyncEvents } from "../../domains/session/sync/session-s
 import type { CoworkCrossCheck } from "../composer/composer-state";
 import { EMPTY_RUN_EVENTS, reduceRunEvent } from "../run/run-events";
 import { useCheckStore } from "./check-store";
-import { retryPlan, runCrossCheck, type CrossCheckDeps, type TranscriptMessage } from "./cross-check";
+import { retryPlan, runCrossCheck, type CheckedDocument, type CrossCheckDeps, type TranscriptMessage } from "./cross-check";
 
 /** A session's messages as the cross-check reads them: who said it, whether it is done, the text. */
 export function toTranscript(entries: Array<{ info: Message; parts: Part[] }>): TranscriptMessage[] {
-  return entries.map(({ info, parts }) => ({
-    id: info.id,
-    role: info.role,
-    completed: info.role === "assistant" && typeof info.time.completed === "number",
-    finish: info.role === "assistant" ? info.finish : undefined,
-    text: parts.flatMap((part) => (part.type === "text" && !part.synthetic ? [part.text] : [])).join("\n"),
-  }));
+  return entries.map(({ info, parts }) => {
+    const document = writtenDocument(parts);
+    return {
+      id: info.id,
+      role: info.role,
+      completed: info.role === "assistant" && typeof info.time.completed === "number",
+      finish: info.role === "assistant" ? info.finish : undefined,
+      text: parts.flatMap((part) => (part.type === "text" && !part.synthetic ? [part.text] : [])).join("\n"),
+      ...(document ? { document } : {}),
+    };
+  });
+}
+
+/**
+ * Round 8 (M3): the newest file a message wrote in FULL - a `write` tool call carrying the whole body
+ * (edits and patches carry diffs, so they are not documents). Engine part shape:
+ * { type: "tool", tool, state: { status, input: { filePath, content } } }.
+ */
+export function writtenDocument(parts: readonly Part[]): CheckedDocument | null {
+  for (let index = parts.length - 1; index >= 0; index -= 1) {
+    const part = parts[index] as { type?: string; tool?: unknown; state?: { status?: unknown; input?: unknown } } | undefined;
+    if (part?.type !== "tool" || typeof part.tool !== "string" || !/(^|[._:/-])write$/i.test(part.tool)) continue;
+    if (part.state?.status === "error") continue;
+    const input = part.state?.input as { filePath?: unknown; content?: unknown } | undefined;
+    if (typeof input?.filePath === "string" && typeof input.content === "string" && input.content.trim()) {
+      return { path: input.filePath, content: input.content };
+    }
+  }
+  return null;
 }
 
 /** A permission ask in an engine event: which session asked, and the id to answer it by. */
