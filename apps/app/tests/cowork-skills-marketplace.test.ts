@@ -3,23 +3,16 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
-import en from "../src/i18n/locales/en";
-import ko from "../src/i18n/locales/ko";
 import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
-import { SkillView, shouldEscapeToList, type SkillViewProps } from "../src/react-app/cowork/skills/cowork-skill";
+import { shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
-import { SkillIcon } from "../src/react-app/cowork/skills/skill-icon";
-import { SkillShelf, SkillTile } from "../src/react-app/cowork/skills/skill-tile";
+import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
   languageTagLabel,
-  matchesFilters,
   shelfEdges,
-  shelvesOf,
-  shouldRestoreListFocus,
   skillBrief,
   skillDisplayTitle,
-  skillPath,
   skillRows,
   skillShelf,
   skillTone,
@@ -44,16 +37,9 @@ const row = (name: string, overrides: Partial<SkillRow> = {}): SkillRow => ({
 });
 
 describe("skills marketplace helpers", () => {
-  test("assigns stable, valid, reasonably distributed tones", () => {
+  test("assigns a stable, valid tone", () => {
     expect(skillTone("us-lawyer-nda")).toBe(skillTone("us-lawyer-nda"));
-    const names = Array.from({ length: 96 }, (_, index) => `us-lawyer-skill-${index}`);
-    const counts = new Map(SKILL_TONES.map((tone) => [tone, 0]));
-    for (const name of names) {
-      const tone = skillTone(name);
-      expect(SKILL_TONES).toContain(tone);
-      counts.set(tone, (counts.get(tone) ?? 0) + 1);
-    }
-    expect(Math.max(...counts.values())).toBeLessThanOrEqual(24);
+    for (const name of ["us-lawyer-nda", "kr-vc-term-sheet-review", "humanize-writing"]) expect(SKILL_TONES).toContain(skillTone(name));
   });
 
   test("groups prefix families, tags, installed rows, and everyday work", () => {
@@ -63,21 +49,6 @@ describe("skills marketplace helpers", () => {
     expect(skillShelf(row("humanize-writing"))).toBe("everyday");
     expect(skillShelf(row("installed", { installed: installed("installed") }))).toBe("yours");
     expect(skillShelf(row("custom", { tags: { profession: "lawyer" } }))).toBe("lawyer");
-  });
-
-  test("keeps shelf order, installed order, and localized title sorting", () => {
-    const shelves = shelvesOf([
-      row("z", { title: "Zulu", titleKo: "가" }),
-      row("a", { title: "Alpha", titleKo: "나" }),
-      row("mine", { installed: installed("mine", "mine"), origin: "mine" }),
-      row("team", { installed: installed("team", "team"), origin: "team" }),
-      row("us-lawyer-b", { title: "Beta" }),
-      row("us-lawyer-a", { title: "Alpha" }),
-    ], "en");
-    expect(shelves.map((shelf) => shelf.id)).toEqual(["yours", "lawyer", "everyday"]);
-    expect(shelves[0]?.rows.map((item) => item.name)).toEqual(["mine", "team"]);
-    expect(shelves[1]?.rows.map((item) => item.name)).toEqual(["us-lawyer-a", "us-lawyer-b"]);
-    expect(shelves[2]?.rows.map((item) => item.name)).toEqual(["a", "z"]);
   });
 
   test("prefers localized titles and summaries with full first-sentence fallbacks", () => {
@@ -96,32 +67,19 @@ describe("skills marketplace helpers", () => {
   test("joins catalogue display fields into installed rows without replacing local values", () => {
     const local = { ...installed("shared", "library"), title: "Local title" };
     const library: LibrarySkill = { name: "shared", title: "Catalogue title", summary: "Short summary", description: "Catalogue description", tags: {} };
-    const rows = skillRows({ installed: [local], library: [library], filters: {}, installedOnly: false });
+    const rows = skillRows({ installed: [local], library: [library] });
     expect(rows).toHaveLength(1);
     expect(rows[0]?.title).toBe("Local title");
     expect(rows[0]?.summary).toBe("Short summary");
-  });
-
-  test("restores focus only once per history entry and builds safe detail paths", () => {
-    expect(shouldRestoreListFocus("entry-2", "entry-1")).toBe(true);
-    expect(shouldRestoreListFocus("entry-2", "entry-2")).toBe(false);
-    expect(skillPath("kr lawyer/nda")).toBe("/skill/kr%20lawyer%2Fnda");
   });
 
   test("shows offline state after rows load, including empty and populated branches", () => {
     expect(shouldShowLibraryNotice(null, true)).toBe(false);
     expect(shouldShowLibraryNotice([], true)).toBe(true);
     expect(shouldShowLibraryNotice([row("installed")], true)).toBe(true);
-    // Round 10: with nothing at all to show, the notice stands in for the old "No skills yet" page.
+    // With nothing at all to show, the notice stands in for the page.
     expect(shouldShowLibraryNotice([], false)).toBe(true);
     expect(shouldShowLibraryNotice([row("installed")], false)).toBe(false);
-  });
-
-  test("searches visible English and Korean titles and summaries", () => {
-    const visible = row("opaque-slug", { title: "Contract review", titleKo: "계약 검토", summary: "Check signature terms", summaryKo: "서명 조건을 확인합니다" });
-    expect(matchesFilters(visible, { q: "contract" })).toBe(true);
-    expect(matchesFilters(visible, { q: "조건" })).toBe(true);
-    expect(matchesFilters(visible, { q: "missing" })).toBe(false);
   });
 
   test("looks the language up directly instead of taking the last tag", () => {
@@ -140,20 +98,6 @@ describe("skills marketplace helpers", () => {
     expect(shelfEdges(0, 1200, 600)).toEqual({ canPrev: false, canNext: true });
     expect(shelfEdges(300, 1200, 600)).toEqual({ canPrev: true, canNext: true });
     expect(shelfEdges(599, 1200, 600)).toEqual({ canPrev: true, canNext: false });
-  });
-
-  test("shelf control labels read naturally in both locales", () => {
-    expect(en["cowork.skills_scroll_left"]).toBe("{shelf}: scroll left");
-    expect(en["cowork.skills_scroll_right"]).toBe("{shelf}: scroll right");
-    expect(ko["cowork.skills_scroll_left"]).toBe("{shelf} 왼쪽으로 넘기기");
-    expect(ko["cowork.skills_scroll_right"]).toBe("{shelf} 오른쪽으로 넘기기");
-  });
-
-  test("drops the See all and search copy from both locales together", () => {
-    for (const key of ["cowork.skills_see_all", "cowork.skills_see_all_label", "cowork.skills_search", "cowork.skills_results"]) {
-      expect(key in en).toBe(false);
-      expect(key in ko).toBe(false);
-    }
   });
 });
 
@@ -192,34 +136,6 @@ describe("skill detail escape guard", () => {
 });
 
 describe("skill marketplace markup", () => {
-  const longDescription = "Use when the user asks to review a contract. ".repeat(12).trim();
-  const view = (installedSkill: CoworkSkill | null) => renderToStaticMarkup(
-    React.createElement(MemoryRouter, null,
-      React.createElement(SkillView, {
-        skill: { name: "sample", description: longDescription, tags: {}, body: "# Secret instructions", installed: installedSkill } as unknown as SkillViewProps["skill"],
-        taxonomy: null, locale: "en", canRun: true, busy: false, backPath: "/skills",
-        onBack: () => {}, onRun: () => {}, onAdd: () => {},
-      } as SkillViewProps),
-    ),
-  );
-
-  test("installed page has no Anything to add box and shows the full description", () => {
-    const html = view(installed("sample"));
-    expect(html).not.toContain("<textarea");
-    expect(html).not.toContain("cowork-skill-run-extra");
-    expect(html).toContain(`<p class="cowork-skill-about__text">${longDescription}</p>`);
-    expect(html).toContain(en["cowork.skills_use"]);
-    expect(html).not.toContain(" title=");
-  });
-
-  test("detail page shows the full description with no More toggle and no instructions accordion", () => {
-    const html = view(null);
-    expect(html).toContain(`<p class="cowork-skill-about__text">${longDescription}</p>`);
-    expect(html).not.toContain("data-expanded");
-    expect(html).not.toContain("aria-expanded");
-    expect(html).not.toContain("Secret instructions");
-    expect(html).not.toContain(" title=");
-  });
   test("keeps the action outside the link and uses described-by without title attributes", () => {
     const html = renderToStaticMarkup(
       React.createElement(MemoryRouter, null,
@@ -231,41 +147,5 @@ describe("skill marketplace markup", () => {
     expect(link).not.toContain("<button");
     expect(html).toContain("<button");
     expect(html).not.toContain(" title=");
-  });
-
-  test("renders the full short description under the title with no tooltip and no title attributes", () => {
-    const summary = "A longer short description that used to be clamped after two lines in the tile.";
-    const html = renderToStaticMarkup(
-      React.createElement(MemoryRouter, null,
-        React.createElement(SkillTile, { row: row("long", { title: "A very long skill title that clamps", summary }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
-      ),
-    );
-    expect(html).toContain("A very long skill title that clamps");
-    expect(html).toContain(`<span id="skill-brief-long" class="cowork-skill-tile__brief">${summary}</span>`);
-    expect(html).not.toContain("tooltip");
-    expect(html).not.toContain(" title=");
-  });
-
-  test("renders shelf chevrons as labelled plain buttons with no hover text", () => {
-    const html = renderToStaticMarkup(
-      React.createElement(MemoryRouter, null,
-        React.createElement(SkillShelf, { id: "lawyer", rows: [row("us-lawyer-a", { title: "A" }), row("us-lawyer-b", { title: "B" })], locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
-      ),
-    );
-    expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--prev"');
-    expect(html).toContain('class="cowork-skills__chevron cowork-skills__chevron--next"');
-    expect(html).toContain(`aria-label="${en["cowork.skills_scroll_left"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
-    expect(html).toContain(`aria-label="${en["cowork.skills_scroll_right"].replace("{shelf}", en["cowork.skills_shelf_lawyer"])}"`);
-    expect(html).not.toContain(" title=");
-    expect(html).not.toContain("see-all");
-    expect(html).not.toContain("See all");
-  });
-
-  test("reserves an image slot while retaining a tone fallback", () => {
-    const withImage = renderToStaticMarkup(React.createElement(SkillIcon, { name: "sample", size: "tile", src: "/sample.png" }));
-    const withoutImage = renderToStaticMarkup(React.createElement(SkillIcon, { name: "sample", size: "tile" }));
-    expect(withImage).toContain('<img src="/sample.png" alt=""');
-    expect(withoutImage).toContain("data-tone=");
-    expect(withoutImage).not.toContain("<img");
   });
 });

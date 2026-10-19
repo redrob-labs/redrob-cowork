@@ -178,7 +178,7 @@ export function SearchDialog(props: { onClose: () => void }) {
 
   const installedSkills = unwrap(skills.data, [] as CoworkSkill[]);
   const catalogue = useMemo(
-    () => skillRows({ installed: installedSkills, library: library.data?.data ?? null, filters: {}, installedOnly: false }),
+    () => skillRows({ installed: installedSkills, library: library.data?.data ?? null }),
     // installedSkills is derived from skills.data, so skills.data is the dependency.
     [skills.data, library.data],
   );

@@ -84,8 +84,8 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse, s
 }
 
 type SkillShelfProps = Omit<SkillTileProps, "row"> & {
-  /** Stable shelf id used for the heading and its label. */
-  id: SkillShelfId;
+  /** The only skill-tile shelf left is the person's own; other groups are workflows or Popular. */
+  id: "yours";
   /** Rows shown in this horizontal collection. */
   rows: SkillRow[];
 };

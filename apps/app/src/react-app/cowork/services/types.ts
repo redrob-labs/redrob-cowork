@@ -91,16 +91,8 @@ export type SkillOrigin = "library" | "team" | "mine";
 export type SkillTags = { profession?: string; task?: string; language?: string };
 
 /** An installed skill: what the assistant can use, and what a schedule can run. */
-export type CoworkSkill = {
+export type CoworkSkill = SkillDisplayFields & {
   name: string;
-  /** Human-readable English display title; the stable `name` remains the route id. */
-  title?: string;
-  /** Human-readable Korean display title supplied by the catalogue. */
-  titleKo?: string;
-  /** Short English catalogue summary used below the title. */
-  summary?: string;
-  /** Short Korean catalogue summary used below the title. */
-  summaryKo?: string;
   description: string;
   origin: SkillOrigin;
   tags: SkillTags;
@@ -110,17 +102,18 @@ export type CoworkSkill = {
 
 /** Optional catalogue fields shared by lists and details. */
 export type SkillDisplayFields = {
+  /** Human-readable English display title; the stable `name` remains the route id. */
   title?: string;
+  /** Human-readable Korean display title supplied by the catalogue. */
   titleKo?: string;
+  /** Short English catalogue summary used below the title. */
   summary?: string;
+  /** Short Korean catalogue summary used below the title. */
   summaryKo?: string;
 };
 
 /** A skill in the Console's library, installed or not. */
 export type LibrarySkill = SkillDisplayFields & { name: string; description: string; tags: SkillTags };
-
-/** The Skills screen's filters. Empty means all. */
-export type SkillFilters = SkillTags & { q?: string };
 
 /** The professions, their tasks and the languages skills are filed under, in English and Korean. */
 export type SkillTaxonomy = RedrobSkillTaxonomy;

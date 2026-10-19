@@ -12,7 +12,7 @@ import type { SkillOrigin, TeamSkillsState } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { CONSOLE_SKILLS_URL, shouldRestoreListFocus } from "./skills";
+import { CONSOLE_SKILLS_URL } from "./skills";
 import { installSkill } from "./use-skills";
 import { runSkill } from "./cowork-skill";
 import { useCoworkStartStore } from "./start-chat";
@@ -116,7 +116,8 @@ export function SkillsScreen() {
 
   useEffect(() => {
     const state = location.state as { fromSkill?: string; fromWorkflow?: string } | null;
-    if (!shouldRestoreListFocus(location.key, restoredFocusKey.current)) return;
+    // A history entry restores its originating control at most once.
+    if (location.key === restoredFocusKey.current) return;
     const target = state?.fromSkill
       ? document.querySelector<HTMLElement>(`[data-skill="${CSS.escape(state.fromSkill)}"] .cowork-skill-tile__link`)
       : state?.fromWorkflow
