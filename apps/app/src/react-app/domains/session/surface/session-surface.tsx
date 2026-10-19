@@ -97,6 +97,9 @@ import {
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
 import { useStickyTodos } from "./sticky-todos";
+import { latestLiveDraft, useLiveDraftStore } from "@/react-app/cowork/panel/live-draft";
+import { useFrameStore } from "@/react-app/cowork/store/frame-store";
+import { getSidePanelSessionKey } from "@/react-app/domains/session/panel/side-panel-session";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
 /** Stable empty list for a surface rendered without todos, so the sticky dock memo stays put. */
@@ -935,6 +938,21 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
     return [...baseRenderedMessages, ...evalMarkdownMessages];
   }, [baseRenderedMessages, evalMarkdownMessages]);
+  // Round 7 C6: hand the deliverable being written to the side panel, live. A new write in a
+  // RUNNING turn publishes its draft and opens the panel on Artifacts; an already-published draft
+  // keeps updating after the run ends so its "settled" flag lands. Reopening an old chat
+  // publishes nothing (it is not running and nothing was published for it).
+  const liveDraft = useMemo(() => (inCoworkFrame ? latestLiveDraft(renderedMessages) : null), [inCoworkFrame, renderedMessages]);
+  useEffect(() => {
+    if (!liveDraft) return;
+    const sessionKey = getSidePanelSessionKey(props.sessionId);
+    const store = useLiveDraftStore.getState();
+    const known = store.drafts[sessionKey]?.callId === liveDraft.callId;
+    if (!chatStreaming && !known) return;
+    if (store.done[sessionKey]?.includes(liveDraft.callId)) return;
+    store.publish(sessionKey, liveDraft);
+    if (!known) useFrameStore.getState().openPanel("artifacts");
+  }, [chatStreaming, liveDraft, props.sessionId]);
   const seedMarkdownPrimitiveControlAction = useMemo<RedrobControlAction | null>(() => {
     if (!import.meta.env.DEV) return null;
 

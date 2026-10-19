@@ -71,7 +71,12 @@ describe("trending edition", () => {
 
   test("declares reduced-motion overrides for every new moving selector", async () => {
     const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
-    const reduced = css.slice(css.lastIndexOf("@media (prefers-reduced-motion: reduce)"));
+    // The reduced-motion block that carries the ticker's overrides (not just the file's last one,
+    // which later features append after it).
+    const anchor = css.indexOf("@media (prefers-reduced-motion: reduce) {\n  .model-chart__trending-entry");
+    const start = anchor >= 0 ? anchor : css.indexOf("@media (prefers-reduced-motion: reduce) {\r\n  .model-chart__trending-entry");
+    const reduced = css.slice(start, start + 400);
+    expect(start).toBeGreaterThanOrEqual(0);
     expect(reduced).toContain(".model-chart__trending-entry");
     expect(reduced).toContain("animation: none");
     expect(reduced).toContain(".model-chart__trending-trigger");

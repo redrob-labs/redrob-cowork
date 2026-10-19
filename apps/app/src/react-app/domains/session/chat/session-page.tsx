@@ -79,6 +79,7 @@ import {
   type SidePanelTarget,
 } from "../../../cowork/panel/route-side-panel";
 import { useFrameStore } from "../../../cowork/store/frame-store";
+import { useLiveDraftStore } from "../../../cowork/panel/live-draft";
 import { browserHeldResult } from "../../../cowork/panel/cowork-browser-state";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
@@ -722,6 +723,11 @@ export function SessionPage(props: SessionPageProps) {
     const increased = sameSession && artifactTargetCount > prev.count;
     prevArtifactCountRef.current = { sessionId, count: artifactTargetCount };
     if (!inCoworkFrame || !increased || !sawSessionRunRef.current.ran) return;
+    // Round 7 C6: a file the panel already showed being WRITTEN is opened by the live-draft
+    // hand-over; reopening the Artifacts list here would yank the panel off that file.
+    const liveKey = getSidePanelSessionKey(sessionId);
+    const live = useLiveDraftStore.getState();
+    if (live.drafts[liveKey] || (live.done[liveKey]?.length ?? 0) > 0) return;
     // In the Cowork frame the old rail never shows, and its toggle would land on Files (or CLOSE the
     // panel when Files was already open), so open the frame panel straight on its Artifacts tab.
     useFrameStore.getState().openPanel("artifacts");

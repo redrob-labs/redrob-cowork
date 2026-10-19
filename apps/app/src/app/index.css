@@ -4064,3 +4064,61 @@ select:disabled {
   .model-chart__trending-trigger,
   .model-chart__trending-chevron { transition: none; transform: none; }
 }
+
+/*
+  Round 7 C6: the deliverable being written, live in the side panel's Artifacts tab. The body is
+  revealed letter by letter (useSmoothReveal) and the Redrob Blue caret rides the end of the last
+  rendered block, the same caret the chat uses. Surfaces set both background and text colour.
+*/
+.cowork-live-draft {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface-raised, var(--background));
+  color: var(--ink-primary, var(--foreground));
+}
+.cowork-live-draft__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle, var(--border));
+}
+.cowork-live-draft__title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cowork-live-draft__status { flex: 0 0 auto; font-size: 12px; }
+.cowork-live-draft__body {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.cowork-live-draft__plain {
+  margin: 0;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  color: var(--ink-primary, var(--foreground));
+}
+.cowork-live-draft__body[data-writing] .markdown-content > :last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.5ch;
+  height: 1em;
+  margin-left: 0.08em;
+  vertical-align: text-bottom;
+  background: var(--primary);
+  border-radius: 1px;
+  animation: redrob-cursor-blink 1.06s steps(1, end) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-live-draft__body[data-writing] .markdown-content > :last-child::after { animation: none; }
+}

@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { EmptyState, IconButton, icons } from "@redrob-labs/ui";
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon";
@@ -13,8 +13,12 @@ import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
 import { CoworkBrowser } from "./cowork-browser";
 import { CoworkPanelFiles } from "./cowork-panel-files";
+import { CoworkLiveDraft } from "./cowork-live-draft";
+import { artifactPathMatches, useLiveDraftStore } from "./live-draft";
 
 const ICON = { width: 15, height: 15, "aria-hidden": true };
+/** How long a fully revealed draft waits for its real file before the list takes over (ms). */
+const DRAFT_HANDOFF_TIMEOUT_MS = 4000;
 
 /** The panel's three tabs, left to right: this chat's artifacts, the workspace files, the in-app browser. */
 const PANEL_TABS: readonly PanelTab[] = ["artifacts", "files", "browser"];
@@ -136,11 +140,40 @@ function CoworkArtifactRow(props: { artifact: ArtifactItem }) {
  */
 function CoworkPanelArtifacts(props: { sessionKey: string }) {
   const targets = usePanelTabStore((state) => state.transcriptArtifactTargets[props.sessionKey]);
+  // Round 7 C6: the file being written right now, revealed live above the list.
+  const draft = useLiveDraftStore((state) => state.drafts[props.sessionKey] ?? null);
+  const finishDraft = useLiveDraftStore((state) => state.finish);
+  const openFile = useFrameStore((state) => state.openFile);
   // Derived once per targets change, not on every panel render (the store re-renders this often).
   const artifacts = useMemo(
     () => getArtifactsFromMessages([], (targets ?? []).filter(isCollectibleArtifactTarget), { includeTargetFallbacks: true }),
     [targets],
   );
+  // Hand-over: once the draft is fully revealed and settled, open the REAL file in its place as soon
+  // as the workspace confirms it exists (the verified target can land a moment after the write).
+  // If it never shows (a failed write, an unsupported type), fall back to the list after a pause.
+  const [revealedCallId, setRevealedCallId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!draft || revealedCallId !== draft.callId) return;
+    const written = artifacts.find((artifact) => artifactPathMatches(artifact.path, draft.path) && canOpenArtifact(artifact));
+    if (written) {
+      finishDraft(props.sessionKey, draft.callId);
+      openFile(written.legacy_target.id);
+      return;
+    }
+    const timer = window.setTimeout(() => finishDraft(props.sessionKey, draft.callId), DRAFT_HANDOFF_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [artifacts, draft, finishDraft, openFile, props.sessionKey, revealedCallId]);
+
+  if (draft) {
+    return (
+      <CoworkLiveDraft
+        key={draft.callId}
+        draft={draft}
+        onDone={() => setRevealedCallId(draft.callId)}
+      />
+    );
+  }
 
   if (artifacts.length === 0) {
     return (

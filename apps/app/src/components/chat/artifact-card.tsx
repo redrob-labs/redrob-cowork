@@ -13,6 +13,7 @@ import {
   type ArtifactItem,
 } from "@/lib/artifacts";
 import { t } from "@/i18n";
+import { useFrameStore } from "@/react-app/cowork/store/frame-store";
 
 /** Props for one rounded, clickable artifact card (item 4). */
 interface ArtifactCardProps {
@@ -30,13 +31,15 @@ interface ArtifactCardProps {
  */
 function ArtifactCard({ artifact, writing }: ArtifactCardProps) {
   const previewArtifact = usePreviewArtifact();
-  const canOpen = canOpenArtifact(artifact);
+  const openPanel = useFrameStore((state) => state.openPanel);
+  // Round 7 C6: while the file is being written the card opens the live draft in the Artifacts tab.
+  const canOpen = writing || canOpenArtifact(artifact);
   const title = prettyArtifactTitle(artifact.path);
   return (
     <button
       type="button"
       disabled={!canOpen}
-      onClick={() => previewArtifact(artifact)}
+      onClick={() => (writing ? openPanel("artifacts") : previewArtifact(artifact))}
       title={t("cowork.artifact_open", { title })}
       className="group/artifact-card flex w-full max-w-md items-center gap-3 rounded-xl border border-border/70 bg-muted/30 px-3.5 py-3 text-left transition-colors hover:bg-muted disabled:cursor-default disabled:hover:bg-muted/30"
     >
