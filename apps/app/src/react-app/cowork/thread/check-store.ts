@@ -103,7 +103,8 @@ export function readKeptChecks(storage: CheckStorage): Record<string, AnswerChec
     const answers: Record<string, AnswerChecks> = {};
     for (const entry of (parsed as { entries: unknown[] }).entries) {
       if (!Array.isArray(entry) || typeof entry[0] !== "string" || !entry[1] || typeof entry[1] !== "object") continue;
-      const checks = entry[1] as AnswerChecks;
+      const { planned, fact, challenge, result } = entry[1] as AnswerChecks;
+      const checks: AnswerChecks = { planned, fact, challenge, ...(result ? { result } : {}) };
       if (isSettled(checks)) answers[entry[0]] = checks;
     }
     return answers;
@@ -112,10 +113,15 @@ export function readKeptChecks(storage: CheckStorage): Record<string, AnswerChec
   }
 }
 
-/** Keeps the settled answers, newest last, capped at CHECKS_KEPT. Storage errors are ignored. */
+/** Keeps the settled answers, newest last, capped at CHECKS_KEPT. Only the chips are written: the
+ *  retry request (with the person's question) stays in memory, so Retry works for checks made in this
+ *  app run only. Storage errors are ignored. */
 export function writeKeptChecks(storage: CheckStorage, answers: Record<string, AnswerChecks>) {
   try {
-    const entries = Object.entries(answers).filter(([, checks]) => isSettled(checks)).slice(-CHECKS_KEPT);
+    const entries = Object.entries(answers)
+      .filter(([, checks]) => isSettled(checks))
+      .slice(-CHECKS_KEPT)
+      .map(([id, { planned, fact, challenge, result }]): [string, AnswerChecks] => [id, { planned, fact, challenge, ...(result ? { result } : {}) }]);
     storage()?.setItem(CHECKS_STORAGE_KEY, JSON.stringify({ entries }));
   } catch {
     // Quota or private mode: the chips still show for this app session.

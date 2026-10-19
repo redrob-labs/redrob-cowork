@@ -107,6 +107,24 @@ export function lastAnswer(messages: TranscriptMessage[]): TranscriptMessage | n
   return messages.findLast((message) => message.role === "assistant" && message.text.trim().length > 0) ?? null;
 }
 
+/**
+ * The answer of the turn that just ran (the assistant messages after the person's last message):
+ * its newest message with text, else, when the turn wrote a deliverable but said nothing, its
+ * newest assistant message. Null when the turn has neither, so a check never lands on an earlier
+ * turn's answer. Pure.
+ */
+export function turnAnswer(messages: TranscriptMessage[]): TranscriptMessage | null {
+  let latest: TranscriptMessage | null = null;
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (!message || message.role === "user") break;
+    if (message.role !== "assistant") continue;
+    if (message.text.trim()) return message;
+    latest ??= message;
+  }
+  return latest && checkedDocument(messages) ? latest : null;
+}
+
 /** The model the chat sent with, so the check runs on the same one. */
 export type CheckModel = { model?: { providerID: string; modelID: string }; variant?: string };
 
@@ -117,6 +135,8 @@ export type CrossCheckDeps = {
   messages(sessionId: string): Promise<TranscriptMessage[]>;
   /** A session for the check, out of the chat's transcript. Returns its id. */
   createCheckSession(parentId: string): Promise<string>;
+  /** Removes a finished check's session from the engine. */
+  deleteCheckSession(checkSessionId: string): Promise<void>;
   prompt(sessionId: string, text: string, agent: string, model: CheckModel): Promise<void>;
   sleep(ms: number): Promise<void>;
   start(messageId: string, input: { planned: boolean; request: CheckRequest } & CheckPlan): void;
@@ -126,6 +146,8 @@ export type CrossCheckDeps = {
   untrack(checkSessionId: string): void;
   /** True once the check asked for something and was told no: it cannot finish. */
   stopped(checkSessionId: string): boolean;
+  /** Aborted when the hook that started the check goes away; the check then stops as failed. */
+  signal?: AbortSignal;
 };
 
 export const CHECK_POLL_MS = 2_000;
@@ -146,8 +168,8 @@ export async function runCrossCheck(
   const { levels: _levels, plan: _plan, ...request } = input;
   try {
     const transcript = await deps.messages(input.sessionId);
-    const answer = lastAnswer(transcript);
-    if (!answer) return;
+    const answer = turnAnswer(transcript);
+    if (!answer || deps.signal?.aborted) return;
     answerId = answer.id;
     // The deliverable the run wrote, when there is one, is what gets checked. The
     // verdict chips still sit under the answer that announced it.
@@ -165,7 +187,7 @@ export async function runCrossCheck(
     });
     for (let waited = 0; waited < CHECK_TIMEOUT_MS; waited += CHECK_POLL_MS) {
       await deps.sleep(CHECK_POLL_MS);
-      if (deps.stopped(checkId)) break;
+      if (deps.stopped(checkId) || deps.signal?.aborted) break;
       const reply = lastAnswer(await deps.messages(checkId));
       if (reply?.completed && reply.finish !== "tool-calls") {
         deps.settle(answer.id, parseCheckAnswer(reply.text));
@@ -176,7 +198,11 @@ export async function runCrossCheck(
   } catch {
     if (answerId) deps.settle(answerId, null);
   } finally {
-    if (checkId) deps.untrack(checkId);
+    if (checkId) {
+      deps.untrack(checkId);
+      // The check session is machinery: never leave it behind. A failed delete does not change the result.
+      await deps.deleteCheckSession(checkId).catch(() => undefined);
+    }
   }
 }
 
