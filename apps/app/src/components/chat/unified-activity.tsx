@@ -1,13 +1,12 @@
 /** @jsxImportSource react */
 import * as React from "react"
-import { ChevronRight, Globe } from "lucide-react"
+import { Globe } from "lucide-react"
 
 import { RedrobLiquidLoader } from "@/components/ui/redrob-liquid-loader/RedrobLiquidLoader"
 import { FileChip } from "@/components/chat/file-chip"
 import {
   getAggregateRowFile,
   getAggregateRowLabel,
-  getAggregateSummary,
   type AnyToolPart,
 } from "@/lib/tool-aggregate"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
@@ -24,13 +23,12 @@ const ROW_CAP = 10
 /** Expansion persists per message while the session stays mounted (matches ToolAggregateGroup). */
 const expandedByKey = new Map<string, boolean>()
 
+/** Props of the live activity row; it is only ever mounted while the run streams. */
 type UnifiedActivityProps = {
   /** All of the running turn's tool parts, in order. */
   parts: AnyToolPart[]
   /** Accumulated reasoning text for this turn (shown as context, not as rows). */
   reasoning: string
-  /** True while the turn is still streaming (drives the live loader + text). */
-  isStreaming: boolean
   /** Stable key for persisting the expand state across re-renders. */
   activityKey: string
   /**
@@ -52,7 +50,7 @@ function reasoningLead(reasoning: string): string | null {
 }
 
 /**
- * Round 8 (M2): what the model is thinking about NOW - the newest paragraph of the turn's reasoning,
+ * What the model is thinking about NOW - the newest paragraph of the turn's reasoning,
  * not its first (the first froze the live line on the turn's opening thought). A bold heading line
  * ("**Checking export rules**"), which models use to title each step, wins over the body sentence.
  */
@@ -69,9 +67,9 @@ export function latestReasoningLead(reasoning: string): string | null {
 }
 
 /**
- * The live header text, refreshed as the run moves (round 8 M2): the tool in flight ("Searching
- * the web for ..."), else the newest thought, else the step that just finished, else `fallback` (round 8c: a
- * rotating friendly line), else "Working on it".
+ * The live header text, refreshed as the run moves: the tool in flight ("Searching the web for
+ * ..."), else the newest thought, else the step that just finished, else `fallback` (a rotating
+ * friendly line), else "Working on it".
  */
 export function currentActivityLabel(parts: AnyToolPart[], reasoning: string, fallback?: string): string {
   for (let i = parts.length - 1; i >= 0; i -= 1) {
@@ -84,11 +82,16 @@ export function currentActivityLabel(parts: AnyToolPart[], reasoning: string, fa
   return last ? getToolActivityLabel(last) : (fallback ?? t("cowork.thread_working"))
 }
 
-/** Round 9: whether the newest tool still running is a web search or page read. Pure. */
+/** Whether a tool part is a web search or page read. */
+function isWebPart(part: AnyToolPart): boolean {
+  return isWebSearchToolPart(part) || isWebFetchToolPart(part)
+}
+
+/** Whether the newest tool still running is a web search or page read. Pure. */
 export function isWebStepInFlight(parts: AnyToolPart[]): boolean {
   for (let i = parts.length - 1; i >= 0; i -= 1) {
     const part = parts[i]
-    if (part && isToolPartInFlight(part)) return isWebSearchToolPart(part) || isWebFetchToolPart(part)
+    if (part && isToolPartInFlight(part)) return isWebPart(part)
   }
   return false
 }
@@ -101,39 +104,32 @@ function rowStatus(part: AnyToolPart): "running" | "failed" | "done" {
 }
 
 /**
- * Round 4: the single in-place activity row for a running turn in the Cowork frame. Instead of a
- * stack of per-tool and per-thinking lines, all of the turn's work folds into one row: the liquid
- * loader + a label that updates in place to the current activity (Claude-style), with an elapsed
- * timer while it runs. Clicking the row expands a steps table (status, action, duration) like the
- * reference, with faint reasoning context at the top. MessageGroup mounts it only while the run is
- * live; once the turn ends the group falls back to the collapsed "Worked for ..." step run, so the
- * non-streaming header branch below is a safe default for any other caller rather than a live path.
+ * The single in-place activity row for a running turn in the Cowork frame: all of the turn's work
+ * folds into one row, the liquid loader plus a label that updates to the current activity and an
+ * elapsed timer. Clicking it expands a steps table (status, action, duration) under the newest
+ * thought. Web searches and reads are left out of the table, since they show in place in the
+ * transcript. Once the turn ends the group shows the collapsed "Worked for ..." run instead.
  */
-export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, startedAt }: UnifiedActivityProps) {
+export function UnifiedActivity({ parts, reasoning, activityKey, startedAt }: UnifiedActivityProps) {
   const [expanded, setExpandedState] = React.useState(() => expandedByKey.get(activityKey) ?? false)
   const setExpanded = (value: boolean) => {
     expandedByKey.set(activityKey, value)
     setExpandedState(value)
   }
-  const elapsed = useElapsed(isStreaming, startedAt)
-  const lead = reasoningLead(reasoning)
+  const elapsed = useElapsed(true, startedAt)
+  const lead = latestReasoningLead(reasoning)
 
-  // Round 8c: when nothing specific is known yet, a friendly line rotates in its place.
-  const working = useWorkingLine(isStreaming)
-  const liveLabel = isStreaming ? currentActivityLabel(parts, reasoning, working.text) : null
-  const showingWorkingLine = isStreaming && liveLabel === working.text
-  const liveWebStep = isStreaming && isWebStepInFlight(parts)
+  // When nothing specific is known yet, a friendly line rotates in its place.
+  const working = useWorkingLine(true)
+  const header = currentActivityLabel(parts, reasoning, working.text)
+  const showingWorkingLine = header === working.text
+  const liveWebStep = isWebStepInFlight(parts)
 
-  // Header: live current-activity label while streaming; past-tense summary once done.
-  const header = isStreaming
-    ? (liveLabel ?? "")
-    : parts.length > 0
-      ? getAggregateSummary(parts, "past")
-      : (lead ?? t("activity.working"))
-
-  const durations = parts.map((part) => trackToolCallDuration(part))
-  const visible = expanded ? parts.slice(0, ROW_CAP) : []
-  const hidden = parts.length - visible.length
+  const rows = parts.filter((part) => !isWebPart(part))
+  // Tracked on every render (not only when expanded): a duration is timed from when a call is first seen running.
+  const durations = rows.map((part) => trackToolCallDuration(part))
+  const visible = expanded ? rows.slice(0, ROW_CAP) : []
+  const hidden = rows.length - visible.length
 
   return (
     <div className="w-full" data-unified-activity={activityKey}>
@@ -143,35 +139,23 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, st
         aria-expanded={expanded}
         className="group flex min-w-0 max-w-full cursor-pointer items-center gap-2 text-start transition-colors"
       >
-        {isStreaming && liveWebStep ? (
-          /* Round 9: while the run reads or searches the web, a static globe (like the web
-             research rows) stands in for the liquid loader. */
+        {liveWebStep ? (
+          /* While the run reads or searches the web, a static globe (like the web research rows)
+             stands in for the liquid loader. */
           <span className="inline-flex size-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
             <Globe className="size-4" />
           </span>
-        ) : isStreaming ? (
-          <RedrobLiquidLoader size={32} label={header} />
         ) : (
-          <ChevronRight
-            aria-hidden="true"
-            className={cn("size-3.5 shrink-0 text-muted-foreground/70 transition-transform", expanded && "rotate-90")}
-          />
+          <RedrobLiquidLoader size={32} label={header} />
         )}
-        {/* Live label shimmers while streaming; a plain muted summary once done. */}
-        {/* Keyed by the friendly line's index, so each new line replays the fade-in. */}
+        {/* The live label shimmers; keyed by the friendly line's index so each new line replays the fade-in. */}
         <span
           key={showingWorkingLine ? `working-${working.index}` : "label"}
-          className={cn(
-            "min-w-0 truncate text-sm",
-            showingWorkingLine && "cowork-working-line",
-            isStreaming ? "redrob-shimmer-text" : "text-muted-foreground group-hover:text-foreground",
-          )}
+          className={cn("min-w-0 truncate text-sm redrob-shimmer-text", showingWorkingLine && "cowork-working-line")}
         >
           {header}
         </span>
-        {isStreaming ? (
-          <span className="shrink-0 text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
-        ) : null}
+        <span className="shrink-0 text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
       </button>
 
       {expanded ? (

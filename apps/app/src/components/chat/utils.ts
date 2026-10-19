@@ -186,6 +186,27 @@ export function isWebResearchGroup(group: AssistantRenderGroup): boolean {
   return false
 }
 
+/** A live run's activity: its tool calls in order and the reasoning shown for it. */
+export type LiveActivity = { parts: (ToolUIPart | DynamicToolUIPart)[]; reasoning: string }
+
+/**
+ * The activity across a run's assistant messages: every tool call, plus the reasoning that has text
+ * (when thinking is shown). Null when there is none yet, which is exactly when the live activity row
+ * does not show; the message group and the bottom run status both key off this one test.
+ */
+export function liveActivityOf(messages: readonly UIMessage[], showThinking: boolean): LiveActivity | null {
+  const parts: (ToolUIPart | DynamicToolUIPart)[] = []
+  const reasoning: string[] = []
+  for (const message of messages) {
+    if (message.role !== "assistant") continue
+    for (const part of message.parts) {
+      if (isToolUIPart(part)) parts.push(part)
+      else if (showThinking && isReasoningUIPart(part) && part.text.trim()) reasoning.push(part.text)
+    }
+  }
+  return parts.length > 0 || reasoning.length > 0 ? { parts, reasoning: reasoning.join("\n\n") } : null
+}
+
 /**
  * Steps often arrive as one assistant message per tool call. When a
  * message contains nothing but aggregatable tool parts (plus step

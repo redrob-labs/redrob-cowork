@@ -23,8 +23,6 @@ import {
 import {
   DynamicToolUIPart,
   isFileUIPart,
-  isReasoningUIPart,
-  isToolUIPart,
   ToolUIPart,
   type FileUIPart,
   type UIMessage,
@@ -141,7 +139,7 @@ import { collapsedCompactionIndexes } from "./compaction-collapse"
 import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
-import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, isWebResearchGroup, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
+import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, isWebResearchGroup, liveActivityOf, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/cowork-blocks"
@@ -1250,6 +1248,16 @@ function MessageGroup({
     })
   })
 
+  // In the Cowork frame a LIVE run renders as one in-place UnifiedActivity row. Every message in the
+  // group is scanned, since a live turn's reasoning and tool calls arrive interleaved with the answer.
+  const liveActivity = React.useMemo(
+    () =>
+      inCoworkFrame && isLiveGroup
+        ? liveActivityOf(items.flatMap((item) => (isSessionErrorMessage(item.message) ? [] : [item.message])), showThinking)
+        : null,
+    [inCoworkFrame, isLiveGroup, items, showThinking],
+  )
+
   if (!lastItem || isMessageEmptyGroup(items)) {
     return null;
   }
@@ -1345,33 +1353,13 @@ function MessageGroup({
     ))
     : []
 
-  // Round 4: in the Cowork frame, a LIVE run renders as one in-place UnifiedActivity row instead
-  // of the per-message step list. Scan EVERY message in the group (not just the leading step
-  // messages) for tool parts + reasoning, because a live turn's reasoning and tool calls arrive
-  // interleaved in the same message as the answer and would otherwise fall into proseItems and
-  // render as separate lines - which is exactly the per-line layout this replaces.
-  const liveActivityToolParts: AnyToolPart[] = []
-  let liveActivityReasoning = ""
-  for (const item of items) {
-    if (item.message.role !== "assistant" || isSessionErrorMessage(item.message)) continue
-    for (const group of getAssistantRenderGroups(item.message.parts, showThinking)) {
-      if (group.kind === "tool-aggregate") liveActivityToolParts.push(...group.parts)
-      else if (group.kind === "tool") liveActivityToolParts.push(group.part)
-      else if (group.kind === "reasoning" && group.text.trim()) {
-        liveActivityReasoning += liveActivityReasoning ? `\n\n${group.text}` : group.text
-      }
-    }
-  }
-  const useUnifiedLiveActivity =
-    inCoworkFrame && isLiveGroup
-    && (liveActivityToolParts.length > 0 || liveActivityReasoning.trim().length > 0)
+  const useUnifiedLiveActivity = liveActivity !== null
 
   const renderItem = (item: UIMessageWithIndex, groupIndex: number, hideReasoning?: boolean, hideSteps?: boolean) => {
     const isLastMessage = item.index === messages.length - 1
 
     return (
-      // Round 7 C7: empty:hidden - when the message renders nothing (all of it folded into the live
-      // row), the wrapper must not keep the column's 8px gap and stack blank bands between prose.
+      // empty:hidden: a message that folded entirely into the live row must not keep the column gap.
       <div key={item.message.id} className="empty:hidden">
         <MessageComponent
           message={item.message}
@@ -1421,17 +1409,15 @@ function MessageGroup({
     return nodes
   }
 
-  // Round 7 C5: the live run row (loader + "Working on it" + timer) TRAILS the newest content of the
-  // turn. It used to render first in the group; once the hidden question-answer and plan-run sends
-  // folded questions, plan and run into ONE group, the loader sat above them all ("stuck at the top").
+  // The live run row (loader, label, timer) trails the newest content of the turn: questions, plan
+  // and run can share one group, and a leading loader would sit above all of them.
   const openingUser = messages[(items[0]?.index ?? 0) - 1]
   const liveRunStartedAt = openingUser?.role === "user" ? (getMessageCreated(openingUser) ?? stepsStartedAt) : stepsStartedAt
-  const liveActivityRow = useUnifiedLiveActivity ? (
+  const liveActivityRow = liveActivity ? (
     <div className={CHAT_COLUMN} data-live-activity-row="">
       <UnifiedActivity
-        parts={liveActivityToolParts}
-        reasoning={liveActivityReasoning}
-        isStreaming
+        parts={liveActivity.parts}
+        reasoning={liveActivity.reasoning}
         /* Stable key for the whole turn so the row (and its timer) never remounts per tool. */
         activityKey={`${items[0]?.message.id ?? "live"}-activity`}
         /* Continuous elapsed from the run's server start (the user message that opened it), so it
@@ -1446,9 +1432,8 @@ function MessageGroup({
       {/* The scroll area keeps the same 8px rhythm the parts inside a single
           message use, so a step row is spaced identically whether or not a
           message boundary happens to fall between it and the previous row. */}
-      {/* The step scroll area is skipped entirely while the unified live row stands in for it.
-          Round 7 C7: the leading step messages still render their WEB RESEARCH rows in place (all
-          other steps are the live row's job), so a run that opens with searches shows them live. */}
+      {/* The step scroll area is skipped while the live row stands in for it; the leading step
+          messages still render their web research rows in place, so opening searches show live. */}
       {useUnifiedLiveActivity && stepItems.length > 0 ? renderItems(stepItems, 0, false, true) : null}
       {!useUnifiedLiveActivity && stepItems.length > 0 ? (
         collapseSteps ? (
@@ -1728,12 +1713,9 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
   const liveActionWeb = isStreaming && isWebStepInFlight(latestToolParts as AnyToolPart[])
 
   /*
-    Round 6: the running turn's loader is the inline UnifiedActivity row, which the live MessageGroup
-    shows as soon as ANY assistant message in the live run has a tool or reasoning part. The bottom
-    CoworkRunStatus must suppress on the SAME condition, or the two loaders drift apart and both show
-    (the dual-loader bug): when the model opens a fresh empty step message, scanning only the LAST
-    message said "nothing inline yet" while the row was still up from earlier parts. So scan the whole
-    trailing run of assistant messages (the live group), not just the last one.
+    The running turn's loader is the inline UnifiedActivity row once the live run has any activity.
+    The bottom CoworkRunStatus hides on the SAME test (liveActivityOf over the trailing run of
+    assistant messages), so the two loaders never both show or both hide.
   */
   const { showThinking } = useMessageList()
   // When the running turn started: the newest user message's server time, shared by both run timers.
@@ -1743,17 +1725,13 @@ export function MessageList({ messages: rawMessages, status, retryStatus, blocke
   }, [messages])
   const hasInlineActivity = React.useMemo(() => {
     if (!inCoworkFrame || !isStreaming) return false
+    const trailingRun: UIMessage[] = []
     for (let i = messages.length - 1; i >= 0; i -= 1) {
       const message = messages[i]
       if (message?.role !== "assistant") break // stop at the user turn that opened this run
-      // Mirror MessageGroup's row condition exactly: any tool part, or reasoning that has text AND
-      // is shown. A bare/empty reasoning part (how thinking starts streaming), or reasoning hidden by
-      // showThinking=false, puts up no row - suppressing the bottom loader then left NO loader.
-      if (message.parts.some((part) => isToolUIPart(part) || (showThinking && isReasoningUIPart(part) && part.text.trim().length > 0))) {
-        return true
-      }
+      if (!isSessionErrorMessage(message)) trailingRun.push(message)
     }
-    return false
+    return liveActivityOf(trailingRun, showThinking) !== null
   }, [inCoworkFrame, isStreaming, messages, showThinking])
 
   return (

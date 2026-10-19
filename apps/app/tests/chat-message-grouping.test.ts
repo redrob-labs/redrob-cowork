@@ -5,6 +5,7 @@ import {
   getAssistantRenderGroups,
   getMessageCompleted,
   getMessageCreated,
+  liveActivityOf,
   splitTurnAtAnswer,
 } from "../src/components/chat/utils";
 
@@ -151,5 +152,19 @@ describe("message timestamps", () => {
       parts: [textPart("hi")],
     };
     expect(getMessageCompleted(message)).toBeNull();
+  });
+});
+
+describe("liveActivityOf", () => {
+  test("collects every tool call and the shown reasoning; null while there is none", () => {
+    const empty: UIMessage["parts"][number] = { type: "reasoning", text: "", state: "streaming" };
+    const messages: UIMessage[] = [
+      { id: "a1", role: "assistant", parts: [reasoningPart("Looking."), bashPart("c1")] },
+      { id: "a2", role: "assistant", parts: [empty, textPart("Done.")] },
+    ];
+    expect(liveActivityOf(messages, true)).toEqual({ parts: [bashPart("c1")], reasoning: "Looking." });
+    expect(liveActivityOf(messages, false)).toEqual({ parts: [bashPart("c1")], reasoning: "" });
+    // A bare reasoning part (how thinking starts streaming) puts up no row.
+    expect(liveActivityOf([{ id: "a3", role: "assistant", parts: [empty] }], true)).toBeNull();
   });
 });
