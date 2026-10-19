@@ -27,10 +27,19 @@ function sentence(text: string): string {
   return /[.!?。…]$/.test(text) ? text : `${text}.`;
 }
 
+/** Each question's own typed answer (round 9), by question id; it replaces the options picked. */
+export type CustomAnswers = Record<string, string>;
+
+/** The answer to one question: the typed text when there is any, else the options picked. */
+function answerFor(question: PlanQuestionData, value: PlanAnswers, custom: CustomAnswers): string[] {
+  const typed = custom[question.id]?.trim();
+  return typed ? [typed] : chosen(question, value);
+}
+
 /** The answers as the person's reply: one line per answered question, its question then its choices. */
-export function answersToPrompt(questions: PlanQuestionData[], value: PlanAnswers): string {
+export function answersToPrompt(questions: PlanQuestionData[], value: PlanAnswers, custom: CustomAnswers = {}): string {
   const lines = questions.flatMap((question) => {
-    const picks = chosen(question, value);
+    const picks = answerFor(question, value, custom);
     return picks.length ? [`${question.question} ${sentence(picks.join(", "))}`] : [];
   });
   const body = lines.length ? lines.join("\n") : t("cowork.thread_no_preference");

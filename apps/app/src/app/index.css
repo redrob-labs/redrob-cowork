@@ -4550,3 +4550,90 @@ a.radar-story__source:focus-visible {
   color: inherit;
 }
 .cowork-artifact-view__body [data-redrob-markdown-preview] { height: auto; overflow: visible; padding: 8px 16px 24px; }
+
+/*
+  Round 9: Plan's questions, the app's own card (cowork-questions.tsx). Same tokens as the DS
+  PlanQuestions it replaces, one step smaller type (question 14px, options 13px), and a
+  "Something else" chip that turns into a pill-shaped text field in place. Every surface sets its
+  background and text colour.
+*/
+.cowork-q {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  min-width: 0;
+  padding: var(--space-5, 20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+}
+.cowork-q__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  margin: 0;
+  padding-left: 18px;
+}
+.cowork-q__item::marker { font-size: 13px; font-weight: 600; color: var(--ink-secondary); }
+.cowork-q__ask {
+  margin: 0 0 var(--space-2, 8px);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+.cowork-q__any { font-size: 12px; font-weight: 400; color: var(--ink-secondary); }
+.cowork-q__opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.cowork-q__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast, 120ms) ease, border-color var(--duration-fast, 120ms) ease;
+}
+.cowork-q__opt:hover { background: var(--surface-sunken); color: var(--ink-primary); }
+.cowork-q__opt[aria-pressed="true"] {
+  border-color: var(--action-primary);
+  background: var(--surface-brand-subtle);
+  color: var(--ink-brand);
+}
+.cowork-q__opt:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+.cowork-q__opt svg { flex: none; }
+.cowork-q__opt--other { border-style: dashed; color: var(--ink-secondary); }
+/* The chip as a field: same pill, a text cursor, and the brand tint once something is typed. */
+.cowork-q__opt--input {
+  min-width: min(260px, 100%);
+  padding: 0 12px;
+  border-color: var(--action-primary);
+  cursor: text;
+}
+.cowork-q__opt--input:hover { background: var(--surface-base); }
+.cowork-q__opt--input[data-filled] { background: var(--surface-brand-subtle); color: var(--ink-brand); }
+.cowork-q__opt--input:focus-within { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+.cowork-q__opt--input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+.cowork-q__opt--input input::placeholder { color: var(--ink-tertiary, var(--ink-secondary)); }
+.cowork-q__act { display: flex; align-items: center; gap: var(--space-3, 12px); }
+@media (prefers-reduced-motion: reduce) {
+  .cowork-q__opt { transition: none; }
+}

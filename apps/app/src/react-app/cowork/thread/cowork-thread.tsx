@@ -7,7 +7,6 @@ import {
   FactCheckReport,
   Loader,
   PlanDocument,
-  PlanQuestions,
   ThreadNote,
   type ChallengeReportProps,
   type FactCheckReportProps,
@@ -16,6 +15,7 @@ import {
 import { t } from "../../../i18n";
 import { cn } from "../../../lib/utils";
 import { useWorkingLine } from "../../../lib/working-lines";
+import { CoworkQuestionsCard } from "./cowork-questions";
 import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader/RedrobLiquidLoader";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { useCoworkComposerStore } from "../composer/composer-state";
@@ -23,7 +23,6 @@ import { useCheckStore, type AnswerChecks } from "./check-store";
 import type { ChallengeData, CoworkBlocks, FactCheckData, PlanDoc, PlanQuestionData } from "./cowork-blocks";
 import { useCoworkThread } from "./cowork-thread-context";
 import {
-  answersSummary,
   answersToPrompt,
   challengeOutcome,
   factConfidence,
@@ -32,7 +31,6 @@ import {
   planToText,
   type ApprovalActions,
   type CheckVerdict,
-  type PlanAnswers,
   type PlanStage,
 } from "./thread-logic";
 
@@ -87,30 +85,25 @@ export function challengeReportProps(challenge: ChallengeData): ChallengeReportP
 /** Plan's questions; answering sends the choices as the person's reply, then folds. */
 function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boolean; messageId?: string }) {
   const thread = useCoworkThread();
-  const [answered, setAnswered] = useState<PlanAnswers | null>(null);
+  const [answered, setAnswered] = useState(false);
   // Round 8 (M1): done means the person ANSWERED (here, or by any reply after this message), not
   // "this is no longer the last message" - the agent often keeps writing after it asks. Without the
   // thread's state (outside a session surface), fall back to the old position rule.
   const repliedLater = props.messageId && thread?.questions ? thread.questions.answered.has(props.messageId) : !props.isLatest;
-  const done = answered !== null || repliedLater;
+  const done = answered || repliedLater;
   // Round 7 C1: once answered (or superseded by a later turn) the questions leave the thread
-  // entirely. The DS fold line ("Answered." / "Answered: a, b") read as an inline comment; the
-  // plan that follows is the visible result of the answers.
+  // entirely. The plan that follows is the visible result of the answers.
   if (done) return null;
+  // Round 9: the app's own card (typed answers per question, "Execute"), not the DS PlanQuestions.
   return (
-    <PlanQuestions
+    <CoworkQuestionsCard
       questions={props.questions}
-      done={false}
-      summary={answered ? answersSummary(props.questions, answered) : t("cowork.thread_answered_none")}
-      label={t("cowork.thread_questions_label")}
-      submitLabel={t("cowork.thread_questions_submit")}
-      hint={t("cowork.thread_questions_hint")}
-      anyLabel={t("cowork.thread_questions_any")}
-      onSubmit={(value) => {
+      disabled={!thread}
+      onSubmit={(value, custom) => {
         if (!thread) return;
-        setAnswered(value);
+        setAnswered(true);
         // The send path reports its own error; the questions open again so they can be re-sent.
-        thread.sendText(answersToPrompt(props.questions, value)).catch(() => setAnswered(null));
+        thread.sendText(answersToPrompt(props.questions, value, custom)).catch(() => setAnswered(false));
       }}
     />
   );
