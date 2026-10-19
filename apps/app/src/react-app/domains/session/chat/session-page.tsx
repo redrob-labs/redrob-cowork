@@ -2,7 +2,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePanelRef } from "react-resizable-panels";
-import { FileText, Globe, Mic2, MoreHorizontal, PanelRight, TextSearch, Zap } from "lucide-react";
+import { FileText, Globe, Mic2, MoreHorizontal, PanelRight, Share2, TextSearch, Zap } from "lucide-react";
 
 import { resolveExtensionIconSrc } from "@/react-app/design-system/extension-icon-src";
 import { t } from "../../../../i18n";
@@ -49,6 +49,7 @@ import { ConfirmModal } from "../../../design-system/modals/confirm-modal";
 import { usePlatform } from "../../../kernel/platform";
 import ProviderAuthModal, { type ProviderAuthModalProps } from "../../connections/provider-auth/provider-auth-modal";
 import { RenameSessionModal } from "../modals/rename-session-modal";
+import { RedrobChatShareDialog, useRedrobChatShareStore } from "../share/redrob-chat-share-dialog";
 import { AppSidebar } from "../sidebar/app-sidebar";
 import { useSessionManagementStore } from "../sidebar/session-management-store";
 import { SessionSurface, type SessionSurfaceProps } from "../surface/session-surface";
@@ -426,6 +427,7 @@ export function SessionPage(props: SessionPageProps) {
     workspaceCount: props.workspaces.length,
   });
 
+  const redrobChatShareRequest = useRedrobChatShareStore((state) => state.request);
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameTitle, setRenameTitle] = useState("");
   const [renameBusy, setRenameBusy] = useState(false);
@@ -1327,6 +1329,19 @@ export function SessionPage(props: SessionPageProps) {
                     <DropdownMenuItem onClick={openVoiceRailPane}>
                       <Mic2 className="size-4" />{t("voice.mode")}</DropdownMenuItem>
                   ) : null}
+                  {props.selectedSessionId ? (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (!props.selectedSessionId) return;
+                        useRedrobChatShareStore.getState().open({
+                          kind: "transcript",
+                          workspaceId: props.selectedWorkspaceId,
+                          sessionId: props.selectedSessionId,
+                        });
+                      }}
+                    >
+                      <Share2 className="size-4" />{t("redrob_chat_share.menu")}</DropdownMenuItem>
+                  ) : null}
                 </DropdownMenuContent>
               </DropdownMenu>
               {props.developerMode ? (
@@ -1851,6 +1866,12 @@ export function SessionPage(props: SessionPageProps) {
       </Dialog>
 
       {props.shareWorkspaceModal ? <ShareWorkspaceModal {...props.shareWorkspaceModal} /> : null}
+
+      <RedrobChatShareDialog
+        client={props.redrobServerClient}
+        request={redrobChatShareRequest}
+        onClose={() => useRedrobChatShareStore.getState().close()}
+      />
 
 
     </div>

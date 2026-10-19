@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, ExternalLink, FolderOpen, X } from "lucide-react";
+import { Download, ExternalLink, FolderOpen, Share2, X } from "lucide-react";
 
 import type { RedrobServerClient } from "@/app/lib/redrob-server";
 import { getDesktopFileIcon, openDesktopPath, revealDesktopItemInDir } from "@/app/lib/desktop";
@@ -14,6 +14,7 @@ import { type ArtifactPanelTab, usePanelTabStore } from "../panel/panel-tab-stor
 import { isCollectibleArtifactTarget, type BinaryData, type Data, type OpenTarget, type TextData } from "./open-target";
 import { HTMLPreview, ImagePreview, MarkdownPreview, PdfPreview, PlainText, PreviewError, PreviewLoading, PreviewUnavailable } from "./preview";
 import { t } from "@/i18n";
+import { RedrobChatShareDialog, type RedrobChatShareRequest } from "../share/redrob-chat-share-dialog";
 
 const ArtifactTextEditor = lazy(() =>
   import("./artifact-text-editor").then((module) => ({ default: module.ArtifactTextEditor })),
@@ -95,6 +96,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
   const platform = usePlatform();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [shareRequest, setShareRequest] = useState<RedrobChatShareRequest | null>(null);
   const [draft, setDraft] = useState("");
   const lastSyncedRef = useRef<string | null>(null);
   const failedDraftRef = useRef<string | null>(null);
@@ -316,6 +318,23 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
               <TooltipContent>{t("artifact.download")}</TooltipContent>
             </Tooltip>
           ) : null}
+          {target.kind === "file" && isTextContent(target) && target.exists !== false ? (
+            <Tooltip>
+              <TooltipTrigger
+                render={(
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setShareRequest({ kind: "artifact", workspaceId, path: target.value, title: target.name })}
+                    aria-label={t("redrob_chat_share.menu")}
+                  >
+                    <Share2 />
+                  </Button>
+                )}
+              />
+              <TooltipContent>{t("redrob_chat_share.menu")}</TooltipContent>
+            </Tooltip>
+          ) : null}
           {canUseDesktopFileActions ? (
             <Tooltip>
               <TooltipTrigger
@@ -383,6 +402,7 @@ function ArtifactPanelView({ client, workspaceId, workspaceRoot, isRemoteWorkspa
           <PreviewUnavailable />
         )}
       </div>
+      <RedrobChatShareDialog client={client} request={shareRequest} onClose={() => setShareRequest(null)} />
     </div>
   );
 }
