@@ -1,20 +1,17 @@
 import type { UIMessage } from "ai";
 
+import { getMessagesText } from "../../../components/chat/utils";
 import { parseCoworkBlocks } from "./cowork-blocks";
 
 /**
- * Round 8 (M1): where Plan's questions stand, read from the RAW transcript (hidden question-answer
- * sends included).
- *
- * Before, a question block counted as done as soon as it was not the transcript's LAST message. The
- * plan agent often keeps writing after it asks (another message, or the plan itself), so the
- * questions folded to "Answered." before anyone saw them, and the plan beside them ran without the
- * answers. Now:
+ * Where Plan's questions stand, read from the RAW transcript (hidden question-answer sends
+ * included). Message position is not enough: the plan agent often keeps writing after it asks
+ * (another message, or the plan itself), so "no longer the last message" does not mean answered.
  * - answered: an assistant message whose questions have ANY user message after them (the person's
  *   own reply, or the hidden send the question card makes);
  * - heldPlans: an assistant message whose plan shares a turn with questions (same message or an
  *   earlier one since the last user message). That plan was drafted before the answers; it stays out
- *   of sight and never runs. The answers produce a new plan, which runs as usual (calibration 3a).
+ *   of sight and never runs. The answers produce a new plan, which runs as usual.
  */
 export type CoworkQuestionState = {
   /** Assistant message ids whose questions have been answered. */
@@ -23,11 +20,8 @@ export type CoworkQuestionState = {
   heldPlans: ReadonlySet<string>;
 };
 
+/** No questions anywhere: nothing answered, no plan held. */
 export const EMPTY_QUESTION_STATE: CoworkQuestionState = { answered: new Set(), heldPlans: new Set() };
-
-function assistantText(message: UIMessage): string {
-  return message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("\n");
-}
 
 /** Whether two states hold the same ids (so a caller can keep the previous object). */
 export function sameQuestionState(a: CoworkQuestionState, b: CoworkQuestionState): boolean {
@@ -50,7 +44,7 @@ export function coworkQuestionState(messages: readonly UIMessage[]): CoworkQuest
       return;
     }
     if (message.role !== "assistant") return;
-    const blocks = parseCoworkBlocks(assistantText(message));
+    const blocks = parseCoworkBlocks(getMessagesText([message]));
     if (blocks.questions) {
       questionsThisTurn = true;
       if (index < lastUser) answered.add(message.id);

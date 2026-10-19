@@ -1,10 +1,11 @@
 import * as React from "react"
 
 import { t } from "@/i18n"
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion"
 
 /**
- * Round 8c: the friendly lines a live run shows when nothing more specific is known (no tool in
- * flight, no thought yet). Half calm, half playful. Each line is its own static t() call so the
+ * The friendly lines a live run shows when nothing more specific is known (no tool in flight, no
+ * thought yet). Half calm, half playful. Each line is its own static t() call so the
  * i18n audit can see every key; never build these keys from a template.
  */
 const WORKING_LINES: ReadonlyArray<() => string> = [
@@ -20,6 +21,7 @@ const WORKING_LINES: ReadonlyArray<() => string> = [
   () => t("cowork.working_line_10"),
 ]
 
+/** How many friendly lines there are to rotate through. */
 export const WORKING_LINE_COUNT = WORKING_LINES.length
 
 /** How long each line stays before the next one fades in. */
@@ -44,24 +46,19 @@ export function nextWorkingLineIndex(previous: number | null, count = WORKING_LI
 /** Shared across mounts, so a remounted row does not reopen on the line just shown. */
 let lastShown: number | null = null
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined" && typeof window.matchMedia === "function"
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false
-}
-
 /**
  * The current friendly line and its index (use the index as a React key to replay the fade).
  * Rotates every WORKING_LINE_MS while `active`; with reduced motion one line stays put.
  */
 export function useWorkingLine(active = true): { index: number; text: string } {
+  const reducedMotion = usePrefersReducedMotion()
   const [index, setIndex] = React.useState(() => {
     const first = nextWorkingLineIndex(lastShown)
     lastShown = first
     return first
   })
   React.useEffect(() => {
-    if (!active || prefersReducedMotion()) return
+    if (!active || reducedMotion) return
     const id = window.setInterval(() => {
       setIndex((previous) => {
         const next = nextWorkingLineIndex(previous)
@@ -70,6 +67,6 @@ export function useWorkingLine(active = true): { index: number; text: string } {
       })
     }, WORKING_LINE_MS)
     return () => window.clearInterval(id)
-  }, [active])
+  }, [active, reducedMotion])
   return { index, text: workingLine(index) }
 }

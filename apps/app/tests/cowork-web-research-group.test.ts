@@ -4,7 +4,7 @@ import type { DynamicToolUIPart } from "ai";
 import { webStepsMeta, webStepsOf } from "../src/components/chat/web-research-group";
 import { parseWebSearchResults } from "../src/lib/websearch-results";
 
-// Round 8b: web research reads as a Claude-style table with each search's sources.
+// Web research reads as a table with each search's sources.
 
 const JSON_OUTPUT = JSON.stringify({
   search_id: "s1",
@@ -33,24 +33,20 @@ describe("parseWebSearchResults", () => {
 });
 
 describe("webStepsOf / webStepsMeta", () => {
-  test("one row per search with its sources; running and non-web parts handled", () => {
+  test("one row per search with its sources, one per page read; non-web parts skipped", () => {
     const parts = [
       search("US China AI race", JSON_OUTPUT),
       search("Huawei Ascend", undefined, "input-available"),
+      { type: "dynamic-tool", toolName: "webfetch", toolCallId: "wf", state: "input-available", input: { url: "https://www.cnn.com/a" } } as unknown as DynamicToolUIPart,
       { type: "dynamic-tool", toolName: "bash", toolCallId: "b", state: "output-available", input: {} } as unknown as DynamicToolUIPart,
     ];
     const steps = webStepsOf(parts);
-    expect(steps.map((step) => [step.label, step.results.length, step.running])).toEqual([
-      ["US China AI race", 2, false],
-      ["Huawei Ascend", 0, true],
+    expect(steps.map((step) => [step.kind, step.label, step.results.length, step.running])).toEqual([
+      ["search", "US China AI race", 2, false],
+      ["search", "Huawei Ascend", 0, true],
+      ["read", "cnn.com", 0, true],
     ]);
-    expect(webStepsMeta(steps)).toBe("2 searches · 2 sources");
-  });
-
-  test("round 9: a page read keeps its url and counts as a page", () => {
-    const read = { type: "dynamic-tool", toolName: "webfetch", toolCallId: "wf", state: "input-available", input: { url: "https://www.cnn.com/a" } } as unknown as DynamicToolUIPart;
-    const steps = webStepsOf([search("q", JSON_OUTPUT), read]);
-    expect(steps[1]).toMatchObject({ kind: "read", label: "cnn.com", url: "https://www.cnn.com/a", running: true });
-    expect(webStepsMeta(steps)).toBe("1 search · 2 sources · 1 page");
+    expect(steps[2]?.url).toBe("https://www.cnn.com/a");
+    expect(webStepsMeta(steps)).toBe("2 searches · 2 sources · 1 page");
   });
 });

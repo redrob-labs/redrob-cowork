@@ -21,10 +21,7 @@ import { coworkSystemText } from "@/react-app/cowork/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/cowork/thread/memory-context";
 import { toNote } from "@/react-app/cowork/services/real-services";
 import { isPlanRunPrompt, isQuestionAnswerPrompt, planTurnInstruction } from "@/react-app/cowork/thread/thread-logic";
-import { useRepairMarkerTitles } from "@/react-app/cowork/thread/use-repair-marker-titles";
-
-/** Stable empty list, so the title repair's effect does not re-run on every render. */
-const EMPTY_ROUTE_SESSIONS: never[] = [];
+import { useChatTitles, type TitledSession } from "@/react-app/cowork/thread/use-chat-titles";
 import { useCoworkCrossCheck } from "@/react-app/cowork/thread/use-cowork-cross-check";
 import type {
   AgentPartInput,
@@ -216,6 +213,9 @@ import {
   refreshProviderListQueries,
   useProviderListQuery,
 } from "@/react-app/infra/provider-list-query";
+
+/** Stable empty list, so the chat-title effect does not re-run on every render. */
+const EMPTY_ROUTE_SESSIONS: readonly TitledSession[] = [];
 
 /**
  * Serialize an SDK error value into a string that parseSessionError can parse.
@@ -829,7 +829,6 @@ export function SessionRoute() {
     activeQuestion,
     questionReplyBusy,
     respondQuestion,
-    todos,
   } = useSessionInteractions({
     client: opencodeClient,
     workspaceId: selectedWorkspaceId,
@@ -1099,16 +1098,16 @@ export function SessionRoute() {
             const coworkSystem = inCoworkFrame
               ? coworkSystemText(coworkMemory, envSystemContext || undefined, coworkNotes)
               : envSystemContext;
-            // Round 6: a complex Run prompt auto-upgrades to Plan so the model drafts a plan first,
+            // A complex Run prompt auto-upgrades to Plan so the model drafts a plan first,
             // then the plan auto-runs (CoworkPlan auto-run). A plan being RUN is never upgraded
             // (see effectiveCoworkMode), or the plan would loop back to the Plan agent forever.
             const chosenCoworkMode = modeFor(coworkChats, targetSessionId, local.prefs.coworkNewChatMode);
-            // Round 8b: the answers to Plan's questions go back to the PLAN agent (so it writes the
+            // The answers to Plan's questions go back to the PLAN agent (so it writes the
             // plan), not the run agent - before, short answers stayed in Run and skipped the plan.
             const sendCoworkMode = inCoworkFrame && isQuestionAnswerPrompt(text)
               ? "plan"
               : effectiveCoworkMode(chosenCoworkMode, text, isPlanRunPrompt(text));
-            // Round 8b: every Plan-mode send carries this turn's protocol rule (questions first, then
+            // Every Plan-mode send carries this turn's protocol rule (questions first, then
             // one plan block), so the plan agent cannot skip straight to researching and answering.
             const planRule = inCoworkFrame && sendCoworkMode === "plan" ? planTurnInstruction(text) : null;
             const system = [coworkSystem, planRule].filter(Boolean).join("\n\n") || undefined;
@@ -2488,8 +2487,9 @@ export function SessionRoute() {
     levels: local.prefs.coworkCrossCheck,
   });
 
-  // Round 9: a chat the server titled "```redrob-questions" is renamed after its first prompt.
-  useRepairMarkerTitles({
+  // In the Cowork frame, a chat titled from its prompt (or a block marker) gets a short name.
+  useChatTitles({
+    enabled: inCoworkFrame,
     client: opencodeClient,
     directory: selectedWorkspaceRoot || undefined,
     sessions: sessionsByWorkspaceId[selectedWorkspaceId] ?? EMPTY_ROUTE_SESSIONS,
@@ -2688,7 +2688,6 @@ export function SessionRoute() {
         onUndo: () => {},
         onRedo: () => {},
       }}
-      todos={todos}
       sessionLoadingById={(sessionId) => effectiveLoading && Boolean(sessionId && sessionId === selectedSessionId)}
       shareWorkspaceModal={
         shareWorkspaceState.shareWorkspaceOpen

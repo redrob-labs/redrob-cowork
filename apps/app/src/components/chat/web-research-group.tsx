@@ -6,7 +6,8 @@ import { ChevronDown, ChevronRight, Globe } from "lucide-react"
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
-import { parseWebSearchResults, type WebSearchResult } from "@/lib/websearch-results"
+import { faviconUrlForHref } from "@/lib/favicon"
+import { hostnameOf, parseWebSearchResults, type WebSearchResult } from "@/lib/websearch-results"
 import { cn } from "@/lib/utils"
 import { t } from "@/i18n"
 import { openExternal } from "@/react-app/cowork/connectors/cowork-connectors"
@@ -33,15 +34,6 @@ export type WebStep = {
   failed: boolean
 }
 
-function hostnameOf(url: string | undefined): string {
-  if (!url) return ""
-  try {
-    return new URL(url).hostname.replace(/^www\./, "")
-  } catch {
-    return ""
-  }
-}
-
 /** Pure: the web steps a run's tool parts stand for, in order. Non-web parts are skipped. */
 export function webStepsOf(parts: readonly AnyToolPart[]): WebStep[] {
   return parts.flatMap((part): WebStep[] => {
@@ -53,7 +45,7 @@ export function webStepsOf(parts: readonly AnyToolPart[]): WebStep[] {
     }
     if (isWebFetchToolPart(part)) {
       const url = part.input?.url
-      return [{ id: part.toolCallId, kind: "read", label: hostnameOf(url) || url || "", ...(url ? { url } : {}), results: [], running, failed }]
+      return [{ id: part.toolCallId, kind: "read", label: hostnameOf(url) ?? url ?? "", ...(url ? { url } : {}), results: [], running, failed }]
     }
     return []
   })
@@ -65,18 +57,20 @@ export function webStepsMeta(steps: readonly WebStep[]): string {
   const sources = new Set(steps.flatMap((step) => step.results.map((result) => result.url))).size
   const pages = steps.filter((step) => step.kind === "read").length
   const pieces = [
-    searches > 0 ? t("cowork.web_count", { count: searches }) : null,
+    searches > 0 ? t("cowork.web_searches", { count: searches }) : null,
     sources > 0 ? t("cowork.web_sources", { count: sources }) : null,
     pages > 0 ? t("cowork.web_pages", { count: pages }) : null,
   ]
   return pieces.filter(Boolean).join(" · ")
 }
 
-/** A site's favicon, small and decorative. */
+/** A site's favicon, small and decorative; nothing for a local or non-web URL. */
 function Favicon(props: { url: string }) {
+  const src = faviconUrlForHref(props.url)
+  if (!src) return null
   return (
     <img
-      src={`https://www.google.com/s2/favicons?sz=32&domain_url=${encodeURIComponent(props.url)}`}
+      src={src}
       alt=""
       aria-hidden="true"
       className="size-4 shrink-0 rounded-sm"
@@ -87,7 +81,7 @@ function Favicon(props: { url: string }) {
 
 /** A source row: favicon, title, domain; opens the page in the person's browser. */
 function SourceRow(props: { result: WebSearchResult }) {
-  const host = hostnameOf(props.result.url)
+  const host = hostnameOf(props.result.url) ?? ""
   return (
     <li>
       <button
@@ -103,7 +97,7 @@ function SourceRow(props: { result: WebSearchResult }) {
   )
 }
 
-/** A page-read row: "Read  <favicon> host"; opens the page it read. No loader (round 9). */
+/** A page-read row: "Read  <favicon> host"; opens the page it read. No loader. */
 function ReadRow(props: { step: WebStep }) {
   const { step } = props
   const verb = step.running ? t("cowork.web_reading") : t("cowork.web_read")
@@ -123,7 +117,7 @@ function ReadRow(props: { step: WebStep }) {
   )
 }
 
-/** One search row: "Searched the web  <query>" and its sources dropdown. No loader (round 9). */
+/** One search row: "Searched the web  <query>" and its sources dropdown. No loader. */
 function SearchRow(props: { step: WebStep }) {
   const { step } = props
   const [open, setOpenState] = useState(() => openRows.get(step.id) ?? false)
@@ -152,8 +146,8 @@ function SearchRow(props: { step: WebStep }) {
       </button>
       {open && canOpen ? (
         <ul className="flex flex-col gap-0.5 px-1 pb-2" aria-label={step.label}>
-          {step.results.map((result) => (
-            <SourceRow key={result.url} result={result} />
+          {step.results.map((result, index) => (
+            <SourceRow key={`${index}-${result.url}`} result={result} />
           ))}
         </ul>
       ) : null}
@@ -162,10 +156,10 @@ function SearchRow(props: { step: WebStep }) {
 }
 
 /**
- * Round 8b: a run's web research as a Claude-style dropdown table. The header ("Searched the web",
+ * A run's web research as a dropdown table. The header ("Searched the web",
  * with "3 searches · 24 sources · 2 pages") folds a bordered table with one row per step: a search
  * (query, source count, opening to its sources) or a page read (favicon, host, opening the page).
- * Round 9: always a static globe, never a loader; the live label above the thread says what is
+ * Always a static globe, never a loader; the live label above the thread says what is
  * running.
  */
 export function WebResearchGroup(props: { parts: AnyToolPart[]; className?: string }) {

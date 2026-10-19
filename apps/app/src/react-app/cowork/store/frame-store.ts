@@ -4,7 +4,7 @@
  * Holds the UI state that wraps every Cowork screen but belongs to none of them: the right-hand side
  * panel, the in-app browser tab state, the active modal, the transient toast, the dictation flag, the
  * published chat header, and the developer-mode flag. Screens read and drive this store; the shell
- * chrome (top bar, panel, overlay) renders from it. Only developer mode is persisted - everything
+ * chrome (top bar, panel, overlay) renders from it. Only developer mode is persisted — everything
  * else is session-lived by design.
  *
  * The store is created by {@link createFrameStore} so tests can inject fake timers and storage; the
@@ -35,7 +35,7 @@ export type FrameToast = { id: number; title: string; text?: string; tone?: Toas
 /**
  * The open chat's header content, published by the session page so the Cowork shell's top bar can
  * render it on ONE row with the chat actions (Invite, side panel). Null while no chat is open or
- * the session page is not inside the Cowork frame - then the shell top bar shows nothing for it.
+ * the session page is not inside the Cowork frame — then the shell top bar shows nothing for it.
  */
 export type ChatHeader = { title: string; findSessionId: string | null } | null;
 
@@ -46,7 +46,7 @@ export type FrameState = {
     tab: PanelTab;
     file: string | null;
     lastTab: PanelTab;
-    /** Round 8: the artifact the Artifacts tab shows on its own (its target id), or none for the list. */
+    /** The artifact the Artifacts tab shows on its own (its target id), or none for the list. */
     artifact?: string | null;
   };
   /** The in-app browser: the active provider tab id and the Cowork/you hand-off state. */
@@ -71,7 +71,7 @@ export type FrameState = {
   toggleBrowser(): void;
   /** Opens a file in the panel; null goes back to the list. */
   openFile(id: string | null): void;
-  /** Round 8: opens an artifact (by target id) on the Artifacts tab; null goes back to its list. */
+  /** Opens an artifact (by target id) on the Artifacts tab; null goes back to its list. */
   openArtifact(id: string | null): void;
   /** Selects the active in-app browser tab (null = none). */
   setBrowserTab(tab: string | null): void;

@@ -5,6 +5,8 @@ import {
   getAssistantRenderGroups,
   getMessageCompleted,
   getMessageCreated,
+  isWebResearchGroup,
+  liveActivityOf,
   splitTurnAtAnswer,
 } from "../src/components/chat/utils";
 
@@ -154,54 +156,33 @@ describe("message timestamps", () => {
   });
 });
 
-describe("getAssistantRenderGroups unifyActivity (Cowork frame)", () => {
-  test("folds reasoning + every tool kind into one activity group", () => {
-    const search: DynamicToolUIPart = {
-      type: "dynamic-tool",
-      toolName: "websearch",
-      toolCallId: "s1",
-      state: "output-available",
-      input: { query: "US China AI race" },
-      output: "ok",
-    };
-    const groups = getAssistantRenderGroups(
-      [
-        reasoningPart("Researching the US-China AI race."),
-        bashPart("c1"),
-        editPart("c2", "/tmp/a.ts"),
-        search,
-      ],
-      true, // showThinking
-      true, // unifyActivity
-    );
-    expect(groups).toHaveLength(1);
-    expect(groups[0].kind).toBe("activity");
-    if (groups[0].kind === "activity") {
-      // All three tool calls (bash, edit, non-aggregatable websearch) are in the one group.
-      expect(groups[0].parts).toHaveLength(3);
-      expect(groups[0].reasoning).toContain("Researching the US-China AI race.");
-    }
+describe("liveActivityOf", () => {
+  test("collects every tool call and the shown reasoning; null while there is none", () => {
+    const empty: UIMessage["parts"][number] = { type: "reasoning", text: "", state: "streaming" };
+    const messages: UIMessage[] = [
+      { id: "a1", role: "assistant", parts: [reasoningPart("Looking."), bashPart("c1")] },
+      { id: "a2", role: "assistant", parts: [empty, textPart("Done.")] },
+    ];
+    expect(liveActivityOf(messages, true)).toEqual({ parts: [bashPart("c1")], reasoning: "Looking." });
+    expect(liveActivityOf(messages, false)).toEqual({ parts: [bashPart("c1")], reasoning: "" });
+    // A bare reasoning part (how thinking starts streaming) puts up no row.
+    expect(liveActivityOf([{ id: "a3", role: "assistant", parts: [empty] }], true)).toBeNull();
   });
+});
 
-  test("keeps the answer text as its own group after the activity", () => {
-    const groups = getAssistantRenderGroups(
-      [reasoningPart("thinking"), bashPart("c1"), textPart("Here is the answer.")],
-      true,
-      true,
-    );
-    expect(groups).toHaveLength(2);
-    expect(groups[0].kind).toBe("activity");
-    expect(groups[1].kind).toBe("text");
-  });
+describe("web research groups", () => {
+  const web = (toolName: string, id: string): DynamicToolUIPart =>
+    ({ type: "dynamic-tool", toolName, toolCallId: id, state: "output-available", input: { query: "q", url: "https://example.com" }, output: "" }) as unknown as DynamicToolUIPart;
 
-  test("off (bare surface) keeps the original per-kind grouping", () => {
-    const groups = getAssistantRenderGroups(
-      [reasoningPart("thinking"), bashPart("c1"), editPart("c2", "/tmp/a.ts")],
-      true,
-      false,
-    );
-    // reasoning is its own group, tools aggregate - no "activity" group exists.
-    expect(groups.some((g) => g.kind === "activity")).toBe(false);
-    expect(groups.some((g) => g.kind === "tool-aggregate")).toBe(true);
+  test("web calls fold into one group only in the Cowork frame, which reads it as web research", () => {
+    const parts = [web("websearch", "w1"), web("webfetch", "w2")];
+    const folded = getAssistantRenderGroups(parts, true, true);
+    expect(folded).toHaveLength(1);
+    expect(folded[0] && isWebResearchGroup(folded[0])).toBe(true);
+    // The bare surface keeps one row per call (each with its own sources popover).
+    expect(getAssistantRenderGroups(parts, true).map((group) => group.kind)).toEqual(["tool", "tool"]);
+    expect(isWebResearchGroup({ kind: "tool-aggregate", parts: [web("websearch", "w3"), bashPart("c1")] })).toBe(false);
+    expect(isWebResearchGroup({ kind: "tool", part: bashPart("c2") })).toBe(false);
+    expect(isWebResearchGroup({ kind: "text", text: "hello" })).toBe(false);
   });
 });

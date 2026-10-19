@@ -41,7 +41,7 @@ export type RunEffectContext = {
 /**
  * What the frame does about one Cowork event. A web NAVIGATION step (a real page open/fetch)
  * opens the browser and Cowork reads, unless the person has taken the tab over; a bare web
- * SEARCH does not open the panel (item 7a). A web step with an address is a page read. An
+ * SEARCH does not open the panel. A web step with an address is a page read. An
  * answer marks the page done, only from reading and only for the run that read it. A written
  * file refreshes the Files list.
  */
@@ -58,7 +58,7 @@ export function runEffects(event: CoworkRunEvent, ctx: RunEffectContext): RunEff
     : null;
   if (page) effects.push({ type: "page-read", page });
   // A bare web SEARCH (a query with no address, not a browser/devtools/page tool) no longer opens
-  // the browser panel; only a real navigation/fetch does (item 7a). A search can still record a
+  // the browser panel; only a real navigation/fetch does. A search can still record a
   // page above if the engine ever gives it a result url.
   if (!event.navigation) return effects;
   if (!runBelongsToFrame(event.runId, ctx.openChatId)) return effects;

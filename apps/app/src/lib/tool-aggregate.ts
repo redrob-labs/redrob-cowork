@@ -23,19 +23,22 @@ export type AnyToolPart = ToolUIPart | DynamicToolUIPart
  */
 export type ToolFamily = "command" | "edit" | "read" | "search"
 
-export function getToolFamily(part: AnyToolPart): ToolFamily | null {
+/**
+ * `foldWeb`: web search and web fetch join the "search" family, so a research run's many calls
+ * collapse into one group. Only the Cowork frame folds them (it draws an all-web group as the web
+ * research table); the bare surface keeps each call's own row and sources popover.
+ */
+export function getToolFamily(part: AnyToolPart, foldWeb = false): ToolFamily | null {
   if (isBashToolPart(part)) return "command"
   if (isEditToolPart(part) || isWriteToolPart(part) || isApplyPatchToolPart(part)) return "edit"
   if (isReadToolPart(part)) return "read"
   if (isGrepToolPart(part) || isGlobToolPart(part)) return "search"
-  // Round 6: web search + web fetch fold into the "search" family too, so a research run's many
-  // "Web search ..." calls collapse into one aggregate line instead of a stack of per-call rows.
-  if (isWebSearchToolPart(part) || isWebFetchToolPart(part)) return "search"
+  if (foldWeb && (isWebSearchToolPart(part) || isWebFetchToolPart(part))) return "search"
   return null
 }
 
-export function isAggregatableToolPart(part: AnyToolPart): boolean {
-  return getToolFamily(part) !== null
+export function isAggregatableToolPart(part: AnyToolPart, foldWeb = false): boolean {
+  return getToolFamily(part, foldWeb) !== null
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -61,7 +64,8 @@ export function getAggregateSummary(parts: AnyToolPart[], tense: "present" | "pa
   let searches = 0
 
   for (const part of parts) {
-    const family = getToolFamily(part)
+    // A web call is only ever in an aggregate when it was folded, so count it as a search.
+    const family = getToolFamily(part, true)
     if (family === "edit") {
       editCalls += 1
       const path = filePathOf(part)
@@ -123,7 +127,7 @@ export function getAggregateRowLabel(part: AnyToolPart): string {
   return getToolActivityLabel(part)
 }
 
-/** Label for the single latest in-flight call - the self-replacing "Now:" line. */
+/** Label for the single latest in-flight call — the self-replacing "Now:" line. */
 export function getAggregateNowLabel(parts: AnyToolPart[]): string | null {
   for (let index = parts.length - 1; index >= 0; index -= 1) {
     const part = parts[index]

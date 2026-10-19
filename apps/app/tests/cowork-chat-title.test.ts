@@ -3,12 +3,17 @@ import { describe, expect, test } from "bun:test";
 import {
   CHAT_TITLE_MAX_WORDS,
   cleanGeneratedTitle,
+  getDisplaySessionTitle,
+  isBlockMarkerTitle,
   isPromptDerivedTitle,
   shortTitleFromPrompt,
+  shownChatTitle,
 } from "../src/app/lib/session-title";
-import { namingAnswer, namingPrompt, sessionsToTitle } from "../src/react-app/cowork/thread/use-repair-marker-titles";
+import { firstPromptText, namingAnswer, sessionsToTitle } from "../src/react-app/cowork/thread/use-chat-titles";
+import { answersToPrompt, planRunPrompt } from "../src/react-app/cowork/thread/thread-logic";
 
-// Round 10 (R1): chat titles under 7 words, named from the subject rather than the prompt's opening.
+// Chat titles stay under 7 words, named from the subject rather than the prompt's opening; a title
+// that is a Cowork block's fence line is never shown.
 
 const words = (title: string) => title.split(/\s+/).filter(Boolean).length;
 
@@ -19,24 +24,17 @@ describe("shortTitleFromPrompt", () => {
     expect(words(title)).toBeLessThanOrEqual(CHAT_TITLE_MAX_WORDS);
   });
 
-  test("drops a 'write a short brief' opener", () => {
-    expect(shortTitleFromPrompt("Research and write a short brief on solid-state batteries in 2026")).toBe("Solid-state batteries in 2026");
-  });
-
-  test("caps at six words, never ends on a connecting word, no ellipsis", () => {
+  test("caps at six words, never ends on a connecting word, no ellipsis; empty stays empty", () => {
     const title = shortTitleFromPrompt("Compare the pricing models of the three largest cloud vendors for startups");
     expect(words(title)).toBeLessThanOrEqual(CHAT_TITLE_MAX_WORDS);
     expect(title).not.toMatch(/\u2026|\.\.\.|\b(of|the|and|for)$/);
+    expect(shortTitleFromPrompt("   ")).toBe("");
   });
 
   test("Korean prompts are capped by word too", () => {
     const title = shortTitleFromPrompt("2026년 국내 전기차 배터리 시장 점유율 변화와 주요 업체 전략을 정리해줘");
     expect(words(title)).toBeLessThanOrEqual(CHAT_TITLE_MAX_WORDS);
     expect(title.startsWith("2026년")).toBe(true);
-  });
-
-  test("empty in, empty out", () => {
-    expect(shortTitleFromPrompt("   ")).toBe("");
   });
 });
 
@@ -70,7 +68,26 @@ describe("isPromptDerivedTitle", () => {
   });
 });
 
-describe("sessionsToTitle", () => {
+describe("block marker titles", () => {
+  test("fence lines and bare block names are markers; ordinary titles are not", () => {
+    expect(isBlockMarkerTitle("```redrob-questions")).toBe(true);
+    expect(isBlockMarkerTitle("  ```redrob-plan  ")).toBe(true);
+    expect(isBlockMarkerTitle("redrob-questions")).toBe(true);
+    expect(isBlockMarkerTitle("~~~")).toBe(true);
+    expect(isBlockMarkerTitle("Redrob questions for the board")).toBe(false);
+    expect(isBlockMarkerTitle("")).toBe(false);
+    expect(isBlockMarkerTitle(null)).toBe(false);
+  });
+
+  test("the display falls back instead of showing a marker", () => {
+    expect(getDisplaySessionTitle("```redrob-questions", "Fallback")).toBe("Fallback");
+    expect(getDisplaySessionTitle("A real title", "Fallback")).toBe("A real title");
+    expect(shownChatTitle("```redrob-questions")).toBe("");
+    expect(shownChatTitle(undefined)).toBe("");
+  });
+});
+
+describe("naming pass", () => {
   test("marker titles first, then newest untried root chats, capped", () => {
     const sessions = [
       { id: "a", title: "Fine" },
@@ -81,15 +98,20 @@ describe("sessionsToTitle", () => {
     expect(sessionsToTitle(sessions, new Set(["d"]))).toEqual(["c", "a"]);
     expect(sessionsToTitle(sessions, new Set(), 1)).toEqual(["c"]);
   });
-});
 
-describe("naming request", () => {
-  test("asks for a short title and carries the prompt", () => {
-    const text = namingPrompt("Compare vendors");
-    expect(text).toContain("2 to 6 words");
-    expect(text.endsWith("Compare vendors")).toBe(true);
+  test("the first prompt skips assistant, synthetic and hidden Cowork sends", () => {
+    const messages = [
+      { info: { role: "assistant" }, parts: [{ type: "text", text: "hi" }] },
+      { info: { role: "user" }, parts: [{ type: "text", text: "system note", synthetic: true }] },
+      { info: { role: "user" }, parts: [{ type: "text", text: planRunPrompt("the plan") }] },
+      { info: { role: "user" }, parts: [{ type: "text", text: answersToPrompt([], {}) }] },
+      { info: { role: "user" }, parts: [{ type: "text", text: "Compare the vendors" }] },
+    ];
+    expect(firstPromptText(messages)).toBe("Compare the vendors");
+    expect(firstPromptText([])).toBe("");
   });
-  test("reads only a finished answer", () => {
+
+  test("the naming answer is read only once it has finished", () => {
     const running = [{ info: { role: "assistant", time: {} }, parts: [{ type: "text", text: "Vendor" }] }];
     const done = [{ info: { role: "assistant", time: { completed: 1 } }, parts: [{ type: "text", text: "Vendor comparison" }] }];
     expect(namingAnswer(running)).toBeNull();

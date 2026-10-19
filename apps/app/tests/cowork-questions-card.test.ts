@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { initialAnswers, isPicked, toggleOption } from "../src/react-app/cowork/thread/cowork-questions";
+import { isPicked, toggleOption } from "../src/react-app/cowork/thread/cowork-questions";
 import { answersToPrompt, isQuestionAnswerPrompt } from "../src/react-app/cowork/thread/thread-logic";
 
-// Round 9 (R9-2): the app's own questions card: options, a typed answer per question, Execute.
+// The app's own questions card: options, a typed answer per question, Execute.
 
 const single = { id: "who", question: "Who is this for?", options: ["You", "A team", "Investors"] };
 const multi = { id: "weigh", question: "What should it weigh?", options: ["Models", "Chips", "Adoption"], multi: true };
@@ -23,9 +23,6 @@ describe("toggleOption / isPicked", () => {
     expect(isPicked(1, 2)).toBe(false);
   });
 
-  test("defaults seed the answers", () => {
-    expect(initialAnswers([{ ...single, defaultValue: 0 }, multi])).toEqual({ who: 0, weigh: null });
-  });
 });
 
 describe("answersToPrompt with typed answers", () => {

@@ -78,30 +78,6 @@ type SyncEntry = {
 const idleStatus: SessionStatus = { type: "idle" };
 const syncs = new Map<string, SyncEntry>();
 const sessionSnapshotFetchStarts = new WeakMap<RedrobSessionSnapshot, number>();
-/**
- * Round 7 (C4 review): when the live `todo.updated` event last wrote a session's to-do list, so a
- * session snapshot fetched BEFORE that moment cannot put back an older list (pending items the
- * event had already completed, or an empty list mid-run). Keyed `${workspaceId}:${sessionId}`.
- */
-const todoEventAt = new Map<string, number>();
-
-function markTodoEvent(workspaceId: string, sessionId: string, at: number = Date.now()) {
-  todoEventAt.set(`${workspaceId}:${sessionId}`, at);
-}
-
-function lastTodoEventAt(workspaceId: string, sessionId: string): number | undefined {
-  return todoEventAt.get(`${workspaceId}:${sessionId}`);
-}
-
-/**
- * Whether a snapshot's to-do list may replace the cached one: yes unless a live event wrote the
- * list after the snapshot's fetch started (then the snapshot is older than what is on screen).
- * A snapshot with no recorded fetch start keeps the old behaviour and seeds. Pure, exported for tests.
- */
-export function shouldSeedSnapshotTodos(snapshotStartedAt: number | undefined, eventAt: number | undefined): boolean {
-  if (typeof snapshotStartedAt !== "number" || typeof eventAt !== "number") return true;
-  return snapshotStartedAt >= eventAt;
-}
 const workspaceSyncDisposeGraceMs = 2_000;
 const retainedSessionTtlMs = 10 * 60_000;
 const idleRetainedSessionTtlMs = 10_000;
@@ -845,7 +821,6 @@ function applyEvent(entry: SyncEntry, workspaceId: string, event: OpencodeEvent)
     if (!props.sessionID || !props.todos) return;
     if (!isTrackedSession(entry, props.sessionID)) return;
     queryClient.setQueryData(todoKey(workspaceId, props.sessionID), props.todos);
-    markTodoEvent(workspaceId, props.sessionID);
     return;
   }
 
@@ -1441,9 +1416,7 @@ export function seedSessionState(workspaceId: string, snapshot: RedrobSessionSna
     snapshot.session.revert?.messageID ?? null,
   ));
 
-  if (shouldSeedSnapshotTodos(snapshotStartedAt, lastTodoEventAt(workspaceId, snapshot.session.id))) {
-    queryClient.setQueryData(todoKey(workspaceId, snapshot.session.id), snapshot.todos);
-  }
+  queryClient.setQueryData(todoKey(workspaceId, snapshot.session.id), snapshot.todos);
 }
 
 /**

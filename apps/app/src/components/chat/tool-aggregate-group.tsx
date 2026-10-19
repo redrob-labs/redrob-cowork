@@ -50,13 +50,13 @@ function failureReason(part: AnyToolPart): string | null {
  * dot, monospace action, per-item duration — capped with "Show N more".
  */
 export function ToolAggregateGroup({ parts, className }: ToolAggregateGroupProps) {
-  // Round 8b: in the Cowork thread, a run of web searches / page reads reads as the Claude-style
+  // In the Cowork thread, a run of web searches / page reads reads as the
   // web research table (WebResearchGroup) instead of the monospace "Ran 3 searches" list.
   const inCoworkFrame = useInCoworkFrame()
   if (inCoworkFrame && parts.length > 0 && parts.every((part) => isWebSearchToolPart(part) || isWebFetchToolPart(part))) {
     return <WebResearchGroup parts={parts} className={className} />
   }
-  // Round 10 (R3): file edits read as the same dropdown table ("Created 1 file"), not this list.
+  // File edits read as the same dropdown table ("Created 1 file"), not this list.
   if (inCoworkFrame && isFileEditParts(parts)) {
     return <FileEditGroup parts={parts} className={className} />
   }

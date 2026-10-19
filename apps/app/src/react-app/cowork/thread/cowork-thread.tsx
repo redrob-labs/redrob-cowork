@@ -14,6 +14,7 @@ import {
 
 import { t } from "../../../i18n";
 import { cn } from "../../../lib/utils";
+import { useElapsed } from "../../../lib/use-elapsed";
 import { useWorkingLine } from "../../../lib/working-lines";
 import { CoworkQuestionsCard } from "./cowork-questions";
 import { IDLE_PLAN_ACTIVITY, planStepStates, type PlanStepState } from "./plan-progress";
@@ -87,15 +88,15 @@ export function challengeReportProps(challenge: ChallengeData): ChallengeReportP
 function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boolean; messageId?: string }) {
   const thread = useCoworkThread();
   const [answered, setAnswered] = useState(false);
-  // Round 8 (M1): done means the person ANSWERED (here, or by any reply after this message), not
+  // Done means the person ANSWERED (here, or by any reply after this message), not
   // "this is no longer the last message" - the agent often keeps writing after it asks. Without the
   // thread's state (outside a session surface), fall back to the old position rule.
   const repliedLater = props.messageId && thread?.questions ? thread.questions.answered.has(props.messageId) : !props.isLatest;
   const done = answered || repliedLater;
-  // Round 7 C1: once answered (or superseded by a later turn) the questions leave the thread
+  // Once answered (or superseded by a later turn) the questions leave the thread
   // entirely. The plan that follows is the visible result of the answers.
   if (done) return null;
-  // Round 9: the app's own card (typed answers per question, "Execute"), not the DS PlanQuestions.
+  // The app's own card (typed answers per question, "Execute"), not the DS PlanQuestions.
   return (
     <CoworkQuestionsCard
       questions={props.questions}
@@ -113,14 +114,14 @@ function CoworkQuestions(props: { questions: PlanQuestionData[]; isLatest: boole
 /** A checklist step's marker: a ring to do, a brand ring with a dot while active, a filled tick when done. */
 function StepMarker(props: { state: PlanStepState }) {
   return (
-    <span className="cowork-planx__marker" data-state={props.state} aria-hidden="true">
+    <span className="cowork-plan__marker" data-state={props.state} aria-hidden="true">
       {props.state === "done" ? icons.check({ width: 10, height: 10, strokeWidth: 3 }) : null}
     </span>
   );
 }
 
 /**
- * Round 9: the plan inside the chat, not a bordered document. A Redrob Blue accent rail on the
+ * The plan inside the chat, not a bordered document. A Redrob Blue accent rail on the
  * left, a small "Research plan" label with the run's progress, the summary, then the checklist as
  * a stepper with custom circle markers: the step the run is on shimmers, finished steps tick, and
  * the rest wait. Progress is guessed from the run's activity (plan-progress.ts). The DS
@@ -140,7 +141,7 @@ function CoworkPlan(props: {
   const activity = (props.messageId ? thread?.plans?.get(props.messageId) : undefined) ?? IDLE_PLAN_ACTIVITY;
   const ran = stage === "running" || activity.started;
   const status = activity.finished ? "done" : ran ? "running" : planStatus({ local: stage, isLatest: props.isLatest, busy: thread?.busy ?? false });
-  const canRun = Boolean(thread) && !ran && (status === "draft" || status === "kept") && !(thread?.busy ?? false);
+  const canRun = Boolean(thread) && !ran && status === "draft" && !(thread?.busy ?? false);
   const labels = props.plan.todo.map((todo) => todo.label);
   // Before the run's send lands in the transcript, the step it starts on is already active.
   const steps = planStepStates(labels, ran && !activity.started ? { ...activity, started: true } : activity);
@@ -153,13 +154,13 @@ function CoworkPlan(props: {
     thread.sendText(planRunPrompt(planToText(props.plan))).catch(() => setStage("draft"));
   };
 
-  // Round 6: auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
+  // Auto-run the plan once it is fully drafted, so a complex prompt flows plan -> execute
   // -> artifact without a manual Run click. Fires exactly once per plan: only when this is the
   // latest turn, still a draft, and the thread is idle (the plan finished streaming).
   // sawDraftingRef: the plan must belong to a chat that was live while it was open here (the
   // session went busy during this surface's life, or the plan saw the busy state itself), so
   // reopening an old chat whose last turn is an unrun plan never silently runs it; that plan shows
-  // a Run button instead. Round 9: the plan view alone missed the busy state when the plan block
+  // a Run button instead. The plan view alone missed the busy state when the plan block
   // completed in the same moment the run went idle, and the plan stopped with a Run button.
   const autoRanRef = useRef(false);
   const sawDraftingRef = useRef(false);
@@ -182,26 +183,26 @@ function CoworkPlan(props: {
         : null;
 
   return (
-    <section className="cowork-planx" aria-label={t("cowork.thread_plan_research_title")} data-status={status}>
-      <header className="cowork-planx__head">
-        <span className="cowork-planx__label">{t("cowork.thread_plan_research_title")}</span>
-        {progress ? <span className="cowork-planx__progress">{progress}</span> : null}
+    <section className="cowork-plan" aria-label={t("cowork.thread_plan_research_title")} data-status={status}>
+      <header className="cowork-plan__head">
+        <span className="cowork-plan__label">{t("cowork.thread_plan_research_title")}</span>
+        {progress ? <span className="cowork-plan__progress">{progress}</span> : null}
       </header>
-      {props.plan.summary ? <p className="cowork-planx__summary">{props.plan.summary}</p> : null}
+      {props.plan.summary ? <p className="cowork-plan__summary">{props.plan.summary}</p> : null}
       {labels.length > 0 ? (
-        <ol className="cowork-planx__steps" aria-label={t("cowork.thread_plan_todo")}>
+        <ol className="cowork-plan__steps" aria-label={t("cowork.thread_plan_todo")}>
           {props.plan.todo.map((todo, index) => {
             const state = steps[index] ?? "todo";
             return (
-              <li key={index} className="cowork-planx__step" data-state={state} aria-current={state === "active" ? "step" : undefined}>
+              <li key={index} className="cowork-plan__step" data-state={state} aria-current={state === "active" ? "step" : undefined}>
                 <StepMarker state={state} />
-                <span className={cn("cowork-planx__task", state === "active" && "redrob-shimmer-text")}>{todo.label}</span>
+                <span className={cn("cowork-plan__task", state === "active" && "redrob-shimmer-text")}>{todo.label}</span>
               </li>
             );
           })}
         </ol>
       ) : null}
-      {props.plan.note ? <p className="cowork-planx__note">{props.plan.note}</p> : null}
+      {props.plan.note ? <p className="cowork-plan__note">{props.plan.note}</p> : null}
       {canRun ? (
         <div>
           <Button size="sm" onClick={run}>
@@ -214,10 +215,10 @@ function CoworkPlan(props: {
 }
 
 /** The blocks in an assistant answer, as the design system draws them. */
-export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean; /** The message the blocks came in (round 8 M1). */ messageId?: string }) {
+export function CoworkBlocksView(props: { blocks: CoworkBlocks; isLatest: boolean; /** The message the blocks came in. */ messageId?: string }) {
   const { questions, plan } = props.blocks;
   const thread = useCoworkThread();
-  // Round 8 (M1): a plan drafted in the same turn as questions waits for the answers - it is not
+  // A plan drafted in the same turn as questions waits for the answers - it is not
   // shown and never runs; the answers produce a new plan that runs on its own.
   const held = Boolean(questions) || Boolean(props.messageId && thread?.questions?.heldPlans.has(props.messageId));
   // Fact check + Challenge no longer render inline here; they appear as verdict CHIPS in the
@@ -244,10 +245,10 @@ export function canRetryChecks(checks: AnswerChecks | undefined): boolean {
 
 /** The tone classes for a verdict chip: agree (green), mild (amber), differ (muted/strong). */
 function verdictToneClass(tone: CheckVerdict["tone"]): string {
-  // Each pairs a text colour with the matching icon; backgrounds come from the chip base below.
-  if (tone === "agree") return "text-[color:var(--ds-success,#1a7f52)]";
-  if (tone === "mild") return "text-[color:var(--ds-warning,#9a6b00)]";
-  return "text-[color:var(--ds-danger,#a1432b)]"; // differ
+  // The design system's tone ink colours; backgrounds come from the chip base below.
+  if (tone === "agree") return "text-success-ink";
+  if (tone === "mild") return "text-warning-ink";
+  return "text-destructive"; // differ
 }
 
 /**
@@ -256,8 +257,6 @@ function verdictToneClass(tone: CheckVerdict["tone"]): string {
  * check is still running it shows a muted "running" chip with no popover.
  */
 function CheckChip(props: {
-  /** Optional leading glyph; the chips currently stay textual (the report carries the icon). */
-  icon?: ReactNode;
   /** The check's name, e.g. "Fact check". */
   name: string;
   /** True while the check runs: a muted chip with a small loader and no popover. */
@@ -276,7 +275,7 @@ function CheckChip(props: {
         {/* Small inline loader on the LEFT while the check runs, so the chip reads as in-progress.
             Item 6: the simple DS three-bar Loader (not the morphing liquid loader); live=false
             because several chips can run at once and each announcing itself would be noise. */}
-        {props.running ? <Loader size="sm" tone="neutral" label={props.name} live={false} /> : props.icon}
+        {props.running ? <Loader size="sm" tone="neutral" label={props.name} live={false} /> : null}
         <span>{props.name}</span>
       </span>
     );
@@ -285,7 +284,6 @@ function CheckChip(props: {
     <Popover>
       {/* The chip is the trigger; clicking opens the report popover, so no inline report is drawn. */}
       <PopoverTrigger className={`${chipBase} cursor-pointer text-dls-text transition-colors hover:bg-dls-surface-hover`}>
-        {props.icon}
         <span>{props.name}</span>
         {/* The verdict word, coloured by tone - this is the "result in the chip itself". */}
         <span className={verdictToneClass(props.verdict.tone)}>{props.verdict.label}</span>
@@ -305,8 +303,7 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
   const challengeState = checks?.challenge ?? "off";
   const showFact = factState === "running" || (factState === "done" && Boolean(result?.fact));
   const showChallenge = challengeState === "running" || (challengeState === "done" && Boolean(result?.challenge));
-  // The model chip ("Redrob Auto") is intentionally dropped from the receipt row per round 5, and
-  // round 8 drops the "Plan followed" chip too: only the checks' verdicts remain.
+  // Only the checks' verdicts show under an answer: no model or "Plan followed" chip.
   return (
     <div className="flex w-full flex-col gap-3">
       {showFact || showChallenge ? (
@@ -345,20 +342,24 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
 }
 
 /**
- * While a run works: what it is doing now. The Cowork frame's "assistant is thinking" moment.
- * It carries the Redrob Liquid Loader at a small inline size beside a label that is slightly
- * smaller than the chat text and grey (Claude-like), with a ChatGPT-style colour-sweep shimmer
- * over the text, and a mm:ss elapsed timer on the right counting since the run row appeared.
+ * While a run works and no inline activity row is up yet: what it is doing now. The liquid loader
+ * (or a globe for a web step) beside a grey shimmering label, and the time since the run started.
  */
-export function CoworkRunStatus(props: { label: string | null; /** Round 9: a web step is in flight. */ web?: boolean }) {
-  // Round 8c: with no specific step to show, a friendly line rotates (fades in each time).
+export function CoworkRunStatus(props: {
+  label: string | null;
+  /** A web search or page read is in flight: a static globe stands in for the loader. */
+  web?: boolean;
+  /** When the run started (ms, the user message's server time), so the timer matches the inline row's. */
+  startedAt?: number | null;
+}) {
+  // With no specific step to show, a friendly line rotates (fades in each time).
   const working = useWorkingLine(props.label === null);
   const label = props.label ?? working.text;
-  const elapsed = useElapsedClock();
+  const elapsed = useElapsed(true, props.startedAt);
   return (
     <div className="flex items-center gap-2 py-1">
       {props.web ? (
-        /* Round 9: reading or searching the web shows a static globe, like the web research rows. */
+        /* Reading or searching the web shows a static globe, like the web research rows. */
         <span className="inline-flex size-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
           {icons.globe({ width: 16, height: 16 })}
         </span>
@@ -377,21 +378,6 @@ export function CoworkRunStatus(props: { label: string | null; /** Round 9: a we
       <span className="text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
     </div>
   );
-}
-
-/** Elapsed time since this hook first mounted, formatted '34s' or '1m 23s', ticking once a second. */
-function useElapsedClock(): string {
-  const startRef = useRef<number>(Date.now());
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  const totalSeconds = Math.max(0, Math.floor((now - startRef.current) / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  // Under a minute: just seconds ("34s"). A minute or more: "1m 23s".
-  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
 /** A note the run saved to memory. It can be removed from Memory, not from here. */

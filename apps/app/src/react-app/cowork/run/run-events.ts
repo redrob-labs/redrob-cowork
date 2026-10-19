@@ -11,7 +11,7 @@ export type StepKind = "web" | "files" | "model" | "approval";
 
 /** `navigation` is set only on a `web` step that actually opens/fetches a page (a real address,
  *  or a browser/devtools/page tool) as opposed to a bare web SEARCH (a query with no url). The
- *  panel pops only for a navigation step; a search alone no longer opens the browser (item 7a). */
+ *  panel pops only for a navigation step; a search alone no longer opens the browser. */
 export type StepInfo = { kind: StepKind; label: string; url?: string; navigation?: boolean };
 
 export type CoworkRunEvent =
@@ -59,7 +59,7 @@ function isWebTool(tool: string, input: UnknownRecord | undefined): boolean {
 
 /**
  * Whether a web tool drives the built-in browser rather than reading the web in the background.
- * A browser capability, a `browser_*`/chrome-devtools/page tool always navigates. Round 9: a
+ * A browser capability, a `browser_*`/chrome-devtools/page tool always navigates. A
  * fetch or search tool never does, url or not - reading a page is a background read, and popping
  * the browser panel for it pulled the person away from the chat. The read is still recorded in
  * "Pages Cowork read today" (runEffects' page-read).
@@ -67,11 +67,6 @@ function isWebTool(tool: string, input: UnknownRecord | undefined): boolean {
 function isNavigationTool(tool: string, input: UnknownRecord | undefined): boolean {
   if (tool.endsWith("redrob_execute")) return stringField(input, "id")?.startsWith("browser.") ?? false;
   return tool.startsWith("browser_") || DEVTOOLS_TOOL.test(tool) || PAGE_TOOL.test(tool);
-}
-
-/** Whether a classified step opens the browser panel: a `web` step that is a navigation (item 7a). */
-export function isNavigationWebStep(step: Pick<StepInfo, "kind" | "navigation">): boolean {
-  return step.kind === "web" && step.navigation === true;
 }
 
 function webUrl(input: UnknownRecord | undefined): string | undefined {

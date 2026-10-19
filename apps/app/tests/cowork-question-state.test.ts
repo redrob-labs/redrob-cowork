@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import type { UIMessage } from "ai";
 
-import { coworkQuestionState, sameQuestionState } from "../src/react-app/cowork/thread/question-state";
+import { coworkQuestionState } from "../src/react-app/cowork/thread/question-state";
 
-// Round 8 M1: questions open until the person answers; a plan drafted beside them is held.
+// Questions stay open until the person answers; a plan drafted beside them is held.
 
 const fence = (tag: string, body: unknown) => `\`\`\`${tag}\n${JSON.stringify(body)}\n\`\`\``;
 const QUESTIONS = fence("redrob-questions", [{ id: "q1", question: "Memo or deck?", options: ["Memo", "Deck"], defaultValue: 0 }]);
@@ -37,9 +37,4 @@ describe("coworkQuestionState", () => {
     expect(coworkQuestionState([msg("u1", "user", "Go"), msg("a1", "assistant", PLAN)]).heldPlans.size).toBe(0);
   });
 
-  test("sameQuestionState compares ids, not object identity", () => {
-    const a = coworkQuestionState([msg("u1", "user", "Go"), msg("a1", "assistant", QUESTIONS), msg("u2", "user", "x")]);
-    const b = coworkQuestionState([msg("u1", "user", "Go"), msg("a1", "assistant", QUESTIONS), msg("u2", "user", "y")]);
-    expect(sameQuestionState(a, b)).toBe(true);
-  });
 });

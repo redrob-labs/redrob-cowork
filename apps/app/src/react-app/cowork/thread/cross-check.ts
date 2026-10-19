@@ -50,7 +50,7 @@ export function crossCheckPlan(levels: CoworkCrossCheck, input: { question: stri
 /** What the check agent is asked: the question, the answer, and which checks. */
 export function checkPrompt(input: { question: string; answer: string; plan: CheckPlan; document?: CheckedDocument | null }): string {
   const asked = [input.plan.fact ? "a Fact check" : null, input.plan.challenge ? "a Challenge" : null].filter(Boolean);
-  // Round 8 (M3): when the run wrote a deliverable, THAT document is what gets checked, not the
+  // When the run wrote a deliverable, THAT document is what gets checked, not the
   // short chat note that announced it.
   if (input.document) {
     return [
@@ -74,7 +74,7 @@ export function checkPrompt(input: { question: string; answer: string; plan: Che
 export type CheckedDocument = { path: string; content: string };
 
 /**
- * Round 8 (M3): the deliverable of the turn that just answered - the newest full-file write in the
+ * The deliverable of the turn that just answered - the newest full-file write in the
  * assistant messages after the person's last message - or null when the run wrote no file. Pure.
  */
 export function checkedDocument(messages: TranscriptMessage[]): CheckedDocument | null {
@@ -98,7 +98,7 @@ export type TranscriptMessage = {
   /** The engine's finish reason; "tool-calls" means the turn is not over. */
   finish?: string;
   text: string;
-  /** Round 8 (M3): the newest file this message wrote in full (a `write` tool call), if any. */
+  /** The newest file this message wrote in full (a `write` tool call), if any. */
   document?: CheckedDocument;
 };
 
@@ -149,7 +149,7 @@ export async function runCrossCheck(
     const answer = lastAnswer(transcript);
     if (!answer) return;
     answerId = answer.id;
-    // Round 8 (M3): the deliverable the run wrote, when there is one, is what gets checked. The
+    // The deliverable the run wrote, when there is one, is what gets checked. The
     // verdict chips still sit under the answer that announced it.
     const document = checkedDocument(transcript);
     const subject = document ? document.content : answer.text;

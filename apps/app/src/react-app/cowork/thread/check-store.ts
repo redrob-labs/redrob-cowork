@@ -74,7 +74,7 @@ function restartChecks(previous: AnswerChecks | undefined, next: AnswerChecks): 
 }
 
 /**
- * Round 8 (M7): settled check results are kept on this device, so a chat reopened later (or after
+ * Settled check results are kept on this device, so a chat reopened later (or after
  * the app restarts) still shows its Fact check and Council chips. Only finished checks are kept:
  * a check still running when the app closed has no result to show and would read as stuck.
  */
@@ -82,8 +82,10 @@ export const CHECKS_STORAGE_KEY = "redrob.cowork.checks.v1";
 /** How many answers' checks are kept, newest first. */
 export const CHECKS_KEPT = 200;
 
+/** Where settled check results are kept between app runs (null when there is no storage). */
 type CheckStorage = () => Pick<Storage, "getItem" | "setItem"> | null;
 
+/** The browser's localStorage, or null outside a window (tests, SSR). */
 const windowCheckStorage: CheckStorage = () => (typeof window === "undefined" ? null : window.localStorage);
 
 /** Whether an answer's checks have finished (nothing still running) and found something to show. */
@@ -120,7 +122,7 @@ export function writeKeptChecks(storage: CheckStorage, answers: Record<string, A
   }
 }
 
-/** In memory for the app session, with settled results kept on the device (M7). */
+/** In memory for the app session, with settled results kept on the device. */
 export function createCheckStore(options: { storage?: CheckStorage } = {}) {
   const storage = options.storage ?? windowCheckStorage;
   return create<CheckStoreState>()((set, get) => ({

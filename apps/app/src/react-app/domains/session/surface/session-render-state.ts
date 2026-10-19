@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 
 import type { RedrobSessionSnapshot } from "../../../../app/lib/redrob-server";
+import { getMessagesText } from "../../../../components/chat/utils";
 import { isSyntheticCoworkPrompt } from "../../../cowork/thread/thread-logic";
 import { mergeSnapshotAndLiveMessages } from "../sync/message-merge";
 import { applyRevertCursor } from "../sync/transcript-reconcile";
@@ -24,33 +25,20 @@ export function resolveRenderedSessionSnapshot(input: {
 }
 
 /**
- * The leading text of a USER message, concatenating its text parts in order. Used only to read a
- * synthetic-send provenance sentinel off the front (item 10); non-text parts are ignored.
- */
-function userMessageText(message: UIMessage): string {
-  if (message.role !== "user") return "";
-  let text = "";
-  for (const part of message.parts) {
-    if (part.type === "text") text += part.text;
-  }
-  return text;
-}
-
-/**
- * Hide synthetic USER sends from the Cowork transcript (item 10): the plan-run prompt and the
+ * Hide synthetic USER sends from the Cowork transcript: the plan-run prompt and the
  * question-answer reply are machinery, not conversation. The engine still received them (they
  * were really sent); this only drops them from the RENDER, and only inside the Cowork frame.
  * The assistant answers they produced are untouched. Ids and order are preserved so the revert
  * cursor still resolves.
  */
 export function filterSyntheticCoworkMessages(messages: UIMessage[]): UIMessage[] {
-  return messages.filter((message) => !isSyntheticCoworkPrompt(userMessageText(message)));
+  return messages.filter((message) => message.role !== "user" || !isSyntheticCoworkPrompt(getMessagesText([message])));
 }
 
 /**
  * The session's messages before any Cowork filtering: the persisted snapshot as the history floor
- * with live stream updates layered on top. Round 8 (M1) also reads this raw list to see which Plan
- * questions were answered, since the hidden question-answer sends are dropped from the render.
+ * with live stream updates layered on top. The Cowork thread also reads this raw list to see which
+ * Plan questions were answered, since the hidden question-answer sends are dropped from the render.
  */
 export function mergedSessionMessages(input: {
   transcriptState: UIMessage[] | null | undefined;
@@ -68,14 +56,18 @@ export function mergedSessionMessages(input: {
     : liveMessages;
 }
 
+/**
+ * The transcript as rendered: the merged messages (from mergedSessionMessages, computed once per
+ * update and shared with the Cowork thread state) cut at the revert cursor, with synthetic Cowork
+ * sends hidden inside the frame.
+ */
 export function deriveRenderedSessionMessages(input: {
-  transcriptState: UIMessage[] | null | undefined;
-  snapshot: RedrobSessionSnapshot | null | undefined;
-  /** In the Cowork frame, hide synthetic machinery sends from the transcript (item 10). */
+  messages: UIMessage[];
+  revertMessageId: string | null;
+  /** In the Cowork frame, hide synthetic machinery sends from the transcript. */
   inCoworkFrame?: boolean;
 }) {
-  const revertMessageId = (input.snapshot?.session as any)?.revert?.messageID ?? null;
-  const messages = mergedSessionMessages(input);
+  const { messages, revertMessageId } = input;
 
   // Hide synthetic sends BEFORE the revert cursor runs, preserving ids/order so applyRevertCursor
   // still finds its cursor message. Render-only: the snapshot still persists them server-side, so

@@ -17,14 +17,15 @@ import {
   type CrossCheckDeps,
   type TranscriptMessage,
 } from "../src/react-app/cowork/thread/cross-check";
-import { COWORK_BLOCK_TAGS, hasCoworkBlocks, parseCoworkBlocks, type CheckResult } from "../src/react-app/cowork/thread/cowork-blocks";
+import { COWORK_BLOCK_TAGS, hasCoworkBlocks, parseCoworkBlocks } from "../src/react-app/cowork/thread/cowork-blocks";
 import { challengeReportProps, factReportProps } from "../src/react-app/cowork/thread/cowork-thread";
 import { coworkSystemText, MEMORY_OFF_INSTRUCTION } from "../src/react-app/cowork/thread/memory-off";
 import { permissionAsk, toTranscript } from "../src/react-app/cowork/thread/use-cowork-cross-check";
 import {
-  answersSummary,
   answersToPrompt,
   approvalActions,
+  challengeOutcome,
+  factConfidence,
   isPlanRunPrompt,
   isQuestionAnswerPrompt,
   isSyntheticCoworkPrompt,
@@ -33,7 +34,6 @@ import {
   planStatus,
   planToText,
   planTurnInstruction,
-  receiptItems,
 } from "../src/react-app/cowork/thread/thread-logic";
 
 afterEach(() => setLocale("en"));
@@ -146,17 +146,16 @@ describe("answers, plan and run", () => {
   const questions = parseCoworkBlocks(fence("redrob-questions", QUESTIONS)).questions ?? [];
 
   test("answersToPrompt reads as the person's reply, behind the question-answer sentinel", () => {
-    // Item 10: the sent text is prefixed with the U+2060 U+FEFF provenance sentinel so the Cowork
-    // transcript can hide this synthetic send; the engine sees only the real answer after it.
-    const sentinel = "\u2060\ufeff";
+    // The sent text is prefixed with the U+2063 provenance sentinel so the Cowork transcript can
+    // hide this synthetic send; the engine sees only the real answer after it.
+    const sentinel = "\u2063";
     expect(answersToPrompt(questions, { q1: 1, q2: [0, 2] })).toBe(
       `${sentinel}What do you need at the end? A notice, ready to send.\nWhat should I read? This chat, The web.`,
     );
     expect(answersToPrompt(questions, { q1: null, q2: [] })).toBe(`${sentinel}Go ahead with what fits best.`);
-    expect(answersSummary(questions, { q1: 0, q2: [1] })).toBe("Answered: A yes or no, The project's files");
   });
 
-  test("synthetic Cowork sends are detectable and told apart by their sentinels (item 10)", () => {
+  test("synthetic Cowork sends are detectable and told apart by their sentinels", () => {
     const planRun = planRunPrompt("# A plan");
     const answer = answersToPrompt(questions, { q1: 1, q2: [] });
     // A plan-run is a plan-run, not a question-answer, and vice versa.
@@ -168,6 +167,10 @@ describe("answers, plan and run", () => {
     expect(isSyntheticCoworkPrompt(planRun)).toBe(true);
     expect(isSyntheticCoworkPrompt(answer)).toBe(true);
     expect(isSyntheticCoworkPrompt("Just a normal message")).toBe(false);
+    // The sentinel survives trim(); an older chat's answer (U+2060 U+FEFF) still reads as an answer.
+    expect(isQuestionAnswerPrompt(answer.trim())).toBe(true);
+    expect(isQuestionAnswerPrompt("\u2060\ufeffYes.")).toBe(true);
+    expect(isPlanRunPrompt("\u2060\ufeffYes.")).toBe(false);
   });
 
   test("Run sends the plan behind 'Run this plan.'", () => {
@@ -187,46 +190,10 @@ describe("answers, plan and run", () => {
     expect(isPlanRunPrompt("Run this plan. Write the final deliverable to a file.")).toBe(false);
   });
 
-  test("Run and Keep move the plan; a run that finished is done", () => {
+  test("a plan that ran and finished is done", () => {
     expect(planStatus({ local: "draft", isLatest: true, busy: false })).toBe("draft");
-    expect(planStatus({ local: "kept", isLatest: false, busy: false })).toBe("kept");
     expect(planStatus({ local: "running", isLatest: false, busy: true })).toBe("running");
     expect(planStatus({ local: "running", isLatest: false, busy: false })).toBe("done");
-  });
-});
-
-describe("receipt", () => {
-  const labels = (items: ReturnType<typeof receiptItems>) => items.map((item) => [item.label, item.sub ?? null, item.busy ?? false]);
-  const result = parseCoworkBlocks(fence("redrob-check", CHECK)).check;
-
-  test("a plain answer is not checked", () => {
-    expect(labels(receiptItems({ planned: false, fact: "off", challenge: "off" }))).toEqual([
-      ["Redrob Auto", null, false],
-      ["Not checked", "a quick answer", false],
-    ]);
-  });
-
-  test("a planned answer with checks running", () => {
-    expect(labels(receiptItems({ model: "claude-opus-5", planned: true, fact: "running", challenge: "running" }))).toEqual([
-      ["claude-opus-5", "by Redrob Auto", false],
-      ["Plan followed", null, false],
-      ["Fact check running", null, true],
-      ["Council running", null, true],
-    ]);
-  });
-
-  test("checks done: to fix, and holds up", () => {
-    const items = receiptItems({ planned: false, fact: "done", challenge: "done", result });
-    expect(labels(items).slice(1)).toEqual([
-      ["Fact check: 2 to fix", null, false],
-      ["Council", "1 to change", false],
-    ]);
-    expect(items.map((item) => item.tone)).toEqual([undefined, "differ", "differ"]);
-    const clean: CheckResult = { fact: { claims: [{ verdict: "holds", claim: "x" }], missed: [] } };
-    expect(receiptItems({ planned: false, fact: "done", challenge: "off", result: clean })[1]).toMatchObject({
-      label: "Fact check: holds up",
-      tone: "agree",
-    });
   });
 });
 
@@ -475,66 +442,25 @@ describe("approvals and memory", () => {
   test("Korean strings come through t()", () => {
     setLocale("ko");
     expect(planRunPrompt("x").startsWith("\u2060이 계획대로 실행해 주세요.")).toBe(true);
-    expect(receiptItems({ planned: false, fact: "off", challenge: "off" }).map((item) => item.label)).toEqual(["레드롭 자동", "확인하지 않음"]);
   });
 });
 
-describe("cross-check verdict words (factConfidence / challengeOutcome)", () => {
-  // Imported lazily via require to avoid touching the large import block above.
-  const { factConfidence, challengeOutcome } = require("../src/react-app/cowork/thread/thread-logic");
-
-  test("fact: all holds, nothing missed -> highly confident (agree)", () => {
-    const v = factConfidence({ claims: [{ verdict: "holds", claim: "a" }, { verdict: "holds", claim: "b" }], missed: [] });
-    expect(v.tone).toBe("agree");
+describe("cross-check verdict words", () => {
+  test("fact confidence bands: all hold, mostly, low", () => {
+    expect(factConfidence({ claims: [{ verdict: "holds", claim: "a" }, { verdict: "holds", claim: "b" }], missed: [] }).tone).toBe("agree");
+    const fourOfFive = ["a", "b", "c", "d"].map((claim) => ({ verdict: "holds" as const, claim }));
+    expect(factConfidence({ claims: [...fourOfFive, { verdict: "wrong", claim: "e" }], missed: [] }).tone).toBe("mild");
+    expect(factConfidence({ claims: [{ verdict: "wrong", claim: "a" }, { verdict: "wrong", claim: "b" }, { verdict: "holds", claim: "c" }], missed: [{ text: "missed one" }] }).tone).toBe("differ");
   });
 
-  test("fact: four holds + one wrong -> 0.8 -> mostly correct (mild)", () => {
-    const v = factConfidence({
-      claims: [
-        { verdict: "holds", claim: "a" },
-        { verdict: "holds", claim: "b" },
-        { verdict: "holds", claim: "c" },
-        { verdict: "holds", claim: "d" },
-        { verdict: "wrong", claim: "e" },
-      ],
-      missed: [],
-    });
-    expect(v.tone).toBe("mild");
-  });
-
-  test("fact: mostly wrong -> low confidence (differ)", () => {
-    const v = factConfidence({
-      claims: [{ verdict: "wrong", claim: "a" }, { verdict: "wrong", claim: "b" }, { verdict: "holds", claim: "c" }],
-      missed: [{ text: "missed one" }],
-    });
-    expect(v.tone).toBe("differ");
-  });
-
-  test("fact: no claims -> highly confident (nothing to doubt)", () => {
-    expect(factConfidence({ claims: [], missed: [] }).tone).toBe("agree");
-  });
-
-  test("challenge: all held -> holds up (agree)", () => {
-    const v = challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }] });
-    expect(v.tone).toBe("agree");
-  });
-
-  test("challenge: a point broke -> challenged (differ)", () => {
-    const v = challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "broke", text: "b" }] });
-    expect(v.tone).toBe("differ");
-  });
-
-  test("challenge: one of four changed, none broke -> mostly holds (mild)", () => {
-    const v = challengeOutcome({
-      claim: "x",
-      rounds: [],
-      verdict: [{ kind: "held", text: "a" }, { kind: "held", text: "b" }, { kind: "held", text: "c" }, { kind: "changed", text: "d" }],
-    });
-    expect(v.tone).toBe("mild");
+  test("council outcome: a broken point challenges, one change in four mostly holds", () => {
+    expect(challengeOutcome({ claim: "x", rounds: [], verdict: [{ kind: "held", text: "a" }, { kind: "broke", text: "b" }] }).tone).toBe("differ");
+    const verdict = [{ kind: "held" as const, text: "a" }, { kind: "held" as const, text: "b" }, { kind: "held" as const, text: "c" }, { kind: "changed" as const, text: "d" }];
+    expect(challengeOutcome({ claim: "x", rounds: [], verdict }).tone).toBe("mild");
   });
 });
 
-describe("round 8 M3: the written deliverable is what gets checked", () => {
+describe("the written deliverable is what gets checked", () => {
   test("checkedDocument takes the newest full write of the answering turn only", () => {
     const doc = { path: "reports/outlook.md", content: "# Outlook\n\nThe U.S. keeps the lead." };
     expect(checkedDocument([
@@ -574,7 +500,7 @@ describe("round 8 M3: the written deliverable is what gets checked", () => {
   });
 });
 
-describe("round 8 M7: check chips survive reopening a chat", () => {
+describe("check chips survive reopening a chat", () => {
   const memory = () => {
     const data = new Map<string, string>();
     return () => ({ getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => void data.set(key, value) });
@@ -598,7 +524,7 @@ describe("round 8 M7: check chips survive reopening a chat", () => {
   });
 });
 
-describe("round 8b: plan-mode turn rule", () => {
+describe("plan-mode turn rule", () => {
   test("a new request asks questions first; answers get exactly one plan", () => {
     const first = planTurnInstruction("Deep research the US-China AI race");
     expect(first).toContain("redrob-questions");

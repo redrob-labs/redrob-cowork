@@ -25,8 +25,7 @@ export function initialAnswers(questions: readonly PlanQuestionData[]): PlanAnsw
 }
 
 /**
- * The "Something else" chip. Round 9 (calibration: behind a chip, and the chip becomes a text
- * input): clicked, the chip itself turns into a pill-shaped field in place, focused. Typing there
+ * The "Something else" chip: clicked, the chip itself turns into a pill-shaped field in place, focused. Typing there
  * replaces the options picked for this question; emptying it and leaving (or Escape) turns it back
  * into the chip. Enter sends the whole card.
  */
@@ -40,7 +39,7 @@ function OtherChip(props: { questionText: string; value: string; onChange: (text
 
   if (!editing) {
     return (
-      <button type="button" className="cowork-q__opt cowork-q__opt--other" aria-pressed={false} onClick={() => setEditing(true)}>
+      <button type="button" className="cowork-questions__opt cowork-questions__opt--other" aria-pressed={false} onClick={() => setEditing(true)}>
         {icons.edit({ width: 13, height: 13, "aria-hidden": true })}
         {t("cowork.thread_questions_custom")}
       </button>
@@ -56,7 +55,7 @@ function OtherChip(props: { questionText: string; value: string; onChange: (text
     }
   };
   return (
-    <span className="cowork-q__opt cowork-q__opt--input" data-filled={filled ? "" : undefined}>
+    <span className="cowork-questions__opt cowork-questions__opt--input" data-filled={filled ? "" : undefined}>
       <input
         ref={input}
         type="text"
@@ -74,7 +73,7 @@ function OtherChip(props: { questionText: string; value: string; onChange: (text
 }
 
 /**
- * Round 9: Plan's questions as the Cowork thread's own card (the DS PlanQuestions 1.7.0 has no
+ * Plan's questions as the Cowork thread's own card (the DS PlanQuestions 1.7.0 has no
  * way to type an answer). Slightly smaller type than the DS card, a "Something else" chip under
  * each question that turns into a text field, and one "Execute" button (no "or reply in your own
  * words" hint). Sending posts every answer at once; the plan that comes back runs on its own.
@@ -90,18 +89,18 @@ export function CoworkQuestionsCard(props: {
     if (!props.disabled) props.onSubmit(value, custom);
   };
   return (
-    <section className="cowork-q" aria-label={t("cowork.thread_questions_label")}>
-      <ol className="cowork-q__list">
+    <section className="cowork-questions" aria-label={t("cowork.thread_questions_label")}>
+      <ol className="cowork-questions__list">
         {props.questions.map((question) => {
           const typed = custom[question.id] ?? "";
           const typing = Boolean(typed.trim());
           return (
-            <li key={question.id} className="cowork-q__item">
-              <p className="cowork-q__ask">
+            <li key={question.id} className="cowork-questions__item">
+              <p className="cowork-questions__ask">
                 {question.question}
-                {question.multi ? <span className="cowork-q__any"> {t("cowork.thread_questions_any")}</span> : null}
+                {question.multi ? <span className="cowork-questions__any"> {t("cowork.thread_questions_any")}</span> : null}
               </p>
-              <div className="cowork-q__opts" role="group" aria-label={question.question}>
+              <div className="cowork-questions__opts" role="group" aria-label={question.question}>
                 {question.options.map((option, index) => {
                   // A typed answer replaces the options, so none reads as picked while it is there.
                   const picked = !typing && isPicked(value[question.id], index);
@@ -109,7 +108,7 @@ export function CoworkQuestionsCard(props: {
                     <button
                       key={index}
                       type="button"
-                      className="cowork-q__opt"
+                      className="cowork-questions__opt"
                       aria-pressed={picked}
                       onClick={() => {
                         setValue((prev) => ({ ...prev, [question.id]: toggleOption(question, prev[question.id], index) }));
@@ -132,7 +131,7 @@ export function CoworkQuestionsCard(props: {
           );
         })}
       </ol>
-      <div className="cowork-q__act">
+      <div className="cowork-questions__act">
         <Button onClick={submit} disabled={props.disabled}>
           {t("cowork.thread_questions_submit")}
         </Button>

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import type { UIMessage } from "ai";
 
-import { firstWritingStep, IDLE_PLAN_ACTIVITY, planRunActivities, planStepStates, samePlanActivities, type PlanRunActivity } from "../src/react-app/cowork/thread/plan-progress";
+import { firstWritingStep, IDLE_PLAN_ACTIVITY, planRunActivities, planStepStates, type PlanRunActivity } from "../src/react-app/cowork/thread/plan-progress";
 import { planRunPrompt } from "../src/react-app/cowork/thread/thread-logic";
 
-// Round 9 (R9-7): the plan's checklist ticks from what the run is doing.
+// The plan's checklist ticks from what the run is doing.
 
 const PLAN_TEXT = '```redrob-plan\n{"title":"Research plan","summary":"A memo.","sections":[],"todo":[{"label":"Gather"},{"label":"Write"}]}\n```';
 
@@ -45,11 +45,6 @@ describe("planRunActivities", () => {
     expect(planRunActivities(messages, true).get("p")?.finished).toBe(true);
   });
 
-  test("same-content maps compare equal", () => {
-    const a = new Map([["p", act({ started: true, webSteps: 2 })]]);
-    expect(samePlanActivities(a, new Map([["p", act({ started: true, webSteps: 2 })]]))).toBe(true);
-    expect(samePlanActivities(a, new Map([["p", act({ started: true, webSteps: 3 })]]))).toBe(false);
-  });
 });
 
 describe("planStepStates", () => {

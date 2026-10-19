@@ -173,25 +173,38 @@ type AssistantRenderGroup =
   | { kind: "file"; part: FileUIPart }
   | { kind: "tool"; part: ToolUIPart | DynamicToolUIPart }
   | { kind: "tool-aggregate"; parts: (ToolUIPart | DynamicToolUIPart)[] }
-  /*
-    Round 4 (Cowork frame): ALL of a running turn's activity folded into one in-place row -
-    every tool call (aggregatable or not) plus the reasoning that framed it. Rendered as the
-    "Working on it" loader that updates in place and expands into a steps table, Claude-style.
-    `reasoning` carries the thinking text (shown as the loader's live line + faint context in the
-    table, per the locked calibration); it does not become table rows.
-  */
-  | { kind: "activity"; parts: (ToolUIPart | DynamicToolUIPart)[]; reasoning: string }
 
 /**
- * Round 7 C7: a render group that is web research only - a web search / web fetch call, or an
- * aggregate made solely of them. The live Cowork run keeps these in place in the transcript (every
- * other tool call folds into the activity row), so a search shows as it happens.
+ * Whether a render group is web research only: a web search / web fetch call, or an aggregate made
+ * solely of them. The live Cowork run keeps these in place (every other tool call folds into the
+ * activity row), so a search shows as it happens.
  */
 export function isWebResearchGroup(group: AssistantRenderGroup): boolean {
   const isWeb = (part: ToolUIPart | DynamicToolUIPart) => isWebSearchToolPart(part) || isWebFetchToolPart(part)
   if (group.kind === "tool") return isWeb(group.part)
   if (group.kind === "tool-aggregate") return group.parts.length > 0 && group.parts.every(isWeb)
   return false
+}
+
+/** A live run's activity: its tool calls in order and the reasoning shown for it. */
+export type LiveActivity = { parts: (ToolUIPart | DynamicToolUIPart)[]; reasoning: string }
+
+/**
+ * The activity across a run's assistant messages: every tool call, plus the reasoning that has text
+ * (when thinking is shown). Null when there is none yet, which is exactly when the live activity row
+ * does not show; the message group and the bottom run status both key off this one test.
+ */
+export function liveActivityOf(messages: readonly UIMessage[], showThinking: boolean): LiveActivity | null {
+  const parts: (ToolUIPart | DynamicToolUIPart)[] = []
+  const reasoning: string[] = []
+  for (const message of messages) {
+    if (message.role !== "assistant") continue
+    for (const part of message.parts) {
+      if (isToolUIPart(part)) parts.push(part)
+      else if (showThinking && isReasoningUIPart(part) && part.text.trim()) reasoning.push(part.text)
+    }
+  }
+  return parts.length > 0 || reasoning.length > 0 ? { parts, reasoning: reasoning.join("\n\n") } : null
 }
 
 /**
@@ -202,7 +215,9 @@ export function isWebResearchGroup(group: AssistantRenderGroup): boolean {
  */
 export function getAggregateOnlyParts(
   message: UIMessage,
-  showThinking: boolean
+  showThinking: boolean,
+  /** Fold web search/fetch into the search family (Cowork frame only, see getToolFamily). */
+  foldWeb = false
 ): (ToolUIPart | DynamicToolUIPart)[] | null {
   const tools: (ToolUIPart | DynamicToolUIPart)[] = []
   for (const part of message.parts) {
@@ -215,7 +230,7 @@ export function getAggregateOnlyParts(
       if (part.text.trim()) return null
       continue
     }
-    if (isToolUIPart(part) && isAggregatableToolPart(part)) {
+    if (isToolUIPart(part) && isAggregatableToolPart(part, foldWeb)) {
       tools.push(part)
       continue
     }
@@ -257,13 +272,8 @@ export function splitTurnAtAnswer(message: UIMessage): { steps: UIMessage; answe
 export function getAssistantRenderGroups(
   parts: UIMessage["parts"],
   showThinking: boolean,
-  /*
-    Round 4: in the Cowork frame, fold ALL of a running turn's reasoning + every tool call into a
-    single "activity" group (the in-place loader), instead of separate reasoning / tool /
-    tool-aggregate lines. Text and files still render as their own groups. Off (default) keeps the
-    original per-line behaviour for the bare session surface.
-  */
-  unifyActivity = false
+  /** Fold web search/fetch into the search family (Cowork frame only, see getToolFamily). */
+  foldWeb = false
 ): AssistantRenderGroup[] {
   const filteredParts = parts.filter((part) => showThinking || !isReasoningUIPart(part))
   const groups: AssistantRenderGroup[] = []
@@ -280,26 +290,6 @@ export function getAssistantRenderGroups(
     }
 
     groups.push({ kind: "text", text })
-  }
-
-  // Unified-activity sink: one group holding every tool part + accumulated reasoning. Created on
-  // the first tool/reasoning part and reused for the rest of the turn, so all activity is one row.
-  const appendActivityReasoning = (text: string) => {
-    if (!text.trim()) return
-    const existing = groups.find((group) => group.kind === "activity")
-    if (existing && existing.kind === "activity") {
-      existing.reasoning += existing.reasoning ? `\n\n${text}` : text
-      return
-    }
-    groups.push({ kind: "activity", parts: [], reasoning: text })
-  }
-  const appendActivityTool = (part: ToolUIPart | DynamicToolUIPart) => {
-    const existing = groups.find((group) => group.kind === "activity")
-    if (existing && existing.kind === "activity") {
-      existing.parts.push(part)
-      return
-    }
-    groups.push({ kind: "activity", parts: [part], reasoning: "" })
   }
 
   const appendReasoning = (part: UIMessage["parts"][number]) => {
@@ -331,12 +321,7 @@ export function getAssistantRenderGroups(
     }
 
     if (isReasoningUIPart(part)) {
-      if (!showThinking) {
-        continue
-      }
-      if (unifyActivity) {
-        appendActivityReasoning(part.text)
-      } else {
+      if (showThinking) {
         appendReasoning(part)
       }
       continue
@@ -348,18 +333,12 @@ export function getAssistantRenderGroups(
     }
 
     if (isToolUIPart(part)) {
-      if (unifyActivity) {
-        // Every tool call - aggregatable or not (web search, capability, subagent) - goes into
-        // the one activity group so the running turn is a single in-place row.
-        appendActivityTool(part)
-        continue
-      }
       // Paper aggregation rule: consecutive command/edit/read/search calls
       // collapse into one aggregate group. Prose, files, and other tools
-      // break the run; reasoning does not - thinking models emit a
+      // break the run; reasoning does not — thinking models emit a
       // reasoning part before nearly every call, and letting it split the
       // run degrades every aggregate to a single call.
-      if (isAggregatableToolPart(part)) {
+      if (isAggregatableToolPart(part, foldWeb)) {
         const previous = groups.findLast((group) => group.kind !== "reasoning")
         if (previous?.kind === "tool-aggregate") {
           previous.parts.push(part)

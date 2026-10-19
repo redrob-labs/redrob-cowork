@@ -16,7 +16,6 @@ import type {
   PendingPermission,
   PendingQuestion,
   ProviderListItem,
-  TodoItem,
   WorkspaceConnectionState,
   WorkspaceSessionGroup,
 } from "../../../../app/types";
@@ -79,7 +78,6 @@ import {
   type SidePanelTarget,
 } from "../../../cowork/panel/route-side-panel";
 import { useFrameStore } from "../../../cowork/store/frame-store";
-import { useLiveDraftStore } from "../../../cowork/panel/live-draft";
 import { browserHeldResult } from "../../../cowork/panel/cowork-browser-state";
 import { type SidePanelItem, useUiStateStore } from "../../../shell/ui-state-store";
 import type { SessionNumberShortcutsState } from "../../../shell/session-number-shortcuts";
@@ -249,7 +247,6 @@ export type SessionPageProps = {
   sidebar: SessionPageSidebarProps;
   surface?: SessionPageSurfaceProps | null;
   history?: SessionPageHistoryControls | null;
-  todos: TodoItem[];
   sessionLoadingById: (sessionId: string | null) => boolean;
   shareWorkspaceModal?: ShareWorkspaceModalProps | null;
   providerAuthModal?: ProviderAuthModalProps | null;
@@ -698,40 +695,6 @@ export function SessionPage(props: SessionPageProps) {
       toggleCurrentSidePanel("panel", FILES_TARGET);
     }
   }, [artifactFileTargets, hasArtifactTargets, openTab, panelRailActive, props.selectedSessionId, selectTab, sessionPanelState, setCurrentSidePanel, toggleCurrentSidePanel]);
-  // Round 5: in the Cowork frame, when a run produces a NEW artifact (the count for this session
-  // rises), auto-open the right panel on it - Claude-style, so a complex task's deliverable opens
-  // in the Artifact panel without the user hunting for it. Tracked per session so switching chats
-  // does not fire it, and only on an INCREASE (never on removal or on the initial load of a chat
-  // that already had artifacts).
-  const prevArtifactCountRef = useRef<{ sessionId: string | null; count: number }>({ sessionId: null, count: 0 });
-  // Whether the selected session has been seen RUNNING since it was opened. An existing chat's
-  // artifact targets sync in after it opens (0 -> N for the same session id), which would read as
-  // a "new" artifact; only a session that ran while open can produce a genuinely new one.
-  const sawSessionRunRef = useRef<{ sessionId: string | null; ran: boolean }>({ sessionId: null, ran: false });
-  const selectedSessionStatus = props.selectedSessionId ? props.sidebar.sessionStatusById[props.selectedSessionId] ?? "idle" : "idle";
-  useEffect(() => {
-    const sessionId = props.selectedSessionId ?? null;
-    if (sawSessionRunRef.current.sessionId !== sessionId) sawSessionRunRef.current = { sessionId, ran: false };
-    // Only a genuinely RUN-ACTIVE status counts as "this session ran while watched". error and
-    // compacting are not runs, so reopening an old errored/compacting chat must not latch ran=true
-    // and then open Artifacts when that chat's existing targets hydrate (0 -> N).
-    if (selectedSessionStatus === "thinking" || selectedSessionStatus === "responding" || selectedSessionStatus === "waiting") {
-      sawSessionRunRef.current.ran = true;
-    }
-    const prev = prevArtifactCountRef.current;
-    const sameSession = prev.sessionId === sessionId;
-    const increased = sameSession && artifactTargetCount > prev.count;
-    prevArtifactCountRef.current = { sessionId, count: artifactTargetCount };
-    if (!inCoworkFrame || !increased || !sawSessionRunRef.current.ran) return;
-    // Round 7 C6: a file the panel already showed being WRITTEN is opened by the live-draft
-    // hand-over; reopening the Artifacts list here would yank the panel off that file.
-    const liveKey = getSidePanelSessionKey(sessionId);
-    const live = useLiveDraftStore.getState();
-    if (live.drafts[liveKey] || (live.done[liveKey]?.length ?? 0) > 0) return;
-    // In the Cowork frame the old rail never shows, and its toggle would land on Files (or CLOSE the
-    // panel when Files was already open), so open the frame panel straight on its Artifacts tab.
-    useFrameStore.getState().openPanel("artifacts");
-  }, [artifactTargetCount, inCoworkFrame, props.selectedSessionId, selectedSessionStatus]);
   const openVoiceRailPane = useCallback(() => {
     toggleCurrentSidePanel("voice");
   }, [toggleCurrentSidePanel]);
@@ -1490,7 +1453,6 @@ export function SessionPage(props: SessionPageProps) {
                         isControlTarget={activeWorkbenchPane === "primary"}
                         opencodeBaseUrl={reactSessionBaseUrl}
                         redrobToken={reactSessionToken}
-                        todos={props.todos}
                         activePermission={props.activePermission}
                         permissionReplyBusy={props.permissionReplyBusy}
                         respondPermission={props.respondPermission}
@@ -1521,7 +1483,6 @@ export function SessionPage(props: SessionPageProps) {
                             isControlTarget={activeWorkbenchPane === "secondary"}
                             opencodeBaseUrl={reactSessionBaseUrl}
                             redrobToken={reactSessionToken}
-                            todos={[]}
                             onOpenTarget={openTarget}
                           />
                         </ResizablePanel>
@@ -1676,11 +1637,8 @@ export function SessionPage(props: SessionPageProps) {
             </ResizablePanel>
               {sidePanelOpen && !isMobile ? (
               <>
-                {/* Round 2/3 (item 3c): the side panel IS inside this ResizablePanelGroup as a
-                    sibling after the main panel, so it can resize. It was not draggable because the
-                    handle was `hidden bg-transparent` (no grip) and lg-gated. Render it always
-                    (not lg-only), with a visible seam, a grab pill, a wider pointer hit area and a
-                    col-resize cursor. Bounds stay min 320px / max 70% (below). */}
+                {/* A visible, grabbable seam at every width so the side panel can be resized
+                    (bounds: min 320px, max 70%, below). */}
                 <ResizableHandle
                   withHandle
                   className="w-1.5 bg-border/60 transition-colors hover:bg-primary/40 data-[resize-handle-active]:bg-primary/60 cursor-col-resize"

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { isInvisibleCoworkText } from "../src/react-app/cowork/thread/invisible-blocks";
 
-// Round 7 (review of C1/C7): a superseded questions-only message leaves no blank band.
+// A superseded questions-only message leaves no blank band.
 
 const fence = (tag: string, body: unknown) => `\`\`\`${tag}\n${JSON.stringify(body)}\n\`\`\``;
 const QUESTIONS = [{ id: "q1", question: "What do you need?", options: ["A memo", "A deck"], defaultValue: 0 }];

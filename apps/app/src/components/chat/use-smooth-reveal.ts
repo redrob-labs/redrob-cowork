@@ -1,28 +1,30 @@
 import * as React from "react"
 
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion"
+
 /**
  * Letter-by-letter reveal pacing for streaming assistant text.
  *
  * A throttler can only ever reveal text the model has ALREADY emitted - it cannot outrun
- * generation. So "start at 2x Claude, settle to 1x Claude" is implemented as a constant
+ * generation. So "start at 2x, settle to 1x" is implemented as a constant
  * target reading rate with an opening burst: at the start of a turn the model's first
  * tokens land before the reveal catches up (a backlog), so we reveal at 2x the base rate
  * to drain that backlog and feel instantly responsive, then decay smoothly to 1x the base
- * rate - roughly Claude's sustained painted pace - so the reveal never stalls waiting for
+ * rate - a comfortable sustained reading pace - so the reveal never stalls waiting for
  * tokens. When the model races far ahead a bounded extra catch-up keeps the lag from
  * growing without turning the reveal choppy; when streaming ends we snap to the full text.
  *
  * Under prefers-reduced-motion there is no paced reveal: the full text shows immediately.
  */
 
-/** Base sustained reveal rate (chars/sec) ~= Claude's painted reading pace ("1x"). */
-const BASE_CHARS_PER_SEC = 55
-/** Opening burst multiplier ("2x Claude") that drains the first-token backlog. */
+/** Base sustained reveal rate (chars/sec) ~= a comfortable reading pace ("1x"). */
+export const BASE_CHARS_PER_SEC = 55
+/** Opening burst multiplier ("2x") that drains the first-token backlog. */
 const BURST_MULTIPLIER = 2
 /** Seconds over which the burst decays from 2x back to 1x. */
-const BURST_DECAY_SECONDS = 1.2
+export const BURST_DECAY_SECONDS = 1.2
 /** Cap on how far ahead of the base pace we will catch up when the model races (chars/sec). */
-const MAX_CATCHUP_CHARS_PER_SEC = BASE_CHARS_PER_SEC * 6
+export const MAX_CATCHUP_CHARS_PER_SEC = BASE_CHARS_PER_SEC * 6
 /** Backlog (chars not yet revealed) above which the bounded catch-up kicks in. */
 const CATCHUP_BACKLOG_THRESHOLD = 240
 
@@ -39,8 +41,8 @@ export type SmoothReveal = {
  * how big the backlog of unrevealed text is. Exported for testing: it carries the whole 2x->1x
  * burst + bounded catch-up policy with no DOM or timers, so the realism can be asserted directly.
  *
- * - At `sinceStartSeconds = 0` the rate is BURST_MULTIPLIER x base (the "2x Claude" opening).
- * - By `BURST_DECAY_SECONDS` it has decayed to 1x base (Claude's sustained pace).
+ * - At `sinceStartSeconds = 0` the rate is BURST_MULTIPLIER x base (the "2x" opening).
+ * - By `BURST_DECAY_SECONDS` it has decayed to 1x base (the sustained pace).
  * - A backlog over CATCHUP_BACKLOG_THRESHOLD raises the floor toward a bounded catch-up so a
  *   model that raced ahead does not leave the reveal permanently behind.
  */
@@ -54,10 +56,19 @@ export function computeRevealRate(sinceStartSeconds: number, backlog: number): n
   return rate
 }
 
-/** Round 9: seconds the leftover text takes to drain once the stream has ended. */
+/** Seconds the leftover text takes to drain once the stream has ended. */
 const DRAIN_SECONDS = 0.8
-/** Round 9: the drain never goes faster than this (chars/sec, ~25 per frame at 60fps). */
-const MAX_DRAIN_CHARS_PER_SEC = 1500
+/** The drain never goes faster than this (chars/sec, ~25 per frame at 60fps). */
+export const MAX_DRAIN_CHARS_PER_SEC = 1500
+
+/**
+ * Re-render throttle. Each committed count re-parses the growing markdown, so the reveal commits a
+ * new count only every few characters and at most ~30 times a second (always within 100ms), not
+ * on every animation frame; the fractional pace itself still advances every frame.
+ */
+const MIN_COMMIT_CHARS = 3
+const MIN_COMMIT_MS = 33
+const MAX_COMMIT_MS = 100
 
 /**
  * Pure drain rate (chars/sec) after the stream has ended: whatever is left finishes in about
@@ -69,28 +80,13 @@ export function drainRate(sinceStartSeconds: number, backlog: number): number {
   return Math.max(computeRevealRate(sinceStartSeconds, backlog), target, MAX_CATCHUP_CHARS_PER_SEC)
 }
 
-/** True when the OS asks for reduced motion (read once per hook instance, kept live). */
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(false)
-  React.useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setReduced(query.matches)
-    const onChange = (event: MediaQueryListEvent) => setReduced(event.matches)
-    query.addEventListener("change", onChange)
-    return () => query.removeEventListener("change", onChange)
-  }, [])
-  return reduced
-}
-
 /**
  * Reveal `fullText` at a smooth, constant velocity with an opening burst while `streaming`
  * is true. Returns the revealed prefix and whether the reveal is still behind.
  *
- * Round 9: when the stream ends with text still unrevealed (the model often races far ahead of the
- * reading pace), the rest DRAINS over about DRAIN_SECONDS instead of snapping in at once. Measured
- * live before this change: a single 50ms frame jumped by 542 characters at the end of a turn,
- * which read as a block landing rather than writing.
+ * When the stream ends with text still unrevealed (the model often races far ahead of the reading
+ * pace), the rest DRAINS over about DRAIN_SECONDS instead of snapping in at once, which would read
+ * as a block landing rather than writing.
  */
 export function useSmoothReveal(fullText: string, streaming: boolean): SmoothReveal {
   const reducedMotion = usePrefersReducedMotion()
@@ -103,6 +99,9 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
   const stateRef = React.useRef({
     // Fractional revealed length, the source of truth the integer state mirrors.
     revealed: 0,
+    // The count last committed to state, and when (see MIN_COMMIT_CHARS).
+    committed: 0,
+    committedAt: 0,
     // Timestamp of the previous frame, for elapsed-time integration.
     lastFrame: 0,
     // When the current reveal run started, for the burst decay curve.
@@ -134,6 +133,8 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
     let raf = 0
     stateRef.current.lastFrame = 0
     stateRef.current.startedAt = 0
+    stateRef.current.committed = Math.floor(stateRef.current.revealed)
+    stateRef.current.committedAt = 0
 
     const tick = (now: number) => {
       const state = stateRef.current
@@ -153,7 +154,17 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
 
         // Never reveal past what the model has emitted.
         state.revealed = Math.min(total, state.revealed + rate * deltaSeconds)
-        setRevealedCount(Math.floor(state.revealed))
+        const next = Math.floor(state.revealed)
+        const sinceCommit = now - state.committedAt
+        const due =
+          next >= total ||
+          sinceCommit >= MAX_COMMIT_MS ||
+          (next - state.committed >= MIN_COMMIT_CHARS && sinceCommit >= MIN_COMMIT_MS)
+        if (next !== state.committed && due) {
+          state.committed = next
+          state.committedAt = now
+          setRevealedCount(next)
+        }
         if (!state.streaming && state.revealed >= total) {
           state.owesDrain = false
           setDrained((value) => value + 1)

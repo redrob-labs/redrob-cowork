@@ -54,7 +54,7 @@ export function modeFor(chats: Record<string, ChatSettings>, key: string, prefer
 }
 
 /**
- * Round 6: auto-pick Plan mode for a complex request. A prompt reads as complex when it is long,
+ * Auto-pick Plan mode for a complex request. A prompt reads as complex when it is long,
  * or it asks for the kind of multi-step work a plan-then-execute flow serves best - research,
  * analysis, a report/document deliverable, a comparison, or an explicit "plan"/"step by step".
  * Deliberately conservative (a short, simple ask stays in Run) and ONE-WAY: it only upgrades Run
@@ -64,6 +64,7 @@ export function modeFor(chats: Record<string, ChatSettings>, key: string, prefer
 const COMPLEX_PROMPT = /\b(deep research|research|analy[sz]e|analysis|compare|comparison|evaluate|assess|predict|forecast|strategy|plan|roadmap|step[- ]by[- ]step|report|write[- ]?up|draft|proposal|design|architect|investigate|deep think)\b/i;
 const COMPLEX_PROMPT_MIN_LEN = 180; // long free-form asks tend to need a plan even without a keyword
 
+/** Whether a prompt reads as complex enough to plan first: long, or naming a planning-type task. */
 export function isComplexPrompt(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length >= COMPLEX_PROMPT_MIN_LEN) return true;

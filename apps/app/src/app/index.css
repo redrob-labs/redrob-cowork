@@ -2710,8 +2710,8 @@ html[lang="ko"] {
 }
 
 /*
-  uiux-refresh round 3 (item 4): the in-chat "working" label shimmer. A ChatGPT-style colour
-  sweep moves a lighter band across the grey label text, clipped to the glyphs. Base is the muted
+  The in-chat "working" label shimmer. `redrob-` marks a utility shared by the chat and the side
+  panel (cowork- classes are Cowork-thread only). A colour sweep moves a lighter band across the grey label text, clipped to the glyphs. Base is the muted
   ink; the sweep is a brighter tint. Held still (plain grey) under reduced motion.
 */
 @keyframes redrob-text-shimmer {
@@ -2741,7 +2741,7 @@ html[lang="ko"] {
     color: var(--ink-muted, #8A90A8);
   }
 }
-/* Round 8c: each rotating "working" line fades up into place. Opacity/translate live on the
+/* Each rotating "working" line fades up into place. Opacity/translate live on the
    individual property so they stack with the shimmer's background animation instead of replacing it. */
 .cowork-working-line {
   animation:
@@ -2760,13 +2760,13 @@ html[lang="ko"] {
 }
 
 /*
-  Round 9: the plan inside the chat (CoworkPlan in cowork-thread.tsx). No frame: a 2px Redrob Blue
+  The plan inside the chat (CoworkPlan in cowork-thread.tsx). No frame: a 2px Redrob Blue
   accent rail on the left, a small label with the run's progress, the summary, and the checklist as
   a stepper. Markers are custom circles joined by a thin line: a ring to do, a brand ring with a
   dot while active (its label shimmers, .redrob-shimmer-text), a filled brand circle with a tick
   when done. Every surface sets its background and text colour.
 */
-.cowork-planx {
+.cowork-plan {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2777,12 +2777,12 @@ html[lang="ko"] {
   background: transparent;
   color: var(--ink-primary);
 }
-.cowork-planx__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
-.cowork-planx__label { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink-brand); }
-.cowork-planx__progress { font-size: 12px; line-height: 20px; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
-.cowork-planx__summary { margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-primary); }
-.cowork-planx__steps { display: flex; flex-direction: column; margin: 2px 0 0; padding: 0; list-style: none; }
-.cowork-planx__step {
+.cowork-plan__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.cowork-plan__label { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink-brand); }
+.cowork-plan__progress { font-size: 12px; line-height: 20px; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+.cowork-plan__summary { margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-primary); }
+.cowork-plan__steps { display: flex; flex-direction: column; margin: 2px 0 0; padding: 0; list-style: none; }
+.cowork-plan__step {
   position: relative;
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr);
@@ -2791,7 +2791,7 @@ html[lang="ko"] {
   padding: 5px 0;
 }
 /* The thin line joining one marker to the next. */
-.cowork-planx__step:not(:last-child)::before {
+.cowork-plan__step:not(:last-child)::before {
   content: "";
   position: absolute;
   top: 25px;
@@ -2801,8 +2801,8 @@ html[lang="ko"] {
   border-radius: 1px;
   background: var(--border-subtle);
 }
-.cowork-planx__step[data-state="done"]:not(:last-child)::before { background: var(--action-primary); opacity: 0.35; }
-.cowork-planx__marker {
+.cowork-plan__step[data-state="done"]:not(:last-child)::before { background: var(--action-primary); opacity: 0.35; }
+.cowork-plan__marker {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -2815,39 +2815,39 @@ html[lang="ko"] {
   background: var(--surface-base);
   color: var(--surface-base);
 }
-.cowork-planx__step[data-state="active"] .cowork-planx__marker {
+.cowork-plan__step[data-state="active"] .cowork-plan__marker {
   border: 2px solid var(--action-primary);
   background: var(--surface-brand-subtle);
 }
-.cowork-planx__step[data-state="active"] .cowork-planx__marker::after {
+.cowork-plan__step[data-state="active"] .cowork-plan__marker::after {
   content: "";
   width: 6px;
   height: 6px;
   border-radius: 999px;
   background: var(--action-primary);
-  animation: cowork-planx-pulse 1.4s ease-in-out infinite;
+  animation: cowork-plan-pulse 1.4s ease-in-out infinite;
 }
-.cowork-planx__step[data-state="done"] .cowork-planx__marker {
+.cowork-plan__step[data-state="done"] .cowork-plan__marker {
   border-color: var(--action-primary);
   background: var(--action-primary);
   color: var(--ink-on-brand, #fff);
 }
-.cowork-planx__task { min-width: 0; font-size: 14px; line-height: 22px; }
+.cowork-plan__task { min-width: 0; font-size: 14px; line-height: 22px; }
 /* Colour only when not shimmering: the shimmer paints the text through background-clip. */
-.cowork-planx__task:not(.redrob-shimmer-text) { color: var(--ink-primary); }
-.cowork-planx__step[data-state="done"] .cowork-planx__task:not(.redrob-shimmer-text) { color: var(--ink-secondary); }
-.cowork-planx__step[data-state="todo"] .cowork-planx__task:not(.redrob-shimmer-text) { color: var(--ink-secondary); }
-.cowork-planx__note { margin: 2px 0 0; font-size: 13px; line-height: 20px; color: var(--ink-secondary); }
-@keyframes cowork-planx-pulse {
+.cowork-plan__task:not(.redrob-shimmer-text) { color: var(--ink-primary); }
+.cowork-plan__step[data-state="done"] .cowork-plan__task:not(.redrob-shimmer-text) { color: var(--ink-secondary); }
+.cowork-plan__step[data-state="todo"] .cowork-plan__task:not(.redrob-shimmer-text) { color: var(--ink-secondary); }
+.cowork-plan__note { margin: 2px 0 0; font-size: 13px; line-height: 20px; color: var(--ink-secondary); }
+@keyframes cowork-plan-pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(0.7); opacity: 0.6; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cowork-planx__step[data-state="active"] .cowork-planx__marker::after { animation: none; }
+  .cowork-plan__step[data-state="active"] .cowork-plan__marker::after { animation: none; }
 }
 
-/* Item 8: a blinking "writing" caret shown in the artifact card and the right-panel preview while
-   the run is still writing the file. Pure CSS; a thin bar that pulses like a text cursor. */
+/* A blinking "writing" caret shown in the artifact card and the right-panel preview while the run
+   is still writing the file; a shared `redrob-` utility like the shimmer. Pure CSS; a thin bar that pulses like a text cursor. */
 .redrob-writing-caret {
   display: inline-block;
   width: 2px;
@@ -4917,12 +4917,12 @@ a.radar-story__source:focus-visible {
 .cowork-artifact-view__body [data-redrob-markdown-preview] { height: auto; overflow: visible; padding: 8px 16px 24px; }
 
 /*
-  Round 9: Plan's questions, the app's own card (cowork-questions.tsx). Same tokens as the DS
+  Plan's questions, the app's own card (cowork-questions.tsx). Same tokens as the DS
   PlanQuestions it replaces, one step smaller type (question 14px, options 13px), and a
   "Something else" chip that turns into a pill-shaped text field in place. Every surface sets its
   background and text colour.
 */
-.cowork-q {
+.cowork-questions {
   display: flex;
   flex-direction: column;
   gap: var(--space-4, 16px);
@@ -4933,24 +4933,24 @@ a.radar-story__source:focus-visible {
   background: var(--surface-base);
   color: var(--ink-primary);
 }
-.cowork-q__list {
+.cowork-questions__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-4, 16px);
   margin: 0;
-  padding-left: var(--cowork-q-gutter, 18px);
+  padding-left: var(--cowork-questions-gutter, 18px);
 }
-.cowork-q__item::marker { font-size: 13px; font-weight: 600; color: var(--ink-secondary); }
-.cowork-q__ask {
+.cowork-questions__item::marker { font-size: 13px; font-weight: 600; color: var(--ink-secondary); }
+.cowork-questions__ask {
   margin: 0 0 var(--space-2, 8px);
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
   color: var(--ink-primary);
 }
-.cowork-q__any { font-size: 12px; font-weight: 400; color: var(--ink-secondary); }
-.cowork-q__opts { display: flex; flex-wrap: wrap; gap: 6px; }
-.cowork-q__opt {
+.cowork-questions__any { font-size: 12px; font-weight: 400; color: var(--ink-secondary); }
+.cowork-questions__opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.cowork-questions__opt {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -4967,26 +4967,26 @@ a.radar-story__source:focus-visible {
   cursor: pointer;
   transition: background-color var(--duration-fast, 120ms) ease, border-color var(--duration-fast, 120ms) ease;
 }
-.cowork-q__opt:hover { background: var(--surface-sunken); color: var(--ink-primary); }
-.cowork-q__opt[aria-pressed="true"] {
+.cowork-questions__opt:hover { background: var(--surface-sunken); color: var(--ink-primary); }
+.cowork-questions__opt[aria-pressed="true"] {
   border-color: var(--action-primary);
   background: var(--surface-brand-subtle);
   color: var(--ink-brand);
 }
-.cowork-q__opt:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
-.cowork-q__opt svg { flex: none; }
-.cowork-q__opt--other { border-style: dashed; color: var(--ink-secondary); }
+.cowork-questions__opt:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+.cowork-questions__opt svg { flex: none; }
+.cowork-questions__opt--other { border-style: dashed; color: var(--ink-secondary); }
 /* The chip as a field: same pill, a text cursor, and the brand tint once something is typed. */
-.cowork-q__opt--input {
+.cowork-questions__opt--input {
   min-width: min(260px, 100%);
   padding: 0 12px;
   border-color: var(--action-primary);
   cursor: text;
 }
-.cowork-q__opt--input:hover { background: var(--surface-base); }
-.cowork-q__opt--input[data-filled] { background: var(--surface-brand-subtle); color: var(--ink-brand); }
-.cowork-q__opt--input:focus-within { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
-.cowork-q__opt--input input {
+.cowork-questions__opt--input:hover { background: var(--surface-base); }
+.cowork-questions__opt--input[data-filled] { background: var(--surface-brand-subtle); color: var(--ink-brand); }
+.cowork-questions__opt--input:focus-within { outline: var(--focus-ring-width) solid var(--focus-ring); outline-offset: 2px; }
+.cowork-questions__opt--input input {
   width: 100%;
   min-width: 0;
   min-height: 28px;
@@ -4997,10 +4997,10 @@ a.radar-story__source:focus-visible {
   font: inherit;
   font-size: 13px;
 }
-.cowork-q__opt--input input::placeholder { color: var(--ink-tertiary, var(--ink-secondary)); }
-/* Round 10: same inline start inset as .cowork-q__list (its 18px marker gutter), so Execute lines
+.cowork-questions__opt--input input::placeholder { color: var(--ink-tertiary, var(--ink-secondary)); }
+/* Same inline start inset as .cowork-questions__list (its 18px marker gutter), so Execute lines
    up with the question text instead of sitting 18px to its left. */
-.cowork-q__act { display: flex; align-items: center; gap: var(--space-3, 12px); padding-left: var(--cowork-q-gutter, 18px); }
+.cowork-questions__act { display: flex; align-items: center; gap: var(--space-3, 12px); padding-left: var(--cowork-questions-gutter, 18px); }
 @media (prefers-reduced-motion: reduce) {
-  .cowork-q__opt { transition: none; }
+  .cowork-questions__opt { transition: none; }
 }
