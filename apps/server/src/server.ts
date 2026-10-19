@@ -63,6 +63,16 @@ import {
   readRedrobEngineKey,
 } from "./redrob-auth.js";
 import { createRedrobDeviceConnections } from "./redrob-device.js";
+import {
+  artifactForPath,
+  buildTranscriptShareMessages,
+  normalizeShareTitle,
+  parseShareVisibility,
+  postRedrobChatShare,
+  REDROB_CHAT_API_URL_ENV,
+  resolveRedrobChatApiUrl,
+} from "./redrob-chat-share.js";
+import { buildSession, buildSessionMessages } from "./session-read-model.js";
 import { EnvService } from "./env-file.js";
 import { installCloudPlugin, readCloudPluginResolved, readInstalledCloudPlugins, removeCloudPlugin } from "./cloud-plugins.js";
 import { resolveClaudePluginBundle } from "./claude-plugin-bundle.js";
@@ -93,7 +103,12 @@ import { serve, type ServeResult } from "./serve-node.js";
 import { serveStaticUi } from "./static-ui.js";
 import { externalFetch, loopbackFetch } from "./server-fetch.js";
 import { registerCoreRoutes } from "./routes/core.js";
-import { registerFileRoutes } from "./routes/files.js";
+import {
+  isSupportedWorkspaceTextFilePath,
+  normalizeWorkspaceRelativePath,
+  registerFileRoutes,
+  resolveSafeChildPath,
+} from "./routes/files.js";
 import { registerOperationRoutes } from "./routes/operations.js";
 import { addRoute, matchRoute, type AuthMode, type RequestContext, type Route } from "./routes/registry.js";
 import { registerSessionRoutes } from "./routes/sessions.js";
@@ -2456,6 +2471,66 @@ function createRoutes(
     const body = await readJsonBody(ctx.request).catch(() => ({}) as Record<string, unknown>);
     const id = typeof body.id === "string" ? body.id.trim() : "";
     return jsonResponse({ ok: true, cancelled: id ? redrobDeviceConnections.cancel(id) : false });
+  });
+
+  /**
+   * Share to Redrob Chat. The renderer names WHAT to share (a session id or a workspace file path);
+   * this process reads the content, reads the Redrob Key from the engine, and calls the chat API.
+   * Only `{ id, url }` goes back to the renderer. See apps/server/src/redrob-chat-share.ts.
+   */
+  addRoute(routes, "POST", "/workspace/:id/redrob-chat/share", "host-token", async (ctx) => {
+    const workspace = await resolveWorkspace(config, ctx.params.id);
+    const body = await readJsonBody(ctx.request);
+    const visibility = parseShareVisibility(body.visibility);
+
+    let payload: Parameters<typeof postRedrobChatShare>[0]["payload"];
+    if (body.kind === "transcript") {
+      const sessionId = typeof body.sessionId === "string" ? body.sessionId.trim() : "";
+      if (!sessionId) throw new ApiError(400, "invalid_payload", "sessionId is required");
+      const opencode = createWorkspaceOpencodeClient(config, workspace);
+      const [session, messages] = await Promise.all([
+        opencode.session
+          .get({ sessionID: sessionId })
+          .then((result) => unwrapOpencodeResult(result, `/session/${encodeURIComponent(sessionId)}`)),
+        opencode.session
+          .messages({ sessionID: sessionId })
+          .then((result) => unwrapOpencodeResult(result, `/session/${encodeURIComponent(sessionId)}/message`)),
+      ]);
+      payload = {
+        kind: "transcript",
+        title: normalizeShareTitle(body.title, buildSession(session).title ?? ""),
+        visibility,
+        messages: buildTranscriptShareMessages(buildSessionMessages(messages)),
+      };
+    } else if (body.kind === "artifact") {
+      const requested = typeof body.path === "string" ? body.path : "";
+      const relativePath = normalizeWorkspaceRelativePath(requested, { allowSubdirs: true });
+      if (!isSupportedWorkspaceTextFilePath(relativePath)) {
+        throw new ApiError(400, "invalid_path", "Only text artifacts (markdown, HTML, code, JSON) can be shared");
+      }
+      const absPath = resolveSafeChildPath(workspace.path, relativePath);
+      const info = await stat(absPath).catch(() => null);
+      if (!info?.isFile()) throw new ApiError(404, "file_not_found", "File not found");
+      const content = await readFile(absPath, "utf8");
+      const fileName = relativePath.split("/").pop() ?? relativePath;
+      payload = {
+        kind: "artifact",
+        title: normalizeShareTitle(body.title, fileName),
+        visibility,
+        artifact: artifactForPath(relativePath, content),
+      };
+    } else {
+      throw new ApiError(400, "invalid_payload", "kind must be transcript or artifact");
+    }
+
+    const key = await readRedrobEngineKey({ config, logger: redrobAuthLogger });
+    if (!key) {
+      throw new ApiError(409, "redrob_key_missing", "Connect your Redrob account first to share to Redrob Chat");
+    }
+    const stored = (await env.list()).find((entry) => entry.key === REDROB_CHAT_API_URL_ENV)?.value;
+    const baseUrl = resolveRedrobChatApiUrl(stored, constants.redrobChatApiUrl);
+    const result = await postRedrobChatShare({ baseUrl, key, payload });
+    return jsonResponse(result, 201);
   });
 
   addRoute(routes, "PATCH", "/runtime-config/providers", "host-token", async (ctx) => {
