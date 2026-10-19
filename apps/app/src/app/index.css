@@ -781,8 +781,8 @@
 
 .cowork-panel__tab[data-active] {
   /* Active icon tab: brand-tinted glyph on a soft brand wash. */
-  color: var(--primary, #2b52ff);
-  background: var(--surface-brand-subtle, rgba(43, 82, 255, 0.08));
+  color: var(--primary);
+  background: var(--surface-brand-subtle);
 }
 
 .cowork-panel__actions {
@@ -2258,7 +2258,7 @@
   outline-offset: 2px;
 }
 [data-theme="dark"] .cowork-skills__chevron {
-  border-color: color-mix(in srgb, #fff 10%, transparent);
+  border-color: color-mix(in srgb, var(--redrob-white) 10%, transparent);
   background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
   color: var(--ink-primary);
 }
@@ -2449,7 +2449,7 @@
 [data-theme="dark"] .cowork-workflow-card__art,
 [data-theme="dark"] .cowork-workflow-hero__card {
   border-color: color-mix(in srgb, var(--border-subtle) 90%, transparent);
-  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 28px -14px color-mix(in srgb, var(--redrob-black) 60%, transparent);
 }
 .cowork-workflow-card__cover {
   display: grid;
@@ -2688,11 +2688,8 @@ html[lang="ko"] {
   the LAST child's end so it sits inline after the final character rather than on a new line.
   The blink is held steady under reduced motion.
 */
-@keyframes redrob-cursor-blink {
-  0%, 45% { opacity: 1; }
-  55%, 100% { opacity: 0; }
-}
-.markdown-content[data-streaming-cursor] > :last-child::after {
+.markdown-content[data-streaming-cursor] > :last-child::after,
+.cowork-live-draft__body[data-writing] .markdown-content > :last-child::after {
   content: "";
   display: inline-block;
   width: 0.5ch; /* A slim caret roughly half a character wide. */
@@ -2701,13 +2698,7 @@ html[lang="ko"] {
   vertical-align: text-bottom;
   background: var(--primary); /* Redrob Blue via the DS token chain (--primary -> --action-primary). */
   border-radius: 1px;
-  animation: redrob-cursor-blink 1.06s steps(1, end) infinite; /* ~1s on/off blink. */
-}
-@media (prefers-reduced-motion: reduce) {
-  /* Hold the caret steady (no blink) for motion-sensitive readers. */
-  .markdown-content[data-streaming-cursor] > :last-child::after {
-    animation: none;
-  }
+  animation: redrob-caret-blink 1.06s step-end infinite; /* ~1s on/off blink. */
 }
 
 /*
@@ -2722,9 +2713,9 @@ html[lang="ko"] {
 .redrob-shimmer-text {
   background: linear-gradient(
     100deg,
-    var(--ink-muted, #8A90A8) 35%,
-    var(--ink-primary, #1A2450) 50%,
-    var(--ink-muted, #8A90A8) 65%
+    var(--ink-muted) 35%,
+    var(--ink-primary) 50%,
+    var(--ink-muted) 65%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -2739,7 +2730,7 @@ html[lang="ko"] {
     background: none;
     -webkit-background-clip: border-box;
     background-clip: border-box;
-    color: var(--ink-muted, #8A90A8);
+    color: var(--ink-muted);
   }
 }
 /* Each rotating "working" line fades up into place. Opacity/translate live on the
@@ -2831,7 +2822,7 @@ html[lang="ko"] {
 .cowork-plan__step[data-state="done"] .cowork-plan__marker {
   border-color: var(--action-primary);
   background: var(--action-primary);
-  color: var(--ink-on-brand, #fff);
+  color: var(--ink-on-brand);
 }
 .cowork-plan__task { min-width: 0; font-size: 14px; line-height: 22px; }
 /* Colour only when not shimmering: the shimmer paints the text through background-clip. */
@@ -2858,12 +2849,15 @@ html[lang="ko"] {
   background: currentColor;
   animation: redrob-caret-blink 1s step-end infinite;
 }
+/* The one blink both carets use: on for the first half, off for the second. */
 @keyframes redrob-caret-blink {
   0%, 50% { opacity: 1; }
   50.01%, 100% { opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   /* Motion-sensitive readers get a steady caret, no blink. */
+  .markdown-content[data-streaming-cursor] > :last-child::after,
+  .cowork-live-draft__body[data-writing] .markdown-content > :last-child::after,
   .redrob-writing-caret {
     animation: none;
     opacity: 1;
@@ -4247,7 +4241,7 @@ select:disabled {
 .model-chart__trending-scope {
   flex: 0 0 auto;
   color: var(--ink-muted);
-  font: var(--text-body-sm, 13px/20px sans-serif);
+  font: var(--text-body-sm);
 }
 /* In the pill the rank hugs its term; the panel rows keep their fixed rank column. */
 .model-chart__trending-entry .model-chart__trending-rank {
@@ -4282,7 +4276,7 @@ select:disabled {
   min-width: 0;
   overflow: hidden;
   color: var(--ink-primary);
-  font: var(--text-body-sm, 13px/20px sans-serif);
+  font: var(--text-body-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4299,48 +4293,63 @@ select:disabled {
   transform: rotate(180deg);
 }
 /*
-  Liquid glass: a see-through raised surface with a strong blur and saturation behind it, a soft
-  inner highlight on the top edge and a hairline light rim, over a gentle drop shadow. The surface
-  stays 78% opaque so text keeps its contrast over the bright banner art in both themes; without
-  backdrop-filter (or with reduced transparency) it falls back to the solid raised surface.
+  Liquid glass, shared by the trending panel and the radar banners and page head: a see-through
+  surface with a strong blur and saturation behind it, a soft inner highlight on the top edge and a
+  hairline light rim, over a gentle drop shadow. Each surface sets its own --cowork-glass-bg, -rim
+  and -shadow for light and dark. Without backdrop-filter, or with reduced transparency, every glass
+  surface falls back to the solid raised surface.
 */
-.model-chart__trending-panel[data-slot="popover-content"] {
-  width: min(340px, calc(100vw - 24px));
-  max-height: min(640px, calc(100vh - 140px));
-  gap: 8px;
-  overflow-y: auto;
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 60%, rgba(255, 255, 255, 0.5));
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--surface-raised) 78%, transparent);
+.model-chart__trending-panel,
+.model-chart__banner.model-chart__radar-banner,
+.cowork-radar-page__head {
+  border: 1px solid var(--cowork-glass-rim);
+  background: var(--cowork-glass-bg);
   color: var(--ink-primary);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 45%, transparent);
-}
-[data-theme="dark"] .model-chart__trending-panel[data-slot="popover-content"] {
-  border-color: color-mix(in srgb, var(--border-subtle) 70%, rgba(255, 255, 255, 0.14));
-  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 70%, transparent);
+  box-shadow: var(--cowork-glass-shadow);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .model-chart__trending-panel[data-slot="popover-content"],
-  [data-theme="dark"] .model-chart__trending-panel[data-slot="popover-content"] {
+  .model-chart__trending-panel,
+  .model-chart__banner.model-chart__radar-banner,
+  .cowork-radar-page__head {
     background: var(--surface-raised);
   }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .model-chart__trending-panel[data-slot="popover-content"],
-  [data-theme="dark"] .model-chart__trending-panel[data-slot="popover-content"] {
+  .model-chart__trending-panel,
+  .model-chart__banner.model-chart__radar-banner,
+  .cowork-radar-page__head {
     background: var(--surface-raised);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+  .cowork-radar-mark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* The trending panel stays 78% opaque so text keeps its contrast over the bright banner art. */
+.model-chart__trending-panel {
+  --cowork-glass-bg: color-mix(in srgb, var(--surface-raised) 78%, transparent);
+  --cowork-glass-rim: color-mix(in srgb, var(--border-subtle) 60%, color-mix(in srgb, var(--redrob-white) 50%, transparent));
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 45%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 8%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 45%, transparent);
+  width: min(340px, calc(100vw - 24px));
+  max-height: min(640px, calc(100vh - 140px));
+  gap: 8px;
+  overflow-y: auto;
+  border-radius: 16px;
+}
+[data-theme="dark"] .model-chart__trending-panel {
+  --cowork-glass-bg: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  --cowork-glass-rim: color-mix(in srgb, var(--border-subtle) 70%, color-mix(in srgb, var(--redrob-white) 14%, transparent));
+  --cowork-glass-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 12%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 4%, transparent),
+    0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 70%, transparent);
 }
 .model-chart__trending-heading {
   display: flex;
@@ -4414,7 +4423,7 @@ select:disabled {
   justify-content: flex-end;
   gap: 3px;
   min-width: 16px;
-  font: var(--text-caption, 11px/16px sans-serif);
+  font: var(--text-caption);
   font-variant-numeric: tabular-nums;
   font-weight: 650;
 }
@@ -4461,12 +4470,9 @@ select:disabled {
 }
 .model-chart__banner.model-chart__radar-banner,
 .cowork-radar-page__head {
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, color-mix(in srgb, var(--redrob-white) 60%, transparent));
-  background: color-mix(in srgb, var(--redrob-white) 66%, transparent);
-  color: var(--ink-primary);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:
+  --cowork-glass-bg: color-mix(in srgb, var(--redrob-white) 66%, transparent);
+  --cowork-glass-rim: color-mix(in srgb, var(--border-subtle) 55%, color-mix(in srgb, var(--redrob-white) 60%, transparent));
+  --cowork-glass-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 85%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 10%, transparent),
     0 18px 48px -20px color-mix(in srgb, var(--redrob-black) 28%, transparent);
@@ -4478,7 +4484,7 @@ select:disabled {
   text-decoration: none;
 }
 .model-chart__banner.model-chart__radar-banner:hover {
-  box-shadow:
+  --cowork-glass-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 90%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 12%, transparent),
     0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 34%, transparent);
@@ -4568,15 +4574,15 @@ select:disabled {
 /* Dark: smoked white glass - white at a low mix over the dark raised surface, light theme ink. */
 [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
 [data-theme="dark"] .cowork-radar-page__head {
-  border-color: color-mix(in srgb, var(--redrob-white) 14%, transparent);
-  background: color-mix(in srgb, var(--redrob-white) 9%, color-mix(in srgb, var(--surface-raised) 70%, transparent));
-  box-shadow:
+  --cowork-glass-rim: color-mix(in srgb, var(--redrob-white) 14%, transparent);
+  --cowork-glass-bg: color-mix(in srgb, var(--redrob-white) 9%, color-mix(in srgb, var(--surface-raised) 70%, transparent));
+  --cowork-glass-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 16%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 5%, transparent),
     0 18px 48px -18px color-mix(in srgb, var(--redrob-black) 65%, transparent);
 }
 [data-theme="dark"] .model-chart__banner.model-chart__radar-banner:hover {
-  box-shadow:
+  --cowork-glass-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--redrob-white) 20%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--redrob-white) 6%, transparent),
     0 22px 52px -18px color-mix(in srgb, var(--redrob-black) 72%, transparent);
@@ -4593,28 +4599,6 @@ select:disabled {
 [data-theme="dark"] .model-chart__radar-open {
   border-color: color-mix(in srgb, var(--redrob-white) 16%, transparent);
   background: color-mix(in srgb, var(--redrob-white) 10%, transparent);
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .model-chart__banner.model-chart__radar-banner,
-  .cowork-radar-page__head,
-  [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
-  [data-theme="dark"] .cowork-radar-page__head {
-    background: var(--surface-raised);
-  }
-}
-@media (prefers-reduced-transparency: reduce) {
-  .model-chart__banner.model-chart__radar-banner,
-  .cowork-radar-page__head,
-  [data-theme="dark"] .model-chart__banner.model-chart__radar-banner,
-  [data-theme="dark"] .cowork-radar-page__head {
-    background: var(--surface-raised);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  .cowork-radar-mark {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
 }
 /*
   Radar subpage: the same white glass header (tint and feed mark, no hover lift) over a numbered
@@ -4813,20 +4797,7 @@ a.cowork-radar-story__source:focus-visible {
   white-space: pre-wrap;
   color: var(--ink-primary, var(--foreground));
 }
-.cowork-live-draft__body[data-writing] .markdown-content > :last-child::after {
-  content: "";
-  display: inline-block;
-  width: 0.5ch;
-  height: 1em;
-  margin-left: 0.08em;
-  vertical-align: text-bottom;
-  background: var(--primary);
-  border-radius: 1px;
-  animation: redrob-cursor-blink 1.06s steps(1, end) infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .cowork-live-draft__body[data-writing] .markdown-content > :last-child::after { animation: none; }
-}
+/* The live draft's caret is the chat's streaming cursor (see .markdown-content[data-streaming-cursor]). */
 
 /*
   Round 10 (R6): the Artifacts tab list. Roomy rows on the panel's own surface (no grey fill, no
@@ -4933,13 +4904,14 @@ a.cowork-radar-story__source:focus-visible {
   border-radius: var(--radius-lg, 12px);
   background: var(--surface-base);
   color: var(--ink-primary);
+  --cowork-questions-gutter: 18px; /* The list's marker gutter; the action row uses the same inset. */
 }
 .cowork-questions__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-4, 16px);
   margin: 0;
-  padding-left: var(--cowork-questions-gutter, 18px);
+  padding-left: var(--cowork-questions-gutter);
 }
 .cowork-questions__item::marker { font-size: 13px; font-weight: 600; color: var(--ink-secondary); }
 .cowork-questions__ask {
@@ -4998,10 +4970,10 @@ a.cowork-radar-story__source:focus-visible {
   font: inherit;
   font-size: 13px;
 }
-.cowork-questions__opt--input input::placeholder { color: var(--ink-tertiary, var(--ink-secondary)); }
+.cowork-questions__opt--input input::placeholder { color: var(--ink-muted); }
 /* Same inline start inset as .cowork-questions__list (its 18px marker gutter), so Execute lines
    up with the question text instead of sitting 18px to its left. */
-.cowork-questions__act { display: flex; align-items: center; gap: var(--space-3, 12px); padding-left: var(--cowork-questions-gutter, 18px); }
+.cowork-questions__act { display: flex; align-items: center; gap: var(--space-3, 12px); padding-left: var(--cowork-questions-gutter); }
 @media (prefers-reduced-motion: reduce) {
   .cowork-questions__opt { transition: none; }
 }
