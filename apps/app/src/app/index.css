@@ -1809,34 +1809,6 @@
   color: var(--ink-muted);
 }
 
-/*
-  Round 11, item 13: when the prompt box holds the caret, show a very subtle Redrob-blue glow
-  OUTSIDE the field (like Kiro), not a wash inside it. The ::before sits BEHIND the field (negative
-  inset + z-index:-1) and is blurred, so the colour blooms around the box rather than tinting its
-  surface. Light and subtle: ~10% sky, fades in on focus-within, pointer-transparent, reduced-motion
-  safe. Replaces the round-8 inner-wash overlay.
-*/
-.cowork-composer-field::before {
-  content: "";
-  position: absolute;
-  inset: -5px;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  background: color-mix(in srgb, var(--spectrum-sky) 10%, transparent);
-  filter: blur(10px);
-  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease);
-  z-index: -1;
-}
-.cowork-composer-field:focus-within::before {
-  opacity: 1;
-}
-/* Keep the field's own content above the overlay. */
-.cowork-composer-field > * {
-  position: relative;
-  z-index: 1;
-}
-
 .cowork-new__line {
   /* Round 36 (item 4): add clearly perceptible air between the greeting and the
      composer. The .cowork-new__center flex gap is --space-5 (20px here); a 0.3x
@@ -4431,8 +4403,7 @@ select:disabled {
 @media (prefers-reduced-motion: reduce) {
   .model-chart__banner,
   .model-chart__tile,
-  .cowork-shell__side-resizer::before,
-  .cowork-composer-field::before {
+  .cowork-shell__side-resizer::before {
     transition: none;
   }
 }

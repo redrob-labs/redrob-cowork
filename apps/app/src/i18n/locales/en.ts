@@ -1122,8 +1122,6 @@ const en = {
   "cowork.preview_guide_use_title": "Redrob Auto picks for you",
   "cowork.preview_high_impact": "High impact",
   "cowork.preview_history_by": "Approved by",
-  "cowork.preview_history_caption": "Everything Cowork did, newest first",
-  "cowork.preview_history_lede": "Everything Cowork did, in order: every run, every change to a file, everything sent outside, and who approved it.",
   "cowork.preview_history_meta": "The last 30 days, for you and your team",
   "cowork.preview_history_note": "Preview: sample history. Your own chats and runs show here once a project is connected.",
   "cowork.preview_history_on_its_own": "Ran on its own",

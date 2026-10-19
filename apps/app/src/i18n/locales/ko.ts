@@ -1112,8 +1112,6 @@ const ko = {
   "cowork.preview_guide_use_title": "레드롭 오토가 대신 고릅니다",
   "cowork.preview_high_impact": "영향 큼",
   "cowork.preview_history_by": "승인한 사람",
-  "cowork.preview_history_caption": "코워크가 한 모든 일, 최근 순",
-  "cowork.preview_history_lede": "코워크가 한 모든 일을 순서대로 보여 줍니다. 실행, 파일 변경, 밖으로 보낸 것, 그리고 승인한 사람까지 담깁니다.",
   "cowork.preview_history_meta": "최근 30일, 나와 팀",
   "cowork.preview_history_note": "미리 보기: 예시 기록입니다. 프로젝트를 연결하면 내 채팅과 실행이 여기에 나옵니다.",
   "cowork.preview_history_on_its_own": "스스로 실행",

@@ -81,7 +81,7 @@ export function RadarPage(props: {
           const text = radarStoryText(story, props.locale);
           const headingId = `cowork-radar-story-${story.id}`;
           return (
-            <li key={story.id} className="cowork-radar-story">
+            <li key={story.id}>
               <article className="cowork-radar-story__card" aria-labelledby={headingId}>
                 <span className="cowork-radar-story__rank" aria-hidden="true">{index + 1}</span>
                 <div className="cowork-radar-story__body">
