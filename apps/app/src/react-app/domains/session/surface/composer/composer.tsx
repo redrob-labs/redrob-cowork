@@ -1153,9 +1153,10 @@ export function ReactSessionComposer(props: ComposerProps) {
             padding is the same intent, and a highlight that only lights up over
             the caret line reads as "drop not supported here". */}
         <div
-          className={`relative overflow-visible rounded-xl border bg-dls-surface transition-all ${panelRoundedClass} ${
+          className={`cowork-composer-panel relative overflow-visible rounded-xl border bg-dls-surface transition-all ${panelRoundedClass} ${
             dropzoneActive ? "border-dls-accent" : "border-dls-border"
           }`}
+          data-disabled={props.disabled ? "true" : undefined}
           data-dropzone-active={dropzoneActive ? "true" : undefined}
           onDragEnter={(event) => {
             if (!dragEventHasFiles(event.dataTransfer)) return;

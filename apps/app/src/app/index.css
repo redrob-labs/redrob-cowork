@@ -1816,6 +1816,30 @@
   flex-shrink: 0;
 }
 
+/* Composer focus glow (every composer: the new-chat hero and the in-chat one share this panel).
+   While the text box has focus, the panel's border turns Redrob Blue and a soft ring and halo
+   bloom around it, like Kiro's chat input. Keyed off the editor itself (:has), so opening the
+   model picker or the + menu inside the panel does not light it up. */
+.cowork-composer-panel {
+  /* Glow colour: Redrob Blue on light surfaces. */
+  --composer-glow: var(--blue-6, #2b52ff);
+}
+[data-theme="dark"] .cowork-composer-panel {
+  /* The lightened brand blue reads better on dark surfaces. */
+  --composer-glow: var(--blue-5, #507fff);
+}
+.cowork-composer-panel:not([data-disabled]):not([data-dropzone-active]):has([contenteditable="true"]:focus) {
+  border-color: color-mix(in srgb, var(--composer-glow) 70%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--composer-glow) 14%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--composer-glow) 38%, transparent);
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-composer-panel:has([contenteditable="true"]:focus) {
+    transition: none;
+  }
+}
 .cowork-composer-status {
   margin-top: var(--space-2);
   padding: 0 var(--space-2);
