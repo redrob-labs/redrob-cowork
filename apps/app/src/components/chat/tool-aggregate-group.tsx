@@ -17,6 +17,7 @@ import { trackToolCallDuration } from "@/lib/tool-call-duration"
 import { cn } from "@/lib/utils"
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { WebResearchGroup } from "@/components/chat/web-research-group"
+import { FileEditGroup, isFileEditParts } from "@/components/chat/file-edit-group"
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 
 const ROW_CAP = 8
@@ -54,6 +55,10 @@ export function ToolAggregateGroup({ parts, className }: ToolAggregateGroupProps
   const inCoworkFrame = useInCoworkFrame()
   if (inCoworkFrame && parts.length > 0 && parts.every((part) => isWebSearchToolPart(part) || isWebFetchToolPart(part))) {
     return <WebResearchGroup parts={parts} className={className} />
+  }
+  // Round 10 (R3): file edits read as the same dropdown table ("Created 1 file"), not this list.
+  if (inCoworkFrame && isFileEditParts(parts)) {
+    return <FileEditGroup parts={parts} className={className} />
   }
   return <ToolAggregateList parts={parts} className={className} />
 }
