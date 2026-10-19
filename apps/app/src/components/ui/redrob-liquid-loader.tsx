@@ -1,5 +1,6 @@
 import * as React from "react"
 
+import { getResolvedThemeMode, subscribeToTheme } from "@/app/theme"
 import { cn } from "@/lib/utils"
 // The engine is a vendored, dependency-free Canvas-2D ES module; its sibling .d.ts supplies the types.
 import { createLiquidLoader, type LiquidLoader } from "./vendor/liquid-loader-engine.js"
@@ -39,6 +40,8 @@ export function RedrobLiquidLoader({ size = 96, color, label, className }: Redro
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   // The live engine handle, so size/color updates go through its methods, not a remount.
   const loaderRef = React.useRef<LiquidLoader | null>(null)
+  // The resolved light/dark mode, so the default colour is re-read from the theme when it changes.
+  const theme = React.useSyncExternalStore(subscribeToTheme, getResolvedThemeMode, getResolvedThemeMode)
 
   // Create once on mount; the engine reads devicePixelRatio and follows reduced motion itself.
   React.useEffect(() => {
@@ -57,10 +60,11 @@ export function RedrobLiquidLoader({ size = 96, color, label, className }: Redro
     loaderRef.current?.resize(size)
   }, [size])
 
-  // Recolor in place when the color prop changes.
+  // Recolor in place when the color prop or the theme changes; no prop means the theme's brand blue.
   React.useEffect(() => {
-    if (color) loaderRef.current?.setColor(color)
-  }, [color])
+    const canvas = canvasRef.current
+    if (canvas) loaderRef.current?.setColor(color ?? brandColor(canvas))
+  }, [color, theme])
 
   return (
     <span role="status" title={label} className={cn("inline-flex items-center", className)}>

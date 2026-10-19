@@ -106,7 +106,9 @@ export function TrendingTicker(props: TrendingTickerProps) {
   // The list opens on the reader's own scope, matching the ticker's order (Korea first for Korean).
   const homeScope: TrendScope = props.locale === "ko" ? "korea" : "global";
   const [open, setOpen] = useState(false);
-  const [scope, setScope] = useState<TrendScope>(homeScope);
+  // Only a tab the reader picked is stored, so a live language change still opens on the new home scope.
+  const [picked, setPicked] = useState<TrendScope | null>(null);
+  const scope = picked ?? homeScope;
   const panelRef = useRef<HTMLDivElement>(null);
   const pause = useInteractionPause();
   const sequence = tickerSequence(props.data, props.locale);
@@ -116,7 +118,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
 
   const select = (item: TrendItem) => {
     setOpen(false);
-    setScope(homeScope);
+    setPicked(null);
     props.onPick(item);
   };
   const moveRowFocus = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -141,7 +143,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
         open={open}
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
-          if (!nextOpen) setScope(homeScope);
+          if (!nextOpen) setPicked(null);
         }}
       >
         <PopoverTrigger
@@ -204,7 +206,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
               { id: "global", label: t("cowork.chart_trending_global") },
             ]}
             onChange={(value) => {
-              if (value === "korea" || value === "global") setScope(value);
+              if (value === "korea" || value === "global") setPicked(value);
             }}
           >
             <TrendList scope={scope} items={visibleItems} locale={props.locale} onPick={select} />
