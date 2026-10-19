@@ -3,21 +3,28 @@ import type { UIMessage } from "ai";
 
 import { getArtifactsFromMessages, isArtifactWriteInFlight, prettyArtifactTitle } from "../src/lib/artifacts";
 
-describe("prettyArtifactTitle (item 4)", () => {
-  test("strips the extension, turns dashes/underscores into spaces, Sentence case", () => {
-    // Round-7 calibration: Sentence case, NOT Title Case, NOT acronym-aware.
-    expect(prettyArtifactTitle("us-china-ai-race.md")).toBe("Us china ai race");
-    expect(prettyArtifactTitle("quarterly_report_2026.docx")).toBe("Quarterly report 2026");
+describe("prettyArtifactTitle", () => {
+  test("strips the extension, turns dashes/underscores into spaces, Title Case with acronyms", () => {
+    // Round 9 calibration: Title Case, acronym-aware (round 7 was Sentence case).
+    expect(prettyArtifactTitle("us-china-ai-race-2035.md")).toBe("US China AI Race 2035");
+    expect(prettyArtifactTitle("quarterly_report_2026.docx")).toBe("Quarterly Report 2026");
     expect(prettyArtifactTitle("notes.txt")).toBe("Notes");
   });
 
+  test("minor words stay lowercase inside, not at the ends; names keep their own case", () => {
+    expect(prettyArtifactTitle("plan-for-the-launch.md")).toBe("Plan for the Launch");
+    expect(prettyArtifactTitle("the-end-of.md")).toBe("The End Of");
+    expect(prettyArtifactTitle("OpenAI-vs-DeepSeek-notes.md")).toBe("OpenAI vs DeepSeek Notes");
+    expect(prettyArtifactTitle("saas-gpu-costs.md")).toBe("SaaS GPU Costs");
+  });
+
   test("takes only the basename, not the folders", () => {
-    expect(prettyArtifactTitle("workspaces/w1/sub dir/final-draft.md")).toBe("Final draft");
-    expect(prettyArtifactTitle("C:\\Users\\kim\\plan-b.md")).toBe("Plan b");
+    expect(prettyArtifactTitle("workspaces/w1/sub dir/final-draft.md")).toBe("Final Draft");
+    expect(prettyArtifactTitle("C:\\Users\\kim\\plan-b.md")).toBe("Plan B");
   });
 
   test("collapses repeated separators and falls back to the raw basename when empty", () => {
-    expect(prettyArtifactTitle("a--b__c.md")).toBe("A b c");
+    expect(prettyArtifactTitle("a--b__c.md")).toBe("A B C");
     // An extension-only name has no stem to humanize, so the basename is kept.
     expect(prettyArtifactTitle(".gitignore")).toBe(".gitignore");
   });

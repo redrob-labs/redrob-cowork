@@ -156,7 +156,7 @@ const en = {
   "artifact.type_file": "File",
   "artifact.type_html": "HTML",
   "artifact.type_image": "Image",
-  "artifact.type_markdown": "Markdown",
+  "artifact.type_markdown": "Artifact",
   "artifact.type_pdf": "PDF",
   "artifact.type_slides": "Slides",
   "artifact.type_spreadsheet": "Spreadsheet",

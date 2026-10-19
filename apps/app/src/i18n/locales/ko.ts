@@ -159,7 +159,7 @@ const ko = {
   "artifact.type_file": "파일",
   "artifact.type_html": "HTML",
   "artifact.type_image": "이미지",
-  "artifact.type_markdown": "마크다운",
+  "artifact.type_markdown": "아티팩트",
   "artifact.type_pdf": "PDF",
   "artifact.type_slides": "슬라이드",
   "artifact.type_spreadsheet": "스프레드시트",

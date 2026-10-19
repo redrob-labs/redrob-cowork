@@ -4465,21 +4465,28 @@ a.radar-story__source:focus-visible {
   Round 7 C6: the deliverable being written, live in the side panel's Artifacts tab. The body is
   revealed letter by letter (useSmoothReveal) and the Redrob Blue caret rides the end of the last
   rendered block, the same caret the chat uses. Surfaces set both background and text colour.
+  Round 9: no grey frame. It sits on the panel's own surface (--surface-base) with no header rule
+  or icon tile, and the body uses the same insets as the finished artifact view, so the hand-over
+  from the live draft to the real file does not jump.
 */
 .cowork-live-draft {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--surface-raised, var(--background));
+  background: var(--surface-base, var(--background));
   color: var(--ink-primary, var(--foreground));
 }
 .cowork-live-draft__head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-subtle, var(--border));
+  gap: 8px;
+  padding: 14px 16px 4px;
+}
+.cowork-live-draft__head .cowork-file__icon {
+  width: auto;
+  height: auto;
+  background: transparent;
 }
 .cowork-live-draft__title {
   min-width: 0;
@@ -4495,7 +4502,9 @@ a.radar-story__source:focus-visible {
   min-height: 0;
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 8px 16px 24px;
+  background: transparent;
+  color: inherit;
 }
 .cowork-live-draft__plain {
   margin: 0;
@@ -4522,13 +4531,14 @@ a.radar-story__source:focus-visible {
 /*
   Round 8 M6: one artifact on the Artifacts tab, shown as its output only. No frame, no border, no
   grey surface: the document sits directly on the panel, with the "All artifacts" back control above.
+  Round 9: on the panel's own --surface-base (it was --surface-raised, a grey that read as a frame).
 */
 .cowork-artifact-view {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: var(--surface-raised, var(--background));
+  background: var(--surface-base, var(--background));
   color: var(--ink-primary, var(--foreground));
 }
 .cowork-artifact-view > .cowork-file__back { align-self: flex-start; margin: 12px 16px 0; }

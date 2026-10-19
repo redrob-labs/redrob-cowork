@@ -124,11 +124,35 @@ function getFileExtension(filename: string) {
   return filename.split(".").pop()?.toLowerCase();
 }
 
+/** Round 9: words a title keeps in capitals (matched case-insensitively). */
+const TITLE_ACRONYMS = new Set([
+  "ai", "ml", "llm", "llms", "api", "apis", "gpu", "gpus", "cpu", "hbm", "euv", "tsmc", "us", "usa", "uk", "eu",
+  "un", "uae", "nato", "ceo", "cfo", "cto", "coo", "hr", "pr", "kpi", "kpis", "okr", "okrs", "roi", "ipo", "esg",
+  "seo", "ux", "ui", "vc", "b2b", "b2c", "saas", "faq", "pdf", "q1", "q2", "q3", "q4", "h1", "h2", "r&d", "gdp",
+]);
+
+/** Round 9: short words a Title Case title keeps lowercase unless they open or close it. */
+const TITLE_MINOR_WORDS = new Set([
+  "a", "an", "the", "and", "but", "or", "nor", "for", "so", "yet", "of", "on", "in", "at", "to", "by", "up",
+  "as", "vs", "via", "per", "with", "from", "into",
+]);
+
+/** One word of a Title Case title: acronym, kept mixed case ("iPhone"), minor word, or capitalized. */
+function titleWord(word: string, first: boolean, last: boolean): string {
+  const lower = word.toLowerCase();
+  if (TITLE_ACRONYMS.has(lower)) return lower === "saas" ? "SaaS" : word.toUpperCase();
+  // A word written with an inner capital ("OpenAI", "iPhone") is a name: keep it as written.
+  if (/[a-z][A-Z]/.test(word)) return word;
+  if (!first && !last && TITLE_MINOR_WORDS.has(lower)) return lower;
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
 /**
- * A human title for an artifact path (item 4): take the basename, drop its extension, turn
- * `-`/`_` runs into spaces, and render in Sentence case (first letter upper, the rest lower -
- * NOT Title Case, NOT acronym-aware, per round-7 calibration). E.g. `us-china-ai-race.md` ->
- * "Us china ai race". An empty or extension-only name falls back to the raw basename.
+ * A human title for an artifact path: take the basename, drop its extension, turn `-`/`_` runs
+ * into spaces, and render in Title Case. Round 9 calibration (Felix): Title Case, acronym-aware,
+ * so `us-china-ai-race-2035.md` -> "US China AI Race 2035" (it was Sentence case, "Us china ai
+ * race", which read oddly). Short connecting words stay lowercase inside the title ("Plan for the
+ * Launch"). An empty or extension-only name falls back to the raw basename.
  */
 export function prettyArtifactTitle(path: string): string {
   const basename = path.split(/[/\\]/).filter(Boolean).pop() ?? path;
@@ -136,7 +160,8 @@ export function prettyArtifactTitle(path: string): string {
   const stem = dot > 0 ? basename.slice(0, dot) : basename;
   const words = stem.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
   if (!words) return basename;
-  return words.charAt(0).toUpperCase() + words.slice(1).toLowerCase();
+  const list = words.split(" ");
+  return list.map((word, index) => titleWord(word, index === 0, index === list.length - 1)).join(" ");
 }
 
 export function getArtifactTypeLabel(type: ArtifactType) {
