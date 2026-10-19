@@ -131,12 +131,12 @@ export const WORKFLOW_SKILLS: Record<WorkflowId, readonly string[]> = {
 const WORKFLOW_TEXT: Record<WorkflowId, { title: () => string; sub: () => string }> = {
   "legal-drafting": { title: () => t("cowork.skills_workflow_legal_drafting_title"), sub: () => t("cowork.skills_workflow_legal_drafting_sub") },
   "vc-deal": { title: () => t("cowork.skills_workflow_vc_deal_title"), sub: () => t("cowork.skills_workflow_vc_deal_sub") },
-  "acct-close": { title: () => t("cowork.skills_workflow_acct_close_title"), sub: () => t("cowork.skills_workflow_acct_close_sub") },
+  "acct-close": { title: () => t("cowork.skills_workflow_accounting_close_title"), sub: () => t("cowork.skills_workflow_accounting_close_sub") },
   office: { title: () => t("cowork.skills_workflow_office_title"), sub: () => t("cowork.skills_workflow_office_sub") },
   "legal-disputes": { title: () => t("cowork.skills_workflow_legal_disputes_title"), sub: () => t("cowork.skills_workflow_legal_disputes_sub") },
-  "acct-tax": { title: () => t("cowork.skills_workflow_acct_tax_title"), sub: () => t("cowork.skills_workflow_acct_tax_sub") },
+  "acct-tax": { title: () => t("cowork.skills_workflow_accounting_tax_title"), sub: () => t("cowork.skills_workflow_accounting_tax_sub") },
   "vc-captable": { title: () => t("cowork.skills_workflow_vc_captable_title"), sub: () => t("cowork.skills_workflow_vc_captable_sub") },
-  "acct-audit": { title: () => t("cowork.skills_workflow_acct_audit_title"), sub: () => t("cowork.skills_workflow_acct_audit_sub") },
+  "acct-audit": { title: () => t("cowork.skills_workflow_accounting_audit_title"), sub: () => t("cowork.skills_workflow_accounting_audit_sub") },
   "legal-company": { title: () => t("cowork.skills_workflow_legal_company_title"), sub: () => t("cowork.skills_workflow_legal_company_sub") },
   "vc-fund": { title: () => t("cowork.skills_workflow_vc_fund_title"), sub: () => t("cowork.skills_workflow_vc_fund_sub") },
 };
