@@ -3,7 +3,6 @@ import { ArrowRight, MessageCircle, Newspaper } from "lucide-react";
 import { Link } from "react-router";
 
 import { t, type Language } from "../../../i18n";
-import { formatEditionStamp } from "./edition-clock";
 import { RADAR, RADAR_FEEDS, radarPath, radarSection, radarSummary, type RadarFeed } from "./radar-edition";
 
 /** Localized title for a Radar feed, shared by its banner and its subpage. */
@@ -41,12 +40,9 @@ function RadarBanner(props: {
       aria-labelledby={titleId}
       aria-describedby={summaryId}
     >
-      <span className="model-chart__glass" aria-hidden="true" />
-      <span className="model-chart__banner-scrim" aria-hidden="true" />
+      {/* Round 10: white liquid glass. The tint layer is the soft colour the frosted surface sits over. */}
+      <span className="model-chart__radar-tint" aria-hidden="true" />
       <RadarMark feed={props.feed} />
-      <span className="model-chart__banner-eyebrow">
-        {t("cowork.radar_edition", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
-      </span>
       <span id={titleId} className="model-chart__banner-title">{radarTitle(props.feed)}</span>
       <span id={summaryId} className="model-chart__radar-summary">
         {radarSummary(radarSection(RADAR, props.feed), props.locale)}
@@ -59,7 +55,7 @@ function RadarBanner(props: {
   );
 }
 
-/** "Radar": today's news and social banners side by side under the Featured banner. */
+/** "Radar": today's news and social banners side by side under the Featured banner, in white liquid glass. */
 export function RadarBanners(props: {
   /** Current application language. */
   locale: Language;

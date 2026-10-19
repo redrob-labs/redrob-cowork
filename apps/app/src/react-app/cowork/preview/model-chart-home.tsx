@@ -1,12 +1,12 @@
 /** @jsxImportSource react */
 import { useCallback, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { t, type Language } from "../../../i18n";
 import { TRENDING, type TrendItem } from "./chart-trending";
 import { TrendingTicker } from "./trending-ticker";
 import { RadarBanners } from "./radar-banners";
-import { useAutoRotate } from "./use-auto-rotate";
+import { interactionPaused, useAutoRotate } from "./use-auto-rotate";
 import {
   CHART_OUTPUT_ORDER,
   COUNTRY_LABEL_KEY,
@@ -413,13 +413,14 @@ export function ModelChartHome(props: {
   const outputs = chartOutputs();
   const skills = skillTiles(props.research, props.locale);
   const countries = COUNTRY_TILES;
-  const [bannerPaused, setBannerPaused] = useState(false);
+  // Picking a dot stops auto-rotation for the rest of the visit (the on-page pause, WCAG 2.2.2).
+  const [bannerStopped, setBannerStopped] = useState(false);
   const [bannerPointerInside, setBannerPointerInside] = useState(false);
   const [bannerFocusInside, setBannerFocusInside] = useState(false);
   const bannerRotation = useAutoRotate({
     count: banners.length,
     ms: BANNER_MS,
-    paused: bannerPaused || bannerPointerInside || bannerFocusInside,
+    paused: interactionPaused({ pointerInside: bannerPointerInside, focusInside: bannerFocusInside, stopped: bannerStopped }),
   });
   const banner = banners[bannerRotation.index];
   return (
@@ -476,21 +477,13 @@ export function ModelChartHome(props: {
                   aria-label={b.title}
                   className="model-chart__dot"
                   data-on={index === bannerRotation.index ? "true" : undefined}
-                  onClick={() => bannerRotation.setIndex(index)}
+                  onClick={() => {
+                    setBannerStopped(true);
+                    bannerRotation.setIndex(index);
+                  }}
                 />
               ))}
             </div>
-            {bannerRotation.reducedMotion ? null : (
-              <button
-                type="button"
-                className="model-chart__banner-pause"
-                aria-label={bannerPaused ? t("cowork.chart_banners_play") : t("cowork.chart_banners_pause")}
-                aria-pressed={bannerPaused}
-                onClick={() => setBannerPaused((paused) => !paused)}
-              >
-                {bannerPaused ? <Play aria-hidden /> : <Pause aria-hidden />}
-              </button>
-            )}
           </div>
         </section>
       ) : null}

@@ -66,14 +66,14 @@ export function RadarPage(props: {
         {icons.back({ width: 16, height: 16, "aria-hidden": true })}
         {t("cowork.nav_guide")}
       </Link>
-      <header className="radar-page__head" data-tone={RADAR_TONE[props.feed]}>
-        <span className="radar-page__scrim" aria-hidden="true" />
+      <header className="radar-page__head" data-tone={RADAR_TONE[props.feed]} data-feed={props.feed}>
+        <span className="model-chart__radar-tint" aria-hidden="true" />
         <RadarMark feed={props.feed} />
         <span className="radar-page__eyebrow">{t("cowork.radar_heading")}</span>
         <h1 className="radar-page__title">{radarTitle(props.feed)}</h1>
         <p className="radar-page__lede">{radarSummary(section, props.locale)}</p>
         <time className="radar-page__meta" dateTime={RADAR.asOf}>
-          {t("cowork.radar_edition", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
+          {t("cowork.radar_updated", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
         </time>
       </header>
       <ol className="radar-page__list" aria-label={t("cowork.radar_stories")}>

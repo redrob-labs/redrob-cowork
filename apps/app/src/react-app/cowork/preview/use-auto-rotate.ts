@@ -18,6 +18,15 @@ export type AutoRotateState = {
   reducedMotion: boolean;
 };
 
+/**
+ * Whether a rotating surface with no visible pause control should hold still: while the pointer or
+ * keyboard focus is inside it, and for good once the reader has picked an entry themselves. Picking
+ * an entry is the on-page way to stop the motion (WCAG 2.2.2); reduced motion is handled by the hook.
+ */
+export function interactionPaused(state: { pointerInside: boolean; focusInside: boolean; stopped: boolean }): boolean {
+  return state.pointerInside || state.focusInside || state.stopped;
+}
+
 /** Pure wraparound step used by every rotating surface. */
 export function nextAutoRotateIndex(index: number, count: number): number {
   return count > 1 ? (index + 1) % count : 0;

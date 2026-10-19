@@ -71,13 +71,16 @@ describe("radar edition", () => {
     }
   });
 
-  test("banner overviews run 3 to 4 sentences and story summaries 2 to 3", () => {
+  test("banner overviews are 1 to 3 short sentences and story summaries 2 to 3", () => {
     for (const feed of RADAR_FEEDS) {
       const section = radarSection(RADAR, feed);
       for (const overview of [section.summary, section.summaryKo]) {
-        expect(sentences(overview)).toBeGreaterThanOrEqual(3);
-        expect(sentences(overview)).toBeLessThanOrEqual(4);
+        expect(sentences(overview)).toBeGreaterThanOrEqual(1);
+        expect(sentences(overview)).toBeLessThanOrEqual(3);
       }
+      // Short enough for the banner to show it in full, with no clamp.
+      expect(section.summary.length).toBeLessThanOrEqual(220);
+      expect(section.summaryKo.length).toBeLessThanOrEqual(130);
       for (const story of section.stories) {
         for (const summary of [story.summary, story.summaryKo]) {
           expect(sentences(summary)).toBeGreaterThanOrEqual(2);
@@ -120,6 +123,67 @@ describe("radar and ticker copy", () => {
   test("every new key exists in English and Korean", () => {
     expect(english.length).toBe(9);
     expect(english.map(([key]) => key).sort()).toEqual(korean.map(([key]) => key).sort());
+  });
+
+  test("names the section and banners in the page's marketing voice", () => {
+    expect(en["cowork.radar_heading"]).toBe("On the radar");
+    expect(en["cowork.radar_news_title"]).toBe("The Front Page");
+    expect(en["cowork.radar_social_title"]).toBe("Everyone's Talking");
+    expect(ko["cowork.radar_heading"]).toBe("오늘 눈여겨볼 소식");
+    expect(ko["cowork.radar_news_title"]).toBe("오늘의 1면");
+    expect(ko["cowork.radar_social_title"]).toBe("다들 이 얘기 중");
+    for (const key of ["cowork.radar_news_title", "cowork.radar_social_title"]) {
+      expect(en[key as keyof typeof en]).not.toMatch(/trending|today/i);
+    }
+  });
+
+  test("the banner button just says Read, and the time reads as an update", () => {
+    expect(en["cowork.radar_open"]).toBe("Read");
+    expect(ko["cowork.radar_open"]).toBe("읽기");
+    expect(en["cowork.radar_updated"]).toBe("Updated {time}");
+    expect(ko["cowork.radar_updated"]).toBe("{time} 업데이트");
+    for (const table of [en, ko] as Array<Record<string, string>>) {
+      expect(table["cowork.radar_edition"]).toBeUndefined();
+    }
+  });
+
+  test("banners show no edition time and never clamp the overview", async () => {
+    const banners = await Bun.file(new URL("../src/react-app/cowork/preview/radar-banners.tsx", import.meta.url)).text();
+    expect(banners).not.toContain("cowork.radar_edition");
+    expect(banners).not.toContain("cowork.radar_updated");
+    expect(banners).not.toContain("formatEditionStamp");
+    const screen = await Bun.file(new URL("../src/react-app/cowork/preview/radar-screen.tsx", import.meta.url)).text();
+    expect(screen.match(/cowork\.radar_updated/g)?.length).toBe(1);
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    const at = css.indexOf("\n.model-chart__radar-summary {");
+    expect(at).toBeGreaterThanOrEqual(0);
+    const rule = css.slice(at, css.indexOf("}", at));
+    expect(rule).not.toContain("line-clamp");
+    expect(rule).not.toContain("-webkit-box");
+    expect(rule).not.toContain("ellipsis");
+  });
+
+  test("banners and subpage header wear white liquid glass with theme fallbacks", async () => {
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    const at = css.indexOf("\n.model-chart__banner.model-chart__radar-banner,\n.radar-page__head {");
+    const alt = css.indexOf("\r\n.model-chart__banner.model-chart__radar-banner,\r\n.radar-page__head {");
+    const start = at >= 0 ? at : alt;
+    expect(start).toBeGreaterThanOrEqual(0);
+    const glass = css.slice(start, css.indexOf("}", start));
+    expect(glass).toContain("var(--redrob-white)");
+    expect(glass).toContain("backdrop-filter: blur(");
+    expect(glass).toContain("color: var(--ink-primary)");
+    expect(css).toContain('[data-theme="dark"] .model-chart__banner.model-chart__radar-banner,');
+    const reduced = css.indexOf("@media (prefers-reduced-transparency: reduce) {", start);
+    expect(css.slice(reduced, reduced + 400)).toContain(".radar-page__head");
+    // The old white-on-gradient look is gone: no scrim on the banners or the subpage header.
+    expect(css).not.toContain("radar-page__scrim");
+    for (const file of ["radar-banners.tsx", "radar-screen.tsx"]) {
+      const source = await Bun.file(new URL(`../src/react-app/cowork/preview/${file}`, import.meta.url)).text();
+      expect(source).toContain("model-chart__radar-tint");
+      expect(source).not.toContain("banner-scrim");
+      expect(source).not.toContain("radar-page__scrim");
+    }
   });
 
   test("the removed ticker note and pause controls are gone in both languages", () => {
