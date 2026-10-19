@@ -82,8 +82,10 @@ export const CHECKS_STORAGE_KEY = "redrob.cowork.checks.v1";
 /** How many answers' checks are kept, newest first. */
 export const CHECKS_KEPT = 200;
 
+/** Where settled check results are kept between app runs (null when there is no storage). */
 type CheckStorage = () => Pick<Storage, "getItem" | "setItem"> | null;
 
+/** The browser's localStorage, or null outside a window (tests, SSR). */
 const windowCheckStorage: CheckStorage = () => (typeof window === "undefined" ? null : window.localStorage);
 
 /** Whether an answer's checks have finished (nothing still running) and found something to show. */

@@ -64,6 +64,7 @@ export function modeFor(chats: Record<string, ChatSettings>, key: string, prefer
 const COMPLEX_PROMPT = /\b(deep research|research|analy[sz]e|analysis|compare|comparison|evaluate|assess|predict|forecast|strategy|plan|roadmap|step[- ]by[- ]step|report|write[- ]?up|draft|proposal|design|architect|investigate|deep think)\b/i;
 const COMPLEX_PROMPT_MIN_LEN = 180; // long free-form asks tend to need a plan even without a keyword
 
+/** Whether a prompt reads as complex enough to plan first: long, or naming a planning-type task. */
 export function isComplexPrompt(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length >= COMPLEX_PROMPT_MIN_LEN) return true;

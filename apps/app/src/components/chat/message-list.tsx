@@ -996,15 +996,14 @@ const LoadingMessage = React.memo(({ label }: { label?: string }) => (
   <Message className={`${CHAT_COLUMN} flex flex-col items-start gap-2`}>
     <div className="group flex w-full flex-col gap-0">
       {/*
-        The primary "assistant is thinking" moment: the Redrob Liquid Loader (the brand mark
-        melting through its three raked bars) replaces the former PaperGrainGradient orb.
-        Rendered at the brand's 96px animated-symbol minimum so the mark stays legible; the
-        label sits beneath it so the loader reads as the main moment, not a tiny inline speck.
-        Small inline tool rows keep the DS three-bar DotMatrixLoader.
+        The bare surface's "assistant is thinking" loader (the Cowork frame shows CoworkRunStatus
+        instead): the Redrob Liquid Loader at the brand's 96px animated-symbol minimum, with its
+        label beneath. The loader already announces the label (role=status), so the visible copy
+        is hidden from assistive tech to avoid reading it twice.
       */}
       <div className="flex flex-col items-start gap-1.5 px-1 py-2 text-sm text-muted-foreground">
         <RedrobLiquidLoader size={96} label={label ?? t("session.assistant_thinking")} />
-        <span>{label ?? t("session.assistant_thinking")}</span>
+        <span aria-hidden="true">{label ?? t("session.assistant_thinking")}</span>
       </div>
     </div>
   </Message>
