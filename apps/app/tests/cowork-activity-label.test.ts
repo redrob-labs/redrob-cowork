@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { DynamicToolUIPart } from "ai";
 
 import { currentActivityLabel, latestReasoningLead } from "../src/components/chat/unified-activity";
+import { nextWorkingLineIndex, workingLine, WORKING_LINE_COUNT } from "../src/lib/working-lines";
 
 // Round 8 M2: the "Working on it" line follows what the run is doing now.
 
@@ -41,5 +42,36 @@ describe("currentActivityLabel", () => {
 
   test("nothing at all falls back to Working on it", () => {
     expect(currentActivityLabel([], "")).toBe("Working on it");
+  });
+
+  test("round 8c: a friendly fallback line shows only when nothing specific is known", () => {
+    expect(currentActivityLabel([], "", "Mulling it over…")).toBe("Mulling it over…");
+    const parts = [tool("websearch", "input-available", { query: "chip rules" })];
+    expect(currentActivityLabel(parts, "", "Mulling it over…")).toContain("chip rules");
+  });
+});
+
+describe("round 8c: rotating working lines", () => {
+  test("ten distinct lines, all translated", () => {
+    expect(WORKING_LINE_COUNT).toBe(10);
+    const lines = Array.from({ length: WORKING_LINE_COUNT }, (_, index) => workingLine(index));
+    expect(new Set(lines).size).toBe(10);
+    for (const line of lines) expect(line.startsWith("cowork.")).toBe(false);
+  });
+
+  test("the next line never repeats the one just shown", () => {
+    for (let previous = 0; previous < 10; previous += 1) {
+      for (const roll of [0, 0.2, 0.5, 0.8, 0.9999]) {
+        const next = nextWorkingLineIndex(previous, 10, () => roll);
+        expect(next).not.toBe(previous);
+        expect(next).toBeGreaterThanOrEqual(0);
+        expect(next).toBeLessThan(10);
+      }
+    }
+  });
+
+  test("the first line can be any of them", () => {
+    expect(nextWorkingLineIndex(null, 10, () => 0)).toBe(0);
+    expect(nextWorkingLineIndex(null, 10, () => 0.9999)).toBe(9);
   });
 });

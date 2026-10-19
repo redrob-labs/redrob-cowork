@@ -14,6 +14,8 @@ import {
 } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
+import { cn } from "../../../lib/utils";
+import { useWorkingLine } from "../../../lib/working-lines";
 import { RedrobLiquidLoader } from "../../../components/ui/redrob-liquid-loader/RedrobLiquidLoader";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { useCoworkComposerStore } from "../composer/composer-state";
@@ -343,14 +345,21 @@ export function CoworkAnswerFooterView(props: { checks: AnswerChecks | undefined
  * over the text, and a mm:ss elapsed timer on the right counting since the run row appeared.
  */
 export function CoworkRunStatus(props: { label: string | null }) {
-  const label = props.label ?? t("cowork.thread_working");
+  // Round 8c: with no specific step to show, a friendly line rotates (fades in each time).
+  const working = useWorkingLine(props.label === null);
+  const label = props.label ?? working.text;
   const elapsed = useElapsedClock();
   return (
     <div className="flex items-center gap-2 py-1">
       {/* Inline loader, a touch larger than before so it reads clearly beside the text. */}
       <RedrobLiquidLoader size={32} label={label} />
       {/* Grey label with a sweeping shimmer, at the chat body size. */}
-      <span className="redrob-shimmer-text text-sm">{label}</span>
+      <span
+        key={props.label === null ? `working-${working.index}` : "label"}
+        className={cn("redrob-shimmer-text text-sm", props.label === null && "cowork-working-line")}
+      >
+        {label}
+      </span>
       {/* Elapsed time as '34s' / '1m 23s', tabular so the digits do not jitter as they tick. */}
       <span className="text-xs tabular-nums text-muted-foreground/70">{elapsed}</span>
     </div>

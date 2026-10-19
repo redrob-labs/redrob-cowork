@@ -2568,6 +2568,23 @@ html[lang="ko"] {
     color: var(--ink-muted, #8A90A8);
   }
 }
+/* Round 8c: each rotating "working" line fades up into place. Opacity/translate live on the
+   individual property so they stack with the shimmer's background animation instead of replacing it. */
+.cowork-working-line {
+  animation:
+    redrob-text-shimmer 1.8s linear infinite,
+    cowork-working-line-in 360ms ease-out;
+}
+@keyframes cowork-working-line-in {
+  from { opacity: 0; translate: 0 3px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Declared after the rule above so it wins: no fade, no sweep. */
+  .cowork-working-line {
+    animation: none;
+  }
+}
 
 /* Items 3 + 9: the Cowork plan reads as a clean "Research plan" + To-do list. The DS PlanDocument
    always paints a header strip (the "Plan.md" file chip + the "Approved by you" status line); no

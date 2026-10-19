@@ -12,6 +12,7 @@ import {
 } from "@/lib/tool-aggregate"
 import { getToolActivityLabel, isToolPartInFlight } from "@/lib/tool-activity"
 import { trackToolCallDuration } from "@/lib/tool-call-duration"
+import { useWorkingLine } from "@/lib/working-lines"
 import { t } from "@/i18n"
 import { cn } from "@/lib/utils"
 
@@ -67,9 +68,10 @@ export function latestReasoningLead(reasoning: string): string | null {
 
 /**
  * The live header text, refreshed as the run moves (round 8 M2): the tool in flight ("Searching
- * the web for ..."), else the newest thought, else the step that just finished, else "Working on it".
+ * the web for ..."), else the newest thought, else the step that just finished, else `fallback` (round 8c: a
+ * rotating friendly line), else "Working on it".
  */
-export function currentActivityLabel(parts: AnyToolPart[], reasoning: string): string {
+export function currentActivityLabel(parts: AnyToolPart[], reasoning: string, fallback?: string): string {
   for (let i = parts.length - 1; i >= 0; i -= 1) {
     const part = parts[i]
     if (part && isToolPartInFlight(part)) return getToolActivityLabel(part)
@@ -77,7 +79,7 @@ export function currentActivityLabel(parts: AnyToolPart[], reasoning: string): s
   const thought = latestReasoningLead(reasoning)
   if (thought) return thought
   const last = parts[parts.length - 1]
-  return last ? getToolActivityLabel(last) : t("cowork.thread_working")
+  return last ? getToolActivityLabel(last) : (fallback ?? t("cowork.thread_working"))
 }
 
 /** A step row's status dot: in flight, errored, or finished. */
@@ -123,9 +125,14 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, st
   const elapsed = useElapsed(isStreaming, startedAt)
   const lead = reasoningLead(reasoning)
 
+  // Round 8c: when nothing specific is known yet, a friendly line rotates in its place.
+  const working = useWorkingLine(isStreaming)
+  const liveLabel = isStreaming ? currentActivityLabel(parts, reasoning, working.text) : null
+  const showingWorkingLine = isStreaming && liveLabel === working.text
+
   // Header: live current-activity label while streaming; past-tense summary once done.
   const header = isStreaming
-    ? currentActivityLabel(parts, reasoning)
+    ? (liveLabel ?? "")
     : parts.length > 0
       ? getAggregateSummary(parts, "past")
       : (lead ?? t("activity.working"))
@@ -151,7 +158,15 @@ export function UnifiedActivity({ parts, reasoning, isStreaming, activityKey, st
           />
         )}
         {/* Live label shimmers while streaming; a plain muted summary once done. */}
-        <span className={cn("min-w-0 truncate text-sm", isStreaming ? "redrob-shimmer-text" : "text-muted-foreground group-hover:text-foreground")}>
+        {/* Keyed by the friendly line's index, so each new line replays the fade-in. */}
+        <span
+          key={showingWorkingLine ? `working-${working.index}` : "label"}
+          className={cn(
+            "min-w-0 truncate text-sm",
+            showingWorkingLine && "cowork-working-line",
+            isStreaming ? "redrob-shimmer-text" : "text-muted-foreground group-hover:text-foreground",
+          )}
+        >
           {header}
         </span>
         {isStreaming ? (
