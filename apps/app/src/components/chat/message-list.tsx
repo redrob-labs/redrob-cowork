@@ -585,26 +585,26 @@ const AssistantMessage = React.memo(
     const assistantRenderGroups = React.useMemo(
       () => {
         // Per-message grouping stays per-kind here; the unified Cowork activity row is assembled
-        // once at the GROUP level (MessageGroup) over the whole run, not per message - a run spans
-        // several assistant messages, so folding per message produced one stray row per message.
+        // once at the GROUP level (MessageGroup) over the whole run, since a run spans several
+        // assistant messages and folding per message would draw one stray row per message.
+        // Keys are taken BEFORE filtering, so a group keeps its key (and the answer keeps its
+        // reveal state) when the live row starts hiding the steps around it mid-stream.
         const groups = getAssistantRenderGroups(message.parts, showThinking)
-          // Round 7 (review): a text group that is only an answered Plan questions block, a held
-          // plan (round 8), or a cross-check block (rendered in the footer) draws nothing, so drop it
-          // here; otherwise its empty <Message> wrapper keeps the column gap.
-          .filter((group) => !(inCoworkFrame && group.kind === "text" && isInvisibleCoworkText(group.text, { questionsOpen, planHeld })))
+          .map((group, index) => ({ group, key: `${group.kind}-${index}` }))
+          // A text group that is only an answered questions block, a held plan, or a cross-check
+          // block (drawn in the footer) renders nothing; drop it so no empty wrapper keeps the gap.
+          .filter(({ group }) => !(inCoworkFrame && group.kind === "text" && isInvisibleCoworkText(group.text, { questionsOpen, planHeld })))
         if (hideSteps) {
-          // The live activity row already shows reasoning + every tool call; keep only text/file.
-          // Round 7 C7: EXCEPT web research - each search/fetch row shows in place as it happens
-          // (the same row a finished turn shows), instead of a blank band until the run ends.
-          return groups.filter((group) => group.kind === "text" || group.kind === "file" || isWebResearchGroup(group))
+          // The live activity row shows reasoning and tool calls; keep text, files and web
+          // research, which shows in place as it happens instead of a blank band until the run ends.
+          return groups.filter(({ group }) => group.kind === "text" || group.kind === "file" || isWebResearchGroup(group))
         }
-        return hideReasoning ? groups.filter((group) => group.kind !== "reasoning") : groups
+        return hideReasoning ? groups.filter(({ group }) => group.kind !== "reasoning") : groups
       },
       [hideReasoning, hideSteps, inCoworkFrame, message.parts, planHeld, questionsOpen, showThinking]
     )
 
-    // Round 7 C7: a message whose parts all folded into the live row renders NOTHING - not an empty
-    // <Message> wrapper, which still took the column's gap and left blank bands between prose lines.
+    // A message whose parts all folded into the live row renders nothing, not an empty wrapper.
     if (assistantRenderGroups.length === 0) return null
 
     return (
@@ -614,7 +614,7 @@ const AssistantMessage = React.memo(
         data-message-role={message.role}
       >
         <div className="group flex w-full flex-col gap-0 space-y-2">
-          {assistantRenderGroups.map((group, index) => {
+          {assistantRenderGroups.map(({ group, key }) => {
             if (group.kind === "text") {
               /*
                 The options marker is taken off the text and rendered as chips instead.
@@ -633,7 +633,7 @@ const AssistantMessage = React.memo(
               const coworkBlocks = blocks && hasCoworkBlocks(blocks) ? blocks : null
               const body = coworkBlocks ? coworkBlocks.prose : parsed.body
               return (
-                <React.Fragment key={`text-${index}`}>
+                <React.Fragment key={key}>
                   {coworkBlocks && !body ? null : (
                     <AssistantAnswerText
                       body={body}
@@ -652,7 +652,7 @@ const AssistantMessage = React.memo(
             if (group.kind === "reasoning") {
               return (
                 <ReasoningBlock
-                  key={`reasoning-${index}`}
+                  key={key}
                   text={group.text}
                   isStreaming={group.isStreaming}
                 />
@@ -661,7 +661,7 @@ const AssistantMessage = React.memo(
 
             if (group.kind === "file") {
               return (
-                <div key={`file-${index}`} className="w-fit max-w-full">
+                <div key={key} className="w-fit max-w-full">
                   <FileMessage part={group.part} tone="assistant" />
                 </div>
               )
@@ -669,7 +669,7 @@ const AssistantMessage = React.memo(
 
             if (group.kind === "tool-aggregate") {
               return (
-                <div key={`tool-aggregate-${index}`} className="w-full">
+                <div key={key} className="w-full">
                   <ToolAggregateGroup parts={group.parts} />
                 </div>
               )
@@ -677,7 +677,7 @@ const AssistantMessage = React.memo(
 
             if (group.kind === "tool") {
               return (
-                <div key={`tool-${index}`} className="w-full">
+                <div key={key} className="w-full">
                   <ToolMessage part={group.part} />
                 </div>
               )
