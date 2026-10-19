@@ -1246,6 +1246,7 @@ const ko = {
   "cowork.project_dialog_folder_change": "변경…",
   "cowork.project_dialog_folder_choose": "폴더 선택…",
   "cowork.project_dialog_folder_cowork": "Cowork가 파일을 보관해요",
+  "cowork.project_dialog_folder_cowork_sub": "Cowork가 폴더를 만들어 줘요.",
   "cowork.project_dialog_folder_hint": "이 프로젝트에서 만든 파일이 여기에 저장돼요.",
   "cowork.project_dialog_folder_pick_title": "프로젝트 폴더 선택",
   "cowork.project_dialog_folder_reset": "Cowork 폴더 사용",

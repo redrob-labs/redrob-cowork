@@ -38,10 +38,18 @@ function folderLabel(path: string): string {
   return path.split(/[\\/]+/).filter(Boolean).pop() ?? path;
 }
 
+const FOLDER_LABEL_ID = "cowork-project-folder-label";
+
 /**
  * Where the project's files go. By default Cowork keeps them in a folder it makes; Choose folder
  * opens the system picker so a project can live in a folder of the person's (a client folder, a
- * repo). The chosen folder shows by name, the full path on hover, with a way back to Cowork's.
+ * repo).
+ *
+ * Laid out with the DS field anatomy (`rr-field`, `rr-field__label`, `rr-field__hint`) so the label,
+ * its gap and the hint match the Name field above it. The row is one white card: a folder tile, a
+ * title over a sub line (the default and what it means, or the chosen folder's name over its full
+ * path) and Choose folder… / Change… on the right. A chosen folder adds a hint with a way back to
+ * Cowork's folder. Without the desktop picker the row only explains the default.
  */
 export function ProjectFolderField(props: {
   folder: string | null;
@@ -50,31 +58,36 @@ export function ProjectFolderField(props: {
   onChoose: () => void;
   onReset: () => void;
 }) {
+  const chosen = props.folder !== null;
   return (
-    <div className="cowork-project-folder">
-      <span className="cowork-project-folder__label">{t("cowork.project_dialog_folder")}</span>
-      <div className="cowork-project-folder__row">
-        <span className="cowork-project-folder__icon">{icons.folder({ width: 16, height: 16, "aria-hidden": true })}</span>
-        {props.folder ? (
-          <span className="cowork-project-folder__name" title={props.folder}>
-            {folderLabel(props.folder)}
+    <div className="rr-field cowork-project-folder" role="group" aria-labelledby={FOLDER_LABEL_ID}>
+      <span className="rr-field__label" id={FOLDER_LABEL_ID}>
+        {t("cowork.project_dialog_folder")}
+      </span>
+      <div className="cowork-project-folder__row" data-chosen={chosen || undefined}>
+        <span className="cowork-project-folder__tile">{icons.folder({ width: 16, height: 16, "aria-hidden": true })}</span>
+        <span className="cowork-project-folder__text">
+          <span className="cowork-project-folder__title">
+            {props.folder ? folderLabel(props.folder) : t("cowork.project_dialog_folder_cowork")}
           </span>
-        ) : (
-          <span className="cowork-project-folder__name cowork-project-folder__name--default">{t("cowork.project_dialog_folder_cowork")}</span>
-        )}
+          {/* The full path can be long: it truncates at the end and shows whole on hover. */}
+          <span className="cowork-project-folder__sub" title={props.folder ?? undefined}>
+            {props.folder ?? t("cowork.project_dialog_folder_cowork_sub")}
+          </span>
+        </span>
         {props.canChoose ? (
           <Button size="sm" variant="secondary" disabled={props.busy} onClick={props.onChoose}>
-            {props.folder ? t("cowork.project_dialog_folder_change") : t("cowork.project_dialog_folder_choose")}
+            {chosen ? t("cowork.project_dialog_folder_change") : t("cowork.project_dialog_folder_choose")}
           </Button>
         ) : null}
       </div>
-      {props.folder ? (
-        <div className="cowork-project-folder__foot">
-          <span className="cowork-hint">{t("cowork.project_dialog_folder_hint")}</span>
+      {chosen ? (
+        <span className="rr-field__hint cowork-project-folder__hint">
+          {t("cowork.project_dialog_folder_hint")}{" "}
           <button type="button" className="cowork-project-folder__reset" disabled={props.busy} onClick={props.onReset}>
             {t("cowork.project_dialog_folder_reset")}
           </button>
-        </div>
+        </span>
       ) : null}
     </div>
   );

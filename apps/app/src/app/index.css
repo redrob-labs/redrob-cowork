@@ -6046,68 +6046,77 @@ a.cowork-radar-story__source:focus-visible {
   max-width: 420px;
 }
 
-/* New project: the Folder row under the name. A sunken bar with the folder's name (or "Cowork keeps
-   the files") and Choose folder / Change on the right; a chosen folder adds a hint and a way back. */
-.cowork-project-folder {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 16px;
-}
-
-.cowork-project-folder__label {
-  color: var(--ink-primary);
-  font-size: 13px;
-  font-weight: 500;
-}
-
+/* New project / Save as a project: the Folder field under the name. It uses the DS field anatomy
+   (`rr-field`, label, hint), so the label weight and the 8px label gap match Name and the form's
+   16px gap is the only space between them. The row is one white card that never reads as a
+   disabled input: a folder tile, a title over a sub line, and Choose folder / Change on the right. */
 .cowork-project-folder__row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 6px 6px 6px 12px;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md, 8px);
-  background: var(--surface-sunken);
+  border-radius: var(--field-radius);
+  background: var(--surface-base);
 }
 
-.cowork-project-folder__icon {
+.cowork-project-folder__tile {
   display: inline-flex;
   flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-sunken);
   color: var(--ink-secondary);
 }
 
-.cowork-project-folder__name {
+/* A chosen folder is the person's own: the tile takes the brand ink. */
+.cowork-project-folder__row[data-chosen] .cowork-project-folder__tile {
+  color: var(--ink-brand);
+}
+
+.cowork-project-folder__text {
+  display: flex;
   flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
+}
+
+.cowork-project-folder__title,
+.cowork-project-folder__sub {
   overflow: hidden;
-  color: var(--ink-primary);
-  font-size: 14px;
-  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cowork-project-folder__name--default {
-  color: var(--ink-secondary);
-  font-weight: 400;
+.cowork-project-folder__title {
+  color: var(--ink-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
-.cowork-project-folder__foot {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+.cowork-project-folder__sub {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.cowork-project-folder__row > .rr-btn {
+  flex: none;
 }
 
 .cowork-project-folder__reset {
-  flex: none;
   padding: 0;
   border: 0;
   background: none;
   color: var(--ink-brand);
-  font-size: 13px;
+  font: inherit;
+  font-weight: 500;
   cursor: pointer;
 }
 

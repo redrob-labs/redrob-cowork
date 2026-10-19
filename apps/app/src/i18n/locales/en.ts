@@ -1257,6 +1257,7 @@ const en = {
   "cowork.project_dialog_folder_change": "Change…",
   "cowork.project_dialog_folder_choose": "Choose folder…",
   "cowork.project_dialog_folder_cowork": "Cowork keeps the files",
+  "cowork.project_dialog_folder_cowork_sub": "Cowork makes the folder for you.",
   "cowork.project_dialog_folder_hint": "Files Cowork makes in this project are saved here.",
   "cowork.project_dialog_folder_pick_title": "Choose the project's folder",
   "cowork.project_dialog_folder_reset": "Use Cowork's folder",
