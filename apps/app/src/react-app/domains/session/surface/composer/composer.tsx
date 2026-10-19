@@ -34,7 +34,7 @@ import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/co
 import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
 import { attachSkill, ComposerSkillTray, detachSkill } from "@/react-app/cowork/composer/skill-tray";
 import { ComposerSkillPicks } from "@/react-app/cowork/composer/skill-picks";
-import { ComposerAddMenu, ComposerProjectChip } from "@/react-app/cowork/composer/add-menu";
+import { ComposerAddMenu, ComposerProjectChip, useNewChatProjectStore } from "@/react-app/cowork/composer/add-menu";
 
 type MentionItem = {
   id: string;
@@ -355,6 +355,8 @@ export function ReactSessionComposer(props: ComposerProps) {
    * emptied the draft; a failed send keeps both the text and the skills for a retry.
    */
   const [traySkills, setTraySkills] = useState<string[]>([]);
+  // The new chat's project, for the hero composer's chip (shown once inCoworkFrame is known, below).
+  const newChatProject = useNewChatProjectStore((state) => state.project);
   useEffect(() => {
     setTraySkills([]);
   }, [props.sessionId]);
@@ -400,6 +402,8 @@ export function ReactSessionComposer(props: ComposerProps) {
   const nonDefaultAgents = useMemo(() => agents.filter(isNonDefaultAgent), [agents]);
   // Inside the Cowork frame Plan or Run picks the agent, so the agent picker steps aside.
   const inCoworkFrame = useInCoworkFrame();
+  // The project chip shows only on the hero composer, in the Cowork frame.
+  const showProjectChip = Boolean(props.newChat && inCoworkFrame && newChatProject);
   const coworkChatKey = props.sessionId ?? NEW_CHAT_KEY;
   const showAgentPicker = !inCoworkFrame && props.selectedAgent !== null;
 
@@ -1250,10 +1254,15 @@ export function ReactSessionComposer(props: ComposerProps) {
           ) : null}
 
           <div className="px-4 pt-3 pb-2">
-            {/* The new chat's project, picked in Add to project, then the attached skills: both sit
-                in the panel's upper section, above the text. */}
-            {props.newChat && inCoworkFrame ? <ComposerProjectChip /> : null}
-            <ComposerSkillTray skills={traySkills} onRemove={(name) => setTraySkills((current) => detachSkill(current, name))} />
+            {/* The context row above the text: the new chat's project (picked in Add to project), a
+                thin divider, then the attached skills, on one line. Nothing renders when both are empty. */}
+            {showProjectChip || traySkills.length ? (
+              <div className="cowork-composer-context">
+                {showProjectChip ? <ComposerProjectChip /> : null}
+                {showProjectChip && traySkills.length ? <span className="cowork-composer-context__divider" aria-hidden="true" /> : null}
+                <ComposerSkillTray skills={traySkills} onRemove={(name) => setTraySkills((current) => detachSkill(current, name))} />
+              </div>
+            ) : null}
             {/* Editor */}
             <LexicalPromptEditor
               ref={editorRef}

@@ -5796,14 +5796,50 @@ a.cowork-radar-story__source:focus-visible {
   margin: -2px;
 }
 
-/* The new chat's project, picked in Add to project: a chip above the text, beside the skill tray. */
+/* The composer's context row above the text: the new chat's project, a thin divider, then the
+   attached skills. One line, every item 28px tall and centred, 6px apart, on the text's left edge,
+   so a project and skills read as one set instead of two stacked strips. */
+.cowork-composer-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  margin: 0 0 8px;
+}
+
+.cowork-composer-context__divider {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  margin: 0 2px;
+  background: var(--border-subtle);
+}
+
+/* Inside the row the tray is just its circles: the row owns the spacing. */
+.cowork-composer-context .cowork-skill-tray {
+  margin: 0;
+}
+
+.cowork-composer-context .cowork-skill-tray__chip {
+  width: 28px;
+  height: 28px;
+}
+
+.cowork-composer-context .cowork-skill-icon[data-size="mini"] {
+  width: 24px;
+  height: 24px;
+}
+
+/* The new chat's project, picked in Add to project: a pill, first in the context row. */
 .cowork-project-chip {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  box-sizing: border-box;
   max-width: 100%;
-  margin-bottom: 8px;
-  padding: 2px 4px 2px 10px;
+  height: 28px;
+  padding: 0 4px 0 10px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full, 999px);
   background: var(--surface-sunken);
