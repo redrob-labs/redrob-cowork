@@ -1,24 +1,21 @@
 "use client"
 
-import { useState } from "react"
 import { ChevronDown, ChevronRight, FilePen } from "lucide-react"
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon"
 import { artifactPathMatches } from "@/react-app/cowork/panel/live-draft"
-import { canOpenArtifact, getArtifactType, prettyArtifactTitle, useToolPartArtifacts } from "@/lib/artifacts"
+import { artifactPathKey, canOpenArtifact, getArtifactType, prettyArtifactTitle, useToolPartArtifacts, writeToolTargetPaths } from "@/lib/artifacts"
 import { isWriteToolPart } from "@/lib/build-in-tools"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import { getToolFamily, type AnyToolPart } from "@/lib/tool-aggregate"
+import { useRememberedOpen } from "@/lib/use-remembered-open"
 import { cn } from "@/lib/utils"
 import { t } from "@/i18n"
 import { useFrameStore } from "@/react-app/cowork/store/frame-store"
 
-/** Expansion state per group, kept while the session stays mounted (same rule as web research). */
-const openGroups = new Map<string, boolean>()
-
 /** One file a run touched, as the table shows it. */
 export type FileStep = {
-  /** The file's path as the tool call named it (stable key). */
+  /** The file's path as the first tool call spelled it (display and row key). */
   path: string
   /** "created" when a write made it, "edited" when only edits / patches touched it. */
   kind: "created" | "edited"
@@ -28,39 +25,31 @@ export type FileStep = {
   failed: boolean
 }
 
-/** The file path a file-family tool call names, or null (an apply-patch carries no single path). */
-function pathOf(part: AnyToolPart): string | null {
-  const input = part.input as { filePath?: unknown } | undefined
-  return typeof input?.filePath === "string" && input.filePath ? input.filePath : null
-}
-
-/** Pure: whether every part is a file edit / write / patch with a path, so the table can show it. */
+/** Pure: whether every part is a file write / edit / patch naming at least one path, so the table can show it. */
 export function isFileEditParts(parts: readonly AnyToolPart[]): boolean {
-  return parts.length > 0 && parts.every((part) => getToolFamily(part) === "edit" && pathOf(part) !== null)
+  return parts.length > 0 && parts.every((part) => getToolFamily(part) === "edit" && writeToolTargetPaths(part).length > 0)
 }
 
 /**
- * Pure: one step per FILE, in first-touched order. A file a write touched reads "created" (a write
- * carries the whole body); one only edits or patches touched reads "edited". Running if any of its
- * calls still runs; failed only if all of them failed.
+ * Pure: one step per FILE, in first-touched order. Spellings of one path ("./Reports/Brief.md",
+ * "reports\\brief.md") share a row. A file a write touched reads "created" (a write carries the
+ * whole body); one only edits or patches touched reads "edited". Running if any of its calls still
+ * runs; failed only if all of them failed.
  */
 export function fileStepsOf(parts: readonly AnyToolPart[]): FileStep[] {
-  const byPath = new Map<string, { kind: FileStep["kind"]; running: boolean; failed: boolean[] }>()
+  const byPath = new Map<string, FileStep & { failures: boolean[] }>()
   for (const part of parts) {
-    const path = pathOf(part)
-    if (!path || getToolFamily(part) !== "edit") continue
-    const entry = byPath.get(path) ?? { kind: "edited" as FileStep["kind"], running: false, failed: [] }
-    if (isWriteToolPart(part)) entry.kind = "created"
-    entry.running ||= isToolPartInFlight(part)
-    entry.failed.push(part.state === "output-error")
-    byPath.set(path, entry)
+    if (getToolFamily(part) !== "edit") continue
+    for (const path of writeToolTargetPaths(part)) {
+      const key = artifactPathKey(path)
+      const entry = byPath.get(key) ?? { path, kind: "edited", running: false, failed: false, failures: [] }
+      if (isWriteToolPart(part)) entry.kind = "created"
+      entry.running ||= isToolPartInFlight(part)
+      entry.failures.push(part.state === "output-error")
+      byPath.set(key, entry)
+    }
   }
-  return [...byPath].map(([path, entry]) => ({
-    path,
-    kind: entry.kind,
-    running: entry.running,
-    failed: entry.failed.length > 0 && entry.failed.every(Boolean),
-  }))
+  return [...byPath.values()].map(({ failures, ...step }) => ({ ...step, failed: failures.every(Boolean) }))
 }
 
 /** Pure: the header verb + count, e.g. "Created 1 file" / "Editing 2 files". Any edit makes it "Edited". */
@@ -87,12 +76,7 @@ function rowVerb(step: FileStep): string {
  */
 export function FileEditGroup(props: { parts: AnyToolPart[]; className?: string }) {
   const steps = fileStepsOf(props.parts)
-  const key = props.parts[0]?.toolCallId ?? "files"
-  const [open, setOpenState] = useState(() => openGroups.get(key) ?? false)
-  const setOpen = (value: boolean) => {
-    openGroups.set(key, value)
-    setOpenState(value)
-  }
+  const [open, setOpen] = useRememberedOpen(`files:${props.parts[0]?.toolCallId ?? ""}`)
   // The artifacts these parts produced, derived the same way the in-chat cards are, so a row opens
   // the very target the panel lists (same id).
   const artifacts = useToolPartArtifacts(props.parts)

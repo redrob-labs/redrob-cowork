@@ -201,6 +201,11 @@ function getArtifactName(path: string) {
   return segments[segments.length - 1] ?? path;
 }
 
+/** One file's identity across spellings ("./Reports\\Brief.md" = "reports/brief.md"), as the artifact list keys it. */
+export function artifactPathKey(path: string): string {
+  return normalizeArtifactPath(path).toLowerCase();
+}
+
 function normalizeArtifactPath(path: string) {
   return path
     .trim()
@@ -401,7 +406,7 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
         if (part.state === "output-available" || part.state === "output-error") continue;
         for (const path of writeToolTargetPaths(part)) {
           addArtifact(artifacts, path, message.id, messageIndex, sequence, openTargets);
-          inFlight.add(normalizeArtifactPath(path).toLowerCase());
+          inFlight.add(artifactPathKey(path));
           sequence += 1;
         }
       }
@@ -440,7 +445,7 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
  * collector: write/edit carry `input.filePath`, apply_patch carries its paths inside `patchText`.
  * Returns [] for a non-write part.
  */
-function writeToolTargetPaths(part: UIMessage["parts"][number]): string[] {
+export function writeToolTargetPaths(part: UIMessage["parts"][number]): string[] {
   // Narrow to a dynamic-tool part first: the house helpers (isWriteToolPart etc.) type their
   // argument as ToolUIPart | DynamicToolUIPart, which is narrower than a UIMessage part.
   if (part.type !== "dynamic-tool") return [];
@@ -449,7 +454,7 @@ function writeToolTargetPaths(part: UIMessage["parts"][number]): string[] {
     return typeof filePath === "string" && filePath.trim() ? [filePath.trim()] : [];
   }
   if (isApplyPatchToolPart(part)) {
-    return parseApplyPatchPaths(part.input.patchText);
+    return parseApplyPatchPaths(part.input.patchText).filter(Boolean);
   }
   return [];
 }

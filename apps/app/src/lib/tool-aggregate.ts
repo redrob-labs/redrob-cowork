@@ -41,6 +41,27 @@ export function isAggregatableToolPart(part: AnyToolPart, foldWeb = false): bool
   return getToolFamily(part, foldWeb) !== null
 }
 
+/** Which aggregate a call may join; calls in different lanes never share one. */
+export type AggregateLane = "web" | "edit" | "work"
+
+/**
+ * The aggregate lane of a call, or null when it does not aggregate. In the Cowork frame (`foldWeb`)
+ * web research and file edits each keep their own lane, so an all-web run draws the web research
+ * table and an all-edit run the file table; the bare surface keeps one lane (develop behaviour).
+ */
+export function getAggregateLane(part: AnyToolPart, foldWeb = false): AggregateLane | null {
+  const family = getToolFamily(part, foldWeb)
+  if (!family) return null
+  if (!foldWeb) return "work"
+  if (isWebSearchToolPart(part) || isWebFetchToolPart(part)) return "web"
+  return family === "edit" ? "edit" : "work"
+}
+
+/** Whether `part` may join an aggregate whose newest call is `last` (same lane). */
+export function continuesAggregate(last: AnyToolPart | undefined, part: AnyToolPart, foldWeb = false): boolean {
+  return last !== undefined && getAggregateLane(last, foldWeb) === getAggregateLane(part, foldWeb)
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
