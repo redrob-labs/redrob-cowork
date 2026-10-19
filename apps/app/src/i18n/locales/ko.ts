@@ -2588,7 +2588,6 @@ const ko = {
   "session.task_create_redrob_code_unavailable": "이 워크스페이스에서 Redrob Code를 사용할 수 없습니다. 다시 시작된 뒤에 재시도하거나, 문제가 계속되면 레드롭 코워크를 다시 시작해 주세요.",
   "session.title_generation_failed_body": "대화 내용은 안전하게 보관되어 있습니다. 생성된 임시 제목이 유지되는 동안 작업 메뉴에서 이름을 변경할 수 있습니다.",
   "session.title_generation_failed_title": "자동 작업 제목 생성이 완료되지 않았습니다",
-  "session.todo_progress_label": "진행률",
   "session.untitled": "제목 없음",
   "session.worked_for": "{duration} 동안 작업했습니다",
   "session.workspace_fallback": "워크스페이스",

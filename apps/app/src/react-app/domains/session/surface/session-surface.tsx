@@ -3,7 +3,6 @@ import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } fro
 import type { UIMessage } from "ai";
 import { useQuery } from "@tanstack/react-query";
 import type { SessionStatus } from "@redrob-labs/sdk/v2/client";
-import { Check, Minimize2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { parseFanOutCommand, type FanOutCommand } from "@/react-app/domains/session/model-fanout";
 import type { VariantRun } from "@/react-app/domains/session/variant-run";
@@ -97,14 +96,11 @@ import {
   type ApplyEnvironmentChangesResult,
 } from "@/react-app/domains/settings/pages/environment-variable-provider";
 import { consumeComposerAutoSend } from "./composer-auto-send";
-import { useStickyTodos } from "./sticky-todos";
 import { latestLiveDraft, useLiveDraftStore } from "@/react-app/cowork/panel/live-draft";
 import { useFrameStore } from "@/react-app/cowork/store/frame-store";
 import { getSidePanelSessionKey } from "@/react-app/domains/session/panel/side-panel-session";
 
 const EMPTY_TRANSCRIPT: UIMessage[] = [];
-/** Stable empty list for a surface rendered without todos, so the sticky dock memo stays put. */
-const EMPTY_TODOS: TodoItem[] = [];
 const IDLE_STATUS: SessionStatus = { type: "idle" };
 /**
  * Sample argument for the `composer.set_text` control action, used as its
@@ -358,6 +354,7 @@ export type SessionSurfaceProps = {
   searchFiles: (query: string) => Promise<string[]>;
   isRemoteWorkspace: boolean;
   isSandboxWorkspace: boolean;
+  /** Unused since round 9 removed the to-do dock; kept so callers need no change. */
   todos?: TodoItem[];
   activePermission?: PendingPermission | null;
   permissionReplyBusy?: boolean;
@@ -488,64 +485,6 @@ function AssistantWaitingCard({ label = t("session.assistant_thinking") }: { lab
         </div>
         <span>{label}</span>
       </div>
-    </div>
-  );
-}
-
-function TodoPanel(props: { todos: TodoItem[] }) {
-  // Round 7 C4: open by default; the person can still fold it with the corner control.
-  const [expanded, setExpanded] = useState(true);
-  const todos = props.todos.filter((todo) => todo.content.trim());
-  const completedTodos = todos.filter((todo) => todo.status === "completed").length;
-  const progressLabel = t("session.todo_progress_label");
-  const label = expanded ? progressLabel : `${progressLabel} · ${completedTodos}/${todos.length}`;
-
-  if (todos.length === 0) return null;
-
-  return (
-    <div className="overflow-hidden border-b border-dls-border bg-transparent">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between px-4 py-3 text-xs text-subtle-foreground transition-colors hover:bg-muted/50"
-          onClick={() => setExpanded((current) => !current)}
-        >
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-muted-foreground">{label}</span>
-          </div>
-          <Minimize2 size={12} className={`text-disabled-foreground transition-transform ${expanded ? "" : "rotate-180"}`} />
-        </button>
-        {expanded ? (
-          <div className="max-h-60 space-y-2.5 overflow-auto border-t border-dls-border px-4 pb-3">
-            {todos.map((todo, index) => {
-              const done = todo.status === "completed";
-              const cancelled = todo.status === "cancelled";
-              const active = todo.status === "in_progress";
-              return (
-                <div key={todo.id} className="flex items-start gap-2.5 pt-2.5 first:pt-2.5">
-                  <div className="flex items-center gap-1.5 pt-0.5">
-                    <div
-                      className={`flex size-4.5 items-center justify-center rounded-full border ${
-                        done
-                          ? "border-success-muted bg-success-soft text-success-ink"
-                          : active
-                            ? "border-warning-muted bg-warning-soft text-warning-ink"
-                            : cancelled
-                              ? "border-border bg-muted text-disabled-foreground"
-                              : "border-border bg-background text-disabled-foreground"
-                      }`}
-                    >
-                      {done ? <Check size={10} /> : active ? <span className="size-1.5 rounded-full bg-warning" /> : null}
-                    </div>
-                  </div>
-                  <div className={`flex-1 text-sm leading-relaxed ${cancelled ? "text-subtle-foreground line-through" : "text-foreground"}`}>
-                    <span className="mr-1.5 text-subtle-foreground">{index + 1}.</span>
-                    {todo.content}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
     </div>
   );
 }
@@ -903,9 +842,8 @@ export function SessionSurface(props: SessionSurfaceProps) {
   const revertedMessageCount = snapshot && revertMessageId ? hiddenMessageCount(snapshot, revertMessageId) : 0;
   const liveStatus = statusState ?? snapshot?.status ?? IDLE_STATUS;
   const chatStreaming = sending || liveStatus.type === "busy" || liveStatus.type === "retry";
-  // Round 7 C4: the to-do dock's list - sticky through stale empty writes while the run is busy,
-  // hidden once the run is idle and every item is done (see sticky-todos.ts).
-  const dockTodos = useStickyTodos(props.sessionId, props.todos ?? EMPTY_TODOS, chatStreaming);
+  // Round 9: the to-do dock above the composer is gone (Felix: it misfired; the plan's own
+  // checklist in the thread shows progress now).
 
   useEffect(() => {
     if (!chatStreaming) setSteering(false);
@@ -2271,9 +2209,9 @@ export function SessionSurface(props: SessionSurfaceProps) {
         isRemoteWorkspace={props.isRemoteWorkspace}
           isSandboxWorkspace={props.isSandboxWorkspace}
           onUploadInboxFiles={props.onUploadInboxFiles ?? handleUploadInboxFiles}
-          compactTopSpacing={Boolean(props.activeQuestion || dockTodos.length > 0 || props.activePermission || queuedItems.length > 0)}
+          compactTopSpacing={Boolean(props.activeQuestion || props.activePermission || queuedItems.length > 0)}
           topAccessory={
-            props.activeQuestion || dockTodos.length > 0 || props.activePermission || queuedItems.length > 0 ? (
+            props.activeQuestion || props.activePermission || queuedItems.length > 0 ? (
               <div>
                 {queuedItems.length > 0 ? (
                   <QueuedMessagesPanel
@@ -2296,8 +2234,6 @@ export function SessionSurface(props: SessionSurfaceProps) {
                     }}
                   />
                 ) : null}
-                {/* Round 7 C4: the dock stays up beside a pending question instead of being replaced. */}
-                {dockTodos.length > 0 ? <TodoPanel todos={dockTodos} /> : null}
                 {props.activePermission ? (
                   <PermissionApprovalPanel
                     permission={props.activePermission}

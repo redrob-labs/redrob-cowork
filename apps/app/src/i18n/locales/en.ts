@@ -2635,7 +2635,6 @@ const en = {
   "session.task_create_redrob_code_unavailable": "Redrob Code is unavailable for this workspace. Retry once it restarts, or restart Redrob Cowork if the problem continues.",
   "session.title_generation_failed_body": "Your conversation is safe. Rename it from the task menu while we keep the generated placeholder.",
   "session.title_generation_failed_title": "Automatic task title did not complete",
-  "session.todo_progress_label": "Progress",
   "session.untitled": "Untitled",
   "session.worked_for": "Worked for {duration}",
   "session.workspace_fallback": "Workspace",
