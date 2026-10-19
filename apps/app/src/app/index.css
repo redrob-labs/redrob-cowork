@@ -1927,6 +1927,23 @@
   padding: 4px 2px;
   color: var(--ink-primary);
 }
+/* The album-cover hover (.model-chart__tile:hover .model-chart__card) on the circle only, and only
+   while the pointer is on the circle itself: a 2px lift, a deeper shadow and the 1px
+   --spectrum-sky 45% outline. Inset outline, like Popular, so it paints above a skill's image. */
+.cowork-skill-picks__item .cowork-skill-icon {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+.cowork-skill-picks__item .cowork-skill-icon:hover {
+  transform: translateY(-2px);
+  outline-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-picks__item .cowork-skill-icon:hover {
+    transform: none;
+  }
+}
 .cowork-skill-picks__title {
   display: -webkit-box;
   min-height: 32px;
