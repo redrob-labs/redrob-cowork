@@ -44,6 +44,7 @@ import type {
   NukeManifestPreview,
   NukeOptions,
   NukeReceipt,
+  SharedLanguageReading,
   WorkspaceList,
 } from "./desktop-types";
 import type { BrowserPanelTab } from "./desktop-types";
@@ -488,6 +489,16 @@ export async function relaunchDesktopApp(): Promise<void> {
 
 export async function getDesktopHomeDir(): Promise<string> {
   return invokeElectronHelper("__homeDir");
+}
+
+/** Redrob Launcher's shared language choice, or null on the web, without a launcher, or on any failure. */
+export async function readLauncherLanguage(): Promise<SharedLanguageReading | null> {
+  if (!window.__REDROB_ELECTRON__?.invokeDesktop) return null;
+  try {
+    return (await invokeElectronHelper("__readSharedLanguage")) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function joinDesktopPath(...parts: string[]): Promise<string> {

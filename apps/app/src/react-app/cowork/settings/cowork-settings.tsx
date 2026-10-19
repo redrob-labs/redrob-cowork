@@ -25,11 +25,18 @@ import {
   LANGUAGE_OPTIONS,
   currentLocale,
   isLanguage,
-  setLocale,
+  localizedLanguageName,
   subscribeToLocale,
   t,
   type Language,
 } from "../../../i18n";
+import {
+  followLauncherLanguage,
+  launcherLanguageState,
+  pickAppLanguage,
+  subscribeToLauncherLanguage,
+  type LauncherLanguageState,
+} from "../../../i18n/launcher-language";
 import { replaceRedrobKey } from "../../domains/onboarding/redrob-key-connect";
 import { RedrobKeyStep } from "../../domains/onboarding/redrob-key-step";
 import { getSettingsTabLabel } from "../../domains/settings/shell/settings-tabs";
@@ -184,11 +191,15 @@ export type GeneralValues = {
   keepAwake: boolean;
   /** Shown in the desktop app only, where reports can be sent. */
   crashReports?: boolean;
+  /** Redrob Launcher's language and whether Cowork follows it; absent or null locale without a launcher. */
+  launcher?: LauncherLanguageState;
 };
 
 export type GeneralActions = {
   onMode: (mode: ChatMode) => void;
   onLanguage: (language: Language) => void;
+  /** "Same as Redrob Launcher": go back to following the launcher's language. */
+  onFollowLauncher?: () => void;
   onTheme: (theme: ThemeMode) => void;
   onTextSize: (size: TextSize) => void;
   onNotify: (on: boolean) => void;
@@ -223,10 +234,15 @@ export function generalActions(deps: GeneralDeps): GeneralActions {
   };
 }
 
-/** English and 한국어, each in its own name. */
-export function languageOptions() {
-  return LANGUAGE_OPTIONS.map((option) => ({ value: option.value, label: option.nativeName }));
+/** English and 한국어, each in its own name, after "Same as Redrob Launcher (X)" when a launcher is found. */
+export function languageOptions(launcher: Language | null = null) {
+  const own = LANGUAGE_OPTIONS.map((option) => ({ value: option.value as string, label: option.nativeName as string }));
+  if (!launcher) return own;
+  return [{ value: LAUNCHER_LANGUAGE, label: t("cowork.settings_language_launcher", { language: localizedLanguageName(launcher) }) }, ...own];
 }
+
+/** The Language select's value for "follow Redrob Launcher". */
+export const LAUNCHER_LANGUAGE = "launcher";
 
 export function textSizeOptions() {
   return TEXT_SIZES.map((size) => ({ value: size.id, label: textSizeLabel(size.id) }));
@@ -263,10 +279,11 @@ export function GeneralView(props: { values: GeneralValues; actions: GeneralActi
           <Select
             id="cowork-settings-language"
             size="sm"
-            value={values.language}
-            options={languageOptions()}
+            value={values.launcher?.following ? LAUNCHER_LANGUAGE : values.language}
+            options={languageOptions(values.launcher?.locale ?? null)}
             onChange={(_event, option) => {
-              if (isLanguage(option?.value)) actions.onLanguage(option.value);
+              if (option?.value === LAUNCHER_LANGUAGE) actions.onFollowLauncher?.();
+              else if (isLanguage(option?.value)) actions.onLanguage(option.value);
             }}
           />
         </Row>
@@ -335,11 +352,13 @@ function GeneralSection() {
   const { prefs, setPrefs } = useLocal();
   const showToast = useFrameStore((state) => state.showToast);
   const language = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+  const launcher = useSyncExternalStore(subscribeToLauncherLanguage, launcherLanguageState, launcherLanguageState);
   const theme = useSyncExternalStore(subscribeToTheme, getInitialThemeMode, getInitialThemeMode);
   const [textSize, setTextSize] = useState(readTextSize);
   const actions = generalActions({
     setPrefs,
-    setLocale,
+    // A pick here is Cowork's own choice, so it wins over Redrob Launcher's from now on.
+    setLocale: pickAppLanguage,
     setTheme: setThemeMode,
     setZoom: requestFontZoom,
     keepAwake: coworkKeepAwake(),
@@ -355,9 +374,11 @@ function GeneralSection() {
         notify: notifiesWhenDone(prefs.desktopNotifications),
         keepAwake: prefs.coworkKeepAwake,
         ...(isDesktopRuntime() ? { crashReports: prefs.crashReports } : {}),
+        launcher,
       }}
       actions={{
         ...actions,
+        onFollowLauncher: () => void followLauncherLanguage(),
         onCrashReports: (on) => {
           setPrefs((previous) => ({ ...previous, crashReports: on }));
           void syncCrashReports(on);

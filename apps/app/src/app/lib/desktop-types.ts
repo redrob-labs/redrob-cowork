@@ -39,6 +39,7 @@ export type {
   OpencodeExecutionSnapshot,
   RedrobDockerCleanupResult,
   RedrobServerInfo,
+  SharedLanguageReading,
   UpdaterEnvironment,
   WorkspaceCreateInput,
   WorkspaceCreateRemoteInput,
