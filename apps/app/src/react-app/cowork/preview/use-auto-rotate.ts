@@ -25,6 +25,12 @@ export function nextAutoRotateIndex(index: number, count: number): number {
   return count > 1 ? (index + 1) % count : 0;
 }
 
+/** Pure: whether the timer should run. Paused (interaction or a manual stop), a hidden document,
+ *  reduced motion, or a single entry each hold the surface still. */
+export function autoRotateRuns(state: { paused: boolean; hidden: boolean; reducedMotion: boolean; count: number }): boolean {
+  return !state.paused && !state.hidden && !state.reducedMotion && state.count > 1;
+}
+
 /** Shared rotation timer with reduced-motion and hidden-document safeguards. */
 export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
   const [index, setIndex] = useState(0);
@@ -43,7 +49,7 @@ export function useAutoRotate(options: AutoRotateOptions): AutoRotateState {
   }, []);
 
   useEffect(() => {
-    if (options.paused || hidden || reducedMotion || options.count <= 1) return;
+    if (!autoRotateRuns({ paused: options.paused, hidden, reducedMotion, count: options.count })) return;
     const timer = window.setTimeout(
       () => setIndex((current) => nextAutoRotateIndex(current, options.count)),
       options.ms,
@@ -59,8 +65,23 @@ export type InteractionPauseHandlers = {
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onFocus: () => void;
-  onBlur: (event: FocusEvent<HTMLElement>) => void;
+  onBlur: (event: Pick<FocusEvent<HTMLElement>, "currentTarget" | "relatedTarget">) => void;
 };
+
+/** Pure: the pause handlers over two setters. Focus moving to a child of the same element is not leaving it. */
+export function interactionPauseHandlers(
+  setPointerInside: (inside: boolean) => void,
+  setFocusInside: (inside: boolean) => void,
+): InteractionPauseHandlers {
+  return {
+    onMouseEnter: () => setPointerInside(true),
+    onMouseLeave: () => setPointerInside(false),
+    onFocus: () => setFocusInside(true),
+    onBlur: (event) => {
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusInside(false);
+    },
+  };
+}
 
 /**
  * Holds a rotating surface still while the pointer or keyboard focus is inside it, which is the
@@ -70,13 +91,6 @@ export type InteractionPauseHandlers = {
 export function useInteractionPause(): { paused: boolean; handlers: InteractionPauseHandlers } {
   const [pointerInside, setPointerInside] = useState(false);
   const [focusInside, setFocusInside] = useState(false);
-  const handlers = useMemo<InteractionPauseHandlers>(() => ({
-    onMouseEnter: () => setPointerInside(true),
-    onMouseLeave: () => setPointerInside(false),
-    onFocus: () => setFocusInside(true),
-    onBlur: (event) => {
-      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusInside(false);
-    },
-  }), []);
+  const handlers = useMemo(() => interactionPauseHandlers(setPointerInside, setFocusInside), []);
   return { paused: pointerInside || focusInside, handlers };
 }

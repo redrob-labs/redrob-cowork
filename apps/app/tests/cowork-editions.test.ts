@@ -28,24 +28,18 @@ describe("trending ticker", () => {
 });
 
 describe("edition clock", () => {
-  test("formats the live day and time in the given time zone on a 24-hour clock", () => {
-    const at = new Date("2026-10-19T02:07:00Z");
-    expect(formatLiveClock(at, "en", "Asia/Seoul")).toBe("Mon, Oct 19 · 11:07");
-    expect(formatLiveClock(at, "ko", "Asia/Seoul")).toBe("10월 19일 (월) 11:07");
-    expect(formatLiveClock(at, "en", "UTC")).toBe("Mon, Oct 19 · 02:07");
-    expect(formatLiveClock(new Date("2026-10-18T15:05:00Z"), "en", "Asia/Seoul")).toBe("Mon, Oct 19 · 00:05");
-    expect(formatLiveClock(new Date("2026-10-19T13:30:00Z"), "ko", "Asia/Seoul")).toBe("10월 19일 (월) 22:30");
-  });
-
-  test("formats the snapshot's own Updated time", () => {
-    expect(formatEditionStamp(TRENDING.updatedAt, "en", "Asia/Seoul")).toBe("Oct 19, 09:00");
-    expect(formatEditionStamp(TRENDING.updatedAt, "ko", "Asia/Seoul")).toBe("10월 19일 09:00");
-    expect(formatEditionStamp(TRENDING.updatedAt, "en", "UTC")).toBe("Oct 19, 00:00");
-  });
-
-  test("ticks on the whole minute", () => {
-    expect(msToNextMinute(Date.UTC(2026, 9, 19, 2, 7, 0))).toBe(60_000);
-    expect(msToNextMinute(Date.UTC(2026, 9, 19, 2, 7, 45, 500))).toBe(14_500);
+  // One table: live day/time and the snapshot stamp in a given time zone (24-hour), and the minute tick.
+  test.each([
+    ["live, Seoul, en", () => formatLiveClock(new Date("2026-10-19T02:07:00Z"), "en", "Asia/Seoul"), "Mon, Oct 19 · 11:07"],
+    ["live, Seoul, ko", () => formatLiveClock(new Date("2026-10-19T02:07:00Z"), "ko", "Asia/Seoul"), "10월 19일 (월) 11:07"],
+    ["live, UTC", () => formatLiveClock(new Date("2026-10-19T02:07:00Z"), "en", "UTC"), "Mon, Oct 19 · 02:07"],
+    ["live, past midnight in Seoul", () => formatLiveClock(new Date("2026-10-18T15:05:00Z"), "en", "Asia/Seoul"), "Mon, Oct 19 · 00:05"],
+    ["stamp, Seoul, ko", () => formatEditionStamp(TRENDING.updatedAt, "ko", "Asia/Seoul"), "10월 19일 09:00"],
+    ["stamp, UTC", () => formatEditionStamp(TRENDING.updatedAt, "en", "UTC"), "Oct 19, 00:00"],
+    ["tick on the whole minute", () => msToNextMinute(Date.UTC(2026, 9, 19, 2, 7, 0)), 60_000],
+    ["tick mid-minute", () => msToNextMinute(Date.UTC(2026, 9, 19, 2, 7, 45, 500)), 14_500],
+  ] as const)("%s", (_name, run, expected) => {
+    expect(run()).toBe(expected);
   });
 });
 

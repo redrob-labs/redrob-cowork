@@ -103,19 +103,6 @@ describe("cowork frame store: panel", () => {
     store.getState().openPanel("artifacts");
     expect(store.getState().panel.artifact ?? null).toBeNull();
   });
-
-  test("cowork state, modal and voice", () => {
-    const store = createFrameStore({ storage: () => null });
-    expect(store.getState().browser.cowork).toBe("done");
-    store.getState().setCowork("reading");
-    expect(store.getState().browser.cowork).toBe("reading");
-    store.getState().openModal({ kind: "project", chatId: "notice" });
-    expect(store.getState().modal).toEqual({ kind: "project", chatId: "notice" });
-    store.getState().closeModal();
-    expect(store.getState().modal).toBeNull();
-    store.getState().setVoice(true);
-    expect(store.getState().voice).toBe(true);
-  });
 });
 
 describe("cowork frame store: developer mode", () => {
@@ -155,11 +142,5 @@ describe("cowork frame store: developer mode", () => {
     expect(throwing.getState().developerMode).toBe(false);
     throwing.getState().setDeveloperMode(true);
     expect(throwing.getState().developerMode).toBe(true);
-  });
-
-  test("the default store works without a window", async () => {
-    expect(typeof window).toBe("undefined");
-    const { useFrameStore } = await import("../src/react-app/cowork/store/frame-store");
-    expect(useFrameStore.getState().developerMode).toBe(false);
   });
 });

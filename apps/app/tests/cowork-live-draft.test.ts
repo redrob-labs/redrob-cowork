@@ -43,9 +43,10 @@ describe("useLiveDraftStore", () => {
   beforeEach(() => useLiveDraftStore.setState({ drafts: {}, done: {} }));
   const draft = { callId: "w1", path: "/w/a.md", content: "A", settled: false };
 
-  test("publish, update to settled, then finish hands the draft over for good", () => {
+  test("publish, update to settled, then finish hands the draft over for good; sessions stay apart", () => {
     const store = useLiveDraftStore.getState();
     store.publish("s1", draft);
+    expect(useLiveDraftStore.getState().drafts.s2).toBeUndefined();
     store.publish("s1", { ...draft, settled: true });
     expect(useLiveDraftStore.getState().drafts.s1?.settled).toBe(true);
     useLiveDraftStore.getState().finish("s1", "w1");
@@ -53,10 +54,5 @@ describe("useLiveDraftStore", () => {
     // A later publish of the same call (a re-render) does not bring it back.
     useLiveDraftStore.getState().publish("s1", { ...draft, settled: true });
     expect(useLiveDraftStore.getState().drafts.s1).toBeUndefined();
-  });
-
-  test("sessions are kept apart", () => {
-    useLiveDraftStore.getState().publish("s1", draft);
-    expect(useLiveDraftStore.getState().drafts.s2).toBeUndefined();
   });
 });
