@@ -196,8 +196,26 @@ export function createRealCoworkServices(deps: RealCoworkServicesDeps): CoworkSe
       get: async (name) => {
         const installed = (await listInstalled()).find((skill) => skill.name === name);
         if (installed) {
-          const { content } = await client.getSkill(workspaceId, name, { includeGlobal: true });
-          return real({ name, description: installed.description, tags: installed.tags, body: skillBody(content), installed: { origin: installed.origin, scope: installed.scope } });
+          const [{ content }, catalogue] = await Promise.all([
+            client.getSkill(workspaceId, name, { includeGlobal: true }),
+            consoleCatalogue.get(name),
+          ]);
+          return real({
+            ...(catalogue
+              ? {
+                  title: catalogue.title,
+                  titleKo: catalogue.titleKo,
+                  summary: catalogue.summary,
+                  summaryKo: catalogue.summaryKo,
+                  version: catalogue.version,
+                }
+              : {}),
+            name,
+            description: installed.description,
+            tags: installed.tags,
+            body: skillBody(content),
+            installed: { origin: installed.origin, scope: installed.scope },
+          });
         }
         return real(await consoleCatalogue.get(name));
       },
