@@ -2093,7 +2093,7 @@
   color: var(--ink-muted);
 }
 
-/* Skills: the filters above the list, and each row's name, tags and actions. */
+/* Skills marketplace: horizontal shelves, app lockups, and product detail page. */
 .cowork-skills__filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -2101,51 +2101,13 @@
   align-items: end;
 }
 
-.cowork-skills__row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-  /* Round 33: a card, not a flat hairline row -- surface + border + radius + hover lift. */
-  padding: var(--space-4);
-  border-radius: 12px;
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-raised);
-  margin-bottom: var(--space-3);
-  transition: box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
-}
-.cowork-skills__row:hover {
-  box-shadow: 0 8px 22px -16px color-mix(in srgb, var(--redrob-black) 35%, transparent);
-}
-
-.cowork-skills__name {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  color: var(--ink-primary);
-  text-decoration: none;
-}
-
-.cowork-skills__name:hover {
-  text-decoration: underline;
-}
-
-.cowork-skills__actions {
-  display: flex;
-  flex-shrink: 0;
-  gap: var(--space-2);
-}
-
-/*
-  Round 32: the "What's a skill?" explainer header for non-technical readers. A
-  quiet raised card so it reads as a friendly intro, not a warning banner. Opaque
-  --surface-sunken on the raised work area, so it sits a step in from the page.
-*/
 .cowork-skills__explainer {
   margin-bottom: var(--space-4);
   padding: var(--space-4);
-  border-radius: 12px;
-  background-color: var(--surface-sunken);
   border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
 }
 .cowork-skills__explainer-title {
   margin: 0 0 var(--space-1);
@@ -2155,74 +2117,186 @@
   color: var(--ink-primary);
 }
 .cowork-skills__explainer-body {
+  max-width: 68ch;
   margin: 0;
   font-size: 13px;
   line-height: 20px;
   color: var(--ink-secondary);
-  max-width: 68ch;
 }
 
-/* Round 33: browse-by-category tiles (profession album art) + the quiet refine filters below. */
-.cowork-skills__browse-heading {
-  margin: var(--space-2) 0 var(--space-2);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--ink-primary);
-}
-.cowork-skills__categories {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-.cowork-skills__category {
+.cowork-skills__marketplace {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  text-align: center;
-}
-.cowork-skills__category-art {
-  display: block;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
-  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
-}
-.cowork-skills__category-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.cowork-skills__category:hover .cowork-skills__category-art {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent);
-}
-.cowork-skills__category[data-active="true"] .cowork-skills__category-art {
-  outline: 2px solid var(--spectrum-sky, #2b52ff);
-  outline-offset: 1px;
-}
-.cowork-skills__category-label {
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--ink-secondary);
-}
-.cowork-skills__category[data-active="true"] .cowork-skills__category-label {
+  gap: 40px;
+  min-width: 0;
+  background: var(--surface-raised);
   color: var(--ink-primary);
-  font-weight: 600;
 }
+.cowork-skills__shelf { min-width: 0; }
+.cowork-skills__shelf-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: 12px;
+}
+.cowork-skills__shelf-heading h2,
+.cowork-skills__full-heading h2 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+.cowork-skills__shelf-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.cowork-skills__shelf-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(148px, 172px);
+  gap: 16px;
+  margin: 0;
+  padding: 2px 2px 10px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: none;
+  list-style: none;
+}
+.cowork-skills__shelf-row::-webkit-scrollbar { display: none; }
+.cowork-skills__shelf-row > li { scroll-snap-align: start; }
+.cowork-skills__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  column-gap: 16px;
+  row-gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-skills__full-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.cowork-skills__header-search { width: min(240px, 38vw); }
+.cowork-skills__notice {
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+.cowork-skills__notice h2 { margin: 0 0 var(--space-1); font-size: 14px; color: var(--ink-primary); }
+.cowork-skills__notice p { margin: 0 0 var(--space-3); font-size: 13px; color: var(--ink-secondary); }
+.cowork-skills__loading { color: var(--ink-primary); }
+.cowork-skills__skeleton-row { display: flex; gap: 16px; overflow: hidden; }
+.cowork-skills__skeleton-tile { display: grid; flex: 0 0 156px; justify-items: center; gap: 8px; padding: 12px 8px; }
+
+.cowork-skill-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  padding: 12px 8px 14px;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--ink-primary);
+  text-align: center;
+  transition: background-color 150ms var(--easing-standard, ease);
+}
+.cowork-skill-tile:hover { background: var(--surface-sunken); color: var(--ink-primary); }
+.cowork-skill-tile__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+  gap: 8px;
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+.cowork-skill-tile__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+.cowork-skill-tile__title,
+.cowork-skill-tile__brief {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+.cowork-skill-tile__title { min-height: 36px; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-primary); }
+.cowork-skill-tile__brief { min-height: 32px; font-size: 12px; line-height: 16px; color: var(--ink-secondary); }
+.cowork-skill-tile__action { min-width: 64px; border-radius: 999px; }
+.cowork-skill-icon {
+  display: block;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--blue-5);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  transition: transform 150ms var(--easing-standard, ease), box-shadow 150ms var(--easing-standard, ease);
+}
+.cowork-skill-icon[data-size="tile"] { width: 72px; height: 72px; }
+.cowork-skill-icon[data-size="hero"] { width: 128px; height: 128px; }
+.cowork-skill-icon[data-size="row"] { width: 40px; height: 40px; }
+.cowork-skill-icon img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.cowork-skill-icon[data-tone="blue"] { background: linear-gradient(145deg, var(--blue-5), var(--blue-7)); }
+.cowork-skill-icon[data-tone="sky"] { background: linear-gradient(145deg, var(--accent-sky-3), var(--accent-sky-4)); }
+.cowork-skill-icon[data-tone="teal"] { background: linear-gradient(145deg, var(--accent-teal-4), var(--accent-teal-5)); }
+.cowork-skill-icon[data-tone="green"] { background: linear-gradient(145deg, var(--accent-green-3), var(--accent-green-4)); }
+.cowork-skill-icon[data-tone="violet"] { background: linear-gradient(145deg, var(--accent-violet-3), var(--accent-violet-4)); }
+.cowork-skill-icon[data-tone="pink"] { background: linear-gradient(145deg, var(--accent-pink-3), var(--accent-pink-4)); }
+.cowork-skill-icon[data-tone="red"] { background: linear-gradient(145deg, var(--accent-red-3), var(--accent-red-4)); }
+.cowork-skill-icon[data-tone="orange"] { background: linear-gradient(145deg, var(--accent-orange-3), var(--accent-orange-4)); }
+.cowork-skill-tile:hover .cowork-skill-icon { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.cowork-skill-tile:active .cowork-skill-icon { transform: scale(0.97); }
+
+.cowork-skill-detail { max-width: 760px; background: var(--surface-raised); color: var(--ink-primary); }
+.cowork-skill-hero {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  margin: var(--space-4) 0 32px;
+}
+.cowork-skill-hero__content { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+.cowork-skill-hero__brief { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-secondary); }
+.cowork-skill-hero__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.cowork-skill-about,
+.cowork-skill-info,
+.cowork-skill-instructions { margin-top: var(--space-6); color: var(--ink-primary); }
+.cowork-skill-about h2,
+.cowork-skill-info h2 { margin: 0 0 var(--space-3); font-size: 15px; line-height: 22px; color: var(--ink-primary); }
+.cowork-skill-about__text { margin: 0; font-size: 13px; line-height: 20px; color: var(--ink-secondary); }
+.cowork-skill-about__text[data-expanded="false"] { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.cowork-skill-info dl { margin: 0; border-top: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--ink-primary); }
+.cowork-skill-info__row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr); gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+.cowork-skill-info dt { font-size: 13px; color: var(--ink-secondary); }
+.cowork-skill-info dd { margin: 0; font-size: 13px; color: var(--ink-primary); }
+.cowork-skill-info code { font-family: var(--font-mono); }
+
 @media (prefers-reduced-motion: reduce) {
-  .cowork-skills__category:hover .cowork-skills__category-art { transform: none; }
-  .cowork-skills__category-art { transition: none; }
-  .cowork-skills__row { transition: none; }
+  .cowork-skill-tile,
+  .cowork-skill-icon { transition: none; }
+  .cowork-skill-tile:hover .cowork-skill-icon,
+  .cowork-skill-tile:active .cowork-skill-icon { transform: none; }
+}
+
+@media (max-width: 620px) {
+  .cowork-skill-hero { grid-template-columns: 88px minmax(0, 1fr); gap: 16px; }
+  .cowork-skill-icon[data-size="hero"] { width: 88px; height: 88px; }
+  .cowork-skills__shelf-controls > button:first-child,
+  .cowork-skills__shelf-controls > button:nth-child(2) { display: none; }
 }
 
 @media (max-width: 900px) {
