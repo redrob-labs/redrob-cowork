@@ -20,7 +20,7 @@ import { useCheckStore } from "@/react-app/cowork/thread/check-store";
 import { coworkSystemText } from "@/react-app/cowork/thread/memory-off";
 import { memoryContext, notesCacheFor } from "@/react-app/cowork/thread/memory-context";
 import { toNote } from "@/react-app/cowork/services/real-services";
-import { isPlanRunPrompt } from "@/react-app/cowork/thread/thread-logic";
+import { isPlanRunPrompt, isQuestionAnswerPrompt, planTurnInstruction } from "@/react-app/cowork/thread/thread-logic";
 import { useCoworkCrossCheck } from "@/react-app/cowork/thread/use-cowork-cross-check";
 import type {
   AgentPartInput,
@@ -1095,12 +1095,19 @@ export function SessionRoute() {
             const coworkSystem = inCoworkFrame
               ? coworkSystemText(coworkMemory, envSystemContext || undefined, coworkNotes)
               : envSystemContext;
-            const system = coworkSystem;
             // Round 6: a complex Run prompt auto-upgrades to Plan so the model drafts a plan first,
             // then the plan auto-runs (CoworkPlan auto-run). A plan being RUN is never upgraded
             // (see effectiveCoworkMode), or the plan would loop back to the Plan agent forever.
             const chosenCoworkMode = modeFor(coworkChats, targetSessionId, local.prefs.coworkNewChatMode);
-            const sendCoworkMode = effectiveCoworkMode(chosenCoworkMode, text, isPlanRunPrompt(text));
+            // Round 8b: the answers to Plan's questions go back to the PLAN agent (so it writes the
+            // plan), not the run agent - before, short answers stayed in Run and skipped the plan.
+            const sendCoworkMode = inCoworkFrame && isQuestionAnswerPrompt(text)
+              ? "plan"
+              : effectiveCoworkMode(chosenCoworkMode, text, isPlanRunPrompt(text));
+            // Round 8b: every Plan-mode send carries this turn's protocol rule (questions first, then
+            // one plan block), so the plan agent cannot skip straight to researching and answering.
+            const planRule = inCoworkFrame && sendCoworkMode === "plan" ? planTurnInstruction(text) : null;
+            const system = [coworkSystem, planRule].filter(Boolean).join("\n\n") || undefined;
             // The map back to the real values stays on this computer, for showing the chat.
             // A Run prompt's answer is what Cross-check reads, once it arrives.
             if (inCoworkFrame && sendCoworkMode === "run") {

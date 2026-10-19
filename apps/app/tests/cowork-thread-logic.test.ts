@@ -32,6 +32,7 @@ import {
   planRunPrompt,
   planStatus,
   planToText,
+  planTurnInstruction,
   receiptItems,
 } from "../src/react-app/cowork/thread/thread-logic";
 
@@ -594,5 +595,16 @@ describe("round 8 M7: check chips survive reopening a chat", () => {
     const storage = () => ({ getItem: () => "{not json", setItem: () => {} });
     expect(createCheckStore({ storage }).getState().answers).toEqual({});
     expect(readKeptChecks(() => null)).toEqual({});
+  });
+});
+
+describe("round 8b: plan-mode turn rule", () => {
+  test("a new request asks questions first; answers get exactly one plan", () => {
+    const first = planTurnInstruction("Deep research the US-China AI race");
+    expect(first).toContain("redrob-questions");
+    expect(first).not.toContain("redrob-plan block");
+    const answers = planTurnInstruction(answersToPrompt(QUESTIONS, { q1: 0, q2: [1] }));
+    expect(answers).toContain("ONE fenced redrob-plan block");
+    expect(answers).not.toContain("redrob-questions");
   });
 });

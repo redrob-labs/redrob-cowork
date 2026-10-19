@@ -102,6 +102,30 @@ export function isQuestionAnswerPrompt(prompt: string): boolean {
 }
 
 /**
+ * Round 8b: the protocol rule a Plan-mode send carries in its system text, for THIS turn.
+ *
+ * Seen live (session ses_eaddde07...): a complex prompt went to the plan agent, which ran three web
+ * searches and wrote the whole answer as prose - no questions, no plan, so no run, no artifact and no
+ * checks. The agent's own prompt says it MAY ask and MAY read the web; this rule makes the turn's
+ * shape explicit: a new request gets questions first; the answers get exactly one plan. The research
+ * and the deliverable belong to the run that follows.
+ */
+export function planTurnInstruction(prompt: string): string {
+  if (isQuestionAnswerPrompt(prompt)) {
+    return [
+      "## This turn",
+      "The person has answered your questions. Reply with ONE fenced redrob-plan block and nothing else, then stop.",
+      "Do not answer the request yet, do not write the deliverable and do not research beyond a quick look you need to plan. The run that follows does the research and writes the deliverable to a file.",
+    ].join("\n");
+  }
+  return [
+    "## This turn",
+    "This is a new request. Do not answer it yet and do not research it. Reply with ONE fenced redrob-questions block of two to four short questions, each with two to four options and a sensible default, and nothing else, then stop.",
+    "Ask what changes the result: the deliverable and its length, the audience, the scope or time frame, and which sources to use. When the answers come back you will write the plan.",
+  ].join("\n");
+}
+
+/**
  * Whether a prompt is any synthetic Cowork machinery send (a plan being run, or a question-answer
  * reply) that the Cowork transcript should hide while the engine still receives it (item 10).
  */
