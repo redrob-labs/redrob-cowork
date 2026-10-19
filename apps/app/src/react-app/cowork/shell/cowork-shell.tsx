@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { useHref } from "react-router";
 import { AppShell, IconButton, ThemeSwitch, icons, type AppShellProps } from "@redrob-labs/ui";
 import { TextSearch } from "lucide-react";
@@ -7,6 +7,7 @@ import { TextSearch } from "lucide-react";
 import { getInitialThemeMode, setThemeMode, subscribeToTheme } from "../../../app/theme";
 import { t } from "../../../i18n";
 import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
+import { RecentChatActions } from "../chats/recent-chat-actions";
 import { CoworkSidePanel } from "../panel/cowork-side-panel";
 import { MAX_WORKSPACE_RIGHT_SIDEBAR_WIDTH, MIN_WORKSPACE_RIGHT_SIDEBAR_WIDTH, useUiStateStore } from "../../shell/ui-state-store";
 import { useFrameStore } from "../store/frame-store";
@@ -121,12 +122,15 @@ export function CoworkShellView(props: CoworkShellViewProps) {
   // The app's theme store stays the source of truth; the switch only reflects and sets it.
   const themeMode = useSyncExternalStore(subscribeToTheme, getInitialThemeMode, getInitialThemeMode);
   const root = useHref("/").replace(/\/$/, "");
+  const navData = useCoworkNavData();
   const nav = buildCoworkNav({
-    ...useCoworkNavData(),
+    ...navData,
     current: props.current,
     chatId: props.chatId,
     toHref: (path) => `${root}${path}`,
   });
+  // The shell's root, where RecentChatActions finds the DS nav to put its "..." menu in.
+  const shellRef = useRef<HTMLDivElement | null>(null);
   const panelLabel = panelToggleLabel(panelOpen);
   // One sidebar state for every screen, so the title bar's toggle and Ctrl+B fold this menu too.
   const sidebarOpen = useUiStateStore((state) => state.sidebarOpen);
@@ -166,6 +170,7 @@ export function CoworkShellView(props: CoworkShellViewProps) {
   return (
     <CoworkFrameContext value={true}>
       <div
+        ref={shellRef}
         className={shellClass}
         onClickCapture={keepSkipLinkOnScreen}
         style={{ "--app-side-width": `${sideWidth}px`, "--app-panel-width": `${panelWidth}px` } as CSSProperties}
@@ -249,6 +254,8 @@ export function CoworkShellView(props: CoworkShellViewProps) {
         >
           {props.children}
         </AppShell>
+        {/* The Recent chats' "..." menu and inline rename, portalled into the DS nav (see the component). */}
+        <RecentChatActions rootRef={shellRef} chats={navData.chats} openChatId={props.chatId} />
         {panelOpen ? (
           <>
             {/* The grip that resizes the right panel, on its left edge; drag or arrow keys. */}

@@ -5878,3 +5878,118 @@ a.cowork-radar-story__source:focus-visible {
   background: var(--surface-raised);
   color: var(--ink-primary);
 }
+
+/* Row "..." menus (chat rows in History and the Recent menu, project rows): a small ghost icon
+   button at the row's right edge, shown while the row is hovered, focused or its menu is open,
+   like Claude's. It is the link's sibling, never inside it. */
+.cowork-row-more {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md, 8px);
+  color: var(--ink-secondary);
+  background: transparent;
+  opacity: 0;
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), background-color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+.cowork-row-more:hover,
+.cowork-row-more[data-popup-open] {
+  background: var(--border-subtle);
+  color: var(--ink-primary);
+}
+
+.cowork-row-more:focus-visible {
+  opacity: 1;
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* History: the row is the link plus its "..." button, side by side. */
+.cowork-history__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.cowork-history__row > .cowork-history__link {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cowork-history__row:hover .cowork-row-more,
+.cowork-history__row:focus-within .cowork-row-more,
+.cowork-history__row[data-menu-open] .cowork-row-more {
+  opacity: 1;
+}
+
+.cowork-history__row[data-menu-open] {
+  background: var(--surface-sunken);
+}
+
+/* The Recent chats' overlay: positioned inside the DS nav, which becomes its containing block. */
+.cowork-shell .rr-shell__nav {
+  position: relative;
+}
+
+.cowork-recent-actions {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.cowork-recent-actions .cowork-row-more {
+  opacity: 1;
+  pointer-events: auto;
+  background: var(--surface-sunken);
+  box-shadow: -10px 0 10px -2px var(--surface-sunken);
+}
+
+.cowork-recent-actions .cowork-row-more:hover,
+.cowork-recent-actions[data-open] .cowork-row-more {
+  background: var(--border-subtle);
+  box-shadow: -10px 0 10px -2px var(--surface-sunken);
+}
+
+/* Inline rename: a text box in place of the name, on the same line. */
+.cowork-recent-rename {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+.cowork-inline-rename {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--action-primary);
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+  font: inherit;
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--action-primary) 18%, transparent);
+}
+
+.cowork-history__rename {
+  height: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cowork-row-more {
+    transition: none;
+  }
+}
