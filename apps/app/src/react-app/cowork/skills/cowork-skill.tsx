@@ -2,18 +2,19 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
-import { Badge, Button, EmptyState, icons } from "@redrob-labs/ui";
+import { Badge, Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
 
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
 import { PreviewPage, PreviewState } from "../preview/preview-note";
 import { previewKey, usePreviewServices } from "../preview/preview";
 import { ScheduleDialog } from "../scheduled/schedule-dialog";
-import type { SkillDetail, SkillTaxonomy } from "../services/types";
+import type { CoworkResult, CoworkSkill, SkillDetail, SkillTaxonomy } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
 import { OriginBadge, originLabel } from "./cowork-skills";
-import { canEditSkill, canRemoveSkill, languageTagLabel, skillBrief, skillDisplayTitle, skillRunPrompt, skillShelf, tagLabels } from "./skills";
+import { CATALOGUE_CACHE_MS, consoleCatalogue } from "./console-catalogue";
+import { canEditSkill, canRemoveSkill, languageTagLabel, seedSkillDetail, skillBrief, skillDisplayTitle, skillRunPrompt, skillShelf, tagLabels } from "./skills";
 import { SHELF_LABEL } from "./skill-tile";
 import { SkillIcon } from "./skill-icon";
 import { useCoworkStartStore, type PendingCoworkChat } from "./start-chat";
@@ -135,10 +136,26 @@ export function SkillScreen() {
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const [scheduling, setScheduling] = useState(false);
   const [busy, setBusy] = useState(false);
-  const query = useQuery({ queryKey: [...previewKey(scope, "skills"), "one", name], queryFn: () => services.skills.get(name), staleTime: 30_000 });
+  // Round 10 (flash fix): paint the real page at once from the catalogue and the cached installed
+  // list; the server answer replaces it when it lands.
+  const query = useQuery({
+    queryKey: [...previewKey(scope, "skills"), "one", name],
+    queryFn: () => services.skills.get(name),
+    staleTime: 30_000,
+    gcTime: CATALOGUE_CACHE_MS,
+    placeholderData: (): CoworkResult<SkillDetail | null> | undefined => {
+      const cached = queryClient.getQueryData<CoworkResult<CoworkSkill[]>>(previewKey(scope, "skills"));
+      const seed = seedSkillDetail(name, consoleCatalogue.peek(name), cached?.data ?? null);
+      return seed && cached ? { data: seed, preview: cached.preview } : undefined;
+    },
+  });
   const taxonomy = useQuery({ queryKey: previewKey(scope, "taxonomy"), queryFn: () => services.skills.taxonomy(), staleTime: 5 * 60_000 });
   const skill = query.data?.data ?? null;
-  const preview = query.data?.preview ?? true;
+  // Round 10: "is a project connected" comes from the installed list, the same signal the Skills page
+  // uses, so the note does not appear on one page and vanish on the next (a library skill's own
+  // detail is real catalogue data even without a project). Undefined until it resolves.
+  const installedList = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, gcTime: CATALOGUE_CACHE_MS });
+  const preview = installedList.data?.preview;
   const installed = skill?.installed ?? null;
   const locationState = location.state as { fromPath?: string } | null;
   const backPath = locationState?.fromPath ?? "/skills";
@@ -164,7 +181,9 @@ export function SkillScreen() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [modal, returnToList, scheduling]);
 
-  const title = skill ? skillDisplayTitle(skill, locale) : name || t("cowork.nav_skills");
+  // Round 10: no raw slug in the header while the page is still loading.
+  const title = skill ? skillDisplayTitle(skill, locale) : query.isLoading ? "" : t("cowork.nav_skills");
+  const real = preview === false;
 
   return (
     <CoworkShell
@@ -179,13 +198,30 @@ export function SkillScreen() {
       ) : null}
     >
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
-        <PreviewState query={query}>
+        <PreviewState query={query} loading={<SkillDetailSkeleton />}>
           {(data) => data ? (
-            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} canRun={!preview && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onRun={() => void runSkill({ workspaceId, request, navigate }, name)} onAdd={() => void act(installSkill)} />
+            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} canRun={real && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onRun={() => void runSkill({ workspaceId, request, navigate }, name)} onAdd={() => void act(installSkill)} />
           ) : <EmptyState title={t("cowork.skill_not_found_title")} description={t("cowork.skill_not_found_text")} />}
         </PreviewState>
       </PreviewPage>
-      {skill && scheduling ? <ScheduleDialog skill={name} real={!preview} onClose={() => setScheduling(false)} /> : null}
+      {skill && scheduling ? <ScheduleDialog skill={name} real={real} onClose={() => setScheduling(false)} /> : null}
     </CoworkShell>
+  );
+}
+
+/** Round 10: a deep link before anything is cached paints the hero's shape, not a block of grey lines. */
+export function SkillDetailSkeleton() {
+  return (
+    <div className="cowork-skill-detail" aria-busy="true">
+      <span className="sr-only">{t("cowork.skills_loading_label")}</span>
+      <div className="cowork-skill-hero">
+        <Skeleton variant="circle" width={128} height={128} />
+        <div className="cowork-skill-hero__content">
+          <Skeleton variant="text" width={320} />
+          <Skeleton variant="text" width={180} />
+          <Skeleton variant="rect" width={96} height={32} />
+        </div>
+      </div>
+    </div>
   );
 }

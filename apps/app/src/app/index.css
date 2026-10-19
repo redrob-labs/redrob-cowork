@@ -2223,6 +2223,8 @@
 .cowork-skills__loading { color: var(--ink-primary); }
 .cowork-skills__skeleton-row { display: flex; gap: 16px; overflow: hidden; }
 .cowork-skills__skeleton-tile { display: grid; flex: 0 0 156px; justify-items: center; gap: 8px; padding: 12px 8px; }
+/* Round 10: the workflow card's square placeholder. */
+.cowork-skills__skeleton-card { display: grid; flex: 0 0 160px; gap: 8px; padding: 8px 2px 4px; }
 
 .cowork-skill-tile {
   display: flex;

@@ -112,7 +112,9 @@ describe("skills marketplace helpers", () => {
     expect(shouldShowLibraryNotice(null, true)).toBe(false);
     expect(shouldShowLibraryNotice([], true)).toBe(true);
     expect(shouldShowLibraryNotice([row("installed")], true)).toBe(true);
-    expect(shouldShowLibraryNotice([], false)).toBe(false);
+    // Round 10: with nothing at all to show, the notice stands in for the old "No skills yet" page.
+    expect(shouldShowLibraryNotice([], false)).toBe(true);
+    expect(shouldShowLibraryNotice([row("installed")], false)).toBe(false);
   });
 
   test("searches visible English and Korean titles and summaries", () => {

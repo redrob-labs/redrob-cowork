@@ -11,6 +11,9 @@ import { matchesFilters } from "./skills";
 
 export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
 
+/** How long the catalogue and the Skills queries keep their data (round 10: one value for both). */
+export const CATALOGUE_CACHE_MS = 30 * 60_000;
+
 /** One catalogue skill with its instructions and localized marketplace display fields. */
 export type ConsoleSkill = {
   name: string;
@@ -48,7 +51,8 @@ export function parseConsoleFrontmatter(content: string): { data: Record<string,
 export function createConsoleCatalogue(options: CatalogueOptions = {}) {
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   const baseUrl = options.baseUrl ?? CONSOLE_CATALOGUE_BASE_URL;
-  const ttlMs = options.ttlMs ?? 10 * 60_000;
+  // Round 10: matches the Skills queries' 30-minute gcTime, so a cached page and the catalogue expire together.
+  const ttlMs = options.ttlMs ?? CATALOGUE_CACHE_MS;
   const failureTtlMs = options.failureTtlMs ?? 60_000;
   const now = options.now ?? Date.now;
   let snapshot: Snapshot | null = null;
@@ -149,6 +153,10 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
             ...(skill.version ? { version: skill.version } : {}),
           }
         : null;
+    },
+    /** Loads the catalogue in the background so Skills paints from memory; never throws. */
+    warm: async (): Promise<void> => {
+      await current().catch(() => undefined);
     },
     /** Drops the cache; tests and a manual refresh. */
     reset: () => {
