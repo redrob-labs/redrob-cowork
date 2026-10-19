@@ -31,7 +31,7 @@ export type RadarStory = {
 };
 
 export type RadarSection = {
-  /** Three or four sentence overview of the day for the banner, in English. */
+  /** One to three short sentences on the day, shown in full on the banner and as the subpage lede, in English. */
   summary: string;
   /** The same overview in Korean. */
   summaryKo: string;
@@ -52,9 +52,9 @@ export const RADAR: RadarEdition = {
   asOf: "2026-10-19T09:00:00+09:00",
   news: {
     summary:
-      "Cost-of-living protests turned violent in France and Italy, with thousands arrested over the weekend. In Canada, a grass fire at an Alberta army base killed four soldiers a day before the province votes on its future. Kenya confirmed another Ebola case as a regional outbreak spreads. Super Typhoon Champi brushed past Guam and knocked out power across the island.",
+      "Cost-of-living protests turned violent in France and Italy. A fire killed four soldiers in Alberta on the eve of its referendum, Kenya confirmed another Ebola case and a super typhoon knocked out power on Guam.",
     summaryKo:
-      "프랑스와 이탈리아에서 생활비 항의 시위가 폭력 사태로 번져 주말 사이 수천 명이 체포됐어요. 캐나다 앨버타주 군기지에서는 들불로 군인 4명이 숨졌고, 바로 다음 날 앨버타의 앞날을 정하는 주민투표가 열려요. 케냐에서는 에볼라 확진자가 또 나오며 주변국으로 번지고 있어요. 슈퍼 태풍 참피는 괌을 스치고 지나가며 섬 곳곳을 정전시켰어요.",
+      "프랑스와 이탈리아에서 생활비 시위가 폭력 사태로 번졌어요. 앨버타는 주민투표 하루 전 군기지 화재로 군인 4명을 잃었고, 케냐에선 에볼라 확진자가 또 나왔어요. 슈퍼 태풍이 스친 괌은 곳곳이 정전됐어요.",
     stories: [
       {
         id: "news-france-unrest",
@@ -144,9 +144,9 @@ export const RADAR: RadarEdition = {
   },
   social: {
     summary:
-      "Your feeds are still full of the French unrest, and on Weibo it held three trending spots at once. Travelers are posting the long checkout rulebooks some Airbnb hosts leave behind. Football clips are everywhere, from a touchdown dance to a sideline shove. On TikTok, October sounds and Halloween costume walks set the mood.",
+      "The French unrest still fills your feeds and held three Weibo trending spots at once. Also going around: Airbnb checkout rulebooks, football clips and October sounds on TikTok.",
     summaryKo:
-      "피드는 여전히 프랑스 시위 이야기로 가득하고, 웨이보에서는 관련 검색어가 한꺼번에 세 자리를 차지했어요. 여행객들은 에어비앤비 숙소의 까다로운 퇴실 규칙을 줄줄이 올리고 있어요. 터치다운 세리머니부터 경기장 밖 몸싸움까지 미식축구 영상도 많이 돌아요. 틱톡은 10월 음원과 핼러윈 의상 영상이 분위기를 이끌고 있어요.",
+      "피드는 여전히 프랑스 시위 이야기로 가득하고, 웨이보 검색어 세 자리를 한꺼번에 차지했어요. 에어비앤비 퇴실 규칙, 미식축구 영상, 틱톡의 10월 음원도 많이 돌고 있어요.",
     stories: [
       {
         id: "social-weibo-france",

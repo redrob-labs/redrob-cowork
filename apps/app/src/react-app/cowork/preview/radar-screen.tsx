@@ -73,7 +73,7 @@ export function RadarPage(props: {
         <h1 className="radar-page__title">{radarTitle(props.feed)}</h1>
         <p className="radar-page__lede">{radarSummary(section, props.locale)}</p>
         <time className="radar-page__meta" dateTime={RADAR.asOf}>
-          {t("cowork.radar_edition", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
+          {t("cowork.radar_updated", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
         </time>
       </header>
       <ol className="radar-page__list" aria-label={t("cowork.radar_stories")}>

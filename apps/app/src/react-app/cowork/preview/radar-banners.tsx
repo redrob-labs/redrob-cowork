@@ -3,7 +3,6 @@ import { ArrowRight, MessageCircle, Newspaper } from "lucide-react";
 import { Link } from "react-router";
 
 import { t, type Language } from "../../../i18n";
-import { formatEditionStamp } from "./edition-clock";
 import { RADAR, RADAR_FEEDS, radarPath, radarSection, radarSummary, type RadarFeed } from "./radar-edition";
 
 /** Localized title for a Radar feed, shared by its banner and its subpage. */
@@ -44,9 +43,6 @@ function RadarBanner(props: {
       <span className="model-chart__glass" aria-hidden="true" />
       <span className="model-chart__banner-scrim" aria-hidden="true" />
       <RadarMark feed={props.feed} />
-      <span className="model-chart__banner-eyebrow">
-        {t("cowork.radar_edition", { time: formatEditionStamp(RADAR.asOf, props.locale) })}
-      </span>
       <span id={titleId} className="model-chart__banner-title">{radarTitle(props.feed)}</span>
       <span id={summaryId} className="model-chart__radar-summary">
         {radarSummary(radarSection(RADAR, props.feed), props.locale)}

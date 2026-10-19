@@ -4298,11 +4298,9 @@ select:disabled {
   font-size: 20px;
   line-height: 26px;
 }
+/* Round 10: the overview is short and always shown in full - no line clamp, no ellipsis. */
 .model-chart__radar-summary {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  display: block;
   color: #fff;
   font-size: 13px;
   line-height: 19px;

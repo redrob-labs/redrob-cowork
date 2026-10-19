@@ -71,13 +71,16 @@ describe("radar edition", () => {
     }
   });
 
-  test("banner overviews run 3 to 4 sentences and story summaries 2 to 3", () => {
+  test("banner overviews are 1 to 3 short sentences and story summaries 2 to 3", () => {
     for (const feed of RADAR_FEEDS) {
       const section = radarSection(RADAR, feed);
       for (const overview of [section.summary, section.summaryKo]) {
-        expect(sentences(overview)).toBeGreaterThanOrEqual(3);
-        expect(sentences(overview)).toBeLessThanOrEqual(4);
+        expect(sentences(overview)).toBeGreaterThanOrEqual(1);
+        expect(sentences(overview)).toBeLessThanOrEqual(3);
       }
+      // Short enough for the banner to show it in full, with no clamp.
+      expect(section.summary.length).toBeLessThanOrEqual(220);
+      expect(section.summaryKo.length).toBeLessThanOrEqual(130);
       for (const story of section.stories) {
         for (const summary of [story.summary, story.summaryKo]) {
           expect(sentences(summary)).toBeGreaterThanOrEqual(2);
@@ -132,6 +135,32 @@ describe("radar and ticker copy", () => {
     for (const key of ["cowork.radar_news_title", "cowork.radar_social_title"]) {
       expect(en[key as keyof typeof en]).not.toMatch(/trending|today/i);
     }
+  });
+
+  test("the banner button just says Read, and the time reads as an update", () => {
+    expect(en["cowork.radar_open"]).toBe("Read");
+    expect(ko["cowork.radar_open"]).toBe("읽기");
+    expect(en["cowork.radar_updated"]).toBe("Updated {time}");
+    expect(ko["cowork.radar_updated"]).toBe("{time} 업데이트");
+    for (const table of [en, ko] as Array<Record<string, string>>) {
+      expect(table["cowork.radar_edition"]).toBeUndefined();
+    }
+  });
+
+  test("banners show no edition time and never clamp the overview", async () => {
+    const banners = await Bun.file(new URL("../src/react-app/cowork/preview/radar-banners.tsx", import.meta.url)).text();
+    expect(banners).not.toContain("cowork.radar_edition");
+    expect(banners).not.toContain("cowork.radar_updated");
+    expect(banners).not.toContain("formatEditionStamp");
+    const screen = await Bun.file(new URL("../src/react-app/cowork/preview/radar-screen.tsx", import.meta.url)).text();
+    expect(screen.match(/cowork\.radar_updated/g)?.length).toBe(1);
+    const css = await Bun.file(new URL("../src/app/index.css", import.meta.url)).text();
+    const at = css.indexOf("\n.model-chart__radar-summary {");
+    expect(at).toBeGreaterThanOrEqual(0);
+    const rule = css.slice(at, css.indexOf("}", at));
+    expect(rule).not.toContain("line-clamp");
+    expect(rule).not.toContain("-webkit-box");
+    expect(rule).not.toContain("ellipsis");
   });
 
   test("the removed ticker note and pause controls are gone in both languages", () => {
