@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { computeRevealRate } from "../src/components/chat/use-smooth-reveal";
+import { computeRevealRate, drainRate } from "../src/components/chat/use-smooth-reveal";
 
 // The base sustained rate ("1x Claude") the hook settles to; mirrored from the module.
 const BASE = 55;
@@ -39,5 +39,18 @@ describe("useSmoothReveal rate policy", () => {
     expect(racing).toBeGreaterThan(BASE);
     // ...but it is capped (never unbounded), so the reveal stays smooth, not a jump-to-end.
     expect(racing).toBeLessThanOrEqual(BASE * 6);
+  });
+});
+
+describe("round 9: drain after the stream ends", () => {
+  test("a big leftover finishes in about 0.8s, not in one frame", () => {
+    // 1,562 characters left (measured live): ~1,950 chars/sec, about 33 per 60fps frame.
+    const rate = drainRate(10, 1562);
+    expect(rate).toBeCloseTo(1562 / 0.8, 0);
+    expect(rate / 60).toBeLessThan(40);
+  });
+
+  test("a small tail never crawls below the catch-up pace", () => {
+    expect(drainRate(10, 5)).toBeGreaterThanOrEqual(BASE * 6);
   });
 });

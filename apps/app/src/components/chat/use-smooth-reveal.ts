@@ -54,6 +54,17 @@ export function computeRevealRate(sinceStartSeconds: number, backlog: number): n
   return rate
 }
 
+/** Round 9: seconds the leftover text takes to drain once the stream has ended. */
+const DRAIN_SECONDS = 0.8
+
+/**
+ * Pure drain rate (chars/sec) after the stream has ended: whatever is left finishes in about
+ * DRAIN_SECONDS, never slower than the bounded catch-up pace (so the tail does not crawl).
+ */
+export function drainRate(sinceStartSeconds: number, backlog: number): number {
+  return Math.max(computeRevealRate(sinceStartSeconds, backlog), backlog / DRAIN_SECONDS, MAX_CATCHUP_CHARS_PER_SEC)
+}
+
 /** True when the OS asks for reduced motion (read once per hook instance, kept live). */
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = React.useState(false)
@@ -71,11 +82,18 @@ function usePrefersReducedMotion(): boolean {
 /**
  * Reveal `fullText` at a smooth, constant velocity with an opening burst while `streaming`
  * is true. Returns the revealed prefix and whether the reveal is still behind.
+ *
+ * Round 9: when the stream ends with text still unrevealed (the model often races far ahead of the
+ * reading pace), the rest DRAINS over about DRAIN_SECONDS instead of snapping in at once. Measured
+ * live before this change: a single 50ms frame jumped by 542 characters at the end of a turn,
+ * which read as a block landing rather than writing.
  */
 export function useSmoothReveal(fullText: string, streaming: boolean): SmoothReveal {
   const reducedMotion = usePrefersReducedMotion()
   // How many characters are currently revealed; fractional so <1 char/frame still averages right.
   const [revealedCount, setRevealedCount] = React.useState(0)
+  // Bumped once a post-stream drain completes, so the hook re-renders out of the paced state.
+  const [, setDrained] = React.useState(0)
 
   // Mutable frame state kept in a ref so the rAF loop reads fresh values without re-subscribing.
   const stateRef = React.useRef({
@@ -87,11 +105,19 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
     startedAt: 0,
     // Latest full text, so the loop reads growth without being re-armed every token.
     text: fullText,
+    // Whether the stream is still live (the loop drains faster once it is not).
+    streaming,
+    // This hook has paced a stream that has not been fully revealed yet.
+    owesDrain: false,
   })
   stateRef.current.text = fullText
+  stateRef.current.streaming = streaming
+  if (streaming) stateRef.current.owesDrain = true
 
-  // Reduced motion, or no streaming: show everything immediately and keep nothing ticking.
-  const paced = streaming && !reducedMotion
+  // Drain after the stream ends: keep pacing until everything shown so far has been revealed.
+  const draining = !streaming && stateRef.current.owesDrain && stateRef.current.revealed < fullText.length
+  // Reduced motion, or no streaming and nothing owed: show everything immediately.
+  const paced = (streaming || draining) && !reducedMotion
 
   React.useEffect(() => {
     if (!paced) {
@@ -116,13 +142,22 @@ export function useSmoothReveal(fullText: string, streaming: boolean): SmoothRev
       const backlog = total - state.revealed
 
       if (backlog > 0) {
-        // Shared 2x->1x burst + bounded catch-up policy (tested via computeRevealRate).
+        // Shared 2x->1x burst + bounded catch-up policy (tested via computeRevealRate); once the
+        // stream has ended, drainRate finishes the rest in about DRAIN_SECONDS.
         const sinceStart = (now - state.startedAt) / 1000
-        const rate = computeRevealRate(sinceStart, backlog)
+        const rate = state.streaming ? computeRevealRate(sinceStart, backlog) : drainRate(sinceStart, backlog)
 
         // Never reveal past what the model has emitted.
         state.revealed = Math.min(total, state.revealed + rate * deltaSeconds)
         setRevealedCount(Math.floor(state.revealed))
+        if (!state.streaming && state.revealed >= total) {
+          state.owesDrain = false
+          setDrained((value) => value + 1)
+        }
+      } else if (!state.streaming) {
+        // Drained: re-render so the hook settles to "not paced" and this loop stops.
+        state.owesDrain = false
+        setDrained((value) => value + 1)
       }
 
       raf = window.requestAnimationFrame(tick)
