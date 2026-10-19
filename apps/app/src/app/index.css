@@ -3832,10 +3832,14 @@ select:disabled {
   Trending search edition: a compact rotating ticker above the hero, with a dated two-tab list.
   Every surface owns both its background and text colour; movement stops under reduced motion.
 */
+.model-chart__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
 .model-chart__topbar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: calc(var(--space-3, 12px) - var(--space-6, 24px));
 }
 .model-chart__trending {
   display: flex;
@@ -3872,14 +3876,14 @@ select:disabled {
 .model-chart__trending-pause:focus-visible,
 .model-chart__banner-pause:focus-visible,
 .model-chart__trending-row:focus-visible {
-  outline: 2px solid var(--spectrum-sky);
+  outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 2px;
 }
 .model-chart__trending-icon {
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
-  color: var(--spectrum-sky);
+  color: var(--ink-brand);
 }
 .model-chart__trending-label {
   flex: 0 0 auto;
@@ -3919,7 +3923,7 @@ select:disabled {
   text-align: end;
 }
 .model-chart__trending-rank[data-top] {
-  color: var(--spectrum-sky);
+  color: var(--ink-brand);
 }
 .model-chart__trending-item-label {
   min-width: 0;
@@ -4042,7 +4046,7 @@ select:disabled {
   fill: currentColor;
 }
 .model-chart__trending-mark--up {
-  color: var(--spectrum-sky);
+  color: var(--ink-brand);
 }
 .model-chart__trending-mark--down {
   color: var(--status-danger);

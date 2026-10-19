@@ -423,6 +423,7 @@ export function ModelChartHome(props: {
   const banner = banners[bannerRotation.index];
   return (
     <div className="model-chart">
+      <div className="model-chart__hero">
       <div className="model-chart__topbar">
         <TrendingTicker
           data={TRENDING}
@@ -492,6 +493,7 @@ export function ModelChartHome(props: {
           </div>
         </section>
       ) : null}
+      </div>
 
       <ModelChartShelf heading={t("cowork.chart_by_profession")} headingId="model-chart-prof">
         {professions.map((profession, index) => (
