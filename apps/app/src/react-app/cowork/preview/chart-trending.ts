@@ -5,7 +5,9 @@
  */
 import type { Language } from "../../../i18n";
 
+/** Which ranked list a term belongs to: South Korea or the global edition. */
 export type TrendScope = "korea" | "global";
+/** How a term moved since the prior edition. */
 export type Trend = "up" | "down" | "steady" | "new";
 
 export type TrendItem = {
@@ -26,18 +28,16 @@ export type TrendingEdition = {
   asOf: string;
   /** ISO time the snapshot was taken, shown as "Updated" so a live clock never implies live data. */
   updatedAt: string;
-  /** Short, human-readable provenance for review. */
-  sourceNote: string;
   /** South Korea search terms. */
   korea: readonly TrendItem[];
   /** Global editorial search terms. */
   global: readonly TrendItem[];
 };
 
+/** The bundled trending-search edition the Trending AI ticker shows. */
 export const TRENDING: TrendingEdition = {
   asOf: "2026-10-19",
   updatedAt: "2026-10-19T09:00:00+09:00",
-  sourceNote: "Google Trends, South Korea and United States, past 24 hours; editorial selection checked 19 October 2026.",
   korea: [
     { id: "kr-shinsegae-gangnam", rank: 1, prevRank: 4, label: "신세계백화점 강남점", labelKo: "신세계백화점 강남점" },
     { id: "kr-typhoon-champi", rank: 2, prevRank: null, label: "태풍 참피", labelKo: "태풍 참피" },

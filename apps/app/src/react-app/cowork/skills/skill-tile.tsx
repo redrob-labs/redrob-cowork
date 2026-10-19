@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
+import { prefersReducedMotion } from "../../../lib/use-prefers-reduced-motion";
 import { shelfEdges, skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
 import { SkillIcon } from "./skill-icon";
 
@@ -133,8 +134,7 @@ export function MarketplaceShelf({ id, label, count, variant = "tiles", children
   const move = (direction: -1 | 1) => {
     const node = scroller.current;
     if (!node) return;
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: reduced ? "auto" : "smooth" });
+    node.scrollBy({ left: direction * Math.max(240, node.clientWidth * 0.8), behavior: prefersReducedMotion() ? "auto" : "smooth" });
   };
   const cards = variant === "cards";
 
@@ -175,7 +175,7 @@ function ShelfChevron({ direction, label, show, onMove }: ShelfChevronProps) {
       aria-label={label}
       aria-hidden={!show}
       tabIndex={show ? 0 : -1}
-      data-show={show || undefined}
+      data-show={show ? "" : undefined}
       onClick={() => { if (show) onMove(direction); }}
     >
       <Icon width={18} height={18} aria-hidden />

@@ -1,6 +1,7 @@
 /** @jsxImportSource react */
 import * as React from "react";
 
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 import {
   createSessionTitleMarqueeController,
@@ -31,20 +32,6 @@ export function resolveSessionTitleTooltip({
   tooltip: string;
 }) {
   return overflowing && !reducedMotion ? undefined : tooltip;
-}
-
-function usePrefersReducedMotion() {
-  const [reducedMotion, setReducedMotion] = React.useState(false);
-
-  React.useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReducedMotion(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
-  return reducedMotion;
 }
 
 export function SessionTitle({ intent, title, tooltip }: SessionTitleProps) {
