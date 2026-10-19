@@ -4156,6 +4156,96 @@ select:disabled {
 @media (max-width: 640px) {
   .model-chart__trending { width: 100%; }
 }
+
+/*
+  Radar: two banners side by side under the Featured banner (stacked on narrow widths), in the
+  Featured banner's visual language: a spectrum gradient, the glass sheen, a scrim, white copy, a
+  frosted feed mark in the corner and a pill that says where the banner goes.
+*/
+.model-chart__radar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4, 16px);
+}
+@media (max-width: 760px) {
+  .model-chart__radar-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.model-chart__radar-banner {
+  min-height: 248px;
+  gap: 8px;
+  padding-top: 72px;
+  color: #fff;
+  text-decoration: none;
+}
+.model-chart__radar-banner:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.model-chart__radar-banner .model-chart__banner-title {
+  font-size: 20px;
+  line-height: 26px;
+}
+.model-chart__radar-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  color: #fff;
+  font-size: 13px;
+  line-height: 19px;
+  opacity: 0.92;
+}
+.model-chart__radar-mark {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 24px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.model-chart__radar-mark svg {
+  width: 20px;
+  height: 20px;
+}
+.model-chart__radar-open {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: var(--radius-full, 999px);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 20px;
+}
+.model-chart__radar-open svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.model-chart__radar-banner:hover .model-chart__radar-open svg,
+.model-chart__radar-banner:focus-visible .model-chart__radar-open svg {
+  transform: translateX(2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-chart__radar-banner:hover { transform: none; }
+  .model-chart__radar-open svg { transition: none; }
+  .model-chart__radar-banner:hover .model-chart__radar-open svg,
+  .model-chart__radar-banner:focus-visible .model-chart__radar-open svg { transform: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .model-chart__trending-entry { animation: none; transform: none; }
   .model-chart__trending-trigger,
