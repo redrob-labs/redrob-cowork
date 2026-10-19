@@ -1339,7 +1339,8 @@
   one weight heavier and a step lighter in tone, so it reads as part of the heading row.
 */
 .cowork-nav__view-all {
-  font: var(--text-caption);
+  font-size: 11px;        /* Same as the Recent heading. */
+  line-height: 16px;      /* Same as the Recent heading. */
   font-weight: 700;       /* Bold, a step heavier than the heading's 600. */
   color: var(--ink-muted);/* The faintest ink token... */
   opacity: 0.7;           /* ...taken a step lighter still than the Recent heading. */
@@ -2374,7 +2375,9 @@
 }
 .cowork-skill-tile__title {
   min-height: 36px;
-  font: var(--text-label);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
   color: var(--ink-primary);
 }
 .cowork-skill-tile__brief {
@@ -2521,7 +2524,8 @@
 }
 .cowork-skill-about__text {
   margin: 0;
-  font: var(--text-body-sm);
+  font-size: 13px;
+  line-height: 20px;
   color: var(--ink-secondary);
   white-space: pre-line;
 }
@@ -2622,7 +2626,9 @@
   aspect-ratio: 1 / 1;
 }
 .cowork-workflow-card__title {
-  font: var(--text-label);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
   color: var(--ink-primary);
 }
 .cowork-workflow-card__sub {
@@ -2646,7 +2652,8 @@
 }
 .cowork-workflow-hero__count {
   margin: 0;
-  font: var(--text-body-sm);
+  font-size: 13px;
+  line-height: 20px;
   color: var(--ink-muted);
 }
 .cowork-workflow__group {
@@ -2693,7 +2700,9 @@
   min-width: 0;
 }
 .cowork-workflow__title {
-  font: var(--text-label);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
   color: var(--ink-primary);
 }
 .cowork-workflow__brief {
@@ -3005,7 +3014,8 @@ html[lang="ko"] {
   gap: 8px;
 }
 .cowork-plan__label {
-  font: var(--text-body-sm);
+  font-size: 13px;
+  line-height: 20px;
   font-weight: 600;
   color: var(--ink-brand);
 }
@@ -3017,7 +3027,8 @@ html[lang="ko"] {
 }
 .cowork-plan__summary {
   margin: 0;
-  font: var(--text-body);
+  font-size: 15px;
+  line-height: 24px;
   color: var(--ink-primary);
 }
 .cowork-plan__steps {
@@ -3097,7 +3108,8 @@ html[lang="ko"] {
 }
 .cowork-plan__note {
   margin: 2px 0 0;
-  font: var(--text-body-sm);
+  font-size: 13px;
+  line-height: 20px;
   color: var(--ink-secondary);
 }
 @keyframes cowork-plan-pulse {
@@ -5183,7 +5195,8 @@ a.cowork-radar-story__source:focus-visible {
   max-height: calc(3 * 20px);
   margin-top: 2px;
   overflow: hidden;
-  font: var(--text-body-sm);
+  font-size: 13px;
+  line-height: 20px;
   color: var(--ink-secondary);
 }
 .cowork-artifact-row:focus-visible {
