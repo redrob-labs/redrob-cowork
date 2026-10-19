@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { UIMessage } from "ai";
 
-import { isArtifactWriteInFlight, prettyArtifactTitle } from "../src/lib/artifacts";
+import { getArtifactsFromMessages, isArtifactWriteInFlight, prettyArtifactTitle } from "../src/lib/artifacts";
 
 describe("prettyArtifactTitle (item 4)", () => {
   test("strips the extension, turns dashes/underscores into spaces, Sentence case", () => {
@@ -43,5 +43,28 @@ describe("isArtifactWriteInFlight (item 8)", () => {
     expect(isArtifactWriteInFlight([message([writePart("/w/other.md", "input-streaming")])], "/w/report.md")).toBe(false);
     // The in-chat card passes the artifact's normalized path; a leading ./ on the tool input still matches.
     expect(isArtifactWriteInFlight([message([writePart("./w/report.md", "input-streaming")])], "w/report.md")).toBe(true);
+  });
+
+  test("covers an in-flight apply_patch whose path lives in patchText (M2)", () => {
+    const applyPatch = (patchText: string, state: string): UIMessage["parts"][number] =>
+      ({ type: "dynamic-tool", toolName: "apply_patch", toolCallId: "c2", state, input: { patchText } }) as unknown as UIMessage["parts"][number];
+    const patch = "*** Begin Patch\n*** Add File: /w/report.md\n+hello\n*** End Patch";
+    expect(isArtifactWriteInFlight([message([applyPatch(patch, "input-available")])], "/w/report.md")).toBe(true);
+    expect(isArtifactWriteInFlight([message([applyPatch(patch, "output-available")])], "/w/report.md")).toBe(false);
+  });
+});
+
+describe("in-flight write cards (item 8 / M1)", () => {
+  const writePart = (filePath: string, state: string): UIMessage["parts"][number] =>
+    ({ type: "dynamic-tool", toolName: "write", toolCallId: "c1", state, input: { filePath } }) as unknown as UIMessage["parts"][number];
+  const message = (parts: UIMessage["parts"]): UIMessage => ({ id: "m1", role: "assistant", parts });
+
+  test("a still-streaming write surfaces a provisional card only when opted in", () => {
+    const msgs = [message([writePart("/w/report.md", "input-streaming")])];
+    // Default (Files strip): a non-settled write is NOT collected - card appears only once settled.
+    expect(getArtifactsFromMessages(msgs, [], { includeTargetFallbacks: false }).length).toBe(0);
+    // Cowork card list opts in: the in-flight write gets a provisional card, so the caret can show.
+    const cards = getArtifactsFromMessages(msgs, [], { includeTargetFallbacks: false, includeInFlightWrites: true });
+    expect(cards.map((a) => a.path)).toEqual(["/w/report.md"]);
   });
 });

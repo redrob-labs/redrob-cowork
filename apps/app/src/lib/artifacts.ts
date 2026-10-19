@@ -30,6 +30,9 @@ type ArtifactEntry = ArtifactItem & {
 
 type GetArtifactsOptions = {
   includeTargetFallbacks?: boolean
+  /** M1 (item 8): also surface a provisional card for an in-flight write, so the "writing" caret
+   *  has a card to attach to before the write settles. Opt-in (Cowork card list only). */
+  includeInFlightWrites?: boolean
 }
 
 const WORKSPACES_PREFIX_PATTERN = /^workspaces\/[^/]+\//i;
@@ -348,6 +351,24 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
     }
   });
 
+  // M1 (item 8): also surface a provisional card for a write-family tool part that is still
+  // IN FLIGHT (input streaming or running, not yet output-available). getArtifactPathsFromMessage
+  // only collects a path once its write settles, so without this a single streaming write has no
+  // card to show the "writing" caret on - the caret could never fire. Gated behind an opt-in so
+  // only the Cowork card list surfaces in-flight writes; the Files strip keeps settled-only.
+  if (options.includeInFlightWrites) {
+    messages.forEach((message, messageIndex) => {
+      for (const part of message.parts) {
+        if (part.type !== "dynamic-tool") continue;
+        if (part.state === "output-available" || part.state === "output-error") continue;
+        for (const path of writeToolTargetPaths(part)) {
+          addArtifact(artifacts, path, message.id, messageIndex, sequence, openTargets);
+          sequence += 1;
+        }
+      }
+    });
+  }
+
   if (options.includeTargetFallbacks ?? true) {
     const fallbackMessageId = messages[messages.length - 1]?.id ?? "open-target";
     for (const target of openTargets) {
@@ -370,29 +391,43 @@ export function getArtifactsFromMessages(messages: UIMessage[], openTargets: Ope
 }
 
 /** The file path a write/edit tool part targets while its input is known, else null. */
-function writeToolTargetPath(part: UIMessage["parts"][number]): string | null {
-  if (part.type !== "dynamic-tool") return null;
-  if (part.toolName !== "write" && part.toolName !== "edit") return null;
-  const input: unknown = (part as { input?: unknown }).input;
-  if (!input || typeof input !== "object") return null;
-  const filePath = (input as { filePath?: unknown }).filePath;
-  return typeof filePath === "string" && filePath.trim() ? filePath.trim() : null;
+/**
+ * The file path(s) a write-family tool part targets, in ANY state (so an in-flight write still
+ * resolves its path). Reuses the house helpers so the set of write tools matches the artifact
+ * collector: write/edit carry `input.filePath`, apply_patch carries its paths inside `patchText`.
+ * Returns [] for a non-write part. (M2: the earlier version only matched literal write/edit and
+ * missed apply_patch, whose path is not in input.filePath.)
+ */
+function writeToolTargetPaths(part: UIMessage["parts"][number]): string[] {
+  // Narrow to a dynamic-tool part first: the house helpers (isWriteToolPart etc.) type their
+  // argument as ToolUIPart | DynamicToolUIPart, which is narrower than a UIMessage part.
+  if (part.type !== "dynamic-tool") return [];
+  if (isWriteToolPart(part) || isEditToolPart(part)) {
+    const filePath = part.input.filePath;
+    return typeof filePath === "string" && filePath.trim() ? [filePath.trim()] : [];
+  }
+  if (isApplyPatchToolPart(part)) {
+    return parseApplyPatchPaths(part.input.patchText);
+  }
+  return [];
 }
 
 /**
- * Item 8: whether a write/edit tool part for `path` is still in flight (streaming its input or
+ * Item 8: whether a write-family tool part for `path` is still in flight (streaming its input or
  * running) across all messages - the signal the artifact is still being WRITTEN. A part that has
- * settled (`output-available` or `output-error`) is finished and does not count. Pure + tested.
+ * settled (`output-available` or `output-error`) is finished and does not count. Covers write,
+ * edit and apply_patch (M2). Pure + tested.
  */
 export function isArtifactWriteInFlight(messages: UIMessage[], path: string): boolean {
   const target = normalizeArtifactPath(path).toLowerCase();
   for (const message of messages) {
     for (const part of message.parts) {
-      const partPath = writeToolTargetPath(part);
-      if (!partPath) continue;
-      if (normalizeArtifactPath(partPath).toLowerCase() !== target) continue;
-      const state = (part as { state?: unknown }).state;
-      if (state !== "output-available" && state !== "output-error") return true;
+      if (part.type !== "dynamic-tool") continue;
+      const state = part.state;
+      if (state === "output-available" || state === "output-error") continue; // settled, not in flight
+      for (const partPath of writeToolTargetPaths(part)) {
+        if (normalizeArtifactPath(partPath).toLowerCase() === target) return true;
+      }
     }
   }
   return false;
@@ -401,10 +436,11 @@ export function isArtifactWriteInFlight(messages: UIMessage[], path: string): bo
 export function useArtifacts(messages: UIMessage[], options: GetArtifactsOptions = {}) {
   const { openTargets } = useOpenTargets();
   const includeTargetFallbacks = options.includeTargetFallbacks ?? false;
+  const includeInFlightWrites = options.includeInFlightWrites ?? false;
 
   return React.useMemo(
-    () => getArtifactsFromMessages(messages, openTargets, { includeTargetFallbacks }),
-    [includeTargetFallbacks, messages, openTargets],
+    () => getArtifactsFromMessages(messages, openTargets, { includeTargetFallbacks, includeInFlightWrites }),
+    [includeInFlightWrites, includeTargetFallbacks, messages, openTargets],
   );
 }
 

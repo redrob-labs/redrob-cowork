@@ -71,7 +71,7 @@ interface ArtifactCardListProps {
  * does, and marks a card as "writing" while a write/edit tool part for its path is still in flight.
  */
 export function ArtifactCardList({ messages }: ArtifactCardListProps) {
-  const artifacts = useArtifacts(messages, { includeTargetFallbacks: false });
+  const artifacts = useArtifacts(messages, { includeTargetFallbacks: false, includeInFlightWrites: true });
   if (artifacts.length === 0) return null;
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-2 md:px-10" data-artifact-cards>
