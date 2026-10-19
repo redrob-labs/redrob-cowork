@@ -63,9 +63,9 @@ export function ProjectDialogView(props: ProjectDialogViewProps) {
   );
 }
 
-function ProjectForm(props: { chatId: string | null; initialName: string; onClose: () => void }) {
+function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | null; initialName: string; onClose: () => void }) {
   const client = useCoworkConnection((state) => state.client);
-  const workspaceId = useCoworkConnection((state) => state.workspaceId);
+  const workspaceId = props.fromWorkspaceId;
   const showToast = useFrameStore((state) => state.showToast);
   const setMemory = useCoworkComposerStore((state) => state.setMemory);
   const navigate = useNavigate();
@@ -105,10 +105,15 @@ function ProjectForm(props: { chatId: string | null; initialName: string; onClos
   );
 }
 
-/** The frame's project dialog: New project, or Save as a project with the chat's title filled in. */
-export function ProjectDialog(props: { chatId: string | null; onClose: () => void }) {
+/**
+ * The frame's project dialog: New project, or Save as a project with the chat's title filled in.
+ * `fromWorkspaceId` is the project the chat is in now (a chat "..." menu can name any chat); it
+ * defaults to the open one.
+ */
+export function ProjectDialog(props: { chatId: string | null; fromWorkspaceId?: string; onClose: () => void }) {
   const client = useCoworkConnection((state) => state.client);
-  const workspaceId = useCoworkConnection((state) => state.workspaceId);
+  const openWorkspaceId = useCoworkConnection((state) => state.workspaceId);
+  const workspaceId = props.fromWorkspaceId ?? openWorkspaceId;
   const title = useQuery({
     queryKey: ["cowork-project-chat-title", workspaceId, props.chatId],
     enabled: Boolean(client && workspaceId && props.chatId),
@@ -118,7 +123,7 @@ export function ProjectDialog(props: { chatId: string | null; onClose: () => voi
   });
   const initialName = nameFromChatTitle(title.data ?? "");
   // Keyed by the name, so the field fills in once the chat's title arrives.
-  return <ProjectForm key={initialName} chatId={props.chatId} initialName={initialName} onClose={props.onClose} />;
+  return <ProjectForm key={initialName} chatId={props.chatId} fromWorkspaceId={workspaceId} initialName={initialName} onClose={props.onClose} />;
 }
 
 export function SaveAsProjectButton(props: { onClick: () => void }) {

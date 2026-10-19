@@ -38,6 +38,7 @@ import { useCoworkConnection } from "../shell/cowork-connection";
 import { SkillIcon } from "../skills/skill-icon";
 import { skillDisplayTitle } from "../skills/skills";
 import { useMarketplaceRows } from "../skills/use-marketplace";
+import { PREVIEW_QUERY_KEY } from "../preview/preview";
 import { useFrameStore } from "../store/frame-store";
 import { useCoworkComposerStore } from "./composer-state";
 
@@ -114,6 +115,7 @@ export type ComposerAddMenuProps = {
  * read only when it opens, through the same queries the Projects, Skills and Connectors screens use.
  */
 export function ComposerAddMenu(props: ComposerAddMenuProps) {
+  const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const filesDisabled = !props.attachmentsEnabled;
   return (
     <DropdownMenu>
@@ -153,7 +155,7 @@ export function ComposerAddMenu(props: ComposerAddMenuProps) {
             <span className="cowork-add-menu__text">{t("cowork.add_menu_project")}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="cowork-add-menu cowork-add-menu--sub" {...FLYOUT}>
-            <ProjectItems chatId={props.chatId} />
+            <ProjectItems chat={props.chatId && workspaceId ? { id: props.chatId, workspaceId } : null} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -193,10 +195,12 @@ function NoteItem(props: { children: ReactNode }) {
  * Add to project. In a chat, picking a project moves the chat there; on the new-chat screen it
  * marks the project the chat will start in (a chip in the composer, applied at send). New project
  * opens the project dialog: for a chat that is Save as a project, which moves it in.
+ *
+ * `chat` is the chat to move and the project it is in now (the chat "..." menus on Recent and
+ * History pass any chat; the composer passes the open one); null on the new-chat screen.
  */
-function ProjectItems(props: { chatId: string | null }) {
+export function ProjectItems(props: { chat: { id: string; workspaceId: string } | null }) {
   const client = useCoworkConnection((state) => state.client);
-  const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const openModal = useFrameStore((state) => state.openModal);
   const showToast = useFrameStore((state) => state.showToast);
   const setMemory = useCoworkComposerStore((state) => state.setMemory);
@@ -211,22 +215,23 @@ function ProjectItems(props: { chatId: string | null }) {
   });
   // Sample projects cannot hold a real chat, so only a live list is offered.
   const live = projects.data && !projects.data.preview ? projects.data.data : null;
-  const currentId = props.chatId ? workspaceId : (picked?.id ?? null);
+  const chat = props.chat;
+  const currentId = chat ? chat.workspaceId : (picked?.id ?? null);
   const choices = live ? projectChoices(live, currentId) : [];
 
   const pick = (project: { id: string; name: string }) => {
-    if (!props.chatId) {
+    if (!chat) {
       choose(project);
       return;
     }
-    if (!workspaceId) return;
     void moveChatToProject(
       { client, navigate, toast: showToast, setMemory },
-      { chatId: props.chatId, workspaceId, project },
+      { chatId: chat.id, workspaceId: chat.workspaceId, project },
     ).then((moved) => {
       if (!moved) return;
       void queryClient.invalidateQueries({ queryKey: [PROJECTS_QUERY_KEY] });
       void queryClient.invalidateQueries({ queryKey: ["cowork-nav"] });
+      void queryClient.invalidateQueries({ queryKey: [PREVIEW_QUERY_KEY] });
     });
   };
 
@@ -242,7 +247,7 @@ function ProjectItems(props: { chatId: string | null }) {
         </DropdownMenuItem>
       ))}
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => openModal({ kind: "project", chatId: props.chatId })}>
+      <DropdownMenuItem onClick={() => openModal({ kind: "project", chatId: chat?.id ?? null, fromWorkspaceId: chat?.workspaceId })}>
         {icons.folderPlus(ICON)}
         <span className="cowork-add-menu__text">{t("cowork.projects_new")}</span>
       </DropdownMenuItem>
