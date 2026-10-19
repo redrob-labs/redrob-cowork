@@ -2,15 +2,17 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button, icons } from "@redrob-labs/ui";
+import { Badge, Button, Skeleton, icons } from "@redrob-labs/ui";
 
 import { t } from "../../../i18n";
 import { prefersReducedMotion } from "../../../lib/use-prefers-reduced-motion";
+import type { SkillOrigin } from "../services/types";
 import { shelfEdges, skillBrief, skillDisplayTitle, skillPath, type SkillRow, type SkillShelfId } from "./skills";
 import { SkillIcon } from "./skill-icon";
 
 const ICON = { width: 14, height: 14, "aria-hidden": true };
 
+/** The localized name of each skill group, read lazily so it follows the current locale. */
 export const SHELF_LABEL: Record<SkillShelfId, () => string> = {
   yours: () => t("cowork.skills_shelf_yours"),
   lawyer: () => t("cowork.skills_shelf_lawyer"),
@@ -19,6 +21,44 @@ export const SHELF_LABEL: Record<SkillShelfId, () => string> = {
   everyday: () => t("cowork.skills_shelf_everyday"),
 };
 
+/** The localized label for where a skill came from. */
+export function originLabel(origin: SkillOrigin): string {
+  switch (origin) {
+    case "library": return t("cowork.skills_origin_library");
+    case "team": return t("cowork.skills_origin_team");
+    case "mine": return t("cowork.skills_origin_mine");
+  }
+}
+
+/** A small tone-coded badge naming a skill's origin. */
+export function OriginBadge(props: { /** Origin rendered by this badge. */ origin: SkillOrigin }) {
+  return <Badge size="sm" tone={props.origin === "team" ? "info" : props.origin === "mine" ? "success" : "neutral"}>{originLabel(props.origin)}</Badge>;
+}
+
+/** A skill or workflow page's loading state, shaped like its hero so a deep link never paints grey lines. */
+export function HeroSkeleton(props: {
+  /** `circle` for a skill icon, `rect` for a workflow cover. */
+  art: "circle" | "rect";
+  /** Also reserve the skill list under the hero (workflow pages). */
+  list?: boolean;
+}) {
+  return (
+    <div className="cowork-skill-detail" aria-busy="true">
+      <span className="sr-only">{t("cowork.skills_loading_label")}</span>
+      <div className="cowork-skill-hero">
+        <Skeleton variant={props.art} width={128} height={128} />
+        <div className="cowork-skill-hero__content">
+          <Skeleton variant="text" width={320} />
+          <Skeleton variant="text" width={160} />
+          <Skeleton variant="rect" width={120} height={32} />
+        </div>
+      </div>
+      {props.list ? <Skeleton variant="text" lines={4} /> : null}
+    </div>
+  );
+}
+
+/** Inputs of one marketplace skill lockup. */
 type SkillTileProps = {
   /** Skill row rendered by this lockup. */
   row: SkillRow;
@@ -34,7 +74,7 @@ type SkillTileProps = {
   onAdd: (name: string) => void;
   /** Starts an installed skill when a workspace is connected. */
   onUse?: (name: string) => void;
-  /** Round 10: keeps element ids unique when one skill sits on two shelves (Your skills and Popular). */
+  /** Keeps element ids unique when one skill sits on two shelves (Your skills and Popular). */
   shelf?: string;
 };
 
@@ -84,6 +124,7 @@ export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse, s
   );
 }
 
+/** Inputs of the Your skills shelf: tile props shared by every row, plus the rows. */
 type SkillShelfProps = Omit<SkillTileProps, "row"> & {
   /** The only skill-tile shelf left is the person's own; other groups are workflows or Popular. */
   id: "yours";
@@ -107,7 +148,7 @@ type MarketplaceShelfProps = {
   label: string;
   /** Item count, so the chevrons re-measure when it changes. */
   count: number;
-  /** Round 10: `cards` for the square workflow covers, `tiles` (default) for skill circles. */
+  /** `cards` for the square workflow covers, `tiles` (default) for skill circles. */
   variant?: "tiles" | "cards";
   /** The `<li>` items. */
   children: ReactNode;

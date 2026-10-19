@@ -1,6 +1,7 @@
 import type { RedrobSkillItem } from "../../../app/lib/redrob-server";
 import type { CoworkSkill, LibrarySkill, SkillDetail, SkillDisplayFields, SkillDraft, SkillOrigin, SkillTags, SkillTaxonomy, TeamSkillsState } from "../services/types";
 import { catalogueDisplay } from "./console-catalogue";
+import type { PendingCoworkChat } from "./start-chat";
 
 /*
  * Skills are SKILL.md files (the agentskills.io specification) in the workspace's
@@ -211,6 +212,17 @@ export function seedSkillDetail(
     body: catalogue?.body ?? "",
     installed: { origin: mine.origin, scope: mine.scope },
   };
+}
+
+/** Runs a skill in a new Plan chat; false when no workspace is connected. */
+export function runSkill(
+  deps: { workspaceId: string | null; request: (chat: PendingCoworkChat) => void; navigate: (path: string) => void },
+  name: string,
+): boolean {
+  if (!deps.workspaceId) return false;
+  deps.request({ workspaceId: deps.workspaceId, prompt: skillRunPrompt(name), mode: "plan" });
+  deps.navigate("/chat");
+  return true;
 }
 
 /** What Run sends: the skill by name. */

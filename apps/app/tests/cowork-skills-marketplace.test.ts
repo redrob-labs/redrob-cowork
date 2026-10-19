@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
 import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
-import { shouldEscapeToList } from "../src/react-app/cowork/skills/cowork-skill";
+import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
