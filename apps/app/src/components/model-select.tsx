@@ -438,8 +438,9 @@ export function ModelSelect({
             />
           }
         >
-          {/* Shrinks with the row; in a narrow composer action row the name hides and the tooltip carries it. */}
-          <span className="min-w-0 max-w-48 truncate @max-[26rem]/composer-actions:hidden">
+          {/* Shrinks with the row and truncates; only a very narrow action row (under 16rem) hides the
+              name, and the tooltip still carries it. */}
+          <span className="min-w-0 max-w-48 truncate @max-[16rem]/composer-actions:hidden">
             {hideValue
               ? t("model_select.select_model")
               : (shownTitle || t("model_select.select_model"))}

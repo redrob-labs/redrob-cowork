@@ -1297,10 +1297,11 @@ export function ReactSessionComposer(props: ComposerProps) {
               the model picker can drop its text when the column gets narrow (side panel open), instead of
               the right-hand cluster overflowing back across the attach button.
             */}
-            <div className="@container/composer-actions mt-2 flex items-center gap-1.5">
-              {/* In the Cowork frame this group holds only fixed icon buttons, so it must not shrink below
-                  them (min-w-0 there is what let the right cluster run over Attach). */}
-              <div className={`flex flex-1 items-center gap-1.5 ${inCoworkFrame ? "" : "min-w-0"}`}>
+            <div className="@container/composer-actions mt-2 flex w-full items-center gap-1.5">
+              {/* In the Cowork frame this group holds only fixed icon buttons: it takes its own width and
+                  never grows, so free space goes to the right cluster and the model name truncates
+                  instead of collapsing to nothing (flex-1 here let it claim the space). */}
+              <div className={`flex items-center gap-1.5 ${inCoworkFrame ? "flex-none" : "min-w-0 flex-1"}`}>
                 <input
                   ref={(element) => {
                     fileInput = element ?? undefined;
