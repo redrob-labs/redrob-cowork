@@ -2501,6 +2501,13 @@
 .cowork-skill-tile__link > .cowork-skill-icon {
   margin-bottom: 8px;
 }
+/* Popular (the only shelf that still uses SkillTile): the circle is centred over the title and
+   description, which stay left-aligned to the tile's edge, as does the Add/Use button below.
+   The link spans the tile column and the text wraps to that same width, so centring in the
+   link centres the circle on the text block. */
+.cowork-skill-tile .cowork-skill-tile__link > .cowork-skill-icon {
+  align-self: center;
+}
 .cowork-skill-tile__link:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
