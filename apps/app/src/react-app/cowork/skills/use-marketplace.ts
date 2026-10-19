@@ -3,7 +3,9 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { previewKey, usePreviewServices } from "../preview/preview";
 import { CATALOGUE_CACHE_MS } from "./console-catalogue";
-import { marketplaceReady, skillRows } from "./skills";
+import { marketplaceReady, skillRows, type SkillRow } from "./skills";
+import { POPULAR_SKILLS } from "./popular-skills";
+import { availableWorkflows } from "./workflows";
 
 /**
  * The installed list and the public catalogue, joined into marketplace rows. Shared by the Skills
@@ -21,4 +23,27 @@ export function useMarketplaceRows() {
     [installed.data, library.data, ready],
   );
   return { services, scope, installed, library, rows, preview: installed.data?.preview };
+}
+
+/** The Popular shelf's rows: the curated list for this language, in order; missing names skipped. */
+export function popularRows(rows: readonly SkillRow[], locale: string): SkillRow[] {
+  const byName = new Map(rows.map((row) => [row.name, row]));
+  const list = locale.startsWith("ko") ? POPULAR_SKILLS.ko : POPULAR_SKILLS.en;
+  return list.flatMap((name) => {
+    const row = byName.get(name);
+    return row ? [row] : [];
+  });
+}
+
+/**
+ * Round 10 page order: Your skills (installed, in origin order), then the featured workflows, then
+ * Popular. The old per-profession shelves are gone; every other skill is a workflow page or a
+ * Search away.
+ */
+export function marketplaceSections(rows: readonly SkillRow[], locale: string) {
+  return {
+    yours: rows.filter((row) => row.installed !== null),
+    workflows: availableWorkflows(rows),
+    popular: popularRows(rows, locale),
+  };
 }

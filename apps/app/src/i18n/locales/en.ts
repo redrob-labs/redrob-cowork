@@ -1399,6 +1399,7 @@ const en = {
   "cowork.skills_scroll_right": "{shelf}: scroll right",
   "cowork.skills_back_to_all": "All skills",
   "cowork.skills_section_workflows": "The whole job, one set",
+  "cowork.skills_section_popular": "Popular",
   "cowork.skills_workflow_eyebrow": "Workflow",
   "cowork.skills_workflow_count_one": "{count} skill",
   "cowork.skills_workflow_count_other": "{count} skills",

@@ -33,13 +33,15 @@ type SkillTileProps = {
   onAdd: (name: string) => void;
   /** Starts an installed skill when a workspace is connected. */
   onUse?: (name: string) => void;
+  /** Round 10: keeps element ids unique when one skill sits on two shelves (Your skills and Popular). */
+  shelf?: string;
 };
 
 /** App Store style skill lockup: icon, title, the full short description, then the action. */
-export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse }: SkillTileProps) {
+export function SkillTile({ row, locale, busy, canAdd, fromPath, onAdd, onUse, shelf }: SkillTileProps) {
   const title = skillDisplayTitle(row, locale);
   const brief = skillBrief(row, locale);
-  const briefId = `skill-brief-${row.name}`;
+  const briefId = shelf ? `skill-brief-${shelf}-${row.name}` : `skill-brief-${row.name}`;
   return (
     <li className="cowork-skill-tile" data-skill={row.name}>
       <Link

@@ -12,15 +12,14 @@ import type { SkillOrigin, TeamSkillsState } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
-import { CONSOLE_SKILLS_URL, shelvesOf, shouldRestoreListFocus } from "./skills";
+import { CONSOLE_SKILLS_URL, shouldRestoreListFocus } from "./skills";
 import { installSkill } from "./use-skills";
 import { runSkill } from "./cowork-skill";
 import { useCoworkStartStore } from "./start-chat";
 import { consoleCatalogue } from "./console-catalogue";
-import { SkillShelf } from "./skill-tile";
-import { useMarketplaceRows } from "./use-marketplace";
+import { MarketplaceShelf, SkillShelf, SkillTile } from "./skill-tile";
+import { marketplaceSections, useMarketplaceRows } from "./use-marketplace";
 import { WorkflowShelf } from "./workflow-card";
-import { availableWorkflows } from "./workflows";
 
 /** The localized label for where a skill came from. */
 export function originLabel(origin: SkillOrigin): string {
@@ -98,8 +97,7 @@ export function SkillsScreen() {
   const requestChat = useCoworkStartStore((state) => state.request);
 
   const team = useQuery({ queryKey: previewKey(scope, "team"), queryFn: () => services.skills.teamState(), staleTime: 60_000 });
-  const shelves = useMemo(() => rows ? shelvesOf(rows, locale) : [], [rows, locale]);
-  const workflows = useMemo(() => rows ? availableWorkflows(rows) : [], [rows]);
+  const sections = useMemo(() => rows ? marketplaceSections(rows, locale) : null, [rows, locale]);
   const count = installed.data?.data.length;
   const teamText = teamStatusText(team.data?.data ?? null);
   const fromPath = "/skills";
@@ -172,9 +170,13 @@ export function SkillsScreen() {
           libraryNotice
         ) : (
           <div className="cowork-skills__marketplace">
-            {shelves.filter((shelf) => shelf.id === "yours").map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} {...tileProps} />)}
-            {workflows.length ? <WorkflowShelf workflows={workflows} locale={locale} fromPath={fromPath} /> : null}
-            {shelves.filter((shelf) => shelf.id !== "yours").map((shelf) => <SkillShelf key={shelf.id} id={shelf.id} rows={shelf.rows} {...tileProps} />)}
+            {sections?.yours.length ? <SkillShelf id="yours" rows={sections.yours} {...tileProps} /> : null}
+            {sections?.workflows.length ? <WorkflowShelf workflows={sections.workflows} locale={locale} fromPath={fromPath} /> : null}
+            {sections?.popular.length ? (
+              <MarketplaceShelf id="popular" label={t("cowork.skills_section_popular")} count={sections.popular.length}>
+                {sections.popular.map((row) => <SkillTile key={row.name} row={row} shelf="popular" {...tileProps} />)}
+              </MarketplaceShelf>
+            ) : null}
             {libraryNotice}
           </div>
         )}

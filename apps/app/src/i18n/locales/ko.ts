@@ -1389,6 +1389,7 @@ const ko = {
   "cowork.skills_scroll_right": "{shelf} 오른쪽으로 넘기기",
   "cowork.skills_back_to_all": "전체 스킬",
   "cowork.skills_section_workflows": "업무 전체를 한 세트로",
+  "cowork.skills_section_popular": "인기 스킬",
   "cowork.skills_workflow_eyebrow": "워크플로",
   "cowork.skills_workflow_count": "스킬 {count}개",
   "cowork.skills_workflow_add_all": "{count}개 모두 추가",
