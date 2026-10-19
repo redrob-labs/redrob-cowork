@@ -29,7 +29,6 @@ import type {
   PendingPermission,
   PendingQuestion,
   SkillCard,
-  TodoItem,
 } from "@/app/types";
 import {
   publishInspectorSlice,
@@ -358,8 +357,6 @@ export type SessionSurfaceProps = {
   searchFiles: (query: string) => Promise<string[]>;
   isRemoteWorkspace: boolean;
   isSandboxWorkspace: boolean;
-  /** Unused since round 9 removed the to-do dock; kept so callers need no change. */
-  todos?: TodoItem[];
   activePermission?: PendingPermission | null;
   permissionReplyBusy?: boolean;
   respondPermission?: (requestID: string, reply: "once" | "always" | "reject") => void;

@@ -16,7 +16,6 @@ import type {
   PendingPermission,
   PendingQuestion,
   ProviderListItem,
-  TodoItem,
   WorkspaceConnectionState,
   WorkspaceSessionGroup,
 } from "../../../../app/types";
@@ -249,7 +248,6 @@ export type SessionPageProps = {
   sidebar: SessionPageSidebarProps;
   surface?: SessionPageSurfaceProps | null;
   history?: SessionPageHistoryControls | null;
-  todos: TodoItem[];
   sessionLoadingById: (sessionId: string | null) => boolean;
   shareWorkspaceModal?: ShareWorkspaceModalProps | null;
   providerAuthModal?: ProviderAuthModalProps | null;
@@ -1490,7 +1488,6 @@ export function SessionPage(props: SessionPageProps) {
                         isControlTarget={activeWorkbenchPane === "primary"}
                         opencodeBaseUrl={reactSessionBaseUrl}
                         redrobToken={reactSessionToken}
-                        todos={props.todos}
                         activePermission={props.activePermission}
                         permissionReplyBusy={props.permissionReplyBusy}
                         respondPermission={props.respondPermission}
@@ -1521,7 +1518,6 @@ export function SessionPage(props: SessionPageProps) {
                             isControlTarget={activeWorkbenchPane === "secondary"}
                             opencodeBaseUrl={reactSessionBaseUrl}
                             redrobToken={reactSessionToken}
-                            todos={[]}
                             onOpenTarget={openTarget}
                           />
                         </ResizablePanel>

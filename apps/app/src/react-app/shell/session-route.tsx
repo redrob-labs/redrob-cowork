@@ -829,7 +829,6 @@ export function SessionRoute() {
     activeQuestion,
     questionReplyBusy,
     respondQuestion,
-    todos,
   } = useSessionInteractions({
     client: opencodeClient,
     workspaceId: selectedWorkspaceId,
@@ -2688,7 +2687,6 @@ export function SessionRoute() {
         onUndo: () => {},
         onRedo: () => {},
       }}
-      todos={todos}
       sessionLoadingById={(sessionId) => effectiveLoading && Boolean(sessionId && sessionId === selectedSessionId)}
       shareWorkspaceModal={
         shareWorkspaceState.shareWorkspaceOpen
