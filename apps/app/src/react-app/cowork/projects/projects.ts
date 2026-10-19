@@ -28,6 +28,8 @@ export type ProjectRow = {
   lastActiveAt: number | null;
   /** The server made its folder: Cowork asks for a folder of the person's. */
   managed: boolean;
+  /** Where the project's folder is on this computer (Open project folder); null for sample data. */
+  path: string | null;
 };
 
 export type ProjectChat = { id: string; title: string; updatedAt: number };
@@ -81,6 +83,7 @@ function fixtureRow(id: string): ProjectRow | null {
     fileCount: project.fileCount,
     lastActiveAt: latest(chats.map((chat) => chat.updatedAt)),
     managed: false,
+    path: null,
   };
 }
 
@@ -93,6 +96,7 @@ function toRow(workspace: RedrobWorkspaceInfo, chats: readonly ProjectChat[] | n
     fileCount: null,
     lastActiveAt: chats ? latest(chats.map((chat) => chat.updatedAt)) : null,
     managed: workspace.kind === "managed",
+    path: workspace.path?.trim() || null,
   };
 }
 

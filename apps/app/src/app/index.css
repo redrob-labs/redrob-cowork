@@ -5993,3 +5993,31 @@ a.cowork-radar-story__source:focus-visible {
     transition: none;
   }
 }
+
+/* Projects page rows with a "..." menu: the row link and its button side by side; the button
+   shows on hover, focus or while its menu is open, like the chat rows. */
+.cowork-project-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.cowork-project-item > .cowork-project-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cowork-project-item:hover .cowork-row-more,
+.cowork-project-item:focus-within .cowork-row-more,
+.cowork-project-item[data-menu-open] .cowork-row-more {
+  opacity: 1;
+}
+
+.cowork-project-item[data-menu-open] {
+  background: var(--surface-sunken);
+}
+
+.cowork-project-row__text .cowork-inline-rename {
+  max-width: 420px;
+}

@@ -1,11 +1,21 @@
 /** @jsxImportSource react */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { Alert, ApprovalStep, Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
 
-import { pickDirectory } from "../../../app/lib/desktop";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { openDesktopPath, pickDirectory, workspaceForget } from "../../../app/lib/desktop";
+import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
+import { deleteProject, projectChatIds, renameProject } from "../chats/chat-actions";
+import { ConfirmDeleteDialog, InlineRename, refreshChatLists } from "../chats/chat-menu";
 import { SAMPLE_NOW } from "../services/fixtures/sample-day";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { CoworkShell } from "../shell/cowork-shell";
@@ -46,14 +56,28 @@ function ProjectFigures(props: { project: Pick<ProjectRow, "chatCount" | "fileCo
   );
 }
 
+export type ProjectsViewActions = {
+  onRename: (project: ProjectRow, value: string) => void;
+  onOpenFolder: (project: ProjectRow) => void;
+  onDelete: (project: ProjectRow) => void;
+};
+
 export type ProjectsViewProps = {
   projects: readonly ProjectRow[];
   now: number;
   locale: string;
+  /** The "..." menu on each row (real projects only): Rename, Open project folder, Delete. */
+  actions?: ProjectsViewActions;
 };
 
-/** Every project: name, one line about it, its counts and when it was last active. */
+/**
+ * Every project: name, one line about it, its counts and when it was last active. With `actions`,
+ * each row has a "..." menu on hover or focus (the link's sibling, not inside it): Rename (inline,
+ * like chats), Open project folder, and Delete (danger, last).
+ */
 export function ProjectsView(props: ProjectsViewProps) {
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
   if (props.projects.length === 0) {
     return (
       <EmptyState
@@ -63,23 +87,67 @@ export function ProjectsView(props: ProjectsViewProps) {
       />
     );
   }
+  const actions = props.actions;
   return (
     <div className="cowork-projects">
       <p className="cowork-projects__lede">{t("cowork.projects_lede")}</p>
       <ul className="cowork-projects__list">
         {props.projects.map((project) => (
-          <li key={project.id}>
-            <Link className="cowork-project-row" to={projectPath(project.id)}>
-              <span className="cowork-project-row__icon">{icons.folder(ROW_ICON)}</span>
-              <span className="cowork-project-row__text">
-                <b>{project.name}</b>
-                <span>{project.about ?? t("cowork.projects_about_none")}</span>
-              </span>
-              <ProjectFigures project={project} />
-              <span className="cowork-project-row__when">
-                {project.lastActiveAt === null ? null : formatNavTime(project.lastActiveAt, props.now, props.locale)}
-              </span>
-            </Link>
+          <li key={project.id} className="cowork-project-item" data-menu-open={menuFor === project.id || undefined}>
+            {renaming === project.id && actions ? (
+              <div className="cowork-project-row">
+                <span className="cowork-project-row__icon">{icons.folder(ROW_ICON)}</span>
+                <span className="cowork-project-row__text">
+                  <InlineRename
+                    value={project.name}
+                    label={t("cowork.project_name_input")}
+                    onSave={(value) => {
+                      setRenaming(null);
+                      actions.onRename(project, value);
+                    }}
+                    onCancel={() => setRenaming(null)}
+                  />
+                </span>
+              </div>
+            ) : (
+              <Link className="cowork-project-row" to={projectPath(project.id)}>
+                <span className="cowork-project-row__icon">{icons.folder(ROW_ICON)}</span>
+                <span className="cowork-project-row__text">
+                  <b>{project.name}</b>
+                  <span>{project.about ?? t("cowork.projects_about_none")}</span>
+                </span>
+                <ProjectFigures project={project} />
+                <span className="cowork-project-row__when">
+                  {project.lastActiveAt === null ? null : formatNavTime(project.lastActiveAt, props.now, props.locale)}
+                </span>
+              </Link>
+            )}
+            {actions && renaming !== project.id ? (
+              <DropdownMenu open={menuFor === project.id} onOpenChange={(open) => setMenuFor(open ? project.id : null)}>
+                <DropdownMenuTrigger
+                  render={(
+                    <button type="button" className="cowork-row-more" aria-label={t("cowork.more_actions_label", { name: project.name })}>
+                      {icons.more(ROW_ICON)}
+                    </button>
+                  )}
+                />
+                <DropdownMenuContent align="end" sideOffset={4} className="cowork-add-menu">
+                  <DropdownMenuItem onClick={() => setRenaming(project.id)}>
+                    {icons.edit(ROW_ICON)}
+                    <span className="cowork-add-menu__text">{t("cowork.chat_rename")}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled={!project.path} onClick={() => actions.onOpenFolder(project)}>
+                    {icons.folderOpen(ROW_ICON)}
+                    <span className="cowork-add-menu__text">{t("cowork.project_open_folder")}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={() => actions.onDelete(project)}>
+                    {icons.trash(ROW_ICON)}
+                    <span className="cowork-add-menu__text">{t("cowork.chat_delete")}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -112,6 +180,8 @@ export function ProjectsScreen() {
   });
   const rows = projects.data?.data ?? [];
   const now = projects.data?.preview ? SAMPLE_NOW : Date.now();
+  const projectActions = useProjectActions();
+  const [deleting, setDeleting] = useState<ProjectRow | null>(null);
 
   return (
     <CoworkShell
@@ -125,10 +195,86 @@ export function ProjectsScreen() {
       ) : projects.isError ? (
         <EmptyState title={t("cowork.projects_error_title")} description={t("cowork.projects_error_text")} />
       ) : (
-        <ProjectsView projects={rows} now={now} locale={locale} />
+        <ProjectsView
+          projects={rows}
+          now={now}
+          locale={locale}
+          // Sample projects cannot be renamed, opened or deleted, so the menus appear on real data only.
+          actions={
+            projects.data?.preview
+              ? undefined
+              : {
+                  onRename: (project, value) => void projectActions.rename(project, value),
+                  onOpenFolder: (project) => void projectActions.openFolder(project),
+                  onDelete: setDeleting,
+                }
+          }
+        />
       )}
+      {deleting ? (
+        <ConfirmDeleteDialog
+          title={t("cowork.project_delete_title")}
+          text={
+            deleting.chatCount
+              ? t("cowork.project_delete_text", { name: deleting.name, count: deleting.chatCount })
+              : t("cowork.project_delete_text_empty", { name: deleting.name })
+          }
+          note={t("cowork.project_delete_files_note")}
+          onConfirm={() => projectActions.remove(deleting)}
+          onClose={() => setDeleting(null)}
+        />
+      ) : null}
     </CoworkShell>
   );
+}
+
+/**
+ * The Projects page's row actions. Rename sets the display name (the folder keeps its own).
+ * Open project folder opens it in the system file manager. Delete removes the project and its
+ * chats but never its folder or files; deleting the project that is open reloads the app, so
+ * the window does not keep running against a project that is gone.
+ */
+function useProjectActions() {
+  const client = useCoworkConnection((state) => state.client);
+  const openWorkspaceId = useCoworkConnection((state) => state.workspaceId);
+  const showToast = useFrameStore((state) => state.showToast);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  return {
+    rename: async (project: ProjectRow, value: string) => {
+      if (await renameProject({ client, toast: showToast }, { projectId: project.id, value, previous: project.name })) {
+        refreshChatLists(queryClient);
+      }
+    },
+    openFolder: async (project: ProjectRow) => {
+      if (!project.path) return;
+      try {
+        await openDesktopPath(project.path);
+      } catch {
+        showToast(t("cowork.project_open_folder_failed"), t("cowork.settings_try_again"), "danger");
+      }
+    },
+    remove: async (project: ProjectRow) => {
+      if (!client) return;
+      let chatIds: string[];
+      try {
+        chatIds = await projectChatIds(client, project.id);
+      } catch {
+        showToast(t("cowork.project_delete_failed"), t("cowork.settings_try_again"), "danger");
+        return;
+      }
+      const deleted = await deleteProject(
+        { client, forget: isDesktopRuntime() ? workspaceForget : undefined, toast: showToast },
+        { projectId: project.id, chatIds },
+      );
+      if (!deleted) return;
+      refreshChatLists(queryClient);
+      if (project.id === openWorkspaceId) {
+        navigate("/projects");
+        window.location.reload();
+      }
+    },
+  };
 }
 
 export type FolderAskProps = {

@@ -1236,6 +1236,7 @@ const ko = {
   "cowork.project_delete_failed": "프로젝트를 삭제하지 못했어요",
   "cowork.project_delete_files_note": "폴더와 그 안의 파일은 컴퓨터에 그대로 남아요.",
   "cowork.project_delete_text": "“{name}” 프로젝트와 채팅 {count}개가 삭제돼요. 되돌릴 수 없어요.",
+  "cowork.project_delete_text_empty": "“{name}” 프로젝트가 삭제돼요. 채팅은 없어요.",
   "cowork.project_delete_title": "이 프로젝트를 삭제할까요?",
   "cowork.project_deleted": "프로젝트를 삭제했어요",
   "cowork.project_deleted_text": "폴더와 파일은 컴퓨터에 그대로 있어요.",

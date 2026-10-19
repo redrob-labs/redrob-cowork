@@ -1245,6 +1245,7 @@ const en = {
   "cowork.project_created_ready": "{name} is ready.",
   "cowork.project_delete_failed": "The project could not be deleted",
   "cowork.project_delete_files_note": "Its folder and the files in it stay on your computer.",
+  "cowork.project_delete_text_empty": "“{name}” will be deleted. It has no chats.",
   "cowork.project_delete_text_one": "“{name}” and its {count} chat will be deleted. This can't be undone.",
   "cowork.project_delete_text_other": "“{name}” and its {count} chats will be deleted. This can't be undone.",
   "cowork.project_delete_title": "Delete this project?",
