@@ -145,11 +145,13 @@ function CoworkArtifactView(props: { target: OpenTarget; chatId: string; onBack:
   const file = useMemo(() => fileFromTarget(props.target, "", props.chatId), [props.chatId, props.target]);
   return (
     <div className="cowork-artifact-view">
-      <button type="button" className="cowork-file__back" onClick={props.onBack}>
-        {icons.arrowLeft({ width: 14, height: 14, "aria-hidden": true })}
-        {t("cowork.artifacts_back")}
-      </button>
+      {/* Round 10: the back control lives INSIDE the scroller, so it scrolls away with the
+          document instead of staying pinned to the top of the panel. */}
       <div className="cowork-artifact-view__body">
+        <button type="button" className="cowork-file__back" onClick={props.onBack}>
+          {icons.arrowLeft({ width: 14, height: 14, "aria-hidden": true })}
+          {t("cowork.artifacts_back")}
+        </button>
         <CoworkFilePreview file={file} client={client} workspaceId={workspaceId} />
       </div>
     </div>

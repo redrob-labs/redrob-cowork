@@ -4620,7 +4620,8 @@ a.radar-story__source:focus-visible {
   background: var(--surface-base, var(--background));
   color: var(--ink-primary, var(--foreground));
 }
-.cowork-artifact-view > .cowork-file__back { align-self: flex-start; margin: 12px 16px 0; }
+/* Round 10: inside the scroll body, so it scrolls with the document (was pinned above it). */
+.cowork-artifact-view__body > .cowork-file__back { display: inline-flex; margin: 12px 16px 0; }
 .cowork-artifact-view__body {
   min-height: 0;
   flex: 1;
@@ -4652,7 +4653,7 @@ a.radar-story__source:focus-visible {
   flex-direction: column;
   gap: var(--space-4, 16px);
   margin: 0;
-  padding-left: 18px;
+  padding-left: var(--cowork-q-gutter, 18px);
 }
 .cowork-q__item::marker { font-size: 13px; font-weight: 600; color: var(--ink-secondary); }
 .cowork-q__ask {
@@ -4712,7 +4713,9 @@ a.radar-story__source:focus-visible {
   font-size: 13px;
 }
 .cowork-q__opt--input input::placeholder { color: var(--ink-tertiary, var(--ink-secondary)); }
-.cowork-q__act { display: flex; align-items: center; gap: var(--space-3, 12px); }
+/* Round 10: same inline start inset as .cowork-q__list (its 18px marker gutter), so Execute lines
+   up with the question text instead of sitting 18px to its left. */
+.cowork-q__act { display: flex; align-items: center; gap: var(--space-3, 12px); padding-left: var(--cowork-q-gutter, 18px); }
 @media (prefers-reduced-motion: reduce) {
   .cowork-q__opt { transition: none; }
 }
