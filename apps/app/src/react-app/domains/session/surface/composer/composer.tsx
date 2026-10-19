@@ -109,14 +109,14 @@ type ComposerProps = {
   /** Render inline in a page (new-task hero): no sticky dock chrome or inner max-width, aligning with sibling content. */
   flush?: boolean;
   /**
-   * Overrides the editor placeholder. Round 35, item 4: the new-chat hero passes
+   * Overrides the editor placeholder. The new-chat hero passes
    * its rotating starter hint here so the suggestion lives INSIDE the input
    * instead of as a separate sub-line. Falls back to the frame/default
    * placeholder when unset.
    */
   placeholderOverride?: string;
   /**
-   * Round 36 (item 3): when true the editor starts at a two-line min-height
+   * When true the editor starts at a two-line min-height
    * (`min-h-[60px]`) instead of the one-line default. The new-chat hero sets it
    * so the hero composer is two lines by default; the in-chat composer leaves it
    * unset and stays one line. Both still grow to the same max height.
@@ -1102,7 +1102,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         previously a read-only chip on the model control and could only be CHANGED by clicking a
         model and walking into a submenu, which is why the interaction was unreadable.
         `EffortSelect` renders nothing when the selected model publishes no levels.
-        Round 37 (item 9): Redrob Auto routes per task and has no user-facing effort level,
+        Redrob Auto routes per task and has no user-facing effort level,
         so hide the Effort selector entirely when Auto is the selected model.
       */}
       {props.selectedModel.modelID === REDROB_MODEL_ID ? null : (
@@ -1322,7 +1322,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                     if (target instanceof Element && target.closest("button")) event.preventDefault();
                   }}
                 >
-                  {/* Round 37 (item 9): the "+" tools button (agents/commands/skills/
+                  {/* The "+" tools button (agents/commands/skills/
                      plugins/connections) is hidden everywhere. @-mention and slash
                      access is unaffected -- it still works by typing "@"/"/" in the
                      editor. The menu markup below stays but is no longer triggerable. */}
@@ -1650,7 +1650,7 @@ export function ReactSessionComposer(props: ComposerProps) {
         */}
         {inCoworkFrame ? <CoworkComposerStatus chatKey={coworkChatKey} showValues={Boolean(props.flush)} /> : null}
         {inCoworkFrame && !props.flush ? (
-          // Round 35, item 3: a quiet disclaimer under the IN-CHAT composer, matching the
+          // A quiet disclaimer under the in-chat composer, matching the
           // new-chat home. The hero (flush) renders its own, so this is in-chat only.
           <p className="cowork-chat__disclaimer">{t("hero.disclaimer")}</p>
         ) : null}

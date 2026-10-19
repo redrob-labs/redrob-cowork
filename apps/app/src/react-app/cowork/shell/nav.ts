@@ -82,8 +82,7 @@ export function privacyLevelLabel(level: PrivacyLevel): string {
   }
 }
 
-/** Round 38 (item 1): a count badge, but a zero shows NO meta (an empty "0" badge
- *  beside Scheduled read as noise). Null (still loading) and 0 both yield undefined. */
+/** A count badge; a zero shows no meta (an empty "0" badge reads as noise). Null (still loading) and 0 both yield undefined. */
 const countPositive = (value: number | null) => (value && value > 0 ? String(value) : undefined);
 
 /** The Cowork menu, in the handoff's order. Pure: everything it shows comes in through `input`. */
@@ -99,12 +98,9 @@ export function buildCoworkNav(input: CoworkNavInput): AppShellNavItem[] {
   });
   const recent = [...input.chats].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, RECENT_CHAT_COUNT);
 
-  // Round 37: left-menu slimmed. Item 6: History row removed from the menu (route
-  // still exists). Item 5: the "Your Cowork" group (nav_how_it_works heading +
-  // Privacy/Memory/Connectors) is removed from the left menu -- all three remain
-  // reachable in Settings (Memory -> memory tab, Connectors -> ai tab, Privacy ->
-  // Preferences). Item 7: Recent shows the latest 5 (RECENT_CHAT_COUNT) with NO
-  // date/time meta on the right.
+  // A slim left menu: History is reached from Recent's "View all" (its route stays);
+  // Privacy, Memory and Connectors live in Settings; Recent shows the latest
+  // RECENT_CHAT_COUNT chats with no date/time meta.
   return [
     place("guide", t("cowork.nav_guide"), icons.chart),
     place("chat", t("cowork.nav_new_chat"), icons.plus),
@@ -118,9 +114,7 @@ export function buildCoworkNav(input: CoworkNavInput): AppShellNavItem[] {
       href: toHref(`/chat/${encodeURIComponent(chat.id)}`),
       current: input.chatId === chat.id,
     })),
-    // Round 39 (item): "View all" under Recent routes to the History page, which left the
-    // left menu in round 37 (item 6) but is still a live route. Shown only when there are
-    // recent chats -- with an empty Recent there is nothing to view all of.
+    // "View all" under Recent opens the History page; shown only when there are recent chats.
     ...(recent.length
       ? [{
           id: "recent-view-all",

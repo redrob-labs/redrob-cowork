@@ -69,13 +69,11 @@ export function ProfessionGuideView(props: {
   /** Starts a normal chat for a selected trending search. */
   onTrendPick: (item: TrendItem) => void;
 }) {
-  // Round 8, item 10: the chart-style browse layer. Null = the Spotify/Apple-Music home (banners +
+  // The chart-style browse layer. Null = the chart home (banners +
   // tiles); a pick drills into the existing ModelGuide ranking for that profession or output.
   const [pick, setPick] = useState<ChartPick | null>(null);
-  // Round 37 (item 8): opening a chart (or switching charts) kept the shell's
-  // scroll position, so a detail could open scrolled to the middle. The scrolling
-  // container is the DS shell's #rr-shell-main; reset it to the top whenever the
-  // pick changes (enter a detail, switch charts, or return to the home).
+  // A chart opens at the top: the DS shell's #rr-shell-main keeps its scroll position
+  // otherwise, so reset it whenever the pick changes (detail, chart switch, or home).
   useEffect(() => {
     document.getElementById("rr-shell-main")?.scrollTo({ top: 0 });
   }, [pick]);
@@ -253,8 +251,7 @@ export function GuideScreen() {
         markNewChatUsesDefault();
       }
     : undefined;
-  // Round 11 (Trending AI): the "By price" view was dropped and the header + tab strip removed, so
-  // the screen is the profession chart only. The pricing query and tab state are gone with them.
+  // The screen is the profession chart only: no price view, header or tab strip.
   const research = useQuery({
     queryKey: GUIDE_RESEARCH_KEY,
     queryFn: () => loadGuideResearch(guideFetch(isDesktopRuntime())),

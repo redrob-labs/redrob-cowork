@@ -31,7 +31,7 @@ export function RedirectToChat() {
   return <Navigate to={chatPath(sessionId)} replace />;
 }
 
-/** `/` and any unknown path land on Model Chart — the default landing (round 8, item 2). */
+/** `/` and any unknown path land on Model Chart — the default landing. */
 export function RedirectToGuide() {
   return <Navigate to="/guide" replace />;
 }

@@ -25,7 +25,7 @@ export function formatTook(ms: number): string | null {
 const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * When a History row last changed, in words (Claude-style): "just now", "5 minutes ago",
+ * When a History row last changed, in words: "just now", "5 minutes ago",
  * "3 hours ago", "Yesterday", "4 days ago", then the locale date for anything older than a
  * week. Pure and locale-aware; `now` is passed in so it is deterministic in tests.
  */

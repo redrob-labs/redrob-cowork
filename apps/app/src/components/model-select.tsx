@@ -457,9 +457,9 @@ export function ModelSelect({
       </Tooltip>
       <PopoverContent
         // border-0 rounded-none: the DS PopoverContent defaults to `rounded-lg border`,
-        // which drew a second rounded border around the ModelMenu's own rounded-2xl
-        // container (round 5, item 7). The menu supplies the only frame now.
-        // Round 14, item G: the base PopoverContent also sets `backdrop-blur-xl
+        // which would draw a second rounded border around the ModelMenu's own rounded-2xl
+        // container; the menu supplies the only frame.
+        // The base PopoverContent also sets `backdrop-blur-xl
         // backdrop-saturate-150`, which tailwind-merge does NOT override here — a backdrop-filter on
         // a rounded-none box paints a HARD GREY SQUARE pane behind the rounded menu. Cancel it so the
         // only painted/filtered surface is the ModelMenu's own rounded card.

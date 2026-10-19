@@ -298,8 +298,7 @@
  * rule is written against its rail. `--app-product-*` because the design system
  * scopes its own `--product-*` to `.rr-shell`.
  */
-/* Round 37 (item 2 / DS 1.6.0): the design system renamed the product from "cowork"
-   to "cowork" (--product-cowork* -> --product-cowork*, data-product="cowork"); follow it. */
+/* Follows the design system's product name: --product-cowork* and data-product="cowork". */
 [data-product="cowork"] {
   --app-product-mark: var(--product-cowork);
   --app-product-wash: var(--product-cowork-wash);
@@ -331,12 +330,11 @@
 }
 
 /*
-  Round 12 (revised): the Cowork sidebar as an Apple-Music-style FLOATING POPUP CARD. Per the
-  reference it is not a flush rail - it is a rounded rectangle inset from the window on all sides,
-  with a soft shadow and a more vibrant translucent gradient tint.
+  The Cowork sidebar as a floating card: a rounded rectangle inset from the window on all sides,
+  with a soft shadow and a translucent gradient tint.
 
   How it floats inside a CSS-grid column: the DS lays `.rr-shell__side` as the first grid column, so
-  we inset the panel WITHIN that column with margin + border-radius + a drop shadow, letting the
+  the panel is inset WITHIN that column with margin + border-radius + a drop shadow, letting the
   window ground show in the gap around it. backdrop-filter is progressive enhancement (true blur only
   where the window is vibrant, e.g. macOS; a richer translucent tint otherwise). The inner scroll
   area (#rr-shell-side) keeps its own overflow, so the rounded corners read without clipping scroll.
@@ -345,12 +343,8 @@
   margin: var(--space-2);
   border-radius: 16px;
   overflow: hidden;
-  /* Round 15/35: the floating card matches the MAIN WORK SECTION. Round 35:
-     Felix sees the grey card framed by the white window gap as "left is white,
-     right is grey" -- so match BOTH surfaces to WHITE (--surface-base), the same
-     tone as the gap/body, instead of grey (--surface-raised). The card still
-     FLOATS -- border + shadow + radius keep it lifted -- but there is no longer
-     a grey-vs-white edge anywhere. */
+  /* The floating card uses the same white surface (--surface-base) as the window gap and the
+     main work area, so no grey-vs-white edge appears; border, shadow and radius keep it lifted. */
   background-color: var(--surface-base);
   background-image: none;
   border: 1px solid color-mix(in srgb, var(--border-subtle) 55%, transparent);
@@ -374,10 +368,8 @@
 }
 
 /*
-  Round 32/35: the main work area matches the floating sidebar card. Round 35:
-  both are now --surface-base (white), the same tone as the window gap/body, so
-  the left panel and right body read as one continuous white surface with no
-  grey-vs-white edge. (Was --surface-raised grey.)
+  The main work area uses the same white surface as the floating sidebar card and the window gap,
+  so the left panel and right body read as one continuous surface.
 */
 .cowork-shell #rr-shell-main {
   background-color: var(--surface-base);
@@ -400,8 +392,8 @@
 
 /*
   The empty new-chat home has no title and nothing to put in the shell's top header,
-  so that header rendered as an empty 57px strip with only the (inert here) side-panel
-  toggle in it (round 3, item 1). Hide it on the home; the work flexes to fill. On the
+  so that header would render as an empty 57px strip with only the (inert here) side-panel
+  toggle in it. Hide it on the home; the work flexes to fill. On the
   desktop app the custom window title bar (window-title-bar.tsx) owns the drag region,
   so no drag strip is lost here.
 */
@@ -410,29 +402,28 @@
 }
 
 /*
-  Round 19: `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
+  `--headless` hides the empty top strip exactly like `--bare-top`, but does NOT open the
   work subtree's overflow. `--bare-top` is the EMPTY CHAT HOME, which has no scrolling transcript and
   needs overflow:visible so an upward status popover isn't clipped (see the rule further down). A tall
   SCROLLING screen that merely has no header - Trending AI - must keep its scroll container, so it uses
-  this instead. Reusing `--bare-top` there turned #rr-shell-main to overflow:visible and clipped the
-  lower shelves (the "missing scrollbar"). Same header-hide, different overflow contract.
+  this instead; `--bare-top` there would set #rr-shell-main to overflow:visible and clip the lower
+  shelves. Same header-hide, different overflow contract.
 */
 .cowork-shell--headless .rr-shell__top {
   display: none;
 }
 
 /*
-  Sidebar brand lockup (round 4, item 6). CoworkShell now passes product="Redrob
-  Cowork", so the wordmark renders beside the mark. Make the mark a touch larger
-  with rounded corners, and set the wordmark in the design system's own sans at a
-  sidebar-appropriate size. Scoped to the Cowork shell brand row.
+  Sidebar brand lockup: CoworkShell passes product="Redrob Cowork", so the wordmark renders beside
+  the mark. The wordmark is set in the design system's own sans at a sidebar-appropriate size.
+  Scoped to the Cowork shell brand row.
 */
 .cowork-shell .rr-shell__brand .rr-mark,
 .cowork-shell .rr-shell__brand .rr-mark img,
 .cowork-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
   width: 34px;
   height: 34px;
-  border-radius: 4px; /* less rounded than before (round 5, item 6) */
+  border-radius: 4px; /* a softer corner than the DS default */
   overflow: hidden;
 }
 .cowork-shell .rr-shell__product {
@@ -441,34 +432,27 @@
   letter-spacing: -0.01em;
   color: var(--ink-primary);
 }
-/*
-  Round 7, item 2: the DS brand row leaves too much space between the mark and the
-  "Redrob Cowork" wordmark. Tighten the gap so the lockup reads as one unit.
-*/
+/* Tighten the DS brand row's gap so the mark and the "Redrob Cowork" wordmark read as one unit. */
 .cowork-shell .rr-shell__brand {
   gap: 8px;
 }
 
 /*
-  Round 5, item 4: the brand row's own fold toggle (.rr-shell__fold, right of the
-  "Redrob Cowork" wordmark) is redundant now that the window title bar carries the
-  sidebar toggle (round 4, item 5) -- both flip the same sidebarOpen store. Hide it.
+  The brand row's own fold toggle (.rr-shell__fold) is redundant: the window title bar carries the
+  sidebar toggle, and both flip the same sidebarOpen store. Hide it.
 */
 .cowork-shell .rr-shell__fold {
   display: none;
 }
 
-/*
-  Round 8, item 6: the sidebar brand lockup keeps only the "Redrob Cowork" wordmark; drop the
-  square mark image (the title bar now carries the Cowork mark). Scoped to the Cowork shell.
-*/
+/* The sidebar lockup is the "Redrob Cowork" wordmark only; the title bar carries the Cowork mark. */
 .cowork-shell .rr-shell__brand .rr-mark,
 .cowork-shell .rr-shell__brand > img:not(.rr-shell__symbol) {
   display: none;
 }
 
 /*
-  Round 8, item 5: the left sidebar is draggable. The CoworkShell has no right rail, so the DS grid is
+  The left sidebar is resizable. The CoworkShell has no right rail, so the DS grid is
   `232px minmax(0,1fr)`; drive that first column from --app-side-width (set from the UI store, clamped
   220-420 to match the store), and lay a thin drag handle on the sidebar's right edge.
 */
@@ -485,9 +469,8 @@
   background: transparent;
 }
 /*
-  Round 11, item 4: the handle keeps its 8px hit area, but on hover/drag it draws only a thin
-  2px line centred in that area (via ::before) instead of filling the whole 8px with colour - the
-  old full-width 35% fill read as a border that thickened too much. Lower opacity too.
+  The handle keeps an 8px hit area, but on hover/drag it draws only a thin 2px line centred in it
+  (via ::before), so it reads as a guide rather than a border that thickens.
 */
 .cowork-shell__side-resizer::before {
   content: "";
@@ -505,11 +488,10 @@
 }
 
 /*
-  Round 8, item 7: the title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS
-  64px mini-rail. When the shell carries cowork-shell--side-hidden, drop to a SINGLE 1fr column so the
-  work fills the whole width. (A two-track `0 minmax(0,1fr)` left the sidebar's `display:none` grid
-  item gone and auto-placed the lone #rr-shell-main into the collapsed 0px FIRST track - the whole
-  page measured 0 wide. One column has nowhere else to flow.)
+  The title-bar sidebar toggle fully opens/closes the sidebar, instead of the DS 64px mini-rail.
+  When the shell carries cowork-shell--side-hidden, drop to a SINGLE 1fr column so the work fills the
+  whole width. (A two-track `0 minmax(0,1fr)` would auto-place the lone #rr-shell-main into the
+  collapsed 0px FIRST track once the sidebar is display:none, and the page would measure 0 wide.)
 */
 .cowork-shell--side-hidden .rr-shell--norail {
   grid-template-columns: minmax(0, 1fr);
@@ -520,19 +502,16 @@
 }
 
 /*
-  Round 9, item 3: the account block (the "Log in or sign up" / profile row) is the VERY
-  bottom section, with the theme switch directly ABOVE it. DOM order in the DS foot is
-  aside (account) then theme, and the DS pins theme to the bottom with `margin-top:auto`.
-  To make account last we flip the visual order with `order` (the foot is a flex column -
-  `margin-top:auto` already works on it) and move the auto margin onto the theme row so the
-  free space collapses above the pair, dropping theme + account to the bottom together.
-  Result top-to-bottom: [free space] -> theme -> account.
+  The account block (the "Log in or sign up" / profile row) is the very bottom section, with the
+  theme switch directly above it. DOM order in the DS foot is aside (account) then theme, and the DS
+  pins theme to the bottom with `margin-top:auto`. To make account last, flip the visual order with
+  `order` (the foot is a flex column) and move the auto margin onto the theme row so the free space
+  collapses above the pair. Result top-to-bottom: [free space] -> theme -> account.
 */
 .cowork-shell .rr-shell__theme {
   order: 0;
   margin-top: auto;
-  /* Round 11, item 12: pull the account block closer to the theme row - trim the DS theme row's
-     own bottom padding so the gap above "Log in or sign up" is smaller. */
+  /* Keep the account block close to the theme row: trim the DS theme row's own bottom padding. */
   padding-bottom: var(--space-1);
 }
 .cowork-shell .rr-shell__aside {
@@ -544,10 +523,9 @@
 }
 
 /*
-  Round 11, item 6: the chat-session header (the DS shell top bar carrying the "New session" title +
-  Invite + panel button) was taller than the app chrome. Match the 48px chrome height - the DS default
-  is padding var(--space-3) top+bottom with no fixed height, which read as too thick. Fix the strip to
-  48px with tighter vertical padding (border-box so the 1px bottom border is included).
+  The chat-session header (the DS shell top bar with the session title, Invite and the panel button)
+  matches the 48px app chrome: the DS default (padding var(--space-3), no fixed height) is thicker.
+  border-box so the 1px bottom border is included.
 */
 .cowork-shell .rr-shell__top {
   box-sizing: border-box;
@@ -722,12 +700,8 @@
   min-width: 0;
   min-height: 0;
   border-left: 1px solid var(--border-subtle);
-  /* Round 15: match the MAIN WORK SECTION (--surface-raised).
-     Round 36 (item 5): round 35 flipped the SHELL containers (#rr-shell-main,
-     .rr-shell__side) to white (--surface-base) but left THIS content pane grey,
-     so the left float read white and the right body read grey -- the seam Felix
-     reported. Match the pane to the shell/float: --surface-base (white). The
-     border-left divider stays (Felix: keep it) as a deliberate column line. */
+  /* The same white surface (--surface-base) as the shell and the floating sidebar, so no seam shows;
+     the border-left divider stays as a deliberate column line. */
   background: var(--surface-base);
   animation: cowork-panel-in var(--duration-base) var(--easing-entrance);
 }
@@ -1314,8 +1288,8 @@
  * the design system's class names.
  */
 .cowork-account {
-  /* Round 12, item 3: the "Log in or sign up" block took too much vertical space. Trim its own
-     top margin + padding (space-2 -> space-1) so the row sits closer under the theme switch. */
+  /* A compact "Log in or sign up" block: trimmed top margin and padding keep it close under the
+     theme switch. */
   margin-top: var(--space-1);
   padding-top: var(--space-1);
   border-top: 1px solid var(--border-subtle);
@@ -1328,8 +1302,7 @@
 .cowork-account > div > button {
   width: 100%;
   height: auto;
-  /* Round 12, item 3: shorter button - trim vertical padding (space-2 -> space-1), keep the
-     horizontal padding so the avatar + label still breathe. */
+  /* A shorter button: trimmed vertical padding; the horizontal padding lets the avatar and label breathe. */
   padding: var(--space-1) var(--space-2);
   justify-content: space-between;
 }
@@ -1507,7 +1480,7 @@
 }
 
 /* History (/history): a flat, full-width clickable list - title left, relative time right,
-   hairline dividers, no cards (Claude-style). Rows link to the chat. */
+   hairline dividers, no cards. Rows link to the chat. */
 .cowork-history {
   display: flex;
   flex-direction: column;
@@ -1752,10 +1725,8 @@
   flex: 1 1 auto;
   flex-direction: column;
   /*
-    Round 32: center the hero (line + composer) in the available height rather
-    than pinning it to the top. The hero is content-light so it fits; justify
-    stays safe-start if it ever grows past the viewport (center + auto overflow
-    keeps a tall hero scrollable from the top instead of clipping its head).
+    Center the hero (line + composer) in the available height. Justify stays safe-start if it ever
+    grows past the viewport, so a tall hero scrolls from the top instead of clipping its head.
   */
   justify-content: center;
   overflow-y: auto;
@@ -1767,8 +1738,7 @@
 
 /*
   The hero (greeting + composer + status chips) is vertically centered in the
-  available height (round 4, item 2). It keeps the old 720px measure and the
-  gap between its own rows.
+  available height. It keeps the 720px measure and the gap between its own rows.
 */
 .cowork-new__center {
   flex: 1 1 auto;
@@ -1782,7 +1752,7 @@
   min-height: 0;
 }
 
-/* A quiet one-line disclaimer pinned at the bottom of the home (round 4, item 3). */
+/* A quiet one-line disclaimer pinned at the bottom of the home. */
 .cowork-new__disclaimer {
   flex: none;
   margin: 0;
@@ -1793,14 +1763,12 @@
 }
 
 /*
-  Round 36 (item 4): the greeting <-> composer gap read too tight. Add ~30% more
-  space ONLY between those two (not composer <-> connect-provider). .cowork-new__center
-  has a flex gap of --space-5 (24px); the greeting's own margin-bottom (set on the
-  real .cowork-new__line rule below) stacks on top of that gap, so greeting->composer
-  becomes ~24px + 30% ~= 31px while every other center child-gap stays 24px.
+  The greeting gets extra space only above the composer: its own margin-bottom (on the
+  .cowork-new__line rule below) stacks on .cowork-new__center's flex gap, while every other
+  center child keeps the plain gap.
 */
 
-/* Round 7, item 7: the same quiet disclaimer under the IN-CHAT composer (the home one lives in SessionEmptyHero and only shows on the new-chat screen). Lighter top padding since it sits under the status chips, not a tall hero. */
+/* The same quiet disclaimer under the in-chat composer (the home one lives in SessionEmptyHero). Lighter top padding since it sits under the status chips, not a tall hero. */
 .cowork-chat__disclaimer {
   margin: 0;
   padding: var(--space-2) 0 0;
@@ -1810,17 +1778,11 @@
 }
 
 .cowork-new__line {
-  /* Round 36 (item 4): add clearly perceptible air between the greeting and the
-     composer. The .cowork-new__center flex gap is --space-5 (20px here); a 0.3x
-     margin (6px) was too subtle to read, so use --space-4 (16px) margin-bottom
-     -> greeting->composer reads ~36px while other center child-gaps stay 20px. */
+  /* Clear air between the greeting and the composer, on top of the center flex gap. */
   margin: 0 0 var(--space-4);
   /*
-    Round 35, item 4: the greeting now matches the Trending AI section-header
-    STYLE -- sans (no serif), bold, tight tracking -- rather than the old big
-    serif, and is CENTER-aligned to the prompt box below (dropped the left inset
-    that aligned it to the composer's text edge). Kept at a hero size so it still
-    anchors the screen, just in the sans family/weight of the chart headers.
+    The greeting uses the Trending AI section-header style (sans, bold, tight tracking),
+    centered over the prompt box, at a hero size so it still anchors the screen.
   */
   text-align: center;
   font-size: 30px;
@@ -1860,7 +1822,7 @@
 }
 
 /*
-  Round 33: a fixed-height stand-in while the status row's data resolves on a real
+  A fixed-height stand-in while the status row's data resolves on a real
   workspace, so the hero does not shift and no default values (Privacy Off, etc.)
   flash before the true ones. Height matches one chip line.
 */
@@ -3605,10 +3567,9 @@ select:disabled {
 }
 
 /* The title bar (react-app/shell/window-title-bar.tsx), on design-system tokens. 48px
-   is the height main.mjs gives the Windows caption buttons (round 3, item 4 thickened it
-   from 40px). It sits above
+   is the height main.mjs gives the Windows caption buttons. It sits above
    dialogs so the window can always be moved, minimised and closed. The ground is the sidebar's
-   (sunken on light, raised on dark), so the chrome reads as one band with the menu, as Slack's does. */
+   (sunken on light, raised on dark), so the chrome reads as one band with the menu. */
 .window-titlebar {
   position: fixed;
   inset: 0 0 auto 0;
@@ -3631,7 +3592,7 @@ select:disabled {
   gap: 2px;
   justify-self: start;
 }
-/* Round 8, item 1: the brand lockup + search + window buttons, docked to the right edge. */
+/* The brand lockup + search + window buttons, docked to the right edge. */
 .window-titlebar__right {
   grid-column: 3;
   display: flex;
@@ -3645,8 +3606,8 @@ select:disabled {
   border-radius: 6px;
   object-fit: contain;
 }
-/* Round 13, item 2: the brand marks are buttons now - a bare wrapper with a subtle hover affordance
-   so they read as clickable, and a focus ring for keyboard use. */
+/* The brand marks are buttons: a bare wrapper with a subtle hover affordance so they read as
+   clickable, and a focus ring for keyboard use. */
 .window-titlebar__brand-btn {
   display: inline-flex;
   align-items: center;
@@ -3669,8 +3630,8 @@ select:disabled {
   outline: var(--focus-ring-width) solid var(--focus-ring);
   outline-offset: 1px;
 }
-/* Round 14, item B: an in-app tooltip BELOW the button (not the native OS title, which drew outside
-   the frameless window near the top edge). Shows on hover/focus, pointer-transparent, inside the app. */
+/* An in-app tooltip BELOW the button (the native OS title draws outside the frameless window near
+   the top edge). Shows on hover/focus, pointer-transparent, inside the app. */
 .window-titlebar__brand-btn {
   position: relative;
 }
@@ -3759,7 +3720,7 @@ select:disabled {
 }
 
 /*
-  Round 8, item 10: the Model Chart browse layer, laid out like a music-chart app. All colour comes
+  The Model Chart browse layer, laid out like a music-chart app. All colour comes
   from the theme's spectrum tokens so it reads in light and dark; the five tones cycle the banners
   and tiles through the brand's hues.
 */
@@ -3779,8 +3740,8 @@ select:disabled {
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  /* Round 24: a taller featured banner (was 172px) - more vertical presence, like a storefront hero.
-     The title + sub sit centered in the extra height via margin-top:auto on the eyebrow block. */
+  /* A tall featured banner for a storefront-hero presence; the title + sub sit centered in the extra
+     height via margin-top:auto on the eyebrow block. */
   min-height: 210px;
   justify-content: flex-end;
   padding: var(--space-6, 24px) var(--space-6, 24px) var(--space-5, 20px);
@@ -3806,7 +3767,7 @@ select:disabled {
 .model-chart__banner[data-tone="3"] { background: linear-gradient(120deg, var(--spectrum-violet), var(--spectrum-sky)); }
 .model-chart__banner[data-tone="4"] { background: linear-gradient(120deg, var(--spectrum-sky), var(--spectrum-teal)); }
 /*
-  Round 27: real banner artwork as a clean backdrop. The art is a full cover (z-index 0, behind the
+  Banner artwork as a clean backdrop. The art is a full cover (z-index 0, behind the
   gradient fallback + glass); the eyebrow/title/sub render on top of it. A scrim gradient keeps the
   white copy legible over bright or busy art. The scrim and the copy are both default-stacked by the
   generic `.model-chart__banner > *` rule (z-index 1), so DOM order puts the copy above the scrim.
@@ -3829,9 +3790,7 @@ select:disabled {
 }
 .model-chart__banner-eyebrow {
   font: var(--text-caption, 12px/1.4 sans-serif);
-  /* Round 17: normal capitalization, not ALL CAPS. The eyebrow strings are already written in
-     sentence case (e.g. "This month", "By output"); the old text-transform:uppercase + wide
-     caps-tracking shouted them. */
+  /* Sentence case as written (e.g. "This month", "By output"); no uppercase transform. */
   letter-spacing: 0.01em;
   opacity: 0.85;
 }
@@ -3882,11 +3841,10 @@ select:disabled {
   color: var(--ink-primary);
 }
 /*
-  Round 20: each shelf is ONE horizontal scroll-snap row (not a wrapping grid), like a music-app
-  shelf. `.model-chart__shelf` is the positioning context for the two overlay chevrons; `.model-chart__row`
-  is the scroller. The native scrollbar is hidden - the row scrolls by chevron, wheel, trackpad, touch
-  and keyboard. Tiles are a fixed ~121px basis (round-19 was 151px; this is ~20% smaller) and snap to
-  the row's start edge.
+  Each shelf is ONE horizontal scroll-snap row (not a wrapping grid). `.model-chart__shelf` is the
+  positioning context for the two overlay chevrons; `.model-chart__row` is the scroller. The native
+  scrollbar is hidden - the row scrolls by chevron, wheel, trackpad, touch and keyboard. Tiles have a
+  fixed ~121px basis and snap to the row's start edge.
 */
 .model-chart__shelf {
   position: relative;
@@ -3895,15 +3853,15 @@ select:disabled {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  /* Round 23: more horizontal air between cards, closer to an Apple Music / Spotify shelf. */
+  /* Generous horizontal air between cards, like a music-app shelf. */
   gap: 20px;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 2px;
   /* chevrons overlay the edges; a little inline padding keeps the first/last card off the very edge.
-     Round 22: the TOP padding is 8px (not 2px) so the hover lift (translateY) has room inside this
-     overflow-y:hidden scroller - at 2px the lifted card's top border was clipped. */
+     The 8px top padding gives the hover lift (translateY) room inside this overflow-y:hidden
+     scroller, so the lifted card's top border is not clipped. */
   padding: 8px 2px 4px;
   /* Hide the native scrollbar - the shelf scrolls by chevrons / wheel / trackpad / touch. */
   scrollbar-width: none;
@@ -3976,8 +3934,8 @@ select:disabled {
   no-backdrop-filter fallback below.
 */
 .model-chart__tile {
-  /* Round 17: an album card - a SQUARE art panel (.model-chart__card) with the caption BELOW it,
-     like a track in a music app. The button itself is just the stack; the card carries the look. */
+  /* An album card: a SQUARE art panel (.model-chart__card) with the caption BELOW it, like a track
+     in a music app. The button itself is just the stack; the card carries the look. */
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -4010,10 +3968,9 @@ select:disabled {
   padding: 0 2px;
 }
 /*
-  Round 25: the album art is now a REAL per-tile IMAGE (user's hand-built set), filling the square and
-  sitting above the glass backdrop. Decorative (aria-hidden) - the caption below carries the meaning.
-  object-fit:cover so the square crop is always full-bleed; it keeps the card's rounded corners via
-  the card's overflow:hidden.
+  The per-tile album art image fills the square and sits above the glass backdrop. Decorative
+  (aria-hidden) - the caption below carries the meaning. object-fit:cover so the square crop is
+  always full-bleed; it keeps the card's rounded corners via the card's overflow:hidden.
 */
 .model-chart__art {
   position: absolute;
@@ -4026,7 +3983,7 @@ select:disabled {
   transition: transform var(--duration-base, 220ms) var(--easing-standard, ease);
 }
 .model-chart__tile:hover .model-chart__card {
-  /* Round 22: subtler hover - a 2px lift (was 3), a lighter shadow, same accent border. */
+  /* A subtle hover: a 2px lift, a light shadow and the accent border. */
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -4076,13 +4033,13 @@ select:disabled {
   font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
-  /* Round 22: a title that wraps to 2-3 lines ("Financial Statement Review") was too loose at the
-     default line-height; pull the lines together. Single-line titles are unaffected. */
+  /* Tighter line-height for titles that wrap to 2-3 lines ("Financial Statement Review");
+     single-line titles are unaffected. */
   line-height: 1.15;
   color: var(--ink-primary);
 }
 .model-chart__tile-summary {
-  /* Round 17: the blurb is hand-written and short, and sits in the caption BELOW the square. */
+  /* The blurb is hand-written and short, and sits in the caption BELOW the square. */
   font-size: 12px;
   line-height: 1.35;
   color: var(--ink-secondary);
@@ -4128,8 +4085,8 @@ select:disabled {
 }
 
 /*
-  Round 26: the inner chart-detail page - a Spotify / Apple-Music style top-10 model list. A header
-  (album-art cover + title + lede) over a ranked list of rows. One layout for every chart.
+  The inner chart-detail page: a top-10 model list. A header (album-art cover + title + lede) over a
+  ranked list of rows. One layout for every chart.
 */
 .chart-detail {
   display: flex;
@@ -4270,9 +4227,9 @@ select:disabled {
   color: var(--ink-muted);
 }
 /*
-  Round 31: the Needle Test badge - a graded ring with clearer, Apple-Music-style grade colors
-  (green ace, blue strong, amber good, grey fair) so a strong result reads instantly. The caption
-  sits beneath; the full explanation is in the on-hover tooltip.
+  The Needle Test badge: a graded ring with clear grade colors (green ace, blue strong, amber good,
+  grey fair) so a strong result reads instantly. The caption sits beneath; the full explanation is in
+  the on-hover tooltip.
 */
 .chart-detail__score {
   display: flex;
@@ -4297,7 +4254,7 @@ select:disabled {
   background: var(--grade-bg, color-mix(in srgb, var(--status-success) 16%, transparent));
   border: 1.5px solid var(--grade-color, var(--status-success));
 }
-/* Apple-Music-clear grades: saturated ring + soft matching fill + dark readable number. */
+/* Clear grades: saturated ring + soft matching fill + dark readable number. */
 .chart-detail__score-ring[data-grade="ace"]    { --grade-color: var(--status-success); --grade-bg: color-mix(in srgb, var(--status-success) 16%, transparent); }
 .chart-detail__score-ring[data-grade="strong"] { --grade-color: var(--status-info); --grade-bg: color-mix(in srgb, var(--status-info) 16%, transparent); }
 .chart-detail__score-ring[data-grade="good"]   { --grade-color: var(--status-warning); --grade-bg: color-mix(in srgb, var(--status-warning) 18%, transparent); }
@@ -4336,7 +4293,7 @@ select:disabled {
   width: 100%;
 }
 /*
-  Round 34: Redrob Auto - the FEATURED first ROW, using the EXACT model-row grid and anatomy so it is
+  Redrob Auto: the featured first row, using the exact model-row grid and anatomy so it is
   the same height as and visually seamless with the ten models: "Featured" sits on the maker line,
   "Always the best" fills the Needle column, and the budget copy fills the cost column. A whisper of
   brand tint is the only thing that sets it apart.
