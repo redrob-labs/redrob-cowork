@@ -4,22 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { EmptyState, IconButton, icons } from "@redrob-labs/ui";
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon";
-import { getArtifactsFromMessages, getArtifactTypeLabel, type ArtifactItem, canOpenArtifact } from "@/lib/artifacts";
-import { usePanelTabStore } from "../../domains/session/panel/panel-tab-store";
-import { isCollectibleArtifactTarget } from "../../domains/session/artifacts/open-target";
-
-import { currentLocale, subscribeToLocale, t } from "../../../i18n";
+import { canOpenArtifact, getArtifactsFromMessages, getArtifactTypeLabel, prettyArtifactTitle, type ArtifactItem } from "@/lib/artifacts";
+import { usePanelTabStore } from "@/react-app/domains/session/panel/panel-tab-store";
+import { isCollectibleArtifactTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
+import { getSidePanelSessionKey } from "@/react-app/domains/session/panel/side-panel-session";
+import { getElectronBrowser } from "@/react-app/domains/session/panel/utils";
+import { currentLocale, subscribeToLocale, t } from "@/i18n";
 import { formatNavTime } from "../shell/nav";
+import { useMinuteClock } from "../preview/use-minute-clock";
 import { artifactPreview } from "./artifact-preview";
-import { getSidePanelSessionKey } from "../../domains/session/panel/side-panel-session";
-import { getElectronBrowser } from "../../domains/session/panel/utils";
 import { useFrameStore, type PanelTab } from "../store/frame-store";
 import { CoworkBrowser } from "./cowork-browser";
-import { CoworkPanelFiles, CoworkFilePreview } from "./cowork-panel-files";
+import { CoworkPanelFiles, CoworkFilePreview, filePreviewQuery } from "./cowork-panel-files";
 import { fileFromTarget, filePreviewKind } from "./cowork-files";
 import { useCoworkConnection } from "../shell/cowork-connection";
-import { prettyArtifactTitle } from "@/lib/artifacts";
-import type { OpenTarget } from "../../domains/session/artifacts/open-target";
 import { CoworkLiveDraft } from "./cowork-live-draft";
 import { artifactPathMatches, useLiveDraftStore } from "./live-draft";
 
@@ -44,10 +42,15 @@ function panelTabIcon(tab: PanelTab): ReactNode {
   return icons.folderOpen(ICON);
 }
 
+/** Inputs of the side panel's chrome. */
 export type CoworkSidePanelViewProps = {
+  /** The open tab. */
   tab: PanelTab;
+  /** Switches to another tab. */
   onSwitch: (tab: PanelTab) => void;
+  /** Closes the panel. */
   onClose: () => void;
+  /** The open tab's body. */
   children?: ReactNode;
 };
 
@@ -61,9 +64,9 @@ export function CoworkSidePanelView(props: CoworkSidePanelViewProps) {
   return (
     <aside className="cowork-panel" aria-label={panelTabLabel(props.tab)}>
       <div className="cowork-panel__top">
-        {/* Left-aligned icon tabs: one glyph per tab; the label rides as the hover title
-            (IconButton sets title + aria-label from `label`). Active tab is tinted. */}
-        <div className="cowork-panel__tabs" role="tablist" aria-label={t("cowork.panel_artifacts")}>
+        {/* Left-aligned icon tabs: plain buttons (DS IconButton has no tab role), one glyph per
+            tab, the label as both accessible name and hover title. The active tab is tinted. */}
+        <div className="cowork-panel__tabs" role="tablist" aria-label={t("cowork.panel_tabs")}>
           {PANEL_TABS.map((tab) => (
             <button
               key={tab}
@@ -113,28 +116,24 @@ function CoworkPanelBrowser(props: { sessionKey: string }) {
 }
 
 /**
- * Round 10 (R6): one artifact row, roomier: type icon, Title Case name, "Artifact" + when it was
- * written, and a 2-line plain-text preview that ends on a whole sentence or word (artifactPreview),
- * never on "...". The preview reads the file through the same cached query the artifact view
- * uses, so opening the row afterwards costs no second read. Clicking opens it on its own in the
- * Artifacts tab (round 8, via the frame store's openArtifact). The panel lives in the Cowork shell,
- * OUTSIDE the session surface's OpenTargetProvider, so the open-target hook would be a no-op here.
+ * One artifact row: type icon, Title Case name, "Artifact" and when it was written, and a 2-line
+ * plain-text preview that ends on a whole sentence or word (artifactPreview). The preview reads the
+ * file through the same cached query the artifact view uses, so opening the row afterwards costs no
+ * second read. Clicking opens it in the Artifacts tab through the frame store's openArtifact: the
+ * panel lives in the Cowork shell, outside the session surface's OpenTargetProvider, so the
+ * open-target hook would be a no-op here.
  */
 function CoworkArtifactRow(props: { artifact: ArtifactItem; chatId: string; now: number; locale: string }) {
   const openArtifact = useFrameStore((state) => state.openArtifact);
   const client = useCoworkConnection((state) => state.client);
   const workspaceId = useCoworkConnection((state) => state.workspaceId);
   const file = useMemo(() => fileFromTarget(props.artifact.legacy_target, "", props.chatId), [props.artifact.legacy_target, props.chatId]);
-  const readable = filePreviewKind(file.name) === "markdown" || filePreviewKind(file.name) === "text";
-  const preview = useQuery({
-    // Same key as CoworkFilePreview, so the row and the opened view share one read.
-    queryKey: ["cowork-file-preview", workspaceId, file.id],
-    enabled: readable && !file.body && Boolean(client && workspaceId && file.path),
-    queryFn: async () => ({ kind: "text" as const, text: (await client!.readWorkspaceFile(workspaceId!, file.path!)).content }),
-    retry: false,
-    staleTime: 30_000,
-  });
-  const source = file.body ?? (preview.data && "text" in preview.data ? String(preview.data.text) : "");
+  const kind = filePreviewKind(file.name);
+  const readable = kind === "markdown" || kind === "text";
+  const options = filePreviewQuery(file, client, workspaceId);
+  // The row only previews text; images and office files show no snippet.
+  const preview = useQuery({ ...options, enabled: options.enabled && readable });
+  const source = file.body ?? (preview.data?.kind === "text" ? preview.data.text : "");
   const snippet = source ? artifactPreview(source) : "";
   const open = () => {
     if (!canOpenArtifact(props.artifact)) return;
@@ -161,9 +160,9 @@ function CoworkArtifactRow(props: { artifact: ArtifactItem; chatId: string; now:
 }
 
 /**
- * Round 8 (M6): one artifact, shown as its output and nothing else - no frame, no folder or time
- * line, no "Written in the chat", no Office / folder buttons. The only control is "All artifacts",
- * back to the list. It reads the file the same way the Files tab previews do (CoworkFilePreview).
+ * One artifact, shown as its output and nothing else: no frame, folder or time line, and no Office
+ * or folder buttons. The only control is "All artifacts", back to the list. It reads the file the
+ * same way the Files tab previews do (CoworkFilePreview).
  */
 function CoworkArtifactView(props: { target: OpenTarget; chatId: string; onBack: () => void }) {
   const client = useCoworkConnection((state) => state.client);
@@ -171,8 +170,8 @@ function CoworkArtifactView(props: { target: OpenTarget; chatId: string; onBack:
   const file = useMemo(() => fileFromTarget(props.target, "", props.chatId), [props.chatId, props.target]);
   return (
     <div className="cowork-artifact-view">
-      {/* Round 10: the back control lives INSIDE the scroller, so it scrolls away with the
-          document instead of staying pinned to the top of the panel. */}
+      {/* The back control lives inside the scroller, so it scrolls away with the document
+          instead of staying pinned to the top of the panel. */}
       <div className="cowork-artifact-view__body">
         <button type="button" className="cowork-file__back" onClick={props.onBack}>
           {icons.arrowLeft({ width: 14, height: 14, "aria-hidden": true })}
@@ -185,21 +184,21 @@ function CoworkArtifactView(props: { target: OpenTarget; chatId: string; onBack:
 }
 
 /**
- * The Artifacts tab (round 2, item 3b): a list of the artifacts this chat has produced, newest
- * first. It reads the transcript artifact targets the session surface already syncs into the
+ * The Artifacts tab: a list of the artifacts this chat has produced, newest first. It reads the transcript artifact targets the session surface already syncs into the
  * panel-tab store (no new data plumbing), so it needs only the chat's session key. Each row opens
  * the artifact through the existing open-target flow. Empty chats show an empty state, mirroring
  * the Files tab.
  */
 function CoworkPanelArtifacts(props: { sessionKey: string }) {
   const targets = usePanelTabStore((state) => state.transcriptArtifactTargets[props.sessionKey]);
-  // Round 7 C6: the file being written right now, revealed live above the list.
+  // The file being written right now, revealed live in place of the list.
   const draft = useLiveDraftStore((state) => state.drafts[props.sessionKey] ?? null);
   const finishDraft = useLiveDraftStore((state) => state.finish);
   const openArtifact = useFrameStore((state) => state.openArtifact);
   const selectedId = useFrameStore((state) => state.panel.artifact ?? null);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const [now] = useState(Date.now);
+  // Ticks each minute so the rows' "2 min ago" stamps stay current while the panel is open.
+  const now = useMinuteClock().getTime();
   // Derived once per targets change, not on every panel render (the store re-renders this often).
   const artifacts = useMemo(
     () => getArtifactsFromMessages([], (targets ?? []).filter(isCollectibleArtifactTarget), { includeTargetFallbacks: true }),

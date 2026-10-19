@@ -707,7 +707,8 @@
   transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 .cowork-panel__resizer:hover::before,
-.cowork-panel__resizer:active::before {
+.cowork-panel__resizer:focus-visible::before,
+.cowork-panel__resizer[data-resizing]::before {
   background: color-mix(in srgb, var(--spectrum-sky) 22%, transparent);
 }
 
@@ -1329,7 +1330,7 @@
   but BOLD and in a LIGHTER tone. Match the heading size, bump to 700, and use --ink-muted at
   reduced opacity so it sits a step lighter than the heading. The label is a span set in nav.ts.
 */
-.cowork-nav-view-all {
+.cowork-nav__view-all {
   font-size: 11px;        /* Same as the Recent heading. */
   line-height: 16px;      /* Same as the Recent heading. */
   font-weight: 700;       /* Bold, a step heavier than the heading's 600. */
