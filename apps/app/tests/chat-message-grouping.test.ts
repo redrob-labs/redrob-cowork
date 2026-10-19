@@ -9,6 +9,7 @@ import {
   liveActivityOf,
   splitTurnAtAnswer,
 } from "../src/components/chat/utils";
+import { continuesAggregate } from "../src/lib/tool-aggregate";
 
 function bashPart(id: string): DynamicToolUIPart {
   return {
@@ -184,5 +185,14 @@ describe("web research groups", () => {
     expect(isWebResearchGroup({ kind: "tool-aggregate", parts: [web("websearch", "w3"), bashPart("c1")] })).toBe(false);
     expect(isWebResearchGroup({ kind: "tool", part: bashPart("c2") })).toBe(false);
     expect(isWebResearchGroup({ kind: "text", text: "hello" })).toBe(false);
+  });
+
+  test("in the Cowork frame web research and file edits keep their own aggregates", () => {
+    const groups = getAssistantRenderGroups([bashPart("c1"), web("websearch", "w1"), web("webfetch", "w2"), editPart("c2", "a.md"), editPart("c3", "b.md")], true, true);
+    expect(groups.map((group) => (group.kind === "tool-aggregate" ? group.parts.map((part) => part.toolCallId) : group.kind))).toEqual([["c1"], ["w1", "w2"], ["c2", "c3"]]);
+    expect(groups[1] && isWebResearchGroup(groups[1])).toBe(true);
+    // The bare surface keeps commands and edits in one aggregate (develop behaviour).
+    expect(continuesAggregate(bashPart("c1"), editPart("c2", "a.md"))).toBe(true);
+    expect(continuesAggregate(bashPart("c1"), editPart("c2", "a.md"), true)).toBe(false);
   });
 });

@@ -38,6 +38,9 @@ describe("planRunActivities", () => {
     expect(planRunActivities(messages, true).get("p")).toEqual({ started: true, webSteps: 2, writing: "writing", writes: 0, finished: false });
     const done = [...messages.slice(0, 3), assistant("r1", [tool("websearch", "output-available"), tool("write", "output-available")])];
     expect(planRunActivities(done, false).get("p")).toEqual({ started: true, webSteps: 1, writing: "written", writes: 1, finished: true });
+    // A failed write wrote nothing: it does not count, and research has not moved on to writing.
+    const failed = [...messages.slice(0, 3), assistant("r1", [tool("websearch", "output-available"), tool("write", "output-error")])];
+    expect(planRunActivities(failed, true).get("p")).toEqual({ started: true, webSteps: 1, writing: "none", writes: 0, finished: false });
   });
 
   test("a later person's message finishes the run even while the session is busy", () => {

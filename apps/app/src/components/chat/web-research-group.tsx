@@ -1,20 +1,16 @@
 "use client"
 
-import { useState } from "react"
 import { ChevronDown, ChevronRight, Globe } from "lucide-react"
 
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { isToolPartInFlight } from "@/lib/tool-activity"
 import type { AnyToolPart } from "@/lib/tool-aggregate"
 import { faviconUrlForHref } from "@/lib/favicon"
+import { useRememberedOpen } from "@/lib/use-remembered-open"
 import { hostnameOf, parseWebSearchResults, type WebSearchResult } from "@/lib/websearch-results"
 import { cn } from "@/lib/utils"
 import { t } from "@/i18n"
 import { openExternal } from "@/react-app/cowork/connectors/cowork-connectors"
-
-/** Expansion state per group / row, kept while the session stays mounted. */
-const openGroups = new Map<string, boolean>()
-const openRows = new Map<string, boolean>()
 
 /** One web step as the table shows it: what was asked, and what came back. */
 export type WebStep = {
@@ -120,11 +116,7 @@ function ReadRow(props: { step: WebStep }) {
 /** One search row: "Searched the web  <query>" and its sources dropdown. No loader. */
 function SearchRow(props: { step: WebStep }) {
   const { step } = props
-  const [open, setOpenState] = useState(() => openRows.get(step.id) ?? false)
-  const setOpen = (value: boolean) => {
-    openRows.set(step.id, value)
-    setOpenState(value)
-  }
+  const [open, setOpen] = useRememberedOpen(`web-row:${step.id}`)
   const canOpen = step.results.length > 0
   const verb = step.running ? t("cowork.web_searching") : t("cowork.web_searched")
   const Chevron = open ? ChevronDown : ChevronRight
@@ -164,12 +156,7 @@ function SearchRow(props: { step: WebStep }) {
  */
 export function WebResearchGroup(props: { parts: AnyToolPart[]; className?: string }) {
   const steps = webStepsOf(props.parts)
-  const key = props.parts[0]?.toolCallId ?? "web"
-  const [open, setOpenState] = useState(() => openGroups.get(key) ?? false)
-  const setOpen = (value: boolean) => {
-    openGroups.set(key, value)
-    setOpenState(value)
-  }
+  const [open, setOpen] = useRememberedOpen(`web:${props.parts[0]?.toolCallId ?? ""}`)
   if (steps.length === 0) return null
   const running = steps.some((step) => step.running)
   const onlyReads = steps.every((step) => step.kind === "read")

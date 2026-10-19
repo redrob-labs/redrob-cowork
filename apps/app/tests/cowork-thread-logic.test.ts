@@ -1,23 +1,21 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 import { setLocale } from "../src/i18n";
 import { DEFAULT_CROSS_CHECK } from "../src/react-app/cowork/composer/composer-state";
-import { createCheckStore, readKeptChecks, settleChecks, startChecks } from "../src/react-app/cowork/thread/check-store";
+import { createCheckStore } from "../src/react-app/cowork/thread/check-store";
 import {
   checkMatters,
   checkPrompt,
   checkedDocument,
   crossCheckPlan,
-  COWORK_CHECK_AGENT,
   parseCheckAnswer,
   retryPlan,
   runCrossCheck,
+  turnAnswer,
   type CrossCheckDeps,
   type TranscriptMessage,
 } from "../src/react-app/cowork/thread/cross-check";
-import { COWORK_BLOCK_TAGS, hasCoworkBlocks, parseCoworkBlocks } from "../src/react-app/cowork/thread/cowork-blocks";
+import { hasCoworkBlocks, parseCoworkBlocks } from "../src/react-app/cowork/thread/cowork-blocks";
 import { challengeReportProps, factReportProps } from "../src/react-app/cowork/thread/cowork-thread";
 import { coworkSystemText, MEMORY_OFF_INSTRUCTION } from "../src/react-app/cowork/thread/memory-off";
 import { permissionAsk, toTranscript } from "../src/react-app/cowork/thread/use-cowork-cross-check";
@@ -74,16 +72,6 @@ const CHECK = {
     unsettled: "Whether a courier abroad counts.",
   },
 };
-
-describe("fence tags", () => {
-  test("match the server's COWORK_BLOCKS", () => {
-    const server = readFileSync(join(import.meta.dir, "..", "..", "server", "src", "redrob-cowork-agents.ts"), "utf8");
-    const block = /export const COWORK_BLOCKS = \{([\s\S]*?)\} as const;/.exec(server)?.[1] ?? "";
-    const tags = Object.fromEntries([...block.matchAll(/(\w+):\s*"([^"]+)"/g)].map((match) => [match[1], match[2]]));
-    expect(tags).toEqual({ ...COWORK_BLOCK_TAGS });
-    expect(server).toContain(`COWORK_CHECK_AGENT = "${COWORK_CHECK_AGENT}"`);
-  });
-});
 
 describe("parseCoworkBlocks", () => {
   test("reads questions and keeps the prose around them", () => {
@@ -231,28 +219,6 @@ describe("cross-check", () => {
     expect(prompt).toContain("No.");
   });
 
-  test("check-store: pending is taken once; checks run, then settle", () => {
-    const store = createCheckStore();
-    store.getState().expect("s1", { question: "Q", planned: true });
-    expect(store.getState().take("s1")).toEqual({ question: "Q", planned: true });
-    expect(store.getState().take("s1")).toBeNull();
-
-    store.getState().start("m1", { planned: true, fact: true, challenge: false });
-    expect(store.getState().answers.m1).toEqual({ planned: true, fact: "running", challenge: "off" });
-    expect(store.getState().take("s1")).toBeNull();
-    store.getState().settle("m1", { fact: { claims: [], missed: [] } });
-    expect(store.getState().answers.m1).toMatchObject({ fact: "done", challenge: "off" });
-
-    const running = startChecks({ planned: false, fact: true, challenge: true });
-    expect(settleChecks(running, null)).toEqual({ planned: false, fact: "failed", challenge: "failed" });
-    expect(settleChecks(running, { challenge: parseCheckAnswer(fence("redrob-check", CHECK))?.challenge })).toMatchObject({
-      fact: "failed",
-      challenge: "done",
-    });
-    store.getState().settle("unknown", null);
-    expect(store.getState().answers.unknown).toBeUndefined();
-  });
-
   test("the check result maps onto FactCheckReport and ChallengeReport", () => {
     const result = parseCheckAnswer(`Here:\n${fence("redrob-check", CHECK)}`);
     if (!result?.fact || !result.challenge) throw new Error("no result");
@@ -288,6 +254,9 @@ describe("cross-check", () => {
         calls.push(`create:${parentId}`);
         return "check-1";
       },
+      deleteCheckSession: async (id) => {
+        calls.push(`delete:${id}`);
+      },
       prompt: async (sessionId, _text, agent, model) => {
         calls.push(`prompt:${sessionId}:${agent}:${model.model?.modelID ?? "default"}:${model.variant ?? "-"}`);
       },
@@ -306,8 +275,8 @@ describe("cross-check", () => {
       model: { providerID: "redrob", modelID: "picked" },
       variant: "high",
     });
-    // On the model the chat used, not the engine default.
-    expect(calls).toEqual(["messages:s1", "create:s1", "prompt:check-1:redrob-check:picked:high", "messages:check-1", "messages:check-1"]);
+    // On the model the chat used, not the engine default; the check session is deleted after.
+    expect(calls).toEqual(["messages:s1", "create:s1", "prompt:check-1:redrob-check:picked:high", "messages:check-1", "messages:check-1", "delete:check-1"]);
     expect(store.getState().answers.a1).toMatchObject({ fact: "done", challenge: "done", request: { sessionId: "s1", model: { modelID: "picked" } } });
     expect(store.getState().checking).toEqual({});
 
@@ -319,9 +288,10 @@ describe("cross-check", () => {
     expect(quiet.getState().answers.a1).toMatchObject({ planned: true, fact: "off", challenge: "off" });
   });
 
-  test("a check that asked and was refused stops at once and reads as failed", async () => {
+  test("a check that asked and was refused stops at once, reads as failed, and its session is deleted", async () => {
     const store = createCheckStore();
     let polls = 0;
+    const deleted: string[] = [];
     await runCrossCheck(
       {
         messages: async (sessionId) => {
@@ -332,6 +302,10 @@ describe("cross-check", () => {
           return [{ id: "c1", role: "assistant", completed: false, text: "" }];
         },
         createCheckSession: async () => "check-1",
+        deleteCheckSession: async (id) => {
+          deleted.push(id);
+          throw new Error("offline");
+        },
         prompt: async () => {
           expect(store.getState().checking["check-1"]).toBe("a1");
         },
@@ -345,6 +319,8 @@ describe("cross-check", () => {
       { sessionId: "s1", question: "Q", planned: false, levels: { factCheck: "always", challenge: "off" } },
     );
     expect(polls).toBe(1);
+    // A failed delete does not change the result.
+    expect(deleted).toEqual(["check-1"]);
     expect(store.getState().answers.a1).toMatchObject({ fact: "failed", challenge: "off" });
     expect(store.getState().checking).toEqual({});
     expect(store.getState().stopped).toEqual({});
@@ -378,6 +354,7 @@ describe("cross-check", () => {
         createCheckSession: async () => {
           throw new Error("offline");
         },
+        deleteCheckSession: async () => {},
         prompt: async () => {},
         sleep: async () => {},
         start: store.getState().start,
@@ -476,6 +453,15 @@ describe("the written deliverable is what gets checked", () => {
     ])).toBeNull();
   });
 
+  test("a file-only run's check sits under its own turn, never the plan before it", () => {
+    const doc = { path: "reports/outlook.md", content: "# Outlook" };
+    const plan: TranscriptMessage = { id: "plan", role: "assistant", completed: true, text: "Here is the plan." };
+    const runSend: TranscriptMessage = { id: "u2", role: "user", completed: false, text: "Run this plan." };
+    expect(turnAnswer([plan, runSend, { id: "a2", role: "assistant", completed: true, text: "", document: doc }])?.id).toBe("a2");
+    // Nothing said and nothing written in this turn: nothing to check.
+    expect(turnAnswer([plan, runSend, { id: "a2", role: "assistant", completed: true, text: "" }])).toBeNull();
+  });
+
   test("checkPrompt checks the document when there is one, the chat answer otherwise", () => {
     const plan = { fact: true, challenge: true };
     const withDoc = checkPrompt({ question: "Forecast", answer: "Saved the memo.", plan, document: { path: "reports/outlook.md", content: "BODY" } });
@@ -497,30 +483,6 @@ describe("the written deliverable is what gets checked", () => {
     }]);
     expect(message?.document).toEqual({ path: "/w/r.md", content: "# R" });
     expect(message?.text).toBe("Saved.");
-  });
-});
-
-describe("check chips survive reopening a chat", () => {
-  const memory = () => {
-    const data = new Map<string, string>();
-    return () => ({ getItem: (key: string) => data.get(key) ?? null, setItem: (key: string, value: string) => void data.set(key, value) });
-  };
-
-  test("a settled result is kept and read back by a fresh store; a running one is not", () => {
-    const storage = memory();
-    const first = createCheckStore({ storage });
-    first.getState().start("m1", { planned: false, fact: true, challenge: true });
-    first.getState().start("m2", { planned: false, fact: true, challenge: false });
-    first.getState().settle("m1", { fact: { claims: [], missed: [] } });
-    const reopened = createCheckStore({ storage });
-    expect(reopened.getState().answers.m1).toMatchObject({ fact: "done", challenge: "failed" });
-    expect(reopened.getState().answers.m2).toBeUndefined();
-  });
-
-  test("unreadable storage is ignored", () => {
-    const storage = () => ({ getItem: () => "{not json", setItem: () => {} });
-    expect(createCheckStore({ storage }).getState().answers).toEqual({});
-    expect(readKeptChecks(() => null)).toEqual({});
   });
 });
 

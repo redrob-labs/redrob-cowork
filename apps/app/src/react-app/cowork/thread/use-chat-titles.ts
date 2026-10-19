@@ -15,7 +15,7 @@ import { isPlanRunPrompt, isQuestionAnswerPrompt } from "./thread-logic";
 export type TitledSession = { id: string; title?: string | null; parentID?: string | null };
 
 /** A message as the engine lists it, reduced to what naming a chat needs. */
-type ListedMessage = {
+export type ListedMessage = {
   info: { role: string; providerID?: string; modelID?: string; time?: { completed?: number } };
   parts: Array<{ type: string; text?: string; synthetic?: boolean }>;
 };
@@ -25,7 +25,7 @@ export const TITLE_PASS_LIMIT = 12;
 /** How long one hidden naming request may take before the rule-made title stays (ms). */
 const NAME_TIMEOUT_MS = 45_000;
 /** How often the naming request is checked for its answer (ms). */
-const NAME_POLL_MS = 1_500;
+export const NAME_POLL_MS = 1_500;
 /** Chats already named, kept across app runs so each chat is named once. */
 const TRIED_KEY = "redrob.cowork.chatTitles.v1";
 /** Most chat ids kept in TRIED_KEY (oldest dropped first). */
@@ -117,6 +117,115 @@ function writeTried(tried: Set<string>) {
   }
 }
 
+/** The engine calls a title pass makes, injected so the pass can be tested without an engine. */
+export type TitlePassDeps = {
+  /** The latest chat list (re-read each step, so chats that arrive mid-pass are picked up). */
+  sessions(): readonly TitledSession[];
+  messages(sessionId: string): Promise<ListedMessage[]>;
+  /** The chat's title as the engine has it now. */
+  title(sessionId: string): Promise<string>;
+  rename(sessionId: string, title: string): Promise<void>;
+  /** A hidden child session for the naming request; returns its id. */
+  createChild(parentId: string, title: string): Promise<string>;
+  /** Sends the naming request; false when the engine refused it. */
+  prompt(sessionId: string, text: string, model: { providerID: string; modelID: string } | undefined): Promise<boolean>;
+  deleteChild(sessionId: string): Promise<void>;
+  sleep(ms: number): Promise<void>;
+  /** Chats already settled; `remember` persists an id once its chat needs no more work. */
+  tried: ReadonlySet<string>;
+  remember(sessionId: string): void;
+};
+
+/** Names one chat: the rule title first, then the AI title if no Rename happened in between. */
+async function nameOne(deps: TitlePassDeps, signal: AbortSignal, id: string, before: string): Promise<void> {
+  // No limit: the engine's limit keeps the NEWEST messages, and the first prompt is the oldest.
+  const messages = await deps.messages(id);
+  const prompt = firstPromptText(messages);
+  // No prompt yet (a brand-new chat): not settled, so a later list refresh looks again.
+  if (!prompt || signal.aborted) return;
+  // A title the person chose is never touched.
+  if (!isPromptDerivedTitle(before, prompt)) return deps.remember(id);
+  const ruled = shortTitleFromPrompt(prompt);
+  // A failed rename throws before the chat is settled, so the next pass tries again.
+  if (ruled && ruled !== before) await deps.rename(id, ruled);
+  deps.remember(id);
+  const expected = (ruled || before).trim();
+  if (signal.aborted) return;
+
+  const child = await deps.createChild(id, expected);
+  try {
+    if (!(await deps.prompt(child, namingPrompt(prompt), chatModel(messages)))) return;
+    for (let waited = 0; waited < NAME_TIMEOUT_MS && !signal.aborted; waited += NAME_POLL_MS) {
+      await deps.sleep(NAME_POLL_MS);
+      if (signal.aborted) return;
+      const answer = namingAnswer(await deps.messages(child));
+      if (answer === null) continue;
+      const named = cleanGeneratedTitle(answer);
+      if (!named) return;
+      // A Rename while the request ran wins: only replace the title this pass set.
+      const current = (await deps.title(id)).trim();
+      if (current === expected && named !== current && !signal.aborted) await deps.rename(id, named);
+      return;
+    }
+  } finally {
+    // The naming session is machinery: never leave it behind in the engine.
+    await deps.deleteChild(child).catch(() => undefined);
+  }
+}
+
+/**
+ * One title pass: names chats one at a time from the latest list, at most TITLE_PASS_LIMIT,
+ * until none is left or `signal` aborts (Cowork left, client or workspace changed, unmount).
+ * A failing chat is left for a later pass. Never throws.
+ */
+export async function runTitlePass(deps: TitlePassDeps, signal: AbortSignal): Promise<void> {
+  const looked = new Set<string>();
+  while (!signal.aborted && looked.size < TITLE_PASS_LIMIT) {
+    const list = deps.sessions();
+    const next = sessionsToTitle(list, deps.tried).find((id) => !looked.has(id));
+    if (!next) return;
+    looked.add(next);
+    const before = list.find((session) => session.id === next)?.title ?? "";
+    await nameOne(deps, signal, next, before).catch(() => {
+      // Leave it: the display already hides a marker title, and the rule title may have landed.
+    });
+  }
+}
+
+/** The engine-backed deps for a title pass in one workspace. */
+function titlePassDeps(client: Client, directory: string | undefined, sessions: () => readonly TitledSession[], tried: Set<string>, onRenamed: () => void): TitlePassDeps {
+  return {
+    sessions,
+    messages: async (sessionId) => unwrap(await client.session.messages({ sessionID: sessionId, directory })) as unknown as ListedMessage[],
+    title: async (sessionId) => (unwrap(await client.session.get({ sessionID: sessionId, directory })) as { title?: string }).title ?? "",
+    rename: async (sessionId, title) => {
+      await client.session.update({ sessionID: sessionId, title, directory });
+      onRenamed();
+    },
+    createChild: async (parentId, title) =>
+      (unwrap(await client.session.create({ directory, parentID: parentId, ...(title ? { title } : {}) })) as { id: string }).id,
+    prompt: async (sessionId, text, model) => {
+      const sent = await client.session.promptAsync({
+        sessionID: sessionId,
+        directory,
+        agent: COWORK_CHECK_AGENT,
+        parts: [{ type: "text", text }],
+        ...(model ? { model } : {}),
+      });
+      return !sent.error;
+    },
+    deleteChild: async (sessionId) => {
+      await client.session.delete({ sessionID: sessionId, directory });
+    },
+    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+    tried,
+    remember: (sessionId) => {
+      tried.add(sessionId);
+      writeTried(tried);
+    },
+  };
+}
+
 /**
  * Names Cowork chats whose title was made from the prompt itself, once and for good, in two steps:
  *   1. at once, by rule (shortTitleFromPrompt: filler dropped, at most 6 words);
@@ -135,92 +244,36 @@ export function useChatTitles(input: {
   onRenamed: () => void;
 }) {
   const tried = useRef<Set<string> | null>(null);
-  const running = useRef(false);
   const latestSessions = useRef(input.sessions);
   latestSessions.current = input.sessions;
   const onRenamed = useRef(input.onRenamed);
   onRenamed.current = input.onRenamed;
   const { enabled, client, directory, sessions } = input;
-  // Only an unmount stops a pass in flight; a refreshed session list must not cancel it.
-  const mounted = useRef(true);
+  // One generation per enabled client + workspace: leaving Cowork, a client or workspace switch,
+  // or unmount aborts the pass in flight. A refreshed session list does not.
+  const generation = useRef<{ controller: AbortController; running: boolean } | null>(null);
+
   useEffect(() => {
-    mounted.current = true;
+    if (!enabled || !client) return;
+    const current = { controller: new AbortController(), running: false };
+    generation.current = current;
     return () => {
-      mounted.current = false;
+      current.controller.abort();
+      if (generation.current === current) generation.current = null;
     };
-  }, []);
+  }, [enabled, client, directory]);
 
   useEffect(() => {
-    if (!enabled || !client || running.current) return;
+    const current = generation.current;
+    if (!client || !current || current.running || current.controller.signal.aborted) return;
     tried.current ??= readTried();
-    const done = tried.current;
-    if (sessionsToTitle(sessions, done).length === 0) return;
-    running.current = true;
-
-    const rename = async (id: string, title: string) => {
-      await client.session.update({ sessionID: id, title, directory });
-      if (mounted.current) onRenamed.current();
-    };
-
-    const nameOne = async (id: string, before: string) => {
-      // No limit: the engine's limit keeps the NEWEST messages, and the first prompt is the oldest.
-      const messages = unwrap(await client.session.messages({ sessionID: id, directory })) as unknown as ListedMessage[];
-      const prompt = firstPromptText(messages);
-      // No prompt yet (a brand-new chat): not marked tried, so a later list refresh looks again.
-      if (!prompt) return;
-      done.add(id);
-      writeTried(done);
-      if (!isPromptDerivedTitle(before, prompt)) return;
-      const ruled = shortTitleFromPrompt(prompt);
-      if (ruled && ruled !== before) await rename(id, ruled);
-      const expected = (ruled || before).trim();
-
-      const child = unwrap(await client.session.create({ directory, parentID: id, ...(expected ? { title: expected } : {}) })) as { id: string };
-      try {
-        const model = chatModel(messages);
-        const sent = await client.session.promptAsync({
-          sessionID: child.id,
-          directory,
-          agent: COWORK_CHECK_AGENT,
-          parts: [{ type: "text", text: namingPrompt(prompt) }],
-          ...(model ? { model } : {}),
-        });
-        if (sent.error) return;
-        const deadline = Date.now() + NAME_TIMEOUT_MS;
-        while (Date.now() < deadline && mounted.current) {
-          await new Promise((resolve) => setTimeout(resolve, NAME_POLL_MS));
-          const answer = namingAnswer(unwrap(await client.session.messages({ sessionID: child.id, directory })) as unknown as ListedMessage[]);
-          if (answer === null) continue;
-          const named = cleanGeneratedTitle(answer);
-          if (!named) return;
-          // A Rename while the request ran wins: only replace the title this pass set.
-          const current = (unwrap(await client.session.get({ sessionID: id, directory })) as { title?: string }).title ?? "";
-          if (current.trim() === expected && named !== current.trim()) await rename(id, named);
-          return;
-        }
-      } finally {
-        // The naming session is machinery: never leave it behind in the engine.
-        await client.session.delete({ sessionID: child.id, directory }).catch(() => undefined);
-      }
-    };
-
-    // One chat at a time; chats that arrive while the pass runs are picked up from the latest list.
-    void (async () => {
-      const looked = new Set<string>();
-      try {
-        while (mounted.current && looked.size < TITLE_PASS_LIMIT) {
-          const list = latestSessions.current;
-          const next = sessionsToTitle(list, done).find((id) => !looked.has(id));
-          if (!next) break;
-          looked.add(next);
-          const before = list.find((session) => session.id === next)?.title ?? "";
-          await nameOne(next, before).catch(() => {
-            // Leave it: the display already hides a marker title, and the rule title may have landed.
-          });
-        }
-      } finally {
-        running.current = false;
-      }
-    })();
+    if (sessionsToTitle(sessions, tried.current).length === 0) return;
+    current.running = true;
+    const deps = titlePassDeps(client, directory, () => latestSessions.current, tried.current, () => {
+      if (!current.controller.signal.aborted) onRenamed.current();
+    });
+    void runTitlePass(deps, current.controller.signal).finally(() => {
+      current.running = false;
+    });
   }, [enabled, client, directory, sessions]);
 }

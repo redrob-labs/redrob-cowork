@@ -1,6 +1,6 @@
 import { isReasoningUIPart, isToolUIPart, type DynamicToolUIPart, type FileUIPart, type ToolUIPart, type UIMessage } from "ai"
 import type { ThreadStatus } from "@/lib/messages"
-import { isAggregatableToolPart } from "@/lib/tool-aggregate"
+import { continuesAggregate, isAggregatableToolPart } from "@/lib/tool-aggregate"
 import { isWebFetchToolPart, isWebSearchToolPart } from "@/lib/build-in-tools"
 import { t } from "@/i18n"
 
@@ -337,10 +337,11 @@ export function getAssistantRenderGroups(
       // collapse into one aggregate group. Prose, files, and other tools
       // break the run; reasoning does not — thinking models emit a
       // reasoning part before nearly every call, and letting it split the
-      // run degrades every aggregate to a single call.
+      // run degrades every aggregate to a single call. In the Cowork frame a
+      // change of lane (web / edit / other) also starts a new aggregate.
       if (isAggregatableToolPart(part, foldWeb)) {
         const previous = groups.findLast((group) => group.kind !== "reasoning")
-        if (previous?.kind === "tool-aggregate") {
+        if (previous?.kind === "tool-aggregate" && continuesAggregate(previous.parts.at(-1), part, foldWeb)) {
           previous.parts.push(part)
         } else {
           groups.push({ kind: "tool-aggregate", parts: [part] })

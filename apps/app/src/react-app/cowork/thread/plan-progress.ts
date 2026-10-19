@@ -81,19 +81,22 @@ export function planRunActivities(messages: readonly UIMessage[], busy: boolean)
       if (!name) continue;
       if (WEB_TOOLS.has(name)) current.activity.webSteps += 1;
       else if (WRITE_TOOLS.test(name)) {
-        const settled = part.state === "output-available" || part.state === "output-error";
-        if (settled) current.activity.writes += 1;
-        // In flight anywhere wins over settled, so "writing" holds while any write still runs.
-        if (!settled) current.activity.writing = "writing";
-        else if (current.activity.writing === "none") current.activity.writing = "written";
+        // A failed write is settled but wrote nothing, so it neither counts nor marks the result written.
+        if (part.state === "output-available") {
+          current.activity.writes += 1;
+          if (current.activity.writing === "none") current.activity.writing = "written";
+        } else if (part.state !== "output-error") {
+          // In flight anywhere wins over settled, so "writing" holds while any write still runs.
+          current.activity.writing = "writing";
+        }
       }
     }
-    // A later message with no write in flight leaves "written" once every write has settled.
+    // A later message with no write in flight leaves "writing" once every write has settled.
     if (current.activity.writing === "writing" && !(message.parts as ToolLike[]).some((part) => {
       const name = toolName(part);
       return name !== null && WRITE_TOOLS.test(name) && part.state !== "output-available" && part.state !== "output-error";
     })) {
-      current.activity.writing = "written";
+      current.activity.writing = current.activity.writes > 0 ? "written" : "none";
     }
   });
   if (current && inRun && !busy) (current as { activity: PlanRunActivity }).activity.finished = true;

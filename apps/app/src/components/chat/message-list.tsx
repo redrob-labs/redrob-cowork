@@ -140,7 +140,7 @@ import { formatMessageCost, readMessageUsage } from "./message-usage"
 import { CHAT_COLUMN } from "./chat-column"
 import { hasIncompleteOptionsMarker, parseAnswerOptions } from "./answer-options"
 import { groupMessages, isMessageGroup, getLastTextPart, getAggregateOnlyParts, getAssistantRenderGroups, getFileTitle, isWebResearchGroup, liveActivityOf, getMediaBadge, getMessageCompleted, getMessageCreated, formatMessageTimestamp, splitTurnAtAnswer, type UIMessageWithIndex, getMessagesText, getSafeFileDownloadUrl, getSafeFileRevealPath } from "./utils"
-import type { AnyToolPart } from "@/lib/tool-aggregate"
+import { continuesAggregate, type AnyToolPart } from "@/lib/tool-aggregate"
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame"
 import { hasCoworkBlocks, parseCoworkBlocks } from "@/react-app/cowork/thread/cowork-blocks"
 import { CoworkAnswerFooter, CoworkBlocksView, CoworkMemoryNote, CoworkRunStatus } from "@/react-app/cowork/thread/cowork-thread"
@@ -1397,8 +1397,12 @@ function MessageGroup({
           ? getAggregateOnlyParts(item.message, showThinking, inCoworkFrame)
           : null
       if (aggregateParts) {
-        if (!run) run = { parts: [], key: item.message.id }
-        run.parts.push(...aggregateParts)
+        // A message may itself span lanes (web, then edits); each lane change starts a new line.
+        for (const part of aggregateParts) {
+          if (run && !continuesAggregate(run.parts.at(-1), part, inCoworkFrame)) flush()
+          if (!run) run = { parts: [], key: part.toolCallId }
+          run.parts.push(part)
+        }
         return
       }
       flush()

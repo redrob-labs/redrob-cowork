@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import type { Message, Part } from "@redrob-labs/sdk/v2/client";
 
 import { unwrap } from "../../../app/lib/opencode";
@@ -53,7 +53,7 @@ export function permissionAsk(event: Pick<OpencodeEvent, "type"> & { properties?
   return sessionId && requestId ? { sessionId, requestId, v2: event.type === "permission.v2.asked" } : null;
 }
 
-function crossCheckDeps(client: Client, directory: string | undefined): CrossCheckDeps {
+function crossCheckDeps(client: Client, directory: string | undefined, signal: AbortSignal): CrossCheckDeps {
   const store = useCheckStore.getState();
   return {
     messages: async (sessionId) => toTranscript(unwrap(await client.session.messages({ sessionID: sessionId, directory }))),
@@ -61,6 +61,9 @@ function crossCheckDeps(client: Client, directory: string | undefined): CrossChe
     // (lists ask for root sessions only).
     createCheckSession: async (parentId) =>
       unwrap(await client.session.create({ directory, parentID: parentId, title: t("cowork.thread_fact_title") })).id,
+    deleteCheckSession: async (checkSessionId) => {
+      await client.session.delete({ sessionID: checkSessionId, directory });
+    },
     // On the model the chat used, not the engine's default.
     prompt: async (sessionId, text, agent, model) => {
       const result = await client.session.promptAsync({
@@ -73,12 +76,23 @@ function crossCheckDeps(client: Client, directory: string | undefined): CrossChe
       });
       if (result.error) throw new Error(t("cowork.thread_receipt_fact_failed"));
     },
-    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+    // Ends early when the hook goes away, so a teardown does not wait out the poll.
+    sleep: (ms) =>
+      new Promise((resolve) => {
+        const timer = setTimeout(done, ms);
+        function done() {
+          clearTimeout(timer);
+          signal.removeEventListener("abort", done);
+          resolve(undefined);
+        }
+        signal.addEventListener("abort", done, { once: true });
+      }),
     start: store.start,
     settle: store.settle,
     track: store.track,
     untrack: store.untrack,
     stopped: (checkSessionId) => Boolean(useCheckStore.getState().stopped[checkSessionId]),
+    signal,
   };
 }
 
@@ -105,10 +119,19 @@ async function refuseCheckAsk(client: Client, directory: string | undefined, ask
  * levels say. Mounted once, by the session route. It also answers Retry on a failed check.
  */
 export function useCoworkCrossCheck(input: { client: Client | null; directory: string | undefined; levels: CoworkCrossCheck }) {
+  // One per client + workspace: aborted when either changes or the route unmounts, which stops
+  // the checks it started (they settle as failed and their sessions are deleted).
+  const controller = useRef<AbortController | null>(null);
+  const deps = (client: Client) => {
+    const signal = controller.current?.signal;
+    return signal && !signal.aborted ? crossCheckDeps(client, input.directory, signal) : null;
+  };
+
   const onAnswered = useEffectEvent((sessionId: string) => {
     const pending = useCheckStore.getState().take(sessionId);
-    if (!pending || !input.client) return;
-    void runCrossCheck(crossCheckDeps(input.client, input.directory), { sessionId, ...pending, levels: input.levels });
+    const ready = pending && input.client ? deps(input.client) : null;
+    if (!pending || !ready) return;
+    void runCrossCheck(ready, { sessionId, ...pending, levels: input.levels });
   });
 
   const onAsk = useEffectEvent((ask: { sessionId: string; requestId: string; v2: boolean }) => {
@@ -118,8 +141,9 @@ export function useCoworkCrossCheck(input: { client: Client | null; directory: s
 
   const onRetry = useEffectEvent((messageId: string) => {
     const checks = useCheckStore.getState().answers[messageId];
-    if (!checks?.request || !input.client) return;
-    void runCrossCheck(crossCheckDeps(input.client, input.directory), {
+    const ready = checks?.request && input.client ? deps(input.client) : null;
+    if (!checks?.request || !ready) return;
+    void runCrossCheck(ready, {
       ...checks.request,
       levels: input.levels,
       plan: retryPlan(checks),
@@ -127,6 +151,8 @@ export function useCoworkCrossCheck(input: { client: Client | null; directory: s
   });
 
   useEffect(() => {
+    const current = new AbortController();
+    controller.current = current;
     useCheckStore.getState().setRetryHandler((messageId) => onRetry(messageId));
     let state = EMPTY_RUN_EVENTS;
     const unsubscribe = subscribeSessionSyncEvents((_workspaceId, event) => {
@@ -139,8 +165,10 @@ export function useCoworkCrossCheck(input: { client: Client | null; directory: s
       }
     });
     return () => {
+      current.abort();
+      if (controller.current === current) controller.current = null;
       unsubscribe();
       useCheckStore.getState().setRetryHandler(null);
     };
-  }, []);
+  }, [input.client, input.directory]);
 }
