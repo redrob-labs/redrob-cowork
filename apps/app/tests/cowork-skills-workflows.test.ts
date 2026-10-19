@@ -3,6 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
+import { SkillView } from "../src/react-app/cowork/skills/cowork-skill";
 import { WorkflowView, type WorkflowViewProps } from "../src/react-app/cowork/skills/cowork-workflow";
 import type { SkillRow } from "../src/react-app/cowork/skills/skills";
 import { installSkills } from "../src/react-app/cowork/skills/use-skills";
@@ -85,14 +86,15 @@ describe("featured workflows data", () => {
   });
 });
 
-describe("workflow markup", () => {
+describe("Add controls", () => {
   const render = (node: React.ReactElement) => renderToStaticMarkup(React.createElement(MemoryRouter, null, node));
+  const added = (entry: SkillRow): SkillRow => ({ ...entry, installed: { name: entry.name, description: "", origin: "library", tags: {}, scope: "project" } });
   const props = (overrides: Partial<WorkflowViewProps> = {}): WorkflowViewProps => ({
     id: "legal-company",
     rows: workflowRows("legal-company", allRows()),
     locale: "en",
     canAdd: true,
-    busy: null,
+    pending: new Set(),
     addingAll: false,
     backPath: "/skills",
     onBack: () => {},
@@ -100,21 +102,27 @@ describe("workflow markup", () => {
     onAddAll: () => {},
     ...overrides,
   });
+  const addAll = (html: string) => html.match(/<button[^>]*>(?:(?!<\/button>)[\s\S])*?Add all 5/)?.[0]?.match(/<button[^>]*>/)?.[0] ?? "";
 
-  test("the page groups skills, links each to its page and offers Add all", () => {
+  test("follow the workspace, a running add, and what is already added", () => {
     const html = render(React.createElement(WorkflowView, props()));
-    expect(html).toContain("United States");
-    expect(html).toContain("Korea");
     expect(html.indexOf("United States")).toBeLessThan(html.indexOf("Korea"));
     expect(html).toContain('href="/skill/us-lawyer-83b-election"');
-    expect(html).toContain("Add all 5");
-  });
-
-  test("Add all hides when everything is added and is disabled without a project", () => {
-    const installed = props().rows.map((entry) => ({ ...entry, installed: { name: entry.name, description: "", origin: "library" as const, tags: {}, scope: "project" as const } }));
-    expect(render(React.createElement(WorkflowView, props({ rows: installed })))).not.toContain("Add all");
-    const disabled = render(React.createElement(WorkflowView, props({ canAdd: false })));
-    expect(disabled).toMatch(/<button[^>]*disabled[^>]*>[\s\S]*?Add all 5/);
+    expect(addAll(html)).not.toContain("disabled");
+    // Without a workspace, Add all is disabled; while a single add runs it waits too.
+    expect(addAll(render(React.createElement(WorkflowView, props({ canAdd: false }))))).toContain("disabled");
+    expect(addAll(render(React.createElement(WorkflowView, props({ pending: new Set(["us-lawyer-83b-election"]) }))))).toContain("disabled");
+    // Everything added: no Add all at all.
+    expect(render(React.createElement(WorkflowView, props({ rows: props().rows.map(added) })))).not.toContain("Add all");
+    // A deep-linked library skill offers Add only when a workspace is connected.
+    const detail = (connected: boolean) => render(React.createElement(SkillView, {
+      skill: { name: "pdf", description: "Use when making a PDF.", tags: {}, body: "", installed: null },
+      taxonomy: null, locale: "en", connected, busy: false, backPath: "/skills", onBack: () => {}, onRun: () => {}, onAdd: () => {},
+    }));
+    // The library skill's only button is Add.
+    const addButton = (html: string) => html.match(/<button[^>]*>/)?.[0] ?? "";
+    expect(addButton(detail(false))).toContain("disabled");
+    expect(addButton(detail(true))).not.toContain("disabled");
   });
 });
 

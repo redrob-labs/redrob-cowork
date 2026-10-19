@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router";
 import { Button, EmptyState, Skeleton, icons } from "@redrob-labs/ui";
@@ -13,7 +13,7 @@ import { CoworkShell } from "../shell/cowork-shell";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { useFrameStore } from "../store/frame-store";
 import { CONSOLE_SKILLS_URL, runSkill } from "./skills";
-import { installSkill } from "./use-skills";
+import { usePendingAdds } from "./use-skills";
 import { useCoworkStartStore } from "./start-chat";
 import { consoleCatalogue } from "./console-catalogue";
 import { MarketplaceShelf, SkillShelf, SkillTile } from "./skill-tile";
@@ -73,7 +73,6 @@ export function SkillsScreen() {
   const queryClient = useQueryClient();
   const showToast = useFrameStore((state) => state.showToast);
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
-  const [busy, setBusy] = useState<string | null>(null);
   const restoredFocusKey = useRef<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -87,11 +86,8 @@ export function SkillsScreen() {
   const fromPath = "/skills";
   const canUse = preview === false && Boolean(workspaceId);
   const deps = { skills: services.skills, queryClient, scope, showToast };
+  const { pending, add } = usePendingAdds(deps);
 
-  const add = (name: string) => {
-    setBusy(name);
-    void installSkill(deps, name).finally(() => setBusy(null));
-  };
   const use = canUse ? (name: string) => void runSkill({ workspaceId, request: requestChat, navigate }, name) : undefined;
   const retryLibrary = () => {
     consoleCatalogue.reset();
@@ -121,7 +117,7 @@ export function SkillsScreen() {
     </section>
   ) : null;
 
-  const tileProps = { locale, busy, canAdd: preview === false, fromPath, onAdd: add, ...(use ? { onUse: use } : {}) };
+  const tileProps = { locale, pending, canAdd: canUse, fromPath, onAdd: add, ...(use ? { onUse: use } : {}) };
 
   return (
     <CoworkShell

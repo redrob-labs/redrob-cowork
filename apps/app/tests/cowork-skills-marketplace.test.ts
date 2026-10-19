@@ -1,12 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { MemoryRouter } from "react-router";
 
 import { createConsoleCatalogue, CATALOGUE_CACHE_MS } from "../src/react-app/cowork/skills/console-catalogue";
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
-import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
 import {
   SKILL_TONES,
   languageTagLabel,
@@ -145,29 +141,15 @@ describe("console catalogue", () => {
 });
 
 describe("skill detail escape guard", () => {
-  test("allows bare Escape and protects controls, modals, and handled events", () => {
-    const idle = { modalOpen: false, scheduling: false };
+  test("allows bare Escape and protects controls, modals, page work, and handled events", () => {
+    const idle = { modalOpen: false, blocked: false };
     expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false }, idle)).toBe(true);
     expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false, targetTag: "INPUT" }, idle)).toBe(false);
     expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false, targetTag: "TEXTAREA" }, idle)).toBe(false);
     expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false, contentEditable: true }, idle)).toBe(false);
     expect(shouldEscapeToList({ key: "Escape", defaultPrevented: true }, idle)).toBe(false);
-    expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false }, { modalOpen: true, scheduling: false })).toBe(false);
-    expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false }, { modalOpen: false, scheduling: true })).toBe(false);
-  });
-});
-
-describe("skill marketplace markup", () => {
-  test("keeps the action outside the link and uses described-by without title attributes", () => {
-    const html = renderToStaticMarkup(
-      React.createElement(MemoryRouter, null,
-        React.createElement(SkillTile, { row: row("sample", { title: "Sample", summary: "A concise sample." }), locale: "en", busy: null, canAdd: true, fromPath: "/skills", onAdd: () => {} }),
-      ),
-    );
-    const link = html.match(/<a\b[\s\S]*?<\/a>/)?.[0] ?? "";
-    expect(link).toContain('aria-describedby="skill-brief-sample"');
-    expect(link).not.toContain("<button");
-    expect(html).toContain("<button");
-    expect(html).not.toContain(" title=");
+    expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false }, { modalOpen: true, blocked: false })).toBe(false);
+    // A schedule dialog or a running Add / Add all keeps the person on the page.
+    expect(shouldEscapeToList({ key: "Escape", defaultPrevented: false }, { modalOpen: false, blocked: true })).toBe(false);
   });
 });

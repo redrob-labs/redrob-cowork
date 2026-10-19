@@ -30,8 +30,8 @@ export type SkillViewProps = {
   taxonomy: SkillTaxonomy | null;
   /** Current locale for catalogue title and summary. */
   locale: string;
-  /** Whether a connected workspace can run this skill. */
-  canRun: boolean;
+  /** Whether a connected workspace can run or add this skill. */
+  connected: boolean;
   /** Whether the add or remove request is active. */
   busy: boolean;
   /** Marketplace path preserved for Back and Escape. */
@@ -45,7 +45,7 @@ export type SkillViewProps = {
 };
 
 /** Product-page presentation for one installed or library skill. */
-export function SkillView({ skill, taxonomy, locale, canRun, busy, backPath, onBack, onRun, onAdd }: SkillViewProps) {
+export function SkillView({ skill, taxonomy, locale, connected, busy, backPath, onBack, onRun, onAdd }: SkillViewProps) {
   const brief = skillBrief(skill, locale);
   const category = skillShelf({ name: skill.name, tags: skill.tags, installed: null });
   // Profession and task only; the language has its own Information row.
@@ -73,9 +73,9 @@ export function SkillView({ skill, taxonomy, locale, canRun, busy, backPath, onB
             {topicTags.map((label) => <Badge key={label} size="sm" variant="outline">{label}</Badge>)}
           </div>
           {skill.installed ? (
-            <Button variant="primary" iconLeft={icons.play(ICON)} disabled={!canRun} onClick={onRun}>{t("cowork.skills_use")}</Button>
+            <Button variant="primary" iconLeft={icons.play(ICON)} disabled={!connected} onClick={onRun}>{t("cowork.skills_use")}</Button>
           ) : (
-            <Button variant="primary" iconLeft={icons.plus(ICON)} loading={busy} onClick={onAdd}>{t("cowork.skill_add")}</Button>
+            <Button variant="primary" iconLeft={icons.plus(ICON)} loading={busy} disabled={!connected} onClick={onAdd}>{t("cowork.skill_add")}</Button>
           )}
         </div>
       </div>
@@ -128,7 +128,7 @@ export function SkillScreen() {
   const installedList = useQuery({ queryKey: previewKey(scope, "skills"), queryFn: () => services.skills.list(), staleTime: 30_000, gcTime: CATALOGUE_CACHE_MS });
   const preview = installedList.data?.preview;
   const installed = skill?.installed ?? null;
-  const { backPath, back: returnToList } = useBackToList({ restoreKey: "fromSkill", restoreValue: name, blocked: scheduling });
+  const { backPath, back: returnToList } = useBackToList({ restoreKey: "fromSkill", restoreValue: name, blocked: scheduling || busy });
   const deps = { skills: services.skills, queryClient, scope, showToast };
   const act = async (run: typeof installSkill, then?: () => void) => {
     setBusy(true);
@@ -156,7 +156,7 @@ export function SkillScreen() {
       <PreviewPage note={t("cowork.skills_preview_note")} preview={preview}>
         <PreviewState query={query} loading={<HeroSkeleton art="circle" />}>
           {(data) => data ? (
-            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} canRun={real && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onRun={() => void runSkill({ workspaceId, request, navigate }, name)} onAdd={() => void act(installSkill)} />
+            <SkillView skill={data} taxonomy={taxonomy.data?.data ?? null} locale={locale} connected={real && Boolean(workspaceId)} busy={busy} backPath={backPath} onBack={returnToList} onRun={() => void runSkill({ workspaceId, request, navigate }, name)} onAdd={() => void act(installSkill)} />
           ) : <EmptyState title={t("cowork.skill_not_found_title")} description={t("cowork.skill_not_found_text")} />}
         </PreviewState>
       </PreviewPage>
