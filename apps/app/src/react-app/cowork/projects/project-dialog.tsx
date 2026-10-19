@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { Button, Input, icons } from "@redrob-labs/ui";
 
+import { pickDirectory } from "../../../app/lib/desktop";
+import { isDesktopRuntime } from "../../../app/lib/runtime-env";
 import { t } from "../../../i18n";
 import { useCoworkComposerStore } from "../composer/composer-state";
 import { useCoworkConnection } from "../shell/cowork-connection";
@@ -23,9 +25,62 @@ export type ProjectDialogViewProps = {
   onNameChange: (name: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
+  /** A folder the person chose for the project; null keeps Cowork's own folder. */
+  folder: string | null;
+  /** Choosing a folder needs the desktop app's picker. */
+  canChooseFolder: boolean;
+  onChooseFolder: () => void;
+  onResetFolder: () => void;
 };
 
-/** Asks only for a name. Save as a project says the chat moves in. */
+/** The last part of a path, for the folder row: `C:\Users\me\Clients\Acme` reads "Acme". */
+function folderLabel(path: string): string {
+  return path.split(/[\\/]+/).filter(Boolean).pop() ?? path;
+}
+
+/**
+ * Where the project's files go. By default Cowork keeps them in a folder it makes; Choose folder
+ * opens the system picker so a project can live in a folder of the person's (a client folder, a
+ * repo). The chosen folder shows by name, the full path on hover, with a way back to Cowork's.
+ */
+export function ProjectFolderField(props: {
+  folder: string | null;
+  canChoose: boolean;
+  busy: boolean;
+  onChoose: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <div className="cowork-project-folder">
+      <span className="cowork-project-folder__label">{t("cowork.project_dialog_folder")}</span>
+      <div className="cowork-project-folder__row">
+        <span className="cowork-project-folder__icon">{icons.folder({ width: 16, height: 16, "aria-hidden": true })}</span>
+        {props.folder ? (
+          <span className="cowork-project-folder__name" title={props.folder}>
+            {folderLabel(props.folder)}
+          </span>
+        ) : (
+          <span className="cowork-project-folder__name cowork-project-folder__name--default">{t("cowork.project_dialog_folder_cowork")}</span>
+        )}
+        {props.canChoose ? (
+          <Button size="sm" variant="secondary" disabled={props.busy} onClick={props.onChoose}>
+            {props.folder ? t("cowork.project_dialog_folder_change") : t("cowork.project_dialog_folder_choose")}
+          </Button>
+        ) : null}
+      </div>
+      {props.folder ? (
+        <div className="cowork-project-folder__foot">
+          <span className="cowork-hint">{t("cowork.project_dialog_folder_hint")}</span>
+          <button type="button" className="cowork-project-folder__reset" disabled={props.busy} onClick={props.onReset}>
+            {t("cowork.project_dialog_folder_reset")}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Asks for a name and, optionally, a folder of the person's. Save as a project says the chat moves in. */
 export function ProjectDialogView(props: ProjectDialogViewProps) {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,6 +113,13 @@ export function ProjectDialogView(props: ProjectDialogViewProps) {
           error={props.error ?? undefined}
           onChange={(event) => props.onNameChange(event.target.value)}
         />
+        <ProjectFolderField
+          folder={props.folder}
+          canChoose={props.canChooseFolder}
+          busy={props.busy}
+          onChoose={props.onChooseFolder}
+          onReset={props.onResetFolder}
+        />
       </form>
     </CoworkDialog>
   );
@@ -73,12 +135,20 @@ function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | n
   const [name, setName] = useState(props.initialName);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // A folder of the person's for the project; null keeps Cowork's own (the default).
+  const [folder, setFolder] = useState<string | null>(null);
+  const chooseFolder = () => {
+    void pickDirectory({ title: t("cowork.project_dialog_folder_pick_title") }).then((selection) => {
+      const picked = typeof selection === "string" ? selection : (selection?.[0] ?? null);
+      if (picked) setFolder(picked);
+    });
+  };
 
   const submit = () => {
     if (busy) return;
     setBusy(true);
     const from = props.chatId && workspaceId ? { chatId: props.chatId, workspaceId } : null;
-    createProject({ client, navigate, toast: showToast, close: props.onClose, setMemory }, { name, from })
+    createProject({ client, navigate, toast: showToast, close: props.onClose, setMemory }, { name, from, folder })
       .then((result) => {
         if (result.status === "invalid") setError(result.error);
         if (result.status === "created" || result.status === "not-moved") {
@@ -101,6 +171,10 @@ function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | n
       }}
       onCancel={props.onClose}
       onSubmit={submit}
+      folder={folder}
+      canChooseFolder={isDesktopRuntime()}
+      onChooseFolder={chooseFolder}
+      onResetFolder={() => setFolder(null)}
     />
   );
 }

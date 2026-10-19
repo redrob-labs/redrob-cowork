@@ -15,6 +15,7 @@ export type ProjectsClient = Pick<
   | "listAuthorizedFolders"
   | "setAuthorizedFolders"
   | "createManagedProject"
+  | "createLocalWorkspace"
   | "moveSession"
 >;
 
@@ -199,7 +200,7 @@ export function offersSaveAsProject(input: { chatId: string | null; workspace: P
 }
 
 export type CreateProjectDeps = {
-  client: Pick<ProjectsClient, "createManagedProject" | "moveSession"> | null;
+  client: Pick<ProjectsClient, "createManagedProject" | "createLocalWorkspace" | "moveSession"> | null;
   navigate: (path: string) => void;
   toast: (title: string, text?: string, tone?: "success" | "danger") => void;
   close: () => void;
@@ -220,9 +221,23 @@ export type CreateProjectResult =
  * moves the chat into it with its memory on the project, says so and opens it. An empty name
  * keeps the dialog open. If the chat cannot move, the project stays and the chat stays put.
  */
+/**
+ * The id of the project `createLocalWorkspace` just made on `folder`. The route answers with the
+ * new workspace (`workspace`), though the client types it as the plain list; fall back to the list
+ * entry on that folder, then to the active id (a project on a chosen folder becomes active).
+ */
+export function createdProjectId(
+  result: { workspace?: { id?: string } | null; activeId?: string | null; workspaces?: readonly { id: string; path?: string | null }[] },
+  folder: string,
+): string | null {
+  const sameFolder = (path: string | null | undefined) =>
+    (path ?? "").replace(/[\\/]+$/, "").toLowerCase() === folder.replace(/[\\/]+$/, "").toLowerCase();
+  return result.workspace?.id || result.workspaces?.find((entry) => sameFolder(entry.path))?.id || result.activeId || null;
+}
+
 export async function createProject(
   deps: CreateProjectDeps,
-  input: { name: string; from: ProjectSource | null },
+  input: { name: string; from: ProjectSource | null; /** A folder the person chose; null keeps Cowork's own. */ folder?: string | null },
 ): Promise<CreateProjectResult> {
   const error = projectNameError(input.name);
   if (error) return { status: "invalid", error };
@@ -234,7 +249,16 @@ export async function createProject(
 
   let projectId: string;
   try {
-    projectId = (await deps.client.createManagedProject(name)).workspace.id;
+    if (input.folder) {
+      const made = createdProjectId(
+        await deps.client.createLocalWorkspace({ folderPath: input.folder, name, preset: "starter" }),
+        input.folder,
+      );
+      if (!made) throw new Error("no project id");
+      projectId = made;
+    } else {
+      projectId = (await deps.client.createManagedProject(name)).workspace.id;
+    }
   } catch {
     deps.toast(t("cowork.project_create_failed_title"), t("cowork.project_create_failed_text"), "danger");
     return { status: "failed" };

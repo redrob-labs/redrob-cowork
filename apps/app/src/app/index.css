@@ -6021,3 +6021,78 @@ a.cowork-radar-story__source:focus-visible {
 .cowork-project-row__text .cowork-inline-rename {
   max-width: 420px;
 }
+
+/* New project: the Folder row under the name. A sunken bar with the folder's name (or "Cowork keeps
+   the files") and Choose folder / Change on the right; a chosen folder adds a hint and a way back. */
+.cowork-project-folder {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.cowork-project-folder__label {
+  color: var(--ink-primary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cowork-project-folder__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-sunken);
+}
+
+.cowork-project-folder__icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--ink-secondary);
+}
+
+.cowork-project-folder__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-primary);
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cowork-project-folder__name--default {
+  color: var(--ink-secondary);
+  font-weight: 400;
+}
+
+.cowork-project-folder__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cowork-project-folder__reset {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-brand);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cowork-project-folder__reset:hover {
+  text-decoration: underline;
+}
+
+.cowork-project-folder__reset:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
