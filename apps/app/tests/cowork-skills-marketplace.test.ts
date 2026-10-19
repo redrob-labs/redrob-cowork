@@ -3,7 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router";
 
-import { createConsoleCatalogue } from "../src/react-app/cowork/skills/console-catalogue";
+import { createConsoleCatalogue, CATALOGUE_CACHE_MS } from "../src/react-app/cowork/skills/console-catalogue";
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import { SkillTile } from "../src/react-app/cowork/skills/skill-tile";
@@ -101,24 +101,46 @@ describe("skills marketplace helpers", () => {
   });
 });
 
-describe("console catalogue marketplace fields", () => {
-  test("maps localized frontmatter and version into list and detail", async () => {
+describe("console catalogue", () => {
+  test("maps fields, publishes only complete loads, keeps the last good one, and caches", async () => {
+    let now = 0;
+    let calls = 0;
+    let failMember = false;
     const fetchImpl: typeof fetch = async (input) => {
+      calls += 1;
       const url = String(input);
-      if (url.endsWith("index.json")) return new Response(JSON.stringify({ skills: [{ name: "sample" }] }));
+      if (url.endsWith("index.json")) return new Response(JSON.stringify({ skills: [{ name: "sample" }, { name: "other" }, { name: "sample" }] }));
+      if (url.includes("/other/")) return failMember ? new Response("", { status: 503 }) : new Response("---\nname: other\ndescription: Use when other.\n---\nBody");
       return new Response("---\nname: sample\ndescription: Use when testing.\ntitle: Sample\ntitle_ko: 예시\nsummary: Test a sample.\nsummary_ko: 예시를 시험합니다.\nversion: 2.1.0\n---\n\n# Instructions");
     };
-    const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test" });
-    expect(catalogue.peek("sample")).toBeNull();
-    expect(await catalogue.list()).toEqual([{ name: "sample", title: "Sample", titleKo: "예시", summary: "Test a sample.", summaryKo: "예시를 시험합니다.", description: "Use when testing.", tags: {} }]);
-    expect(catalogue.peek("sample")).toMatchObject({ titleKo: "예시", summaryKo: "예시를 시험합니다.", version: "2.1.0" });
-    expect(await catalogue.get("sample")).toMatchObject({ titleKo: "예시", summaryKo: "예시를 시험합니다.", version: "2.1.0", body: "# Instructions" });
-  });
+    const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test", now: () => now, failureTtlMs: 1_000 });
 
-  test("rejects list but keeps detail nullable when the index is unavailable", async () => {
-    const catalogue = createConsoleCatalogue({ fetchImpl: async () => new Response("", { status: 503 }), baseUrl: "https://example.test" });
+    // A member failing on the first load means no catalogue, not a partial one.
+    failMember = true;
     await expect(catalogue.list()).rejects.toThrow("not available");
-    expect(await catalogue.get("missing")).toBeNull();
+    expect(await catalogue.get("sample")).toBeNull();
+    await expect(catalogue.warm()).resolves.toBeUndefined();
+
+    // After the failure TTL a complete load publishes; duplicate index names collapse.
+    failMember = false;
+    now = 1_000;
+    expect(catalogue.peek("sample")).toBeNull();
+    expect(await catalogue.list()).toEqual([
+      { name: "sample", title: "Sample", titleKo: "예시", summary: "Test a sample.", summaryKo: "예시를 시험합니다.", description: "Use when testing.", tags: {} },
+      { name: "other", description: "Use when other.", tags: {} },
+    ]);
+    expect(catalogue.peek("sample")).toMatchObject({ titleKo: "예시", version: "2.1.0" });
+    expect(await catalogue.get("sample")).toMatchObject({ summaryKo: "예시를 시험합니다.", body: "# Instructions" });
+
+    // Served from memory until the 30-minute TTL; a failed refresh then keeps the last complete list.
+    const loaded = calls;
+    now += CATALOGUE_CACHE_MS - 1;
+    await catalogue.list();
+    expect(calls).toBe(loaded);
+    failMember = true;
+    now += 1;
+    expect((await catalogue.list()).map((skill) => skill.name)).toEqual(["sample", "other"]);
+    expect(calls).toBeGreaterThan(loaded);
   });
 });
 
