@@ -369,7 +369,7 @@ function FileMessage({ part, tone }: FileMessageProps) {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                aria-label={`More actions for ${title}`}
+                aria-label={t("message.more_actions_for", { title })}
               >
                 <MoreHorizontal />
               </Button>
@@ -697,7 +697,7 @@ const USER_SKILL_TOKEN_RE = /(Use the `[^`]+` skill\.|Load \[skill [^\]]+\] and 
 
 function UserSkillChip(props: { name: string }) {
   return (
-    <span className="mx-0.5 inline-flex items-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 px-2.5 py-1 text-xs font-medium text-foreground align-middle" title={`Skill: ${props.name}`}>
+    <span className="mx-0.5 inline-flex items-center rounded-full border border-spectrum-violet/35 bg-spectrum-violet/15 px-2.5 py-1 text-xs font-medium text-foreground align-middle" title={`${t("composer.skill_source")}: ${props.name}`}>
       {props.name}
     </span>
   )

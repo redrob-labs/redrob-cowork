@@ -17,6 +17,7 @@
  *
  * See redrob-code `docs/PROVIDER-AUTH.md`.
  */
+import { t } from "@/i18n";
 
 /** What we found on the machine for one runtime. */
 export type RuntimeProbe = {
@@ -83,7 +84,7 @@ function claudeChoice(probe: RuntimeProbe, keyConnected: boolean): OnboardingCho
     return {
       id: "claude",
       title: "Claude",
-      subtitle: "Runs Claude Code, already signed in on this computer.",
+      subtitle: t("onboarding.choice_claude_ready"),
       action: { kind: "already-connected" },
       ready: true,
       steps: [],
@@ -93,18 +94,18 @@ function claudeChoice(probe: RuntimeProbe, keyConnected: boolean): OnboardingCho
     return {
       id: "claude",
       title: "Claude",
-      subtitle: "Runs Claude Code. Sign in through Anthropic to use your plan.",
+      subtitle: t("onboarding.choice_claude_sign_in"),
       // Their flow, in their browser. We never hold the token.
       action: { kind: "run-vendor-login", runtime: "claude", command: "claude" },
       ready: false,
-      steps: ["Sign in to Claude in the window that opens", "Come back here"],
+      steps: [t("onboarding.choice_step_claude_sign_in"), t("onboarding.choice_step_come_back")],
     };
   }
   if (keyConnected) {
     return {
       id: "claude",
       title: "Claude",
-      subtitle: "Connected with your own Anthropic API key.",
+      subtitle: t("onboarding.choice_claude_key"),
       action: { kind: "already-connected" },
       ready: true,
       steps: [],
@@ -113,14 +114,14 @@ function claudeChoice(probe: RuntimeProbe, keyConnected: boolean): OnboardingCho
   return {
     id: "claude",
     title: "Claude",
-    subtitle: "Install Claude Code to use your Claude plan, or paste an Anthropic API key.",
+    subtitle: t("onboarding.choice_claude_install"),
     action: {
       kind: "install-runtime",
       runtime: "claude",
       installCommand: "npm install -g @anthropic-ai/claude-code",
     },
     ready: false,
-    steps: ["Install Claude Code", "Sign in to Claude in the window that opens", "Come back here"],
+    steps: [t("onboarding.choice_step_install_claude"), t("onboarding.choice_step_claude_sign_in"), t("onboarding.choice_step_come_back")],
   };
 }
 
@@ -129,7 +130,7 @@ function chatgptChoice(probe: RuntimeProbe, keyConnected: boolean): OnboardingCh
     return {
       id: "chatgpt",
       title: "ChatGPT",
-      subtitle: "Runs Codex, already signed in on this computer.",
+      subtitle: t("onboarding.choice_chatgpt_ready"),
       action: { kind: "already-connected" },
       ready: true,
       steps: [],
@@ -139,17 +140,17 @@ function chatgptChoice(probe: RuntimeProbe, keyConnected: boolean): OnboardingCh
     return {
       id: "chatgpt",
       title: "ChatGPT",
-      subtitle: "Runs Codex. Sign in with ChatGPT to use your plan.",
+      subtitle: t("onboarding.choice_chatgpt_sign_in"),
       action: { kind: "run-vendor-login", runtime: "codex", command: "codex login" },
       ready: false,
-      steps: ["Sign in with ChatGPT in the window that opens", "Come back here"],
+      steps: [t("onboarding.choice_step_chatgpt_sign_in"), t("onboarding.choice_step_come_back")],
     };
   }
   if (keyConnected) {
     return {
       id: "chatgpt",
       title: "ChatGPT",
-      subtitle: "Connected with your own OpenAI API key.",
+      subtitle: t("onboarding.choice_chatgpt_key"),
       action: { kind: "already-connected" },
       ready: true,
       steps: [],
@@ -158,10 +159,10 @@ function chatgptChoice(probe: RuntimeProbe, keyConnected: boolean): OnboardingCh
   return {
     id: "chatgpt",
     title: "ChatGPT",
-    subtitle: "Install Codex to use your ChatGPT plan, or paste an OpenAI API key.",
+    subtitle: t("onboarding.choice_chatgpt_install"),
     action: { kind: "install-runtime", runtime: "codex", installCommand: "npm install -g @openai/codex" },
     ready: false,
-    steps: ["Install Codex", "Sign in with ChatGPT in the window that opens", "Come back here"],
+    steps: [t("onboarding.choice_step_install_codex"), t("onboarding.choice_step_chatgpt_sign_in"), t("onboarding.choice_step_come_back")],
   };
 }
 
@@ -170,8 +171,8 @@ function redrobChoice(connected: boolean): OnboardingChoice {
     id: "redrob",
     title: "Redrob",
     subtitle: connected
-      ? "Connected. Nothing else to install."
-      : "Use Redrob's own models. Nothing to install.",
+      ? t("onboarding.choice_redrob_connected")
+      : t("onboarding.choice_redrob"),
     action: connected ? { kind: "already-connected" } : { kind: "connect-redrob" },
     ready: connected,
     steps: [],
@@ -208,8 +209,8 @@ export function recommendedChoice(choices: OnboardingChoice[]): OnboardingChoice
 export function whyNotOneClick(choice: OnboardingChoice): string | null {
   if (choice.action.kind === "install-runtime" || choice.action.kind === "run-vendor-login") {
     return choice.id === "claude"
-      ? "Anthropic requires that you sign in through their own app, so we open it for you instead of asking for your password."
-      : "OpenAI requires that you sign in through their own app, so we open it for you instead of asking for your password.";
+      ? t("onboarding.choice_why_claude")
+      : t("onboarding.choice_why_chatgpt");
   }
   return null;
 }

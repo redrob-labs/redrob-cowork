@@ -121,7 +121,7 @@ function SidePanelTab({ tab, active, onSelect, onClose }: SidePanelTabProps) {
             showBrowserTabContextMenu();
           } : undefined}
           title={tab.label}
-          aria-label={`Select tab: ${tab.label}`}
+          aria-label={t("panel.select_tab", { label: tab.label })}
         >
           {tab.type === "browser" ? (
             tab.favicon ? (
@@ -212,7 +212,7 @@ export function BrowserPanelContent({
                   </Button>
                 )}
               />
-              <TooltipContent>Back</TooltipContent>
+              <TooltipContent>{t("panel.go_back")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger
@@ -243,7 +243,7 @@ export function BrowserPanelContent({
                   </Button>
                 )}
               />
-              <TooltipContent>Reload</TooltipContent>
+              <TooltipContent>{t("panel.reload_page")}</TooltipContent>
             </Tooltip>
             <InputGroup className="mx-1 h-7 flex-1 rounded-md">
               <InputGroupInput

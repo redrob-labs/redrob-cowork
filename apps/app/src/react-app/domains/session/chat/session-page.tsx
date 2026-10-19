@@ -1269,7 +1269,7 @@ export function SessionPage(props: SessionPageProps) {
                       </Button>
                     }
                   />
-                  <TooltipContent>Find in conversation (⌘F)</TooltipContent>
+                  <TooltipContent>{`${t("find.in_conversation")} (⌘F)`}</TooltipContent>
                 </Tooltip>
               ) : null}
               {/* The Cowork frame has its own side panel button. */}
@@ -1765,8 +1765,8 @@ export function SessionPage(props: SessionPageProps) {
                 panelRailActive && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
               )}
               onClick={openArtifactRailPane}
-              title={`Artifacts (${artifactTargetCount})`}
-              aria-label={`Artifacts (${artifactTargetCount})`}
+              title={`${t("cowork.panel_artifacts")} (${artifactTargetCount})`}
+              aria-label={`${t("cowork.panel_artifacts")} (${artifactTargetCount})`}
               aria-pressed={panelRailActive}
             >
               <FileText size={15} />

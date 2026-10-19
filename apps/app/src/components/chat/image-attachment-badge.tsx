@@ -30,7 +30,7 @@ export function ImageAttachmentBadge({
         type="button"
         className="h-10 w-10 overflow-hidden rounded-xl border border-border/70 bg-background/50 transition-opacity hover:opacity-90"
         onClick={() => setOpen(true)}
-        aria-label={`Expand ${alt}`}
+        aria-label={t("attachment.expand_image", { name: alt })}
         title={alt}
       >
         <img
@@ -49,7 +49,7 @@ export function ImageAttachmentBadge({
             event.stopPropagation()
             onRemove()
           }}
-          aria-label={`Remove ${alt}`}
+          aria-label={t("attachment.remove_image", { name: alt })}
           title={t("common.remove")}
         >
           <X className="size-3" />
