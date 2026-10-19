@@ -127,7 +127,7 @@ export function TrendingTicker(props: TrendingTickerProps) {
   };
   const moveRowFocus = (event: KeyboardEvent<HTMLDivElement>) => {
     const rows = rowRefs.current.filter((row): row is HTMLButtonElement => row !== null);
-    const at = rows.indexOf(document.activeElement as HTMLButtonElement);
+    const at = rows.findIndex((row) => row === document.activeElement);
     let next = at;
     if (event.key === "ArrowDown") next = Math.min(rows.length - 1, at + 1);
     else if (event.key === "ArrowUp") next = Math.max(0, at - 1);

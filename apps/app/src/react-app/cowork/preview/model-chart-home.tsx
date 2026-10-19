@@ -450,19 +450,21 @@ export function ModelChartHome(props: {
             <span className="model-chart__banner-title">{banner.title}</span>
             <span className="model-chart__banner-sub">{banner.sub}</span>
           </button>
-          <div className="model-chart__dots" role="tablist" aria-label={t("cowork.chart_banners_label")}>
-            {banners.map((b, index) => (
-              <button
-                key={b.id}
-                type="button"
-                role="tab"
-                aria-selected={index === bannerRotation.index}
-                aria-label={b.title}
-                className="model-chart__dot"
-                data-on={index === bannerRotation.index ? "true" : undefined}
-                onClick={() => bannerRotation.setIndex(index)}
-              />
-            ))}
+          <div className="model-chart__dots">
+            <div className="model-chart__dots-tabs" role="tablist" aria-label={t("cowork.chart_banners_label")}>
+              {banners.map((b, index) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === bannerRotation.index}
+                  aria-label={b.title}
+                  className="model-chart__dot"
+                  data-on={index === bannerRotation.index ? "true" : undefined}
+                  onClick={() => bannerRotation.setIndex(index)}
+                />
+              ))}
+            </div>
             {bannerRotation.reducedMotion ? null : (
               <button
                 type="button"
