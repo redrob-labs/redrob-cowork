@@ -152,11 +152,6 @@ export function SkillsScreen() {
         ) : (
           <div className="cowork-skills__marketplace">
             {sections?.yours.length ? <SkillShelf id="yours" rows={sections.yours} {...tileProps} /> : null}
-            {sections?.categories.map((shelf) => (
-              <MarketplaceShelf key={shelf.id} id={shelf.id} label={shelf.label} count={shelf.rows.length}>
-                {shelf.rows.map((row) => <SkillTile key={row.name} row={row} shelf={shelf.id} {...tileProps} />)}
-              </MarketplaceShelf>
-            ))}
             {sections?.workflows.length ? <WorkflowShelf workflows={sections.workflows} locale={locale} fromPath={fromPath} /> : null}
             {sections?.popular.length ? (
               <MarketplaceShelf id="popular" label={t("cowork.skills_section_popular")} count={sections.popular.length}>

@@ -4,7 +4,6 @@ import { catalogueStep, createConsoleCatalogue, CATALOGUE_CACHE_MS, parseConsole
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import {
-  categoryShelves,
   languageTagLabel,
   skillBrief,
   skillDisplayTitle,
@@ -152,6 +151,22 @@ describe("console catalogue", () => {
     expect([catalogueStep("4"), catalogueStep("0"), catalogueStep("two"), catalogueStep(undefined)]).toEqual([4, undefined, undefined, undefined]);
   });
 
+  test("never lists caveman, conducting-research, eli5 or ponytail", async () => {
+    const requested: string[] = [];
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = String(input);
+      requested.push(url);
+      if (url.endsWith("index.json")) return new Response(JSON.stringify({ skills: ["caveman", "conducting-research", "eli5", "ponytail", "kc-report"].map((name) => ({ name })) }));
+      const name = url.split("/").at(-2) ?? "";
+      return new Response(`---\nname: ${name}\ndescription: Use when ${name}.\n---\n`);
+    };
+    const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test" });
+    expect((await catalogue.list()).map((skill) => skill.name)).toEqual(["kc-report"]);
+    expect(await catalogue.get("caveman")).toBeNull();
+    expect(catalogue.peek("eli5")).toBeNull();
+    expect(requested.some((url) => url.includes("/ponytail/"))).toBe(false);
+  });
+
   test("lists carry the family and step through to rows", async () => {
     const fetchImpl: typeof fetch = async (input) => String(input).endsWith("index.json")
       ? new Response(JSON.stringify({ skills: [{ name: "kc-report" }] }))
@@ -160,34 +175,6 @@ describe("console catalogue", () => {
     expect(await catalogue.list()).toEqual([
       { name: "kc-report", description: "Use when reporting.", tags: {}, category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 3 },
     ]);
-  });
-});
-
-describe("category shelves", () => {
-  test("one shelf per family in the Console's order, skills in step order, names in the app language", () => {
-    const rows = [
-      row("kc-report", { category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 3, title: "Report" }),
-      row("caveman"),
-      row("kc-proposal", { category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 1, title: "Proposal" }),
-      row("new-family", { category: "Brand new", step: 1 }),
-      row("humanizing-korean-banmal", { category: "Natural writing", categoryKo: "자연스러운 글쓰기", step: 1, title: "B", titleKo: "나" }),
-      row("humanizing-english-casual", { category: "Natural writing", categoryKo: "자연스러운 글쓰기", step: 1, title: "A", titleKo: "다" }),
-      row("kc-diagnosis", { category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 2, title: "Diagnosis", installed: installed("kc-diagnosis") }),
-    ];
-    const en = categoryShelves(rows, "en");
-    expect(en.map((shelf) => [shelf.id, shelf.label])).toEqual([
-      ["category-natural-writing", "Natural writing"],
-      ["category-korean-consulting", "(Korean) Consulting"],
-      ["category-brand-new", "Brand new"],
-    ]);
-    // Alternatives on one step sort by title; installed skills stay in their family.
-    expect(en[0]?.rows.map((entry) => entry.name)).toEqual(["humanizing-english-casual", "humanizing-korean-banmal"]);
-    expect(en[1]?.rows.map((entry) => entry.name)).toEqual(["kc-proposal", "kc-diagnosis", "kc-report"]);
-    const ko = categoryShelves(rows, "ko-KR");
-    expect(ko.map((shelf) => shelf.label)).toEqual(["자연스러운 글쓰기", "(국내) 경영 컨설팅", "Brand new"]);
-    expect(ko[0]?.rows.map((entry) => entry.name)).toEqual(["humanizing-korean-banmal", "humanizing-english-casual"]);
-    // Ungrouped skills get no family shelf.
-    expect(ko.flatMap((shelf) => shelf.rows).some((entry) => entry.name === "caveman")).toBe(false);
   });
 });
 

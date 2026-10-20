@@ -5,18 +5,16 @@ import { t } from "../../../i18n";
 import type { SkillRow } from "./skills";
 import { SkillIcon } from "./skill-icon";
 import { MarketplaceShelf } from "./skill-tile";
-import { workflowOrderedRows, workflowPath, workflowSub, workflowTitle, type WorkflowId } from "./workflows";
+import { workflowPath, workflowTitle, type Workflow } from "./workflows";
 
 /** A workflow's cover: its first four skills' circles in a 2x2 grid on a square card. Decorative. */
 export function WorkflowMosaic(props: {
-  /** The workflow's available rows; the first four in page order fill the grid. */
+  /** The workflow's rows in run order; the first four fill the grid. */
   rows: readonly SkillRow[];
-  /** Current locale, which decides the page order. */
-  locale: string;
   /** `card` on the shelf, `hero` on the workflow page. */
   size: "card" | "hero";
 }) {
-  const covers = workflowOrderedRows(props.rows, props.locale).slice(0, 4);
+  const covers = props.rows.slice(0, 4);
   return (
     <span className="cowork-workflow-card__cover" data-size={props.size} aria-hidden="true">
       {covers.map((row) => (
@@ -30,39 +28,36 @@ export function WorkflowMosaic(props: {
 
 /** Inputs of one workflow card on the shelf. */
 type WorkflowCardProps = {
-  /** Which featured workflow this card opens. */
-  id: WorkflowId;
-  /** The workflow's available rows. */
-  rows: readonly SkillRow[];
-  /** Current locale for the cover order. */
+  /** The family this card opens. */
+  workflow: Workflow;
+  /** Current locale for the family name. */
   locale: string;
   /** Path restored when the workflow page closes. */
   fromPath: string;
 };
 
-/** Album-cover lockup for one workflow: the square cover, then title, one line and the skill count. */
-export function WorkflowCard({ id, rows, locale, fromPath }: WorkflowCardProps) {
-  const subId = `workflow-sub-${id}`;
+/** Album-cover lockup for one workflow: the square cover, then the family name and the skill count. */
+export function WorkflowCard({ workflow, locale, fromPath }: WorkflowCardProps) {
+  const countId = `workflow-count-${workflow.id}`;
   return (
-    <li className="cowork-workflow-card" data-workflow={id}>
-      <Link className="cowork-workflow-card__link" to={workflowPath(id)} state={{ fromPath }} aria-describedby={subId}>
+    <li className="cowork-workflow-card" data-workflow={workflow.id}>
+      <Link className="cowork-workflow-card__link" to={workflowPath(workflow.id)} state={{ fromPath }} aria-describedby={countId}>
         <span className="cowork-workflow-card__art">
-          <WorkflowMosaic rows={rows} locale={locale} size="card" />
+          <WorkflowMosaic rows={workflow.rows} size="card" />
         </span>
-        <span className="cowork-workflow-card__title">{workflowTitle(id)}</span>
-        <span id={subId} className="cowork-workflow-card__sub">{workflowSub(id)}</span>
-        <span className="cowork-workflow-card__count">{t("cowork.skills_workflow_count", { count: rows.length })}</span>
+        <span className="cowork-workflow-card__title">{workflowTitle(workflow, locale)}</span>
+        <span id={countId} className="cowork-workflow-card__count">{t("cowork.skills_workflow_count", { count: workflow.rows.length })}</span>
       </Link>
     </li>
   );
 }
 
-/** The featured workflows shelf. */
-export function WorkflowShelf(props: { workflows: ReadonlyArray<{ id: WorkflowId; rows: SkillRow[] }>; locale: string; fromPath: string }) {
+/** The workflows shelf: one card per catalogue family. */
+export function WorkflowShelf(props: { workflows: readonly Workflow[]; locale: string; fromPath: string }) {
   return (
     <MarketplaceShelf id="workflows" label={t("cowork.skills_section_workflows")} count={props.workflows.length} variant="cards">
       {props.workflows.map((workflow) => (
-        <WorkflowCard key={workflow.id} id={workflow.id} rows={workflow.rows} locale={props.locale} fromPath={props.fromPath} />
+        <WorkflowCard key={workflow.id} workflow={workflow} locale={props.locale} fromPath={props.fromPath} />
       ))}
     </MarketplaceShelf>
   );
