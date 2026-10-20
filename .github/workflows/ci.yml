@@ -1,4 +1,5 @@
-# The one pull-request CI: a seconds-long scripts job and one tests job.
+# The one pull-request CI: a seconds-long scripts job and one tests job (skipped for
+# docs-only and version-only pull requests).
 # No push or schedule triggers. Releases live in release-macos-aarch64.yml.
 
 name: ci
@@ -10,6 +11,40 @@ permissions:
   contents: read
 
 jobs:
+  # Docs-only and version-only pull requests skip the tests job. A skipped job still satisfies
+  # the required "tests" check, so branch protection needs no change.
+  changes:
+    name: changes
+    runs-on: ubuntu-22.04
+    outputs:
+      heavy: ${{ steps.diff.outputs.heavy }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Classify the diff
+        id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          heavy=false
+          version_line='^[+-][[:space:]]*("version"[[:space:]]*:|version[[:space:]]*=)[[:space:]]*"[^"]*",?[[:space:]]*$'
+          while IFS= read -r f; do
+            case "$f" in
+              *.md|docs/*|LICENSE*|CHANGELOG*) continue ;;
+              VERSION|*/VERSION|REDROB_VERSION|*-version.txt) continue ;;
+              package.json|*/package.json|Cargo.toml|*/Cargo.toml|package-lock.json)
+                if git diff -U0 "$BASE" HEAD -- "$f" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---) ' \
+                    | grep -qvE "$version_line"; then
+                  heavy=true; break
+                fi
+                continue ;;
+            esac
+            heavy=true; break
+          done < <(git diff --name-only "$BASE" HEAD)
+          echo "heavy=$heavy" | tee -a "$GITHUB_OUTPUT"
+
   checks:
     name: checks
     runs-on: ubuntu-22.04
@@ -37,6 +72,8 @@ jobs:
 
   tests:
     name: tests
+    needs: changes
+    if: needs.changes.outputs.heavy == 'true'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
