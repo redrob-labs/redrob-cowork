@@ -65,6 +65,7 @@ import { getSessionActivityStatusLabel, useSessionActivityStore, type SessionAct
 import { PermissionApprovalPanel } from "@/react-app/domains/session/chat/permission-approval-modal";
 import { CoworkThreadContext, textDraft, type CoworkThread } from "@/react-app/cowork/thread/cowork-thread-context";
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
+import { withSkillTokens } from "@/react-app/cowork/composer/skill-tray";
 import { QuestionPanel } from "@/react-app/domains/session/modals/question-modal";
 import { QueuedMessagesPanel } from "@/react-app/domains/session/modals/queued-messages-panel";
 import { deriveOpenTargets, selectAutoOpenTarget, type OpenTarget } from "@/react-app/domains/session/artifacts/open-target";
@@ -1193,10 +1194,12 @@ export function SessionSurface(props: SessionSurfaceProps) {
 
   // Initial send (agent idle) and explicit "Steer" follow-up (agent busy)
   // share the same immediate path.
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(async (skills?: readonly string[]) => {
     const originalDraft = draft;
-    const text = originalDraft.trim();
-    if (!text && attachments.length === 0) return;
+    // The composer's attached skills (its tray) ride in front of the text as `[skill name]` tokens.
+    const text = withSkillTokens(originalDraft.trim(), skills).trim();
+    // Nothing to submit means the tray should stay for the next real attempt.
+    if (!text && attachments.length === 0) return false;
     /*
       Fan-out commands are taken here, in the live send path, and not in the actions store: that store
       recognises `/compact` but nothing constructs it, so an interception added there would never run.
@@ -1210,7 +1213,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
     if (fanOut) {
       if (!fanOut.prompt) {
         toast.error(t("fanout.needs_prompt"));
-        return;
+        return false;
       }
       const started = (await props.onVariantRun?.(fanOut)) ?? 0;
       if (started > 0) {
@@ -1219,14 +1222,16 @@ export function SessionSurface(props: SessionSurfaceProps) {
       } else {
         toast.error(t("fanout.none_started"));
       }
-      return;
+      // The tray is consumed only when at least one variant actually started.
+      return started > 0;
     }
     const nextDraft = buildDraft(text, attachments);
     const sentAttachments = attachments;
     if (sentAttachments.length) setAttachmentsUploading(true);
     try {
       const result = await sendDraft(nextDraft);
-      if (result.outcome === "cancelled") return;
+      // Cancellation did not accept the message, so keep its tray for retry.
+      if (result.outcome === "cancelled") return false;
       const currentState = useComposerStateStore.getState();
       const currentDraft = getComposerDraft(currentState, props.sessionId);
       const currentAttachments = getComposerAttachments(currentState, props.sessionId);
@@ -1239,7 +1244,11 @@ export function SessionSurface(props: SessionSurfaceProps) {
           .filter((attachment) => !retainedIds.has(attachment.id))
           .forEach(revokeAttachmentPreview);
       }
+      // The send was accepted even when newer draft content had to be retained.
+      return true;
     } catch {
+      // sendDraft already recorded the error; false keeps the submitted skills for retry.
+      return false;
     } finally {
       setAttachmentsUploading(false);
     }
@@ -1259,20 +1268,25 @@ export function SessionSurface(props: SessionSurfaceProps) {
     void handleSend();
   }, [chatStreaming, draft, handleSend, model.transitionState, props.modelUnavailable, props.sessionId]);
 
-  const handleSteer = useCallback(async () => {
+  const handleSteer = useCallback(async (skills?: readonly string[]) => {
+    // The tray's skills ride along with the steer, the same as with a send.
     setSteering(true);
-    await handleSend();
+    return handleSend(skills);
   }, [handleSend]);
 
   // Queue: hold the draft locally and clear the composer. The drain effect
   // sends it once the session reports idle.
-  const handleQueue = useCallback(() => {
-    const text = draft.trim();
-    if (!text && attachments.length === 0) return;
+  const handleQueue = useCallback((skills?: readonly string[]) => {
+    // Tokens are baked in now, so the queued text drains with its skills after the run.
+    const text = withSkillTokens(draft.trim(), skills).trim();
+    // Nothing valid was queued, so keep the tray for a retry.
+    if (!text && attachments.length === 0) return false;
     const queuedDraft = withoutRevertTarget(buildDraft(text, attachments));
-    if (!queuedDraft) return;
+    if (!queuedDraft) return false;
     appendQueuedDraft(props.sessionId, queuedDraft);
     clearComposer();
+    // The queue owns the skill tokens now; the tray can be consumed.
+    return true;
   }, [appendQueuedDraft, attachments, buildDraft, clearComposer, draft, props.sessionId]);
 
   const removeQueuedDraft = useCallback((id: string) => {

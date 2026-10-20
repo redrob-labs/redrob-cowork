@@ -570,7 +570,7 @@ export type RedrobSessionGroupEvent = {
   seq: number;
   workspaceId: string;
   type: "session_groups.updated";
-  action: "created" | "updated" | "deleted" | "assigned" | "reordered" | "imported";
+  action: "created" | "updated" | "deleted" | "assigned" | "reordered" | "imported" | "opened";
   groupId?: string;
   sessionId?: string;
   timestamp: number;

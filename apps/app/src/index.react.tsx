@@ -9,6 +9,7 @@ import { getRedrobWorkDeployment } from "./app/lib/redrob-deployment";
 import { bootstrapTheme } from "./app/theme";
 import { isDesktopRuntime } from "./app/utils";
 import { initLocale } from "./i18n";
+import { startLauncherLanguageSync } from "./i18n/launcher-language";
 import { getReactQueryClient } from "./react-app/infra/query-client";
 import {
   createDefaultPlatform,
@@ -22,6 +23,8 @@ import "./app/index.css";
 
 bootstrapTheme();
 initLocale();
+// Follow Redrob Launcher's language unless the person picked one in Cowork (desktop only; a no-op on the web).
+startLauncherLanguageSync();
 startDeepLinkBridge();
 
 const root = document.getElementById("root");

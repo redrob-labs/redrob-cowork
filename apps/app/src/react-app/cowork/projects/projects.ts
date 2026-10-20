@@ -15,6 +15,7 @@ export type ProjectsClient = Pick<
   | "listAuthorizedFolders"
   | "setAuthorizedFolders"
   | "createManagedProject"
+  | "createLocalWorkspace"
   | "moveSession"
 >;
 
@@ -28,6 +29,8 @@ export type ProjectRow = {
   lastActiveAt: number | null;
   /** The server made its folder: Cowork asks for a folder of the person's. */
   managed: boolean;
+  /** Where the project's folder is on this computer (Open project folder); null for sample data. */
+  path: string | null;
 };
 
 export type ProjectChat = { id: string; title: string; updatedAt: number };
@@ -81,6 +84,7 @@ function fixtureRow(id: string): ProjectRow | null {
     fileCount: project.fileCount,
     lastActiveAt: latest(chats.map((chat) => chat.updatedAt)),
     managed: false,
+    path: null,
   };
 }
 
@@ -93,6 +97,7 @@ function toRow(workspace: RedrobWorkspaceInfo, chats: readonly ProjectChat[] | n
     fileCount: null,
     lastActiveAt: chats ? latest(chats.map((chat) => chat.updatedAt)) : null,
     managed: workspace.kind === "managed",
+    path: workspace.path?.trim() || null,
   };
 }
 
@@ -195,7 +200,7 @@ export function offersSaveAsProject(input: { chatId: string | null; workspace: P
 }
 
 export type CreateProjectDeps = {
-  client: Pick<ProjectsClient, "createManagedProject" | "moveSession"> | null;
+  client: Pick<ProjectsClient, "createManagedProject" | "createLocalWorkspace" | "moveSession"> | null;
   navigate: (path: string) => void;
   toast: (title: string, text?: string, tone?: "success" | "danger") => void;
   close: () => void;
@@ -212,13 +217,31 @@ export type CreateProjectResult =
   | { status: "not-moved"; projectId: string };
 
 /**
- * New project, or Save as a project with `from`. Makes a project with a folder Cowork keeps,
- * moves the chat into it with its memory on the project, says so and opens it. An empty name
- * keeps the dialog open. If the chat cannot move, the project stays and the chat stays put.
+ * The id of the project `createLocalWorkspace` just made on `folder`. The route answers with the
+ * new workspace (`workspace`), though the client types it as the plain list; fall back to the list
+ * entry on that folder, then to the active id (a project on a chosen folder becomes active).
+ */
+export function createdProjectId(
+  result: { workspace?: { id?: string } | null; activeId?: string | null; workspaces?: readonly { id: string; path?: string | null }[] },
+  folder: string,
+): string | null {
+  // Paths compare without trailing separators and case-insensitively (Windows and macOS defaults).
+  const key = (path: string) => path.replace(/[\\/]+$/, "").toLowerCase();
+  const target = key(folder);
+  // `||`, not `??`: an empty id from any source means "not this one, try the next".
+  return result.workspace?.id || result.workspaces?.find((entry) => key(entry.path ?? "") === target)?.id || result.activeId || null;
+}
+
+/**
+ * New project, or Save as a project with `from`. Makes a project with a folder Cowork keeps, or on
+ * the person's own `folder` when one was chosen, moves the chat into it with its memory on the
+ * project, says so and opens it. An empty name keeps the dialog open. If the chat cannot move, the
+ * project stays and the chat stays put.
  */
 export async function createProject(
   deps: CreateProjectDeps,
-  input: { name: string; from: ProjectSource | null },
+  // `folder`: a folder the person chose; absent or null keeps Cowork's own.
+  input: { name: string; from: ProjectSource | null; folder?: string | null },
 ): Promise<CreateProjectResult> {
   const error = projectNameError(input.name);
   if (error) return { status: "invalid", error };
@@ -230,7 +253,19 @@ export async function createProject(
 
   let projectId: string;
   try {
-    projectId = (await deps.client.createManagedProject(name)).workspace.id;
+    if (input.folder) {
+      // A local project on the person's folder; the starter preset matches the managed default.
+      const made = createdProjectId(
+        await deps.client.createLocalWorkspace({ folderPath: input.folder, name, preset: "starter" }),
+        input.folder,
+      );
+      // No id to open means the create cannot be trusted; the catch reports it.
+      if (!made) throw new Error("no project id");
+      projectId = made;
+    } else {
+      // Cowork makes and owns the folder.
+      projectId = (await deps.client.createManagedProject(name)).workspace.id;
+    }
   } catch {
     deps.toast(t("cowork.project_create_failed_title"), t("cowork.project_create_failed_text"), "danger");
     return { status: "failed" };
@@ -254,4 +289,52 @@ export async function createProject(
   );
   deps.navigate(projectPath(projectId));
   return { status: "created", projectId };
+}
+
+/** A project the composer's Add to project offers, and whether the chat is already in it. */
+export type ProjectChoice = { id: string; name: string; current: boolean };
+
+/**
+ * The composer's Add to project list: every project, in the order given (the Projects list's, most
+ * recently active first), with the one the open chat (or the new chat) already belongs to marked so
+ * it reads as chosen and cannot be picked again. `currentId` is that project's id, or null when
+ * there is none.
+ */
+export function projectChoices(rows: readonly Pick<ProjectRow, "id" | "name">[], currentId: string | null): ProjectChoice[] {
+  // Only the fields the menu shows, plus the chosen flag.
+  return rows.map((row) => ({ id: row.id, name: row.name, current: row.id === currentId }));
+}
+
+// The same navigation, toast and memory hooks createProject takes; only the move call is needed.
+export type MoveChatDeps = Pick<CreateProjectDeps, "navigate" | "toast" | "setMemory"> & {
+  client: Pick<ProjectsClient, "moveSession"> | null;
+};
+
+/**
+ * Add to project, for an open chat: moves it into an existing project (the same server call Save as
+ * a project uses), puts its memory on the project, says so and opens it there. On failure the chat
+ * stays where it was and the toast says so. Resolves true when the chat moved.
+ */
+export async function moveChatToProject(
+  deps: MoveChatDeps,
+  input: { chatId: string; workspaceId: string; project: Pick<ProjectRow, "id" | "name"> },
+): Promise<boolean> {
+  // Offline is told apart from a failed move: there is nothing to retry until the server is back.
+  if (!deps.client) {
+    deps.toast(t("cowork.project_offline_title"), t("cowork.project_offline_text"), "danger");
+    return false;
+  }
+  try {
+    // The server moves the chat between workspaces.
+    await deps.client.moveSession(input.workspaceId, input.chatId, input.project.id);
+  } catch {
+    deps.toast(t("cowork.project_move_failed_title"), t("cowork.settings_try_again"), "danger");
+    return false;
+  }
+  // The chat now remembers through its project, as one saved as a project does.
+  deps.setMemory(input.chatId, "project");
+  deps.toast(t("cowork.project_moved_title"), t("cowork.project_moved_text", { name: input.project.name }));
+  // Open it where it now lives, so the person sees the move.
+  deps.navigate(projectChatPath(input.project.id, input.chatId));
+  return true;
 }

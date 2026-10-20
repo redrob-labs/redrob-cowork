@@ -321,7 +321,7 @@ export function CoworkLayerView(props: CoworkLayerViewProps) {
       {props.modal?.kind === "search" ? <SearchDialog onClose={props.onCloseModal} /> : null}
       {props.modal?.kind === "feedback" ? <FeedbackDialog onClose={props.onCloseModal} /> : null}
       {props.modal?.kind === "project" ? (
-        <ProjectDialog key={props.modal.chatId ?? "new"} chatId={props.modal.chatId} onClose={props.onCloseModal} />
+        <ProjectDialog key={props.modal.chatId ?? "new"} chatId={props.modal.chatId} fromWorkspaceId={props.modal.fromWorkspaceId} onClose={props.onCloseModal} />
       ) : null}
       {props.modal?.kind === "skill" ? (
         <SkillDialog name={props.modal.name} instructions={props.modal.instructions} onClose={props.onCloseModal} />

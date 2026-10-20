@@ -486,6 +486,21 @@ export function registerSessionRoutes(options: RegisterSessionRoutesOptions): vo
     return jsonResponse({ state: result.state, updatedAt: result.updatedAt });
   });
 
+  // Asks the app showing this workspace to focus its window on the desk. Rides the event feed the
+  // app already polls, so no state changes and nothing happens when no app is open.
+  addRoute(routes, "POST", "/workspace/:id/session-groups/:groupId/open", "client", async (ctx) => {
+    requireClientScope(ctx, "collaborator");
+    const workspace = await resolveWorkspaceWithoutBootstrap(config, ctx.params.id);
+    const groupId = (ctx.params.groupId ?? "").trim();
+    if (!groupId) throw new ApiError(400, "invalid_payload", "groupId is required");
+    const current = await readSessionGroupState(config, workspace.id);
+    if (!current.state.groups.some((group) => group.id === groupId)) {
+      throw new ApiError(404, "not_found", `Desk ${groupId} not found`);
+    }
+    const event = sessionGroupEvents.record(workspace.id, "opened", { groupId });
+    return jsonResponse({ ok: true, seq: event.seq });
+  });
+
   addRoute(routes, "DELETE", "/workspace/:id/session-groups/:groupId", "client", async (ctx) => {
     ensureWritable(config);
     requireClientScope(ctx, "collaborator");

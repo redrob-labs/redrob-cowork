@@ -44,6 +44,7 @@ import type {
   NukeManifestPreview,
   NukeOptions,
   NukeReceipt,
+  SharedLanguageReading,
   WorkspaceList,
 } from "./desktop-types";
 import type { BrowserPanelTab } from "./desktop-types";
@@ -490,6 +491,19 @@ export async function getDesktopHomeDir(): Promise<string> {
   return invokeElectronHelper("__homeDir");
 }
 
+/** Redrob Launcher's shared language choice, or null on the web, without a launcher, or on any failure. */
+export async function readLauncherLanguage(): Promise<SharedLanguageReading | null> {
+  // The web build has no Electron bridge, so there is no launcher file to read.
+  if (!window.__REDROB_ELECTRON__?.invokeDesktop) return null;
+  try {
+    // An older desktop shell without the handler resolves undefined; treat it as no file.
+    return (await invokeElectronHelper("__readSharedLanguage")) ?? null;
+  } catch {
+    // The language sync is best effort: Cowork keeps its own setting.
+    return null;
+  }
+}
+
 export async function joinDesktopPath(...parts: string[]): Promise<string> {
   return invokeElectronHelper("__joinPath", ...parts);
 }
@@ -580,6 +594,7 @@ const {
   engineInstallCancel,
   memoryHeadroom,
   desktopNotificationShow,
+  desktopFocusWindow,
   importSkill,
   installSkillTemplate,
   listLocalSkills,
@@ -635,6 +650,7 @@ export {
   engineInstallCancel,
   memoryHeadroom,
   desktopNotificationShow,
+  desktopFocusWindow,
   importSkill,
   installSkillTemplate,
   listLocalSkills,

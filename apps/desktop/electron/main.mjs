@@ -37,6 +37,7 @@ import { createUiControlServer } from "./ui-control-server.mjs";
 import { createApplicationMenu } from "./app-menu.mjs";
 import { applyBrandAppName } from "./brand-app-name.mjs";
 import { createBrowserPanel } from "./browser-panel.mjs";
+import { readSharedLanguage } from "./shared-language.mjs";
 import { createWorkspaceStore } from "./workspace-store.mjs";
 import {
   buildNukeManifest,
@@ -1707,6 +1708,14 @@ const desktopCommandHandlers = {
   "desktopNotificationShow": async (event, ...args) => {
       return showDesktopNotification(args[0] ?? {});
   },
+  "desktopFocusWindow": async (event) => {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (!win || win.isDestroyed()) return { ok: false };
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+      return { ok: true };
+  },
   "desktopSentrySetSession": async (event, ...args) => {
       const input = args[0] ?? {};
       return {
@@ -2153,6 +2162,10 @@ const desktopCommandHandlers = {
   },
   "__homeDir": async (event, ...args) => {
       return os.homedir();
+  },
+  // Read-only: Redrob Launcher's shared language.json (the launcher is its only writer).
+  "__readSharedLanguage": async () => {
+      return readSharedLanguage();
   },
   "__joinPath": async (event, ...args) => {
       return path.join(...args.map((value) => String(value ?? "")));

@@ -4,6 +4,7 @@ import type { UIMessage } from "ai";
 import { ArrowUpRightIcon } from "lucide-react";
 
 import { ArtifactIcon } from "@/components/chat/artifact-icon";
+import { t } from "@/i18n";
 import {
   type ArtifactItem,
   canOpenArtifact,
@@ -46,8 +47,8 @@ function ArtifactChip({ artifact }: ArtifactChipProps) {
         <button
           type="button"
           onClick={() => onOpenTarget?.(artifact.legacy_target, { external: true })}
-          title={`Open ${artifact.name} in default app`}
-          aria-label={`Open ${artifact.name} in default app`}
+          title={t("artifact.open_external", { name: artifact.name })}
+          aria-label={t("artifact.open_external", { name: artifact.name })}
           className="flex cursor-pointer items-center border-l border-border/60 px-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <ArrowUpRightIcon aria-hidden="true" className="size-3" />

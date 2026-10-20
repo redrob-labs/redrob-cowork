@@ -2,6 +2,7 @@
 
 import { ArrowUpRight, FileText } from "lucide-react"
 
+import { t } from "@/i18n"
 import { useOpenArtifactPath } from "@/lib/artifacts"
 import { cn } from "@/lib/utils"
 
@@ -47,8 +48,8 @@ export function FileChip({ path, className }: FileChipProps) {
       <button
         type="button"
         onClick={() => openArtifactPath(path, { external: true })}
-        title={`Open ${name} in default app`}
-        aria-label={`Open ${name} in default app`}
+        title={t("artifact.open_external", { name })}
+        aria-label={t("artifact.open_external", { name })}
         className="flex cursor-pointer items-center border-l border-border/60 px-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
         <ArrowUpRight aria-hidden="true" className="size-2.5" />

@@ -146,7 +146,7 @@ export function ClaudePluginImportModal(props: ClaudePluginImportModalProps) {
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <TextInput
-                label="GitHub repository"
+                label={t("plugins.github_repository_label")}
                 placeholder="https://github.com/slackapi/slack-mcp-plugin"
                 value={state.url}
                 onChange={(event) =>

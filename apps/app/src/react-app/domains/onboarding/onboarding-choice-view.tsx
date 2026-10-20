@@ -7,6 +7,7 @@
  * so the compliance rules cannot drift by someone editing markup.
  */
 import { Button } from "@/components/ui/button";
+import { t } from "@/i18n";
 
 import {
   recommendedChoice,
@@ -26,16 +27,16 @@ export type OnboardingChoiceViewProps = {
 function actionLabel(action: OnboardingAction): string {
   switch (action.kind) {
     case "install-runtime":
-      return action.runtime === "claude" ? "Install Claude Code" : "Install Codex";
+      return action.runtime === "claude" ? t("onboarding.connect_action_install_claude") : t("onboarding.connect_action_install_codex");
     case "run-vendor-login":
       // Says whose flow opens, because that is the surprising part.
-      return action.runtime === "claude" ? "Open Claude sign-in" : "Open ChatGPT sign-in";
+      return action.runtime === "claude" ? t("onboarding.connect_action_claude_sign_in") : t("onboarding.connect_action_chatgpt_sign_in");
     case "connect-key":
-      return "Paste an API key";
+      return t("onboarding.connect_action_paste_key");
     case "connect-redrob":
-      return "Use Redrob";
+      return t("onboarding.connect_action_use_redrob");
     case "already-connected":
-      return "Continue";
+      return t("onboarding.connect_action_continue");
   }
 }
 
@@ -45,9 +46,9 @@ export function OnboardingChoiceView({ choices, busyChoiceId, error, onAct }: On
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-medium">Connect your AI</h2>
+        <h2 className="text-lg font-medium">{t("onboarding.connect_title")}</h2>
         <p className="text-sm text-muted-foreground">
-          Use an account you already have, or Redrob&apos;s own models.
+          {t("onboarding.connect_subtitle")}
         </p>
       </div>
 
@@ -74,7 +75,7 @@ export function OnboardingChoiceView({ choices, busyChoiceId, error, onAct }: On
                   {choice.title}
                 </h3>
                 {choice.id === recommended ? (
-                  <span className="text-xs text-primary">Recommended</span>
+                  <span className="text-xs text-primary">{t("onboarding.connect_recommended")}</span>
                 ) : null}
               </div>
 
@@ -93,7 +94,7 @@ export function OnboardingChoiceView({ choices, busyChoiceId, error, onAct }: On
                 disabled={busy}
                 onClick={() => void onAct(choice.action, choice.id)}
               >
-                {busy ? "Working…" : actionLabel(choice.action)}
+                {busy ? t("onboarding.connect_working") : actionLabel(choice.action)}
               </Button>
 
               {why ? <p className="text-xs text-muted-foreground">{why}</p> : null}

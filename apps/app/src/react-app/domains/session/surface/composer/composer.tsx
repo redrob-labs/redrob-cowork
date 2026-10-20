@@ -32,6 +32,9 @@ import { dragEventHasFiles } from "./drag-files";
 import { useInCoworkFrame } from "@/react-app/cowork/shell/cowork-frame";
 import { CoworkComposerStatus, CoworkComposerTools } from "@/react-app/cowork/composer/cowork-composer";
 import { NEW_CHAT_KEY } from "@/react-app/cowork/composer/composer-state";
+import { attachSkill, ComposerSkillTray, detachSkill } from "@/react-app/cowork/composer/skill-tray";
+import { ComposerSkillPicks } from "@/react-app/cowork/composer/skill-picks";
+import { ComposerAddMenu, ComposerProjectChip, useNewChatProjectStore } from "@/react-app/cowork/composer/add-menu";
 
 type MentionItem = {
   id: string;
@@ -46,9 +49,12 @@ type ComposerProps = {
   draft: string;
   mentions: Record<string, ComposerMentionKind>;
   onDraftChange: (value: string) => void;
-  onSend: () => void | Promise<void>;
-  onSteer: () => void | Promise<void>;
-  onQueue: () => void | Promise<void>;
+  /** Sends the draft. Resolves false only when the submission was not accepted. */
+  onSend: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>;
+  /** Steers the running turn with the draft. Resolves false only when it was not accepted. */
+  onSteer: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>;
+  /** Queues the draft. Resolves false only when it was not accepted. */
+  onQueue: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>;
   onStop: () => void | Promise<void>;
   busy: boolean;
   steering: boolean;
@@ -122,6 +128,10 @@ type ComposerProps = {
    * unset and stays one line. Both still grow to the same max height.
    */
   twoLineDefault?: boolean;
+  /** Show the recommended-skills popup while the empty text box is focused (the new-chat hero only). */
+  skillPicks?: boolean;
+  /** The new-chat composer: Add to project picks the project the chat starts in, shown as a chip. */
+  newChat?: boolean;
   topAccessory?: ReactNode;
 };
 
@@ -339,18 +349,75 @@ export function ReactSessionComposer(props: ComposerProps) {
     });
   }, []);
 
+  /*
+   * Skills attached to this message (the tray). They stay out of the text until send, and a new
+   * session starts with an empty tray. They are cleared once the send went through, i.e. the parent
+   * emptied the draft; a failed send keeps both the text and the skills for a retry.
+   */
+  const [traySkills, setTraySkills] = useState<readonly string[]>([]);
+  // The new chat's project, for the hero composer's chip (shown once inCoworkFrame is known, below).
+  const newChatProject = useNewChatProjectStore((state) => state.project);
+  // Switching chats empties the tray: skills belong to the message being written, not the composer.
+  useEffect(() => {
+    setTraySkills([]);
+  }, [props.sessionId]);
+  // Every picker (the / menu, the + menu, the hero's picks) attaches the same way, then hands focus back.
+  const attachToTray = useCallback(
+    (name: string) => {
+      // attachSkill returns the same array for a repeat, so a second pick does not re-render.
+      setTraySkills((current) => attachSkill(current, name));
+      // The picker took focus; typing continues where it left off.
+      focusEditor();
+    },
+    [focusEditor],
+  );
+  // Whether the text box has focus, and whether Escape closed the skill popup for this focus.
+  const [editorFocused, setEditorFocused] = useState(false);
+  const [picksDismissed, setPicksDismissed] = useState(false);
+  // Reads focus from the DOM, since the editor and the picks both live inside rootRef.
+  const syncEditorFocus = useCallback(() => {
+    const active = document.activeElement;
+    // Focus counts only on the text box itself, not the toolbar's buttons.
+    const focused = Boolean(active && rootRef.current?.contains(active) && active.getAttribute("contenteditable") === "true");
+    setEditorFocused(focused);
+    // Leaving the box resets Escape's dismissal, so the next focus shows the picks again.
+    if (!focused) setPicksDismissed(false);
+  }, []);
+  // Sends, steers or queues with the tray's skills, then refocuses the editor.
+  const submitWithTray = useCallback(
+    (run: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>) => {
+      // Undefined, not [], so callers without skills take their unchanged path.
+      const skills = traySkills.length ? traySkills : undefined;
+      return Promise.resolve()
+        // Starting in a promise also catches a synchronous callback throw.
+        .then(() => run(skills))
+        .then((accepted) => {
+          // False means the parent rejected/cancelled the submission; keep the tray for a retry.
+          if (accepted === false || !skills) return;
+          // Remove only what this submission used; preserve skills attached while it was in flight.
+          setTraySkills((current) => current.filter((name) => !skills.includes(name)));
+        })
+        // A rejection keeps the tray; the parent owns reporting the submission failure.
+        .catch(() => undefined)
+        .finally(focusEditor);
+    },
+    [focusEditor, traySkills],
+  );
+
   // Editor submit (Enter). While idle this sends normally; while busy
   // Enter queues until the agent finishes, and Cmd/Ctrl+Enter steers.
   const handleEditorSubmit = useCallback((options: { queue: boolean }) => {
-    const hasContent = props.draft.trim().length > 0 || props.attachments.length > 0;
+    // Skills alone are a message: the tray counts as content.
+    const hasContent = props.draft.trim().length > 0 || props.attachments.length > 0 || traySkills.length > 0;
     if (!hasContent) return;
     if (props.busy) {
-      if (options.queue) void Promise.resolve(props.onSteer()).finally(focusEditor);
-      else void Promise.resolve(props.onQueue()).finally(focusEditor);
+      // Both carry the tray, so skills attached mid-run are not lost.
+      if (options.queue) void submitWithTray(props.onSteer);
+      else void submitWithTray(props.onQueue);
       return;
     }
-    void Promise.resolve(props.onSend()).finally(focusEditor);
-  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue, focusEditor]);
+    void submitWithTray(props.onSend);
+  }, [props.busy, props.draft, props.attachments, props.onSend, props.onSteer, props.onQueue, submitWithTray, traySkills.length]);
 
   const slashCommandQuery = getSlashCommandQuery(props.draft);
   const slashOpenNext = slashCommandQuery !== null;
@@ -361,6 +428,8 @@ export function ReactSessionComposer(props: ComposerProps) {
   const nonDefaultAgents = useMemo(() => agents.filter(isNonDefaultAgent), [agents]);
   // Inside the Cowork frame Plan or Run picks the agent, so the agent picker steps aside.
   const inCoworkFrame = useInCoworkFrame();
+  // The project chip shows only on the hero composer, in the Cowork frame.
+  const showProjectChip = Boolean(props.newChat && inCoworkFrame && newChatProject);
   const coworkChatKey = props.sessionId ?? NEW_CHAT_KEY;
   const showAgentPicker = !inCoworkFrame && props.selectedAgent !== null;
 
@@ -676,7 +745,12 @@ export function ReactSessionComposer(props: ComposerProps) {
     })),
     ...skills.filter((skill) => !localCommandSkillNames.has(skill.name)),
   ];
-  const canSend = props.draft.trim().length > 0 || props.attachments.length > 0;
+  // Skills alone are a message: the tray counts as content.
+  const canSend = props.draft.trim().length > 0 || props.attachments.length > 0 || traySkills.length > 0;
+  // The new-chat hero's recommended skills: while its text box is focused and still empty, and no
+  // other menu is open. The first keystroke, Escape or leaving the box hides it.
+  const showSkillPicks = Boolean(props.skillPicks) && inCoworkFrame && editorFocused && !picksDismissed
+    && props.draft.trim().length === 0 && !slashOpen && !toolMenuOpen && !mentionOpen;
 
   const renderConnectionRows = () => {
     const servers = props.mcpServers ?? [];
@@ -749,21 +823,12 @@ export function ReactSessionComposer(props: ComposerProps) {
   };
 
   const applySkillSelection = (input: string | SkillCard, options?: { replaceSkillDraft?: boolean }) => {
-    const skill = typeof input === "string"
-      ? { name: input, path: "", origin: "local" as const }
-      : input;
-    const name = skill.name;
-    if (options?.replaceSkillDraft) {
-      props.onDraftChange(`[skill ${name}] `);
-    } else {
-      const editor = editorRef.current;
-      if (editor) {
-        editor.insertSkillAtSelection(name);
-      } else {
-        const separator = props.draft.length > 0 && !/\s$/.test(props.draft) ? " " : "";
-        props.onDraftChange(`${props.draft}${separator}[skill ${name}] `);
-      }
-    }
+    // Pickers pass either the name or the whole card; only the name matters.
+    const name = typeof input === "string" ? input : input.name;
+    // The skill goes to the tray, not into the text. A `/query` that picked it is dropped from the
+    // draft; a pick from the + menu leaves what was typed alone.
+    attachToTray(name);
+    if (options?.replaceSkillDraft) props.onDraftChange("");
     setSlashOpen(false);
     setToolMenuOpen(false);
   };
@@ -832,6 +897,13 @@ export function ReactSessionComposer(props: ComposerProps) {
       (event.nativeEvent as KeyboardEvent).isComposing === true ||
       event.keyCode === 229;
     if (event.key === "Enter" && imeActive) {
+      return;
+    }
+    // Escape closes the recommended-skills popup first, and does nothing else.
+    if (event.key === "Escape" && showSkillPicks) {
+      event.preventDefault();
+      event.stopPropagation();
+      setPicksDismissed(true);
       return;
     }
     // Escape-to-stop while the agent is busy. Only when no menu is open so
@@ -1129,6 +1201,10 @@ export function ReactSessionComposer(props: ComposerProps) {
       }
       style={{ contain: "layout style" }}
       onKeyDownCapture={handleKeyDownCapture}
+      // Focus anywhere inside re-reads whether the text box itself has it.
+      onFocus={syncEditorFocus}
+      // Focus has not moved yet while blur fires; read where it went on the next tick.
+      onBlur={() => window.setTimeout(syncEditorFocus, 0)}
       onCompositionStart={() => {
         imeComposingRef.current = true;
       }}
@@ -1153,9 +1229,12 @@ export function ReactSessionComposer(props: ComposerProps) {
             padding is the same intent, and a highlight that only lights up over
             the caret line reads as "drop not supported here". */}
         <div
-          className={`relative overflow-visible rounded-xl border bg-dls-surface transition-all ${panelRoundedClass} ${
+          // `cowork-composer-panel` hooks the focus glow; `relative` anchors the skill picks popup.
+          className={`cowork-composer-panel relative overflow-visible rounded-xl border bg-dls-surface transition-all ${panelRoundedClass} ${
             dropzoneActive ? "border-dls-accent" : "border-dls-border"
           }`}
+          // The focus glow (index.css) stays off while the composer is disabled.
+          data-disabled={props.disabled ? "true" : undefined}
           data-dropzone-active={dropzoneActive ? "true" : undefined}
           onDragEnter={(event) => {
             if (!dragEventHasFiles(event.dataTransfer)) return;
@@ -1205,6 +1284,17 @@ export function ReactSessionComposer(props: ComposerProps) {
           ) : null}
 
           <div className="px-4 pt-3 pb-2">
+            {/* The context row above the text: the new chat's project (picked in Add to project), a
+                thin divider, then the attached skills, on one line. Nothing renders when both are empty. */}
+            {showProjectChip || traySkills.length ? (
+              <div className="cowork-composer-context">
+                {showProjectChip ? <ComposerProjectChip /> : null}
+                {/* The divider only when both sides have something. */}
+                {showProjectChip && traySkills.length ? <span className="cowork-composer-context__divider" aria-hidden="true" /> : null}
+                {/* Each attached skill as a removable circle. */}
+                <ComposerSkillTray skills={traySkills} onRemove={(name) => setTraySkills((current) => detachSkill(current, name))} />
+              </div>
+            ) : null}
             {/* Editor */}
             <LexicalPromptEditor
               ref={editorRef}
@@ -1495,6 +1585,22 @@ export function ReactSessionComposer(props: ComposerProps) {
                     document.body,
                   ) : null}
                 </div>
+                {/* In the Cowork frame the paperclip is the Add menu: files, project, skills and
+                    connectors. Elsewhere it stays the plain attach button. */}
+                {inCoworkFrame ? (
+                  <ComposerAddMenu
+                    attachmentsEnabled={props.attachmentsEnabled}
+                    attachmentsDisabledReason={props.attachmentsDisabledReason}
+                    // The same hidden file input the paperclip opens.
+                    onAddFiles={() => fileInput?.click()}
+                    attachedSkills={traySkills}
+                    onAttachSkill={attachToTray}
+                    // The hero has no chat yet, so Add to project picks where it will start.
+                    chatId={props.newChat ? null : (props.sessionId ?? null)}
+                    // Looked up on close, since the editor's node can be replaced between renders.
+                    editor={() => rootRef.current?.querySelector<HTMLElement>("[contenteditable='true']") ?? null}
+                  />
+                ) : (
                 <button
                   type="button"
                   className={`inline-flex h-9 max-h-9 w-9 shrink-0 items-center justify-center rounded-md text-subtle-foreground transition-colors hover:bg-accent ${
@@ -1509,6 +1615,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                 >
                   <Paperclip size={16} />
                 </button>
+                )}
 
                 {/* Agent picker (#2101/#1971). Only shown once a non-default
                     agent is selected. Switching back to Default agent lives in
@@ -1614,7 +1721,7 @@ export function ReactSessionComposer(props: ComposerProps) {
                         ? undefined
                         : // Clicking the button takes focus out of the editor, so it is restored on the
                           // same path Enter uses. Without this, sending by click always cost a click back.
-                          () => void Promise.resolve(props.onSend()).finally(focusEditor)
+                          () => void submitWithTray(props.onSend)
                   }
                   disabled={props.disabled || (!props.busy && !canSend)}
                   aria-label={props.busy ? t("composer.stop") : t("composer.run_task")}
@@ -1639,6 +1746,8 @@ export function ReactSessionComposer(props: ComposerProps) {
               </div>
             </div>
           </div>
+          {/* The hero's featured skills, hanging under the panel (positioned by its own CSS). */}
+          {showSkillPicks ? <ComposerSkillPicks attached={traySkills} onAttach={attachToTray} /> : null}
         </div>
 
         {/*

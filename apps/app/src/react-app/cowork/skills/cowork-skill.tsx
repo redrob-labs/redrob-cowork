@@ -73,7 +73,7 @@ export function SkillView({ skill, taxonomy, locale, connected, busy, backPath, 
             {topicTags.map((label) => <Badge key={label} size="sm" variant="outline">{label}</Badge>)}
           </div>
           {skill.installed ? (
-            <Button variant="primary" iconLeft={icons.play(ICON)} disabled={!connected} onClick={onRun}>{t("cowork.skills_use")}</Button>
+            <Button variant="primary" iconLeft={icons.sparkle(ICON)} disabled={!connected} onClick={onRun}>{t("cowork.skills_use")}</Button>
           ) : (
             <Button variant="primary" iconLeft={icons.plus(ICON)} loading={busy} disabled={!connected} onClick={onAdd}>{t("cowork.skill_add")}</Button>
           )}

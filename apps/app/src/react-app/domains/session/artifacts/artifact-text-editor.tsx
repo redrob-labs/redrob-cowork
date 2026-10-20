@@ -157,19 +157,19 @@ export function ArtifactTextEditor(props: ArtifactTextEditorProps) {
     <ContextMenu>
       <ContextMenuTrigger className="block h-full min-h-0">{editor}</ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "# "))}>Heading 1</ContextMenuItem>
-        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "## "))}>Heading 2</ContextMenuItem>
-        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "### "))}>Heading 3</ContextMenuItem>
+        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "# "))}>{t("editor.heading_1")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "## "))}>{t("editor.heading_2")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "### "))}>{t("editor.heading_3")}</ContextMenuItem>
         <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, ""))}>{t("editor.paragraph")}</ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => format((view) => wrapSelection(view, "**"))}>Bold</ContextMenuItem>
-        <ContextMenuItem onClick={() => format((view) => wrapSelection(view, "*"))}>Italic</ContextMenuItem>
+        <ContextMenuItem onClick={() => format((view) => wrapSelection(view, "**"))}>{t("editor.bold")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => format((view) => wrapSelection(view, "*"))}>{t("editor.italic")}</ContextMenuItem>
         <ContextMenuItem onClick={() => format((view) => wrapSelection(view, "~~"))}>{t("editor.strikethrough")}</ContextMenuItem>
         <ContextMenuItem onClick={() => format((view) => wrapSelection(view, "`"))}>{t("editor.inline_code")}</ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "- "))}>{t("editor.bullet_list")}</ContextMenuItem>
         <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, (index) => `${index + 1}. `))}>{t("editor.numbered_list")}</ContextMenuItem>
-        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "> "))}>Quote</ContextMenuItem>
+        <ContextMenuItem onClick={() => format((view) => setLinePrefix(view, "> "))}>{t("editor.quote")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

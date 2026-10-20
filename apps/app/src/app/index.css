@@ -1816,6 +1816,195 @@
   flex-shrink: 0;
 }
 
+/* Composer focus glow (every composer: the new-chat hero and the in-chat one share this panel).
+   While the text box has focus, the panel's border turns Redrob Blue with a faint hairline ring
+   around it, like Kiro's chat input. Kept deliberately quiet: no halo. Keyed off the editor itself
+   (:has), so opening the model picker or the + menu inside the panel does not light it up. */
+.cowork-composer-panel {
+  /* Glow colour: Redrob Blue on light surfaces. */
+  --composer-glow: var(--blue-6, #2b52ff);
+}
+[data-theme="dark"] .cowork-composer-panel {
+  /* The lightened brand blue reads better on dark surfaces. */
+  --composer-glow: var(--blue-5, #507fff);
+}
+.cowork-composer-panel:not([data-disabled]):not([data-dropzone-active]):has([contenteditable="true"]:focus) {
+  /* A 45% Redrob Blue border: tinted, not saturated. */
+  border-color: color-mix(in srgb, var(--composer-glow) 45%, transparent);
+  /* One faint 2px hairline ring at 8%; no blurred halo, so it reads as focus, not glow. */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--composer-glow) 8%, transparent);
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-composer-panel:has([contenteditable="true"]:focus) {
+    transition: none;
+  }
+}
+/* Hero composer's recommended skills: a horizontal popup hanging under the panel while its empty
+   text box is focused. It floats over the status row below rather than pushing the page down. */
+.cowork-skill-picks {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--redrob-black) 35%, transparent);
+  animation: cowork-skill-picks-in var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+@keyframes cowork-skill-picks-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-picks {
+    animation: none;
+  }
+}
+/* Header row: "Featured skills" on the left, the "All skills" link on the right edge. */
+.cowork-skill-picks__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cowork-skill-picks__label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+/* A quiet text link; it reads as ink until hovered, then takes the brand blue. */
+.cowork-skill-picks__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-picks__all:hover {
+  color: var(--blue-6, #2b52ff);
+}
+[data-theme="dark"] .cowork-skill-picks__all:hover {
+  color: var(--blue-5, #507fff);
+}
+.cowork-skill-picks__all:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-skill-picks__row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* No frame: each pick sits straight on the popup surface, separated only by the grid gap. */
+.cowork-skill-picks__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 2px;
+  color: var(--ink-primary);
+}
+/* The album-cover hover (.model-chart__tile:hover .model-chart__card) on the circle only, and only
+   while the pointer is on the circle itself: a 2px lift, a deeper shadow and the 1px
+   --spectrum-sky 45% outline. Inset outline, like Popular, so it paints above a skill's image. */
+.cowork-skill-picks__item .cowork-skill-icon {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+.cowork-skill-picks__item .cowork-skill-icon:hover {
+  transform: translateY(-2px);
+  outline-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-picks__item .cowork-skill-icon:hover {
+    transform: none;
+  }
+}
+.cowork-skill-picks__title {
+  display: -webkit-box;
+  min-height: 32px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  overflow-wrap: anywhere;
+}
+/* Add / Use as a small 28px round icon button (name in the DS tooltip), sitting under the title. */
+.cowork-skill-picks__action {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: auto;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease), background-color var(--duration-fast, 150ms) var(--easing-standard, ease), color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-picks__action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--blue-6, #2b52ff) 45%, transparent);
+  background: color-mix(in srgb, var(--blue-6, #2b52ff) 8%, transparent);
+  color: var(--blue-6, #2b52ff);
+}
+[data-theme="dark"] .cowork-skill-picks__action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--blue-5, #507fff) 45%, transparent);
+  background: color-mix(in srgb, var(--blue-5, #507fff) 12%, transparent);
+  color: var(--blue-5, #507fff);
+}
+.cowork-skill-picks__action:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-skill-picks__action:disabled {
+  cursor: progress;
+  color: var(--ink-secondary);
+}
+/* While Add installs: the refresh glyph turns (static under reduced motion). */
+.cowork-skill-picks__spin {
+  display: grid;
+  animation: cowork-skill-picks-spin 900ms linear infinite;
+}
+@keyframes cowork-skill-picks-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-picks__action {
+    transition: none;
+  }
+  .cowork-skill-picks__spin {
+    animation: none;
+  }
+}
 .cowork-composer-status {
   margin-top: var(--space-2);
   padding: 0 var(--space-2);
@@ -2175,7 +2364,8 @@
 }
 .cowork-skills__chevron {
   position: absolute;
-  top: 56px;
+  /* Centred on the 72px circles: row padding 8 + tile padding 8 + half the circle 36. */
+  top: 52px;
   z-index: 3;
   display: grid;
   place-items: center;
@@ -2267,9 +2457,10 @@
 .cowork-skills__skeleton-tile {
   display: grid;
   flex: 0 0 156px;
-  justify-items: center;
+  /* Left aligned, like the tiles it stands in for. */
+  justify-items: start;
   gap: 8px;
-  padding: 12px 8px;
+  padding: 8px 0;
 }
 /* The workflow card's square loading placeholder. */
 .cowork-skills__skeleton-card {
@@ -2282,25 +2473,38 @@
 .cowork-skill-tile {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* Left and top aligned, like the workflow cards ("The whole job, one set"): the circle, then the
+     title, then the description directly under it, all from the tile's left edge. */
+  align-items: flex-start;
   min-width: 0;
-  gap: 8px;
-  padding: 12px 8px 14px;
+  gap: 10px;
+  padding: 8px 0 4px;
   border-radius: 16px;
   background: transparent;
   color: var(--ink-primary);
-  text-align: center;
+  text-align: left;
 }
 /* No hover frame: only the circle lifts (below), like the Trending AI album covers. */
 .cowork-skill-tile__link {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   align-self: stretch;
   min-width: 0;
-  gap: 8px;
+  gap: 4px;
   color: var(--ink-primary);
   text-decoration: none;
+}
+/* The circle keeps the workflow cover's breathing room above the title. */
+.cowork-skill-tile__link > .cowork-skill-icon {
+  margin-bottom: 8px;
+}
+/* Popular (the only shelf that still uses SkillTile): the circle is centred over the title and
+   description, which stay left-aligned to the tile's edge, as does the Add/Use button below.
+   The link spans the tile column and the text wraps to that same width, so centring in the
+   link centres the circle on the text block. */
+.cowork-skill-tile .cowork-skill-tile__link > .cowork-skill-icon {
+  align-self: center;
 }
 .cowork-skill-tile__link:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -2313,7 +2517,6 @@
   overflow-wrap: anywhere;
 }
 .cowork-skill-tile__title {
-  min-height: 36px;
   font-size: 13px;
   line-height: 18px;
   font-weight: 600;
@@ -2324,39 +2527,122 @@
   line-height: 16px;
   color: var(--ink-secondary);
 }
+/* Tiles in a row stretch to the tallest one, so the actions still line up along the bottom. */
 .cowork-skill-tile__action {
   min-width: 64px;
   margin-top: auto;
   border-radius: 999px;
 }
-/* Titles and full descriptions start on the same line across a row, and the actions line up
-   at the bottom. The row owns four tracks (icon, title, description, action); each tile and its link
-   adopt them through subgrid. Without subgrid the flex column above still holds, with the action
-   pushed to the bottom. */
-@supports (grid-template-rows: subgrid) {
-  .cowork-skills__shelf-row {
-    grid-template-rows: repeat(4, auto);
-    row-gap: 8px;
+
+/* Your skills: compact horizontal cards on a raised surface (not the catalogue's circle tiles), so
+   the person's own set reads as theirs. Icon left, title + origin badge and one line of
+   description, Use on the right. A wrapping grid instead of a scroller: all of them stay in view. */
+.cowork-your-skills {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  min-width: 0;
+}
+.cowork-your-skills__count {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* One height for every card, in every row: the rows are equal (1fr) and never shorter than a card
+   with a 2-line title and a 2-line description (14px padding x 2 + 36px + 2px gap + 32px + 2px border). */
+.cowork-your-skills__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-auto-rows: minmax(100px, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cowork-your-skill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+  box-shadow: 0 6px 18px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent);
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+/* Hover: the Trending AI album outline (.model-chart__tile:hover .model-chart__card, a 1px
+   --spectrum-sky 45% border) on the card, which itself stays still. Only the icon circle moves,
+   1px, so the motion reads like the workflow covers (art moves, caption stays) but quieter. */
+.cowork-your-skill:hover {
+  border-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
+}
+.cowork-your-skill:hover .cowork-skill-icon {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-your-skill,
+  .cowork-your-skill .cowork-skill-icon {
+    transition: none;
   }
-  .cowork-skills__shelf-row > .cowork-skill-tile {
-    display: grid;
-    grid-row: span 4;
-    grid-template-rows: subgrid;
-    justify-items: center;
+  .cowork-your-skill:hover .cowork-skill-icon {
+    transform: none;
   }
-  .cowork-skills__shelf-row .cowork-skill-tile__link {
-    display: grid;
-    grid-row: span 3;
-    grid-template-rows: subgrid;
-    justify-items: center;
-  }
-  .cowork-skills__shelf-row .cowork-skill-tile__title {
-    min-height: 0;
-  }
-  .cowork-skills__shelf-row .cowork-skill-tile__action {
-    align-self: end;
-    margin-top: 0;
-  }
+}
+/* Overrides the shared tile link (kept for focus restore) from a column into a row. */
+.cowork-your-skill .cowork-your-skill__link {
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.cowork-your-skill .cowork-your-skill__link > .cowork-skill-icon {
+  margin-bottom: 0;
+}
+.cowork-your-skill__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cowork-your-skill__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+/* Title and description wrap to at most two lines each, so a long one reads whole instead of
+   ending in "..."; the clamp only cuts past two lines. */
+.cowork-your-skill__title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cowork-your-skill__brief {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 32px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-secondary);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.cowork-your-skill__action {
+  flex: none;
+  border-radius: 999px;
 }
 .cowork-skill-icon {
   display: block;
@@ -2366,7 +2652,7 @@
   background: var(--blue-5);
   /* The album cover's resting depth (.model-chart__card) under a 1px ring. */
   box-shadow: 0 8px 24px -14px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
-  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+  transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease), box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease), outline-color var(--duration-fast, 150ms) var(--easing-standard, ease);
 }
 .cowork-skill-icon[data-size="tile"] {
   width: 72px;
@@ -2379,6 +2665,72 @@
 .cowork-skill-icon[data-size="row"] {
   width: 40px;
   height: 40px;
+}
+/* The hero composer's recommended-skills strip. */
+.cowork-skill-icon[data-size="pick"] {
+  width: 28px;
+  height: 28px;
+}
+/* The composer's attached-skills tray. */
+.cowork-skill-icon[data-size="mini"] {
+  width: 22px;
+  height: 22px;
+}
+
+/* Composer skill tray: attached skills as small circles in the panel's upper section. Hover or focus
+   shows the title (DS tooltip) and a remove badge; clicking the chip detaches the skill. */
+.cowork-skill-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.cowork-skill-tray__item {
+  display: flex;
+}
+.cowork-skill-tray__chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+.cowork-skill-tray__chip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cowork-skill-tray__remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--ink-primary);
+  color: var(--surface-raised, #fff);
+  box-shadow: 0 0 0 2px var(--surface-raised, #fff);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), transform var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+.cowork-skill-tray__chip:hover .cowork-skill-tray__remove,
+.cowork-skill-tray__chip:focus-visible .cowork-skill-tray__remove {
+  opacity: 1;
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-tray__remove {
+    transition: none;
+  }
 }
 .cowork-skill-icon img {
   display: block;
@@ -2411,11 +2763,23 @@
 .cowork-skill-icon[data-tone="orange"] {
   background: linear-gradient(145deg, var(--accent-orange-3), var(--accent-orange-4));
 }
-/* The album-cover hover (.model-chart__tile:hover .model-chart__card): a 2px lift and a deeper
-   shadow on the circle only; the title, description and button stay put. */
+/* The album-cover hover (.model-chart__tile:hover .model-chart__card): a 2px lift, a deeper
+   shadow and the album outline (1px --spectrum-sky 45%) on the circle only; the title,
+   description and button stay put. The circle has no border, so the outline is an inset
+   outline: unlike an inset box-shadow it paints above a skill's image, not under it. */
+.cowork-skill-tile .cowork-skill-icon {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
 .cowork-skill-tile:hover .cowork-skill-icon {
   transform: translateY(-2px);
+  outline-color: color-mix(in srgb, var(--spectrum-sky) 45%, transparent);
   box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--redrob-black) 40%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--ink-primary) 10%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cowork-skill-tile:hover .cowork-skill-icon {
+    transform: none;
+  }
 }
 
 /* The skill detail page sits on the page surface, with no grey panel. */
@@ -5303,4 +5667,463 @@ a.cowork-radar-story__source:focus-visible {
   .cowork-questions__opt {
     transition: none;
   }
+}
+
+/* Composer Add menu (the "+" in place of the paperclip): Add files or photos, Add to project, Skills
+   and Connectors. The panel and rows are the DS menu (menu-surface.ts); this only sizes the trigger
+   like the paperclip it replaces and lays out the rows' text, end marks and connector switches. */
+.cowork-add-menu__trigger {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md, 8px);
+  color: var(--ink-secondary);
+  transition: background-color var(--duration-fast, 150ms) var(--easing-standard, ease), color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+.cowork-add-menu__trigger:hover,
+.cowork-add-menu__trigger[data-popup-open] {
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+}
+
+.cowork-add-menu__trigger:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* `position: relative` overrides the DS list's own `position: absolute` (made for the DS Menu, which
+   positions itself). Absolute left Base UI's positioner wrapper 0px tall, so "above the +" put a
+   0px box 8px over the trigger and the real list hung down past the window in a chat. */
+.cowork-add-menu {
+  position: relative;
+  min-width: 240px;
+}
+
+/* Flyouts with a long list (skills, projects) scroll inside themselves. */
+.cowork-add-menu--sub {
+  max-width: 320px;
+  max-height: min(420px, var(--available-height, 420px));
+}
+
+.cowork-add-menu__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A second, quieter line: why files cannot be added, or a connector's state. */
+.cowork-add-menu__hint {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cowork-add-menu__end {
+  display: inline-flex;
+  flex: none;
+  margin-left: auto;
+  color: var(--action-primary);
+}
+
+.cowork-add-menu__end svg {
+  color: currentColor;
+}
+
+/* Loading and empty rows read as notes, not as disabled choices. */
+.cowork-add-menu__note {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* The DS switch's small size, drawn here because the row itself is the control (a menu checkbox
+   item), so a nested input would be a second control inside it. */
+.cowork-add-menu__switch {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 20px;
+  margin-left: auto;
+  border-radius: var(--radius-full, 999px);
+  background: var(--border-strong);
+  transition: background-color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+.cowork-add-menu__switch[data-on] {
+  background: var(--action-primary);
+}
+
+.cowork-add-menu__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--redrob-white);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base, 200ms) var(--easing-settle, ease);
+}
+
+.cowork-add-menu__switch[data-on] .cowork-add-menu__thumb {
+  transform: translateX(12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cowork-add-menu__switch,
+  .cowork-add-menu__thumb {
+    transition: none;
+  }
+}
+
+/* A skill's circle in the Skills flyout takes the rows' icon slot, so titles line up with the
+   other rows' text instead of the tray's larger mini circle. */
+.cowork-add-menu .cowork-skill-icon {
+  width: 20px;
+  height: 20px;
+  margin: -2px;
+}
+
+/* The composer's context row above the text: the new chat's project, a thin divider, then the
+   attached skills. One line, every item 28px tall and centred, 6px apart, on the text's left edge,
+   so a project and skills read as one set instead of two stacked strips. */
+.cowork-composer-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  margin: 0 0 8px;
+}
+
+.cowork-composer-context__divider {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  margin: 0 2px;
+  background: var(--border-subtle);
+}
+
+/* Inside the row the tray is just its circles: the row owns the spacing. */
+.cowork-composer-context .cowork-skill-tray {
+  margin: 0;
+}
+
+.cowork-composer-context .cowork-skill-tray__chip {
+  width: 28px;
+  height: 28px;
+}
+
+.cowork-composer-context .cowork-skill-icon[data-size="mini"] {
+  width: 24px;
+  height: 24px;
+}
+
+/* The new chat's project, picked in Add to project: a pill, first in the context row. */
+.cowork-project-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full, 999px);
+  background: var(--surface-sunken);
+  color: var(--ink-primary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.cowork-project-chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink-secondary);
+}
+
+.cowork-project-chip__name {
+  overflow: hidden;
+  color: var(--ink-primary);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cowork-project-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full, 999px);
+  color: var(--ink-muted);
+}
+
+.cowork-project-chip__remove:hover {
+  background: var(--surface-raised);
+  color: var(--ink-primary);
+}
+
+/* Row "..." menus (chat rows in History and the Recent menu, project rows): a small ghost icon
+   button at the row's right edge, shown while the row is hovered, focused or its menu is open,
+   like Claude's. It is the link's sibling, never inside it. */
+.cowork-row-more {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md, 8px);
+  color: var(--ink-secondary);
+  background: transparent;
+  opacity: 0;
+  transition: opacity var(--duration-fast, 150ms) var(--easing-standard, ease), background-color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+/* The DS icon set has only the horizontal `more` glyph; the row buttons turn it 90deg so they
+   read as a vertical three-dot (kebab) button. Same glyph, stroke and size as the DS one. */
+.cowork-row-more > svg {
+  transform: rotate(90deg);
+}
+
+.cowork-row-more:hover,
+.cowork-row-more[data-popup-open] {
+  background: var(--border-subtle);
+  color: var(--ink-primary);
+}
+
+.cowork-row-more:focus-visible {
+  opacity: 1;
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* History: the row is the link plus its "..." button, side by side. */
+.cowork-history__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.cowork-history__row > .cowork-history__link {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cowork-history__row:hover .cowork-row-more,
+.cowork-history__row:focus-within .cowork-row-more,
+.cowork-history__row[data-menu-open] .cowork-row-more {
+  opacity: 1;
+}
+
+.cowork-history__row[data-menu-open] {
+  background: var(--surface-sunken);
+}
+
+/* The Recent chats' overlay: positioned inside the DS nav, which becomes its containing block. */
+.cowork-shell .rr-shell__nav {
+  position: relative;
+}
+
+.cowork-recent-actions {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.cowork-recent-actions .cowork-row-more {
+  opacity: 1;
+  pointer-events: auto;
+  background: var(--surface-sunken);
+  box-shadow: -10px 0 10px -2px var(--surface-sunken);
+}
+
+.cowork-recent-actions .cowork-row-more:hover,
+.cowork-recent-actions[data-open] .cowork-row-more {
+  background: var(--border-subtle);
+  box-shadow: -10px 0 10px -2px var(--surface-sunken);
+}
+
+/* Inline rename: a text box in place of the name, on the same line. */
+.cowork-recent-actions__rename {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+.cowork-inline-rename {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--action-primary);
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-base);
+  color: var(--ink-primary);
+  font: inherit;
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--action-primary) 18%, transparent);
+}
+
+.cowork-history__rename {
+  height: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cowork-row-more {
+    transition: none;
+  }
+}
+
+/* Projects page rows with a "..." menu: the row link and its button side by side; the button
+   shows on hover, focus or while its menu is open, like the chat rows. */
+.cowork-project-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.cowork-project-item > .cowork-project-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cowork-project-item:hover .cowork-row-more,
+.cowork-project-item:focus-within .cowork-row-more,
+.cowork-project-item[data-menu-open] .cowork-row-more {
+  opacity: 1;
+}
+
+/* The hover fill belongs to the whole item (row link, more button and the padding around it),
+   like the History rows, so it no longer stops short of the button. The link inside an item
+   drops its own fill. */
+.cowork-project-item:hover,
+.cowork-project-item:focus-within,
+.cowork-project-item[data-menu-open] {
+  background: var(--surface-sunken);
+}
+
+.cowork-project-item > .cowork-project-row:hover {
+  background: none;
+}
+
+/* The folder tile is --surface-sunken too, so on a filled row it would vanish; it lifts to the
+   base surface with a hairline instead. */
+.cowork-project-item:hover .cowork-project-row__icon,
+.cowork-project-item:focus-within .cowork-project-row__icon,
+.cowork-project-item[data-menu-open] .cowork-project-row__icon {
+  background: var(--surface-base);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+.cowork-project-row__text .cowork-inline-rename {
+  max-width: 420px;
+}
+
+/* New project / Save as a project: the Folder field under the name. It uses the DS field anatomy
+   (`rr-field`, label, hint), so the label weight and the 8px label gap match Name and the form's
+   16px gap is the only space between them. The row is one white card that never reads as a
+   disabled input: a folder tile, a title over a sub line, and Choose folder / Change on the right. */
+.cowork-project-folder__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--field-radius);
+  background: var(--surface-base);
+}
+
+.cowork-project-folder__tile {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-sunken);
+  color: var(--ink-secondary);
+}
+
+/* A chosen folder is the person's own: the tile takes the brand ink. */
+.cowork-project-folder__row[data-chosen] .cowork-project-folder__tile {
+  color: var(--ink-brand);
+}
+
+.cowork-project-folder__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cowork-project-folder__title,
+.cowork-project-folder__sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cowork-project-folder__title {
+  color: var(--ink-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.cowork-project-folder__sub {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.cowork-project-folder__row > .rr-btn {
+  flex: none;
+}
+
+.cowork-project-folder__reset {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-brand);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cowork-project-folder__reset:hover {
+  text-decoration: underline;
+}
+
+.cowork-project-folder__reset:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
