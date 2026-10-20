@@ -13,6 +13,9 @@ export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
 /** How long the catalogue and the Skills queries keep their data; one value for both. */
 export const CATALOGUE_CACHE_MS = 30 * 60_000;
 
+/** Catalogue skills Cowork never lists: not on a shelf, not in Search, not on a skill page. */
+export const HIDDEN_CATALOGUE_SKILLS: ReadonlySet<string> = new Set(["caveman", "conducting-research", "eli5", "ponytail"]);
+
 /** One catalogue skill with its instructions and localized marketplace display fields. */
 export type ConsoleSkill = SkillDisplayFields & {
   name: string;
@@ -140,7 +143,7 @@ export function createConsoleCatalogue(options: CatalogueOptions = {}) {
   const load = async (): Promise<Snapshot> => {
     try {
       const index = JSON.parse(await fetchText("index.json")) as { skills?: Array<{ name?: unknown }> };
-      const names = [...new Set((index.skills ?? []).map((skill) => skill.name).filter((name): name is string => typeof name === "string"))];
+      const names = [...new Set((index.skills ?? []).map((skill) => skill.name).filter((name): name is string => typeof name === "string" && !HIDDEN_CATALOGUE_SKILLS.has(name)))];
       const skills = (await Promise.all(names.map(loadSkill))).filter((skill): skill is ConsoleSkill => skill !== null);
       return { skills, expiresAt: now() + ttlMs, ok: true };
     } catch {
