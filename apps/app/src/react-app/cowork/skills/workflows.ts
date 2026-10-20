@@ -40,7 +40,7 @@ export type Workflow = {
 };
 
 /** A family's route id: its English name in kebab case. */
-export function workflowId(category: string): string {
+function workflowId(category: string): string {
   return category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 

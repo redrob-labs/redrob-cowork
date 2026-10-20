@@ -14,7 +14,7 @@ export const CONSOLE_CATALOGUE_BASE_URL = "https://console.redrob.ai/skills";
 export const CATALOGUE_CACHE_MS = 30 * 60_000;
 
 /** Catalogue skills Cowork never lists: not on a shelf, not in Search, not on a skill page. */
-export const HIDDEN_CATALOGUE_SKILLS: ReadonlySet<string> = new Set(["caveman", "conducting-research", "eli5", "ponytail"]);
+const HIDDEN_CATALOGUE_SKILLS: ReadonlySet<string> = new Set(["caveman", "conducting-research", "eli5", "ponytail"]);
 
 /** One catalogue skill with its instructions and localized marketplace display fields. */
 export type ConsoleSkill = SkillDisplayFields & {
