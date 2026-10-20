@@ -607,6 +607,15 @@ importers:
 
   packages/redrob-bootstrap: {}
 
+  packages/redrob-login:
+    devDependencies:
+      '@types/node':
+        specifier: 22.19.7
+        version: 22.19.7
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
   packages/redrob-ui-mcp:
     dependencies:
       '@modelcontextprotocol/sdk':
