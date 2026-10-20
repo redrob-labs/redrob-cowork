@@ -5,7 +5,7 @@
  */
 
 /** Stable skill names that have cover art. */
-export const SKILL_ART_NAMES: ReadonlySet<string> = new Set([
+const SKILL_ART_NAMES: ReadonlySet<string> = new Set([
   "humanizing-english-casual",
   "humanizing-english-workplace",
   "humanizing-korean-banmal",

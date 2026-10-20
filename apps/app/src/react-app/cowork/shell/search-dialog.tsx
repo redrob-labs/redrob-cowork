@@ -58,7 +58,7 @@ export type SearchData = {
 const SKILL_RESULT_LIMIT = 24;
 
 /**
- * Every skill (installed or in the catalogue) and every featured workflow as a search hit.
+ * Every skill (installed or in the catalogue) and every workflow (catalogue family) as a search hit.
  * A skill opens its own page; a workflow opens its workflow page. Titles,
  * Korean titles, summaries and the stable name all match.
  */

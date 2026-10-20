@@ -1,5 +1,5 @@
 /** @jsxImportSource react */
-import { useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate, useParams } from "react-router";
 import { Button, EmptyState, icons } from "@redrob-labs/ui";
@@ -79,23 +79,23 @@ export function WorkflowView({ workflow, locale, canAdd, pending, addingAll, bac
           {stepped && group.step !== null ? <h2>{workflowStepLabel(group.step)}</h2> : null}
           <ul className="cowork-workflow__list" role="list">
             {group.rows.map((row) => {
-              const title = skillDisplayTitle(row, locale);
+              const skillTitle = skillDisplayTitle(row, locale);
               const briefId = `workflow-skill-brief-${row.name}`;
               return (
                 <li key={row.name} className="cowork-workflow__row" data-skill={row.name}>
                   <Link className="cowork-workflow__link" to={skillPath(row.name)} state={{ fromSkill: row.name, fromPath: from }} aria-describedby={briefId}>
                     <SkillIcon name={row.name} size="row" />
                     <span className="cowork-workflow__text">
-                      <span className="cowork-workflow__title">{title}</span>
+                      <span className="cowork-workflow__title">{skillTitle}</span>
                       <span id={briefId} className="cowork-workflow__brief">{skillBrief(row, locale)}</span>
                     </span>
                   </Link>
                   {row.installed === null ? (
-                    <Button size="sm" variant="secondary" iconLeft={icons.plus(ICON)} loading={pending.has(row.name)} disabled={!canAdd || addingAll} aria-label={t("cowork.skill_add_label", { name: title })} onClick={() => onAdd(row.name)}>
+                    <Button size="sm" variant="secondary" iconLeft={icons.plus(ICON)} loading={pending.has(row.name)} disabled={!canAdd || addingAll} aria-label={t("cowork.skill_add_label", { name: skillTitle })} onClick={() => onAdd(row.name)}>
                       {t("cowork.skill_add")}
                     </Button>
                   ) : onUse ? (
-                    <Button size="sm" variant="secondary" iconLeft={icons.sparkle(ICON)} aria-label={t("cowork.skills_use_label", { name: title })} onClick={() => onUse(row.name)}>
+                    <Button size="sm" variant="secondary" iconLeft={icons.sparkle(ICON)} aria-label={t("cowork.skills_use_label", { name: skillTitle })} onClick={() => onUse(row.name)}>
                       {t("cowork.skills_use")}
                     </Button>
                   ) : null}
@@ -115,8 +115,14 @@ export function WorkflowScreen() {
   return <WorkflowScreenFor id={id} />;
 }
 
+/** Inputs of the workflow page for one route id. */
+type WorkflowScreenForProps = {
+  /** The route id of the family to show, e.g. `korean-patents`. */
+  id: string;
+};
+
 /** The workflow page for a route id; reads the shared marketplace rows. */
-function WorkflowScreenFor({ id }: { id: string }) {
+function WorkflowScreenFor({ id }: WorkflowScreenForProps) {
   const { services, scope, rows, library, preview } = useMarketplaceRows();
   const queryClient = useQueryClient();
   const showToast = useFrameStore((state) => state.showToast);
@@ -130,7 +136,7 @@ function WorkflowScreenFor({ id }: { id: string }) {
   // A running add owns the page: Escape must not leave it while installs continue unseen.
   const { backPath, back } = useBackToList({ restoreKey: "fromWorkflow", restoreValue: id, blocked: addingAll || pending.size > 0 });
 
-  const workflow = rows ? findWorkflow(id, rows, locale) : null;
+  const workflow = useMemo(() => rows ? findWorkflow(id, rows, locale) : null, [id, rows, locale]);
   const canUse = preview === false && Boolean(workspaceId);
   // A family the loaded catalogue does not have is not a page; an offline catalogue says so instead.
   if (rows && !workflow && !library.isError) return <Navigate to="/skills" replace />;

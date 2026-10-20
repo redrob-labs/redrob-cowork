@@ -2869,7 +2869,7 @@
   font-family: var(--font-mono);
 }
 
-/* ---------- Skills: featured workflows (album-cover cards, workflow page) ---------- */
+/* ---------- Skills: workflows (album-cover cards, workflow page) ---------- */
 .cowork-skill-icon[data-size="fill"] {
   width: 100%;
   height: 100%;
@@ -2944,11 +2944,6 @@
   line-height: 18px;
   font-weight: 600;
   color: var(--ink-primary);
-}
-.cowork-workflow-card__sub {
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--ink-secondary);
 }
 .cowork-workflow-card__count {
   font-size: 12px;
@@ -3038,7 +3033,7 @@
     transform: none;
   }
 }
-/* ---------- end featured workflows ---------- */
+/* ---------- end workflows ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .cowork-skill-icon,

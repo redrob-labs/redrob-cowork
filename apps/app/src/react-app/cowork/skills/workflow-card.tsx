@@ -7,17 +7,19 @@ import { SkillIcon } from "./skill-icon";
 import { MarketplaceShelf } from "./skill-tile";
 import { workflowPath, workflowTitle, type Workflow } from "./workflows";
 
-/** A workflow's cover: its first four skills' circles in a 2x2 grid on a square card. Decorative. */
-export function WorkflowMosaic(props: {
+/** Inputs of a workflow's cover mosaic. */
+type WorkflowMosaicProps = {
   /** The workflow's rows in run order; the first four fill the grid. */
   rows: readonly SkillRow[];
   /** `card` on the shelf, `hero` on the workflow page. */
   size: "card" | "hero";
-}) {
-  const covers = props.rows.slice(0, 4);
+};
+
+/** A workflow's cover: its first four skills' circles in a 2x2 grid on a square card. Decorative. */
+export function WorkflowMosaic({ rows, size }: WorkflowMosaicProps) {
   return (
-    <span className="cowork-workflow-card__cover" data-size={props.size} aria-hidden="true">
-      {covers.map((row) => (
+    <span className="cowork-workflow-card__cover" data-size={size} aria-hidden="true">
+      {rows.slice(0, 4).map((row) => (
         <span key={row.name} className="cowork-workflow-card__cover-cell">
           <SkillIcon name={row.name} size="fill" />
         </span>
@@ -52,12 +54,22 @@ export function WorkflowCard({ workflow, locale, fromPath }: WorkflowCardProps) 
   );
 }
 
+/** Inputs of the workflows shelf. */
+type WorkflowShelfProps = {
+  /** The catalogue families, in shelf order. */
+  workflows: readonly Workflow[];
+  /** Current locale for the family names. */
+  locale: string;
+  /** Path restored when a workflow page closes. */
+  fromPath: string;
+};
+
 /** The workflows shelf: one card per catalogue family. */
-export function WorkflowShelf(props: { workflows: readonly Workflow[]; locale: string; fromPath: string }) {
+export function WorkflowShelf({ workflows, locale, fromPath }: WorkflowShelfProps) {
   return (
-    <MarketplaceShelf id="workflows" label={t("cowork.skills_section_workflows")} count={props.workflows.length} variant="cards">
-      {props.workflows.map((workflow) => (
-        <WorkflowCard key={workflow.id} workflow={workflow} locale={props.locale} fromPath={props.fromPath} />
+    <MarketplaceShelf id="workflows" label={t("cowork.skills_section_workflows")} count={workflows.length} variant="cards">
+      {workflows.map((workflow) => (
+        <WorkflowCard key={workflow.id} workflow={workflow} locale={locale} fromPath={fromPath} />
       ))}
     </MarketplaceShelf>
   );

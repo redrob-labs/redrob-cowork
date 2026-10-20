@@ -3,7 +3,7 @@ import { skillArt } from "./skill-art";
 import { skillTone } from "./skills";
 
 type SkillIconProps = {
-  /** Stable skill id used to choose the same tone everywhere. */
+  /** Stable skill id: picks the cover art, or the same tone everywhere when there is none. */
   name: string;
   /** Visual size for marketplace tile, detail hero, compact row, `pick` (hero composer strip), `mini` (composer tray), or `fill` (sized by its parent, e.g. a workflow mosaic cell). */
   size: "tile" | "hero" | "row" | "pick" | "mini" | "fill";
@@ -16,7 +16,8 @@ const ART_SIZES: Record<SkillIconProps["size"], string> = {
   row: "40px",
   pick: "28px",
   mini: "22px",
-  fill: "96px",
+  // A mosaic cell: (72% of the 160px card, less the 8px gap) / 2; the hero mosaic is smaller.
+  fill: "54px",
 };
 
 /** Decorative marketplace artwork: the skill's cover art when it has one, else a tone-coded circle from its stable name. */

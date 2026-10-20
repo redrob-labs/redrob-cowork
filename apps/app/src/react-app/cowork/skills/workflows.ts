@@ -13,7 +13,7 @@ import { skillDisplayTitle, type SkillRow } from "./skills";
  * The families in the Console's own order (console PR #305). A family the Console adds later
  * follows these, in the order its first skill appears.
  */
-const CATEGORY_ORDER = [
+const CATEGORY_ORDER: readonly string[] = [
   "Natural writing",
   "(Korean) Research papers",
   "(Korean) Civil cases",
@@ -44,34 +44,42 @@ export function workflowId(category: string): string {
   return category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
+/** A family's place on the shelf: its index in CATEGORY_ORDER, or after all of them. */
+function categoryRank(category: string): number {
+  const index = CATEGORY_ORDER.indexOf(category);
+  return index === -1 ? CATEGORY_ORDER.length : index;
+}
+
 /** Every family the rows carry, in shelf order; ungrouped skills are left out. */
-export function availableWorkflows(rows: readonly SkillRow[], locale: string = "en"): Workflow[] {
+export function availableWorkflows(rows: readonly SkillRow[], locale: string): Workflow[] {
+  // Map keys keep first-appearance order and the sort is stable, so unknown families stay in that order.
   const groups = new Map<string, SkillRow[]>();
   for (const row of rows) {
     const category = row.category?.trim();
     if (!category) continue;
-    groups.set(category, [...(groups.get(category) ?? []), row]);
+    const members = groups.get(category);
+    if (members) members.push(row);
+    else groups.set(category, [row]);
   }
-  const rank = (category: string) => {
-    const index = CATEGORY_ORDER.indexOf(category);
-    return index === -1 ? CATEGORY_ORDER.length : index;
-  };
-  const appearance = [...groups.keys()];
-  return [...appearance]
-    .sort((a, b) => rank(a) - rank(b) || appearance.indexOf(a) - appearance.indexOf(b))
+  return [...groups.keys()]
+    .sort((a, b) => categoryRank(a) - categoryRank(b))
     .map((category) => {
       const members = groups.get(category) ?? [];
       const categoryKo = members.find((row) => row.categoryKo?.trim())?.categoryKo?.trim();
-      const sorted = [...members].sort((a, b) =>
+      members.sort((a, b) =>
         (a.step ?? Number.MAX_SAFE_INTEGER) - (b.step ?? Number.MAX_SAFE_INTEGER)
         || skillDisplayTitle(a, locale).localeCompare(skillDisplayTitle(b, locale), locale));
-      return { id: workflowId(category), category, ...(categoryKo ? { categoryKo } : {}), rows: sorted };
+      return { id: workflowId(category), category, ...(categoryKo ? { categoryKo } : {}), rows: members };
     });
 }
 
-/** The workflow with this route id, or null when the rows carry no such family. */
+/** The workflow with this route id, or null when the rows carry no such family. Groups only that family's rows. */
 export function findWorkflow(id: string, rows: readonly SkillRow[], locale: string): Workflow | null {
-  return availableWorkflows(rows, locale).find((workflow) => workflow.id === id) ?? null;
+  const members = rows.filter((row) => {
+    const category = row.category?.trim();
+    return category ? workflowId(category) === id : false;
+  });
+  return availableWorkflows(members, locale)[0] ?? null;
 }
 
 /** The family name in the app language (Korean falls back to English). */

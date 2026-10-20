@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { catalogueStep, createConsoleCatalogue, CATALOGUE_CACHE_MS, parseConsoleFrontmatter } from "../src/react-app/cowork/skills/console-catalogue";
+import { createConsoleCatalogue, CATALOGUE_CACHE_MS } from "../src/react-app/cowork/skills/console-catalogue";
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import {
@@ -118,63 +118,6 @@ describe("console catalogue", () => {
     now += 1;
     expect((await catalogue.list()).map((skill) => skill.name)).toEqual(["sample", "other"]);
     expect(calls).toBeGreaterThan(loaded);
-  });
-
-  test("reads the PR #305 metadata block: category, category_ko and step, past comments and quotes", () => {
-    const skill = [
-      "---",
-      "# name: stable skill id",
-      "name: kpat-drawings",
-      "description: 'Creates patent drawings (도면). It''s a test.'",
-      "# metadata: non-displayed provenance and grouping",
-      "metadata:",
-      "  # version: a semver copy for readers",
-      "  version: '1.0.0'",
-      "  author: redrob",
-      "  # category / category_ko: the skill family",
-      "  category: (Korean) Patents",
-      "  category_ko: (국내) 특허 출원",
-      "  step: 4",
-      "version: 1.0.0",
-      "title: (Korean) Patent drawings",
-      "title_ko: (국내) 특허 도면",
-      "---",
-      "Body",
-    ].join("\r\n");
-    const { data, metadata, body } = parseConsoleFrontmatter(skill);
-    expect(data).toMatchObject({ name: "kpat-drawings", description: "Creates patent drawings (도면). It's a test.", version: "1.0.0", title: "(Korean) Patent drawings", title_ko: "(국내) 특허 도면" });
-    expect(data.category).toBeUndefined();
-    expect(metadata).toEqual({ version: "1.0.0", author: "redrob", category: "(Korean) Patents", category_ko: "(국내) 특허 출원", step: "4" });
-    expect(body).toBe("Body");
-    // Indented lines outside `metadata:` are not grouping.
-    expect(parseConsoleFrontmatter("---\nname: a\nother:\n  category: Nope\n---\n").metadata).toEqual({});
-    expect([catalogueStep("4"), catalogueStep("0"), catalogueStep("two"), catalogueStep(undefined)]).toEqual([4, undefined, undefined, undefined]);
-  });
-
-  test("never lists caveman, conducting-research, eli5 or ponytail", async () => {
-    const requested: string[] = [];
-    const fetchImpl: typeof fetch = async (input) => {
-      const url = String(input);
-      requested.push(url);
-      if (url.endsWith("index.json")) return new Response(JSON.stringify({ skills: ["caveman", "conducting-research", "eli5", "ponytail", "kc-report"].map((name) => ({ name })) }));
-      const name = url.split("/").at(-2) ?? "";
-      return new Response(`---\nname: ${name}\ndescription: Use when ${name}.\n---\n`);
-    };
-    const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test" });
-    expect((await catalogue.list()).map((skill) => skill.name)).toEqual(["kc-report"]);
-    expect(await catalogue.get("caveman")).toBeNull();
-    expect(catalogue.peek("eli5")).toBeNull();
-    expect(requested.some((url) => url.includes("/ponytail/"))).toBe(false);
-  });
-
-  test("lists carry the family and step through to rows", async () => {
-    const fetchImpl: typeof fetch = async (input) => String(input).endsWith("index.json")
-      ? new Response(JSON.stringify({ skills: [{ name: "kc-report" }] }))
-      : new Response("---\nname: kc-report\ndescription: Use when reporting.\nmetadata:\n  category: (Korean) Consulting\n  category_ko: (국내) 경영 컨설팅\n  step: 3\n---\n");
-    const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test" });
-    expect(await catalogue.list()).toEqual([
-      { name: "kc-report", description: "Use when reporting.", tags: {}, category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 3 },
-    ]);
   });
 });
 

@@ -3,8 +3,8 @@
  *
  * The "Popular" / "인기 스킬" shelf on the Skills page shows these catalogue skill names, in this
  * order. There is no usage data yet (the public catalogue at console.redrob.ai/skills/index.json has
- * no counts, and there is no backend for it), so the list is hand-picked. Editing these arrays is the
- * only change needed to replace it.
+ * no counts, and there is no backend for it), so the list is hand-picked. Editing `PICKS` (or giving
+ * a language its own array) is the only change needed to replace it.
  *
  * Rules the shelf applies at runtime:
  * - one list per UI language (`en` for English, `ko` for Korean); any other language uses `en`;
@@ -15,6 +15,7 @@
  */
 const PICKS = ["docx-to-hwpx", "ko-civil-analysis", "ko-civil-formatting", "vc-pitch-deck", "kr-fs-preparation"] as const;
 
+/** Per-language lists; both languages show the same picks for now. */
 export const POPULAR_SKILLS: { readonly en: readonly string[]; readonly ko: readonly string[] } = {
   en: PICKS,
   ko: PICKS,

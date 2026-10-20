@@ -41,7 +41,7 @@ export function catalogueDisplay({ title, titleKo, summary, summaryKo, category,
 }
 
 /** A `metadata.step` value as a positive whole number, or undefined when absent or malformed. */
-export function catalogueStep(value: string | undefined): number | undefined {
+function catalogueStep(value: string | undefined): number | undefined {
   if (!value || !/^\d+$/.test(value)) return undefined;
   const step = Number(value);
   return step > 0 ? step : undefined;
