@@ -146,8 +146,8 @@ importers:
         specifier: ^0.6.2
         version: 0.6.2
       '@redrob-labs/ui':
-        specifier: 1.7.0
-        version: 1.7.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: 1.8.0
+        version: 1.8.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@redrob/install-config':
         specifier: workspace:*
         version: link:../../packages/install-config
@@ -2176,8 +2176,8 @@ packages:
   '@redrob-labs/sdk@0.6.2':
     resolution: {integrity: sha512-vqgefyMAiWk9JEYgapL9gc2hYoOn3M3dL9y8uujmig7U48vaqjsgw3kKimDOZc34JStG8RJq6f/ETLOZ9MM5SA==}
 
-  '@redrob-labs/ui@1.7.0':
-    resolution: {integrity: sha512-0U/6FX8B5MuWGhZK0AnrlG3yWNQjvxzJfgv+mk8au7IQq1DLhnHeOG9FWskGNuWOvPS4ZVlhQD88qso+Gp8jnw==}
+  '@redrob-labs/ui@1.8.0':
+    resolution: {integrity: sha512-3RwrHRytDMbKNpevn5Ydn8a/kF1i5QseimlkQkhrTvRIqOmQG/BENcm3EztX0+C6FHxvo9heSDkml/fGHQZuJw==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
       react-dom: ^18.2.0 || ^19.0.0
@@ -5759,7 +5759,7 @@ packages:
     engines: {node: '>=20'}
 
   xlsx@https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz:
-    resolution: {integrity: sha512-+nKZ39+nvK7Qq6i0PvWWRA4j/EkfWOtkP/YhMtupm+lJIiHxUrgTr1CcKv1nBk1rHtkRRQ3O2+Ih/q/sA+FXZA==, tarball: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz}
+    resolution: {tarball: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz}
     version: 0.20.2
     engines: {node: '>=0.8'}
     hasBin: true
@@ -7396,7 +7396,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@redrob-labs/ui@1.7.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@redrob-labs/ui@1.8.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
