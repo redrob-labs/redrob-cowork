@@ -493,10 +493,13 @@ export async function getDesktopHomeDir(): Promise<string> {
 
 /** Redrob Launcher's shared language choice, or null on the web, without a launcher, or on any failure. */
 export async function readLauncherLanguage(): Promise<SharedLanguageReading | null> {
+  // The web build has no Electron bridge, so there is no launcher file to read.
   if (!window.__REDROB_ELECTRON__?.invokeDesktop) return null;
   try {
+    // An older desktop shell without the handler resolves undefined; treat it as no file.
     return (await invokeElectronHelper("__readSharedLanguage")) ?? null;
   } catch {
+    // The language sync is best effort: Cowork keeps its own setting.
     return null;
   }
 }

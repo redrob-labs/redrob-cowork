@@ -23,15 +23,25 @@ const CODE = /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/;
  * (macOS), `$XDG_CONFIG_HOME/redrob-shared` or `~/.config/redrob-shared` (Linux).
  */
 export function sharedRedrobDir(env = process.env, platform = process.platform, home = os.homedir()) {
+  // An explicit override wins everywhere (tests, portable installs).
   const override = env.REDROB_SHARED_DIR?.trim();
   if (override) return override;
   if (platform === "win32") {
+    // APPDATA is normally set; the fallback is its usual location.
     const appData = env.APPDATA?.trim() || path.join(home, "AppData", "Roaming");
     return path.join(appData, "Redrob", "Shared");
   }
   if (platform === "darwin") return path.join(home, "Library", "Application Support", "ai.redrob.shared");
+  // Linux and other Unix: the XDG config directory, else its default.
   const config = env.XDG_CONFIG_HOME?.trim() || path.join(home, ".config");
   return path.join(config, "redrob-shared");
+}
+
+/** A field as a normalized language code, or null when it is not one. */
+function cleanCode(value) {
+  // Normalize once, then validate the normalized form.
+  const code = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return CODE.test(code) ? code : null;
 }
 
 /**
@@ -43,13 +53,16 @@ export function parseSharedLanguage(text) {
   try {
     data = JSON.parse(text);
   } catch {
+    // A half-written or corrupt file reads as no file.
     return null;
   }
+  // `null` and primitives are valid JSON but not the launcher's shape.
   if (!data || typeof data !== "object") return null;
-  const clean = (value) => (typeof value === "string" && CODE.test(value.trim().toLowerCase()) ? value.trim().toLowerCase() : null);
-  const language = clean(data.language);
-  const app = data.apps && typeof data.apps === "object" ? clean(data.apps[COWORK_LAUNCHER_APP_ID]) : null;
+  const language = cleanCode(data.language);
+  // The per-app override sits under `apps`, keyed by Cowork's id.
+  const app = data.apps && typeof data.apps === "object" ? cleanCode(data.apps[COWORK_LAUNCHER_APP_ID]) : null;
   if (!language && !app) return null;
+  // `chosen` must be literally true; anything else means the launcher defaulted it.
   return { language, chosen: data.chosen === true, app };
 }
 
@@ -57,9 +70,11 @@ export function parseSharedLanguage(text) {
 export async function readSharedLanguage(dir = sharedRedrobDir()) {
   try {
     const buffer = await readFile(path.join(dir, "language.json"));
+    // Refuse to parse something far larger than the launcher ever writes.
     if (buffer.byteLength > MAX_BYTES) return null;
     return parseSharedLanguage(buffer.toString("utf8"));
   } catch {
+    // Missing (no launcher installed) is the common case, not an error.
     return null;
   }
 }

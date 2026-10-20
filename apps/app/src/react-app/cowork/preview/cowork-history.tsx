@@ -1,21 +1,20 @@
 /** @jsxImportSource react */
 import { useState, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { EmptyState, icons } from "@redrob-labs/ui";
+import { EmptyState } from "@redrob-labs/ui";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { currentLocale, subscribeToLocale, t } from "../../../i18n";
-import { ChatMenuItems, ConfirmDeleteDialog, InlineRename, useChatActions, type ChatRef } from "../chats/chat-menu";
+import { ChatMenuItems, ConfirmDeleteDialog, InlineRename, RowMoreMenu, useChatActions, type ChatRef } from "../chats/chat-menu";
 import { formatHistoryWhen } from "../history/history";
 import type { HistoryEntry } from "../services/types";
 import { CoworkShell } from "../shell/cowork-shell";
 import { PreviewPage, PreviewState } from "./preview-note";
 import { previewKey, usePreviewServices } from "./preview";
 
-const MORE_ICON = { width: 16, height: 16, "aria-hidden": true };
-
 export type HistoryViewActions = {
+  // Saves an inline rename.
   onRename: (chat: ChatRef, value: string) => void;
+  // Asks before deleting.
   onDelete: (chat: ChatRef) => void;
 };
 
@@ -35,18 +34,23 @@ export function HistoryView(props: {
   const rows = [...props.entries].sort((a, b) => b.at - a.at);
   const preview = props.preview ?? true;
   const now = props.now ?? Date.now();
+  // The row being renamed in place, by chat id.
   const [renaming, setRenaming] = useState<string | null>(null);
+  // The row whose menu is open, so it stays highlighted.
   const [menuFor, setMenuFor] = useState<string | null>(null);
   if (!preview && !rows.length) {
     return <EmptyState title={t("cowork.history_empty_title")} description={t("cowork.history_empty_text")} />;
   }
+  // Read once; narrowed for the closures below.
+  const actions = props.actions;
   return (
     <ul className="cowork-history" aria-label={t("cowork.nav_history")}>
       {rows.map((entry) => {
+        // What the menu acts on: the chat and the project it is in.
         const chat: ChatRef = { id: entry.id, title: entry.what, workspaceId: entry.projectId };
-        const actions = props.actions;
         return (
           <li key={entry.id} className="cowork-history__row" data-menu-open={menuFor === entry.id || undefined}>
+            {/* Renaming: the link becomes a text box in the same place. */}
             {renaming === entry.id && actions ? (
               <div className="cowork-history__link">
                 <InlineRename
@@ -66,23 +70,11 @@ export function HistoryView(props: {
                 <span className="cowork-history__when">{formatHistoryWhen(entry.at, now, props.locale)}</span>
               </a>
             )}
+            {/* The "..." menu beside the link; hidden while renaming. */}
             {actions && renaming !== entry.id ? (
-              <DropdownMenu open={menuFor === entry.id} onOpenChange={(open) => setMenuFor(open ? entry.id : null)}>
-                <DropdownMenuTrigger
-                  render={(
-                    <button
-                      type="button"
-                      className="cowork-row-more"
-                      aria-label={t("cowork.more_actions_label", { name: entry.what })}
-                    >
-                      {icons.more(MORE_ICON)}
-                    </button>
-                  )}
-                />
-                <DropdownMenuContent align="end" sideOffset={4} className="cowork-add-menu">
-                  <ChatMenuItems chat={chat} onRename={() => setRenaming(entry.id)} onDelete={() => actions.onDelete(chat)} />
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <RowMoreMenu name={entry.what} open={menuFor === entry.id} onOpenChange={(open) => setMenuFor(open ? entry.id : null)}>
+                <ChatMenuItems chat={chat} onRename={() => setRenaming(entry.id)} onDelete={() => actions.onDelete(chat)} />
+              </RowMoreMenu>
             ) : null}
           </li>
         );
@@ -97,7 +89,9 @@ export function HistoryScreen() {
   const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
   const query = useQuery({ queryKey: previewKey(scope, "history"), queryFn: () => services.history.list(), staleTime: 30_000 });
   const preview = query.data?.preview ?? true;
+  // Rename and delete for any chat in History, whatever its project.
   const chatActions = useChatActions();
+  // The chat whose delete is being confirmed.
   const [deleting, setDeleting] = useState<ChatRef | null>(null);
   return (
     <CoworkShell current="history" title={t("cowork.nav_history")} meta={preview ? t("cowork.preview_history_meta") : undefined}>
@@ -114,6 +108,7 @@ export function HistoryScreen() {
           )}
         </PreviewState>
       </PreviewPage>
+      {/* Asks before a chat and its messages go. */}
       {deleting ? (
         <ConfirmDeleteDialog
           title={t("cowork.chat_delete_title")}

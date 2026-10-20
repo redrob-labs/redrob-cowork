@@ -48,7 +48,8 @@ describe("composer model controls", () => {
   test("tracks steering until the active run stops streaming", () => {
     const sessionSurfaceSource = readFileSync(sessionSurfacePath, "utf8");
 
-    expect(sessionSurfaceSource).toContain("setSteering(true);\n    await handleSend();");
+    // Steering forwards the composer's attached skills to the same send path.
+    expect(sessionSurfaceSource).toContain("setSteering(true);\n    await handleSend(skills);");
     expect(sessionSurfaceSource).toContain("if (!chatStreaming) setSteering(false);");
     expect(sessionSurfaceSource).toContain("steering={steering}");
     expect(sessionSurfaceSource).toContain("props.onModelChange(nextModel, variant)");

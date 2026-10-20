@@ -66,7 +66,7 @@ import {
 import { ShareWorkspaceModal } from "../../workspace/share-workspace-modal";
 import { SessionEmptyHero } from "./session-empty-hero";
 import type { NewTaskComposerContext } from "./new-task-composer";
-import { takeNewChatWorkspace } from "@/react-app/cowork/composer/add-menu";
+import { takeNewChatProject } from "@/react-app/cowork/composer/add-menu";
 import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
@@ -1514,7 +1514,7 @@ export function SessionPage(props: SessionPageProps) {
                       onRunTask={(prompt, attachments) => {
                         // A project picked in Add to project already exists, so the chat goes there;
                         // otherwise chat-first makes the default chat workspace as before.
-                        const project = takeNewChatWorkspace("");
+                        const project = takeNewChatProject();
                         if (project) props.sidebar.onCreateTaskWithPrompt?.(project, prompt, attachments);
                         else props.onChatFirstTask?.(prompt, attachments);
                       }}
@@ -1614,8 +1614,8 @@ export function SessionPage(props: SessionPageProps) {
                       <SessionEmptyHero
                         providerCount={providerCount}
                         onRunTask={(prompt, attachments) =>
-                          // A project picked in the composer's Add to project gets the new chat.
-                          props.sidebar.onCreateTaskWithPrompt?.(takeNewChatWorkspace(props.selectedWorkspaceId), prompt, attachments)
+                          // A project picked in the composer's Add to project gets the new chat, else this workspace.
+                          props.sidebar.onCreateTaskWithPrompt?.(takeNewChatProject() ?? props.selectedWorkspaceId, prompt, attachments)
                         }
                         onOpenProviderAuth={props.onOpenProviderAuth}
                         composer={props.newTaskComposer}

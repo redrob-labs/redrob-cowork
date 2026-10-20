@@ -234,15 +234,18 @@ export function generalActions(deps: GeneralDeps): GeneralActions {
   };
 }
 
-/** English and 한국어, each in its own name, after "Same as Redrob Launcher (X)" when a launcher is found. */
-export function languageOptions(launcher: Language | null = null) {
-  const own = LANGUAGE_OPTIONS.map((option) => ({ value: option.value as string, label: option.nativeName as string }));
-  if (!launcher) return own;
-  return [{ value: LAUNCHER_LANGUAGE, label: t("cowork.settings_language_launcher", { language: localizedLanguageName(launcher) }) }, ...own];
-}
-
 /** The Language select's value for "follow Redrob Launcher". */
 export const LAUNCHER_LANGUAGE = "launcher";
+
+/** English and 한국어, each in its own name, after "Same as Redrob Launcher (X)" when a launcher is found. */
+export function languageOptions(launcher: Language | null = null): { value: string; label: string }[] {
+  // Each language in its own script, so a person can find theirs whatever the UI shows.
+  const own = LANGUAGE_OPTIONS.map((option) => ({ value: option.value, label: option.nativeName }));
+  // No launcher file: nothing to follow, so no follow option.
+  if (!launcher) return own;
+  // The follow option first, naming the launcher's language in the current UI language.
+  return [{ value: LAUNCHER_LANGUAGE, label: t("cowork.settings_language_launcher", { language: localizedLanguageName(launcher) }) }, ...own];
+}
 
 export function textSizeOptions() {
   return TEXT_SIZES.map((size) => ({ value: size.id, label: textSizeLabel(size.id) }));
@@ -279,9 +282,11 @@ export function GeneralView(props: { values: GeneralValues; actions: GeneralActi
           <Select
             id="cowork-settings-language"
             size="sm"
+            // Following the launcher shows the follow option, not the language it resolves to.
             value={values.launcher?.following ? LAUNCHER_LANGUAGE : values.language}
             options={languageOptions(values.launcher?.locale ?? null)}
             onChange={(_event, option) => {
+              // The follow option is not a language; it hands the choice back to the launcher.
               if (option?.value === LAUNCHER_LANGUAGE) actions.onFollowLauncher?.();
               else if (isLanguage(option?.value)) actions.onLanguage(option.value);
             }}
@@ -352,6 +357,7 @@ function GeneralSection() {
   const { prefs, setPrefs } = useLocal();
   const showToast = useFrameStore((state) => state.showToast);
   const language = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+  // The launcher's language and whether Cowork follows it, live across window focus.
   const launcher = useSyncExternalStore(subscribeToLauncherLanguage, launcherLanguageState, launcherLanguageState);
   const theme = useSyncExternalStore(subscribeToTheme, getInitialThemeMode, getInitialThemeMode);
   const [textSize, setTextSize] = useState(readTextSize);
@@ -374,10 +380,12 @@ function GeneralSection() {
         notify: notifiesWhenDone(prefs.desktopNotifications),
         keepAwake: prefs.coworkKeepAwake,
         ...(isDesktopRuntime() ? { crashReports: prefs.crashReports } : {}),
+        // Offers "Same as Redrob Launcher" when a launcher file exists.
         launcher,
       }}
       actions={{
         ...actions,
+        // Drops Cowork's own pick and re-reads the launcher's file.
         onFollowLauncher: () => void followLauncherLanguage(),
         onCrashReports: (on) => {
           setPrefs((previous) => ({ ...previous, crashReports: on }));

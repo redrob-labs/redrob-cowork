@@ -2,21 +2,23 @@ import { afterEach, describe, expect, test } from "bun:test";
 
 import type { ChatMemory } from "../services/types";
 import { moveChatToProject, projectChoices } from "../projects/projects";
-import { connectorMenuRow, takeNewChatWorkspace, useNewChatProjectStore } from "./add-menu";
+import { connectorMenuRow, takeNewChatProject, useNewChatProjectStore } from "./add-menu";
 
+// Each test starts with no pick, since the store is app-wide.
 afterEach(() => useNewChatProjectStore.getState().choose(null));
 
 describe("composer Add menu: new chat's project", () => {
-  test("send goes to the hero's workspace when no project was picked", () => {
-    expect(takeNewChatWorkspace("personal")).toBe("personal");
+  test("nothing picked: the caller's own workspace gets the chat", () => {
+    // Null tells the caller to fall back to its own workspace.
+    expect(takeNewChatProject()).toBeNull();
   });
 
   test("a picked project gets the new chat, once", () => {
     useNewChatProjectStore.getState().choose({ id: "ws_hello", name: "Hello" });
-    expect(takeNewChatWorkspace("personal")).toBe("ws_hello");
+    expect(takeNewChatProject()).toBe("ws_hello");
     // Taking it clears the pick, so the next new chat starts on the hero's workspace again.
     expect(useNewChatProjectStore.getState().project).toBeNull();
-    expect(takeNewChatWorkspace("personal")).toBe("personal");
+    expect(takeNewChatProject()).toBeNull();
   });
 });
 

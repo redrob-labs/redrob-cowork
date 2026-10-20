@@ -122,6 +122,7 @@ export function CoworkShellView(props: CoworkShellViewProps) {
   // The app's theme store stays the source of truth; the switch only reflects and sets it.
   const themeMode = useSyncExternalStore(subscribeToTheme, getInitialThemeMode, getInitialThemeMode);
   const root = useHref("/").replace(/\/$/, "");
+  // Read once: the nav builds from it and the Recent chats' "..." menu needs its chat list.
   const navData = useCoworkNavData();
   const nav = buildCoworkNav({
     ...navData,

@@ -1842,14 +1842,12 @@
 }
 /* Hero composer's recommended skills: a horizontal popup hanging under the panel while its empty
    text box is focused. It floats over the status row below rather than pushing the page down. */
-.cowork-skill-picks-pop {
+.cowork-skill-picks {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
   right: 0;
   z-index: 40;
-}
-.cowork-skill-picks {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -5966,7 +5964,7 @@ a.cowork-radar-story__source:focus-visible {
 }
 
 /* Inline rename: a text box in place of the name, on the same line. */
-.cowork-recent-rename {
+.cowork-recent-actions__rename {
   position: absolute;
   z-index: 3;
   display: flex;

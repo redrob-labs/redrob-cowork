@@ -1262,6 +1262,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
   }, [chatStreaming, draft, handleSend, model.transitionState, props.modelUnavailable, props.sessionId]);
 
   const handleSteer = useCallback(async (skills?: readonly string[]) => {
+    // The tray's skills ride along with the steer, the same as with a send.
     setSteering(true);
     await handleSend(skills);
   }, [handleSend]);
@@ -1269,6 +1270,7 @@ export function SessionSurface(props: SessionSurfaceProps) {
   // Queue: hold the draft locally and clear the composer. The drain effect
   // sends it once the session reports idle.
   const handleQueue = useCallback((skills?: readonly string[]) => {
+    // Tokens are baked in now, so the queued text drains with its skills after the run.
     const text = withSkillTokens(draft.trim(), skills).trim();
     if (!text && attachments.length === 0) return;
     const queuedDraft = withoutRevertTarget(buildDraft(text, attachments));

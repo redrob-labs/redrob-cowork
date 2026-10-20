@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { deleteChat, deleteProject, nameToSave, renameChat, renameProject } from "./chat-actions";
 
+// A fake toast that records every call, for asserting what the person was told.
 function recorder() {
   const toasts: [string, string | undefined, string | undefined][] = [];
   return { toasts, toast: (title: string, text?: string, tone?: "success" | "danger") => void toasts.push([title, text, tone]) };
@@ -77,6 +78,9 @@ describe("renameProject", () => {
   });
 });
 
+// The project's top-level chats, as the server's list returns them.
+const listing = (...ids: string[]) => async () => ({ items: ids.map((id) => ({ id })) });
+
 describe("deleteProject", () => {
   test("deletes its chats one by one, then the project, then forgets it", async () => {
     const order: string[] = [];
@@ -84,13 +88,14 @@ describe("deleteProject", () => {
     const ok = await deleteProject(
       {
         client: {
+          listSessions: listing("a", "b"),
           deleteSession: async (_w: string, id: string) => void order.push(`chat:${id}`),
           deleteWorkspace: async (id: string) => void order.push(`project:${id}`),
         } as never,
         forget: async (id) => void order.push(`forget:${id}`),
         toast,
       },
-      { projectId: "p", chatIds: ["a", "b"] },
+      { projectId: "p" },
     );
     expect(ok).toBe(true);
     expect(order).toEqual(["chat:a", "chat:b", "project:p", "forget:p"]);
@@ -103,6 +108,7 @@ describe("deleteProject", () => {
     const ok = await deleteProject(
       {
         client: {
+          listSessions: listing("a", "b", "c"),
           deleteSession: async (_w: string, id: string) => {
             if (id === "b") throw new Error("x");
             order.push(`chat:${id}`);
@@ -111,10 +117,37 @@ describe("deleteProject", () => {
         } as never,
         toast,
       },
-      { projectId: "p", chatIds: ["a", "b", "c"] },
+      { projectId: "p" },
     );
     expect(ok).toBe(false);
     expect(order).toEqual(["chat:a"]);
+    expect(toasts[0]?.[2]).toBe("danger");
+  });
+
+  test("a chat list that will not load deletes nothing and says so", async () => {
+    const order: string[] = [];
+    const { toast, toasts } = recorder();
+    const ok = await deleteProject(
+      {
+        client: {
+          // The listing fails before any delete is attempted.
+          listSessions: async () => { throw new Error("x"); },
+          deleteSession: async (_w: string, id: string) => void order.push(`chat:${id}`),
+          deleteWorkspace: async (id: string) => void order.push(`project:${id}`),
+        } as never,
+        toast,
+      },
+      { projectId: "p" },
+    );
+    expect(ok).toBe(false);
+    expect(order).toEqual([]);
+    expect(toasts[0]?.[2]).toBe("danger");
+  });
+
+  test("offline: nothing is deleted and the toast says try again", async () => {
+    const { toast, toasts } = recorder();
+    // A null client is the offline case; it shares the failure toast.
+    expect(await deleteProject({ client: null, toast }, { projectId: "p" })).toBe(false);
     expect(toasts[0]?.[2]).toBe("danger");
   });
 });

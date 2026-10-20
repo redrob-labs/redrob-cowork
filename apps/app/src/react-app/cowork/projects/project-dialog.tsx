@@ -11,7 +11,7 @@ import { useCoworkComposerStore } from "../composer/composer-state";
 import { useCoworkConnection } from "../shell/cowork-connection";
 import { CoworkDialog } from "../shell/cowork-dialog";
 import { useFrameStore } from "../store/frame-store";
-import { PROJECTS_QUERY_KEY } from "./cowork-projects";
+import { PROJECTS_QUERY_KEY, singleFolder } from "./cowork-projects";
 import { createProject, nameFromChatTitle, offersSaveAsProject } from "./projects";
 
 const STALE_MS = 30_000;
@@ -29,15 +29,19 @@ export type ProjectDialogViewProps = {
   folder: string | null;
   /** Choosing a folder needs the desktop app's picker. */
   canChooseFolder: boolean;
+  // Opens the system folder picker.
   onChooseFolder: () => void;
+  // Goes back to Cowork's own folder.
   onResetFolder: () => void;
 };
 
 /** The last part of a path, for the folder row: `C:\Users\me\Clients\Acme` reads "Acme". */
 function folderLabel(path: string): string {
+  // Either separator, so Windows and POSIX paths both work; a bare root keeps the whole path.
   return path.split(/[\\/]+/).filter(Boolean).pop() ?? path;
 }
 
+// Names the folder group for assistive tech; one dialog is open at a time, so a fixed id is safe.
 const FOLDER_LABEL_ID = "cowork-project-folder-label";
 
 /**
@@ -58,15 +62,19 @@ export function ProjectFolderField(props: {
   onChoose: () => void;
   onReset: () => void;
 }) {
+  // A folder of the person's, rather than Cowork's default.
   const chosen = props.folder !== null;
   return (
     <div className="rr-field cowork-project-folder" role="group" aria-labelledby={FOLDER_LABEL_ID}>
+      {/* The field label, styled like Name above it. */}
       <span className="rr-field__label" id={FOLDER_LABEL_ID}>
         {t("cowork.project_dialog_folder")}
       </span>
+      {/* One card: folder tile, title over sub line, and the choose button. */}
       <div className="cowork-project-folder__row" data-chosen={chosen || undefined}>
         <span className="cowork-project-folder__tile">{icons.folder({ width: 16, height: 16, "aria-hidden": true })}</span>
         <span className="cowork-project-folder__text">
+          {/* The chosen folder's name, or what the default means. */}
           <span className="cowork-project-folder__title">
             {props.folder ? folderLabel(props.folder) : t("cowork.project_dialog_folder_cowork")}
           </span>
@@ -75,12 +83,14 @@ export function ProjectFolderField(props: {
             {props.folder ?? t("cowork.project_dialog_folder_cowork_sub")}
           </span>
         </span>
+        {/* Only the desktop app has a folder picker. */}
         {props.canChoose ? (
           <Button size="sm" variant="secondary" disabled={props.busy} onClick={props.onChoose}>
             {chosen ? t("cowork.project_dialog_folder_change") : t("cowork.project_dialog_folder_choose")}
           </Button>
         ) : null}
       </div>
+      {/* A chosen folder says where files go, with the way back to the default. */}
       {chosen ? (
         <span className="rr-field__hint cowork-project-folder__hint">
           {t("cowork.project_dialog_folder_hint")}{" "}
@@ -126,6 +136,7 @@ export function ProjectDialogView(props: ProjectDialogViewProps) {
           error={props.error ?? undefined}
           onChange={(event) => props.onNameChange(event.target.value)}
         />
+        {/* Where the project's files go; Cowork's own folder unless one is chosen. */}
         <ProjectFolderField
           folder={props.folder}
           canChoose={props.canChooseFolder}
@@ -140,6 +151,7 @@ export function ProjectDialogView(props: ProjectDialogViewProps) {
 
 function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | null; initialName: string; onClose: () => void }) {
   const client = useCoworkConnection((state) => state.client);
+  // The project the chat is in now, which Save as a project moves it out of.
   const workspaceId = props.fromWorkspaceId;
   const showToast = useFrameStore((state) => state.showToast);
   const setMemory = useCoworkComposerStore((state) => state.setMemory);
@@ -151,16 +163,21 @@ function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | n
   // A folder of the person's for the project; null keeps Cowork's own (the default).
   const [folder, setFolder] = useState<string | null>(null);
   const chooseFolder = () => {
-    void pickDirectory({ title: t("cowork.project_dialog_folder_pick_title") }).then((selection) => {
-      const picked = typeof selection === "string" ? selection : (selection?.[0] ?? null);
-      if (picked) setFolder(picked);
-    });
+    pickDirectory({ title: t("cowork.project_dialog_folder_pick_title") })
+      // A cancelled picker returns nothing and keeps the current choice.
+      .then((selection) => {
+        const picked = singleFolder(selection);
+        if (picked) setFolder(picked);
+      })
+      // A picker that fails to open leaves the default in place and says so.
+      .catch(() => showToast(t("cowork.project_folder_failed_title"), t("cowork.project_folder_failed_text"), "danger"));
   };
 
   const submit = () => {
     if (busy) return;
     setBusy(true);
     const from = props.chatId && workspaceId ? { chatId: props.chatId, workspaceId } : null;
+    // A chosen folder makes a local project on it; none keeps Cowork's managed folder.
     createProject({ client, navigate, toast: showToast, close: props.onClose, setMemory }, { name, from, folder })
       .then((result) => {
         if (result.status === "invalid") setError(result.error);
@@ -185,6 +202,7 @@ function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | n
       onCancel={props.onClose}
       onSubmit={submit}
       folder={folder}
+      // The picker is an Electron dialog; the web build explains the default only.
       canChooseFolder={isDesktopRuntime()}
       onChooseFolder={chooseFolder}
       onResetFolder={() => setFolder(null)}
@@ -200,6 +218,7 @@ function ProjectForm(props: { chatId: string | null; fromWorkspaceId: string | n
 export function ProjectDialog(props: { chatId: string | null; fromWorkspaceId?: string; onClose: () => void }) {
   const client = useCoworkConnection((state) => state.client);
   const openWorkspaceId = useCoworkConnection((state) => state.workspaceId);
+  // A chat "..." menu names the chat's own project; otherwise it is the open one.
   const workspaceId = props.fromWorkspaceId ?? openWorkspaceId;
   const title = useQuery({
     queryKey: ["cowork-project-chat-title", workspaceId, props.chatId],
