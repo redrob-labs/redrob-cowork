@@ -141,6 +141,57 @@ export function skillBrief(row: { summary?: string; summaryKo?: string; descript
   return sentence.charAt(0).toUpperCase() + sentence.slice(1);
 }
 
+/**
+ * The catalogue's families in the Console's own order (console PR #305). A family the Console adds
+ * later is not dropped: it follows these, in the order its first skill appears.
+ */
+const CATEGORY_ORDER = [
+  "Natural writing",
+  "(Korean) Research papers",
+  "(Korean) Civil cases",
+  "(Korean) Criminal cases",
+  "(Korean) Patents",
+  "(Korean) Accounting and audit",
+  "(Korean) Consulting",
+  "(Korean) Venture capital",
+  "(Korean) News and PR",
+  "Design",
+  "(Korean) File conversion",
+];
+
+/** One family shelf: a stable id, its name in the app language, and its skills in run order. */
+export type CategoryShelf = { id: string; label: string; rows: SkillRow[] };
+
+/**
+ * The catalogue skills that carry a family (`metadata.category`), one shelf per family. Within a
+ * shelf, skills run in `step` order (unnumbered last), alternatives on one step by title.
+ */
+export function categoryShelves(rows: readonly SkillRow[], locale: string): CategoryShelf[] {
+  const korean = locale.startsWith("ko");
+  const groups = new Map<string, SkillRow[]>();
+  for (const row of rows) {
+    const category = row.category?.trim();
+    if (!category) continue;
+    groups.set(category, [...(groups.get(category) ?? []), row]);
+  }
+  const rank = (category: string) => {
+    const index = CATEGORY_ORDER.indexOf(category);
+    return index === -1 ? CATEGORY_ORDER.length : index;
+  };
+  const appearance = [...groups.keys()];
+  return appearance
+    .sort((a, b) => rank(a) - rank(b) || appearance.indexOf(a) - appearance.indexOf(b))
+    .map((category) => {
+      const members = groups.get(category) ?? [];
+      const label = korean ? members.find((row) => row.categoryKo?.trim())?.categoryKo?.trim() ?? category : category;
+      const sorted = [...members].sort((a, b) =>
+        (a.step ?? Number.MAX_SAFE_INTEGER) - (b.step ?? Number.MAX_SAFE_INTEGER)
+        || skillDisplayTitle(a, locale).localeCompare(skillDisplayTitle(b, locale), locale));
+      const id = `category-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`;
+      return { id, label, rows: sorted };
+    });
+}
+
 /** Sub-pixel tolerance so a shelf at its edge never keeps a chevron with nothing left to reveal. */
 const SHELF_EDGE_EPSILON = 2;
 

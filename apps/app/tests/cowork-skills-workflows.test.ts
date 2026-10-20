@@ -86,8 +86,8 @@ describe("Popular shelf", () => {
     const rows = allRows().reverse().filter((entry) => entry.name !== POPULAR_SKILLS.en[0]);
     expect(popularRows(rows, "en").map((entry) => entry.name)).toEqual(POPULAR_SKILLS.en.slice(1));
     expect(popularRows(rows, "ko-KR").map((entry) => entry.name)).toEqual(POPULAR_SKILLS.ko.filter((name) => name !== POPULAR_SKILLS.en[0]));
-    // Page order: Your skills, then workflows, then Popular.
-    expect(Object.keys(marketplaceSections(rows, "en"))).toEqual(["yours", "workflows", "popular"]);
+    // Page order: Your skills, then the catalogue families, then workflows, then Popular.
+    expect(Object.keys(marketplaceSections(rows, "en"))).toEqual(["yours", "categories", "workflows", "popular"]);
   });
 });
 

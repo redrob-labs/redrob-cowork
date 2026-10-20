@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { previewKey, usePreviewServices } from "../preview/preview";
 import { CATALOGUE_CACHE_MS } from "./console-catalogue";
-import { skillRows, type SkillRow } from "./skills";
+import { categoryShelves, skillRows, type SkillRow } from "./skills";
 import { POPULAR_SKILLS } from "./popular-skills";
 import { availableWorkflows } from "./workflows";
 
@@ -39,12 +39,13 @@ export function popularRows(rows: readonly SkillRow[], locale: string): SkillRow
 }
 
 /**
- * Page order: Your skills (installed, in origin order), then the featured workflows, then Popular.
- * Every other skill is a workflow page or a Search away.
+ * Page order: Your skills (installed, in origin order), then one shelf per catalogue family (the
+ * Console's grouped skills, in run order), then the featured workflows, then Popular.
  */
 export function marketplaceSections(rows: readonly SkillRow[], locale: string) {
   return {
     yours: rows.filter((row) => row.installed !== null),
+    categories: categoryShelves(rows, locale),
     workflows: availableWorkflows(rows),
     popular: popularRows(rows, locale),
   };

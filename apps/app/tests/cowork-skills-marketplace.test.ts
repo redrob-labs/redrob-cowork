@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { createConsoleCatalogue, CATALOGUE_CACHE_MS } from "../src/react-app/cowork/skills/console-catalogue";
+import { catalogueStep, createConsoleCatalogue, CATALOGUE_CACHE_MS, parseConsoleFrontmatter } from "../src/react-app/cowork/skills/console-catalogue";
 import { shouldEscapeToList } from "../src/react-app/cowork/skills/use-back-to-list";
 import { shouldShowLibraryNotice } from "../src/react-app/cowork/skills/cowork-skills";
 import {
+  categoryShelves,
   languageTagLabel,
   skillBrief,
   skillDisplayTitle,
@@ -118,6 +119,75 @@ describe("console catalogue", () => {
     now += 1;
     expect((await catalogue.list()).map((skill) => skill.name)).toEqual(["sample", "other"]);
     expect(calls).toBeGreaterThan(loaded);
+  });
+
+  test("reads the PR #305 metadata block: category, category_ko and step, past comments and quotes", () => {
+    const skill = [
+      "---",
+      "# name: stable skill id",
+      "name: kpat-drawings",
+      "description: 'Creates patent drawings (도면). It''s a test.'",
+      "# metadata: non-displayed provenance and grouping",
+      "metadata:",
+      "  # version: a semver copy for readers",
+      "  version: '1.0.0'",
+      "  author: redrob",
+      "  # category / category_ko: the skill family",
+      "  category: (Korean) Patents",
+      "  category_ko: (국내) 특허 출원",
+      "  step: 4",
+      "version: 1.0.0",
+      "title: (Korean) Patent drawings",
+      "title_ko: (국내) 특허 도면",
+      "---",
+      "Body",
+    ].join("\r\n");
+    const { data, metadata, body } = parseConsoleFrontmatter(skill);
+    expect(data).toMatchObject({ name: "kpat-drawings", description: "Creates patent drawings (도면). It's a test.", version: "1.0.0", title: "(Korean) Patent drawings", title_ko: "(국내) 특허 도면" });
+    expect(data.category).toBeUndefined();
+    expect(metadata).toEqual({ version: "1.0.0", author: "redrob", category: "(Korean) Patents", category_ko: "(국내) 특허 출원", step: "4" });
+    expect(body).toBe("Body");
+    // Indented lines outside `metadata:` are not grouping.
+    expect(parseConsoleFrontmatter("---\nname: a\nother:\n  category: Nope\n---\n").metadata).toEqual({});
+    expect([catalogueStep("4"), catalogueStep("0"), catalogueStep("two"), catalogueStep(undefined)]).toEqual([4, undefined, undefined, undefined]);
+  });
+
+  test("lists carry the family and step through to rows", async () => {
+    const fetchImpl: typeof fetch = async (input) => String(input).endsWith("index.json")
+      ? new Response(JSON.stringify({ skills: [{ name: "kc-report" }] }))
+      : new Response("---\nname: kc-report\ndescription: Use when reporting.\nmetadata:\n  category: (Korean) Consulting\n  category_ko: (국내) 경영 컨설팅\n  step: 3\n---\n");
+    const catalogue = createConsoleCatalogue({ fetchImpl, baseUrl: "https://example.test" });
+    expect(await catalogue.list()).toEqual([
+      { name: "kc-report", description: "Use when reporting.", tags: {}, category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 3 },
+    ]);
+  });
+});
+
+describe("category shelves", () => {
+  test("one shelf per family in the Console's order, skills in step order, names in the app language", () => {
+    const rows = [
+      row("kc-report", { category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 3, title: "Report" }),
+      row("caveman"),
+      row("kc-proposal", { category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 1, title: "Proposal" }),
+      row("new-family", { category: "Brand new", step: 1 }),
+      row("humanizing-korean-banmal", { category: "Natural writing", categoryKo: "자연스러운 글쓰기", step: 1, title: "B", titleKo: "나" }),
+      row("humanizing-english-casual", { category: "Natural writing", categoryKo: "자연스러운 글쓰기", step: 1, title: "A", titleKo: "다" }),
+      row("kc-diagnosis", { category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: 2, title: "Diagnosis", installed: installed("kc-diagnosis") }),
+    ];
+    const en = categoryShelves(rows, "en");
+    expect(en.map((shelf) => [shelf.id, shelf.label])).toEqual([
+      ["category-natural-writing", "Natural writing"],
+      ["category-korean-consulting", "(Korean) Consulting"],
+      ["category-brand-new", "Brand new"],
+    ]);
+    // Alternatives on one step sort by title; installed skills stay in their family.
+    expect(en[0]?.rows.map((entry) => entry.name)).toEqual(["humanizing-english-casual", "humanizing-korean-banmal"]);
+    expect(en[1]?.rows.map((entry) => entry.name)).toEqual(["kc-proposal", "kc-diagnosis", "kc-report"]);
+    const ko = categoryShelves(rows, "ko-KR");
+    expect(ko.map((shelf) => shelf.label)).toEqual(["자연스러운 글쓰기", "(국내) 경영 컨설팅", "Brand new"]);
+    expect(ko[0]?.rows.map((entry) => entry.name)).toEqual(["humanizing-korean-banmal", "humanizing-english-casual"]);
+    // Ungrouped skills get no family shelf.
+    expect(ko.flatMap((shelf) => shelf.rows).some((entry) => entry.name === "caveman")).toBe(false);
   });
 });
 
