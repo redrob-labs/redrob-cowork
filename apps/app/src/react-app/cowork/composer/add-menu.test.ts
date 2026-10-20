@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 
 import type { ChatMemory } from "../services/types";
 import { moveChatToProject, projectChoices } from "../projects/projects";
-import { connectorMenuRow, takeNewChatProject, useNewChatProjectStore } from "./add-menu";
+import { clearNewChatProject, connectorMenuRow, selectedNewChatProject, useNewChatProjectStore } from "./add-menu";
 
 // Each test starts with no pick, since the store is app-wide.
 afterEach(() => useNewChatProjectStore.getState().choose(null));
@@ -10,15 +10,24 @@ afterEach(() => useNewChatProjectStore.getState().choose(null));
 describe("composer Add menu: new chat's project", () => {
   test("nothing picked: the caller's own workspace gets the chat", () => {
     // Null tells the caller to fall back to its own workspace.
-    expect(takeNewChatProject()).toBeNull();
+    expect(selectedNewChatProject()).toBeNull();
   });
 
-  test("a picked project gets the new chat, once", () => {
+  test("a picked project is cleared only after its task dispatch", () => {
     useNewChatProjectStore.getState().choose({ id: "ws_hello", name: "Hello" });
-    expect(takeNewChatProject()).toBe("ws_hello");
-    // Taking it clears the pick, so the next new chat starts on the hero's workspace again.
-    expect(useNewChatProjectStore.getState().project).toBeNull();
-    expect(takeNewChatProject()).toBeNull();
+    expect(selectedNewChatProject()?.id).toBe("ws_hello");
+    // Peeking preserves intent while dispatch is not yet accepted.
+    expect(selectedNewChatProject()?.id).toBe("ws_hello");
+    clearNewChatProject("ws_hello");
+    expect(selectedNewChatProject()).toBeNull();
+  });
+
+  test("finishing an old dispatch does not erase a newer pick", () => {
+    useNewChatProjectStore.getState().choose({ id: "ws_old", name: "Old" });
+    // A new selection can arrive while task creation is in flight.
+    useNewChatProjectStore.getState().choose({ id: "ws_new", name: "New" });
+    clearNewChatProject("ws_old");
+    expect(selectedNewChatProject()?.id).toBe("ws_new");
   });
 });
 

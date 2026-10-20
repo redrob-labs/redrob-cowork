@@ -36,3 +36,18 @@ describe("Redrob Launcher language", () => {
     expect(launcherLanguageState()).toEqual({ locale: null, following: false });
   });
 });
+
+
+test("an older launcher read cannot overwrite a newer one", async () => {
+  // Resolve reads manually so the newer request can finish first.
+  let resolveOlder: ((value: { language: string; chosen: boolean; app: string | null }) => void) | null = null;
+  const older = syncLauncherLanguage(() => new Promise((resolve) => {
+    resolveOlder = resolve;
+  }));
+  // The later request publishes English immediately.
+  await syncLauncherLanguage(async () => ({ language: "en", chosen: true, app: null }), () => undefined);
+  // The older Korean read completes last and must now be ignored.
+  resolveOlder?.({ language: "ko", chosen: true, app: null });
+  await older;
+  expect(launcherLanguageState().locale).toBe("en");
+});

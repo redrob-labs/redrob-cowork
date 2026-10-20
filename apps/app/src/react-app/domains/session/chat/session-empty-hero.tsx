@@ -49,7 +49,7 @@ export type SessionEmptyHeroProps = {
   /** Disable submission while a default workspace is being prepared. */
   busy?: boolean;
   /** Called with the task prompt and attachments; the caller creates the session (and workspace if needed). */
-  onRunTask: (prompt: string, attachments: ComposerAttachment[]) => void;
+  onRunTask: (prompt: string, attachments: ComposerAttachment[]) => boolean | Promise<boolean>;
   onOpenProviderAuth?: () => void;
   /** Workspace-scoped wiring for the full composer (skills, agents, models). */
   composer?: NewTaskComposerContext | null;
@@ -92,8 +92,9 @@ export function SessionEmptyHero(props: SessionEmptyHeroProps) {
 
   const submit = (resolvedPrompt: string, attachments: ComposerAttachment[]) => {
     const trimmedPrompt = resolvedPrompt.trim();
-    if (!trimmedPrompt || props.busy) return;
-    props.onRunTask(trimmedPrompt, attachments);
+    // An empty or busy hero did not accept the submission, so its tray stays.
+    if (!trimmedPrompt || props.busy) return false;
+    return props.onRunTask(trimmedPrompt, attachments);
   };
 
   const fillPrompt = (value: string) => {

@@ -52,20 +52,25 @@ export function useChatActions(openChatId?: string | null) {
     queryFn: async () => (await client?.listWorkspaces())?.items ?? [],
     staleTime: STALE_MS,
   });
-  // A workspace's folder, or null when it is unknown or blank (the engine then uses its default).
-  const directoryOf = (workspaceId: string) => workspaces.data?.find((entry) => entry.id === workspaceId)?.path?.trim() || null;
+  // A workspace's folder once the list resolved; null means rename must fail closed.
+  const directoryOf = (workspaceId: string) => {
+    if (!workspaces.isSuccess) return null;
+    return workspaces.data.find((entry) => entry.id === workspaceId)?.path?.trim() || null;
+  };
 
   return {
     rename: async (chat: ChatRef, value: string) => {
+      // Cross-project rename is unsafe without the target workspace's exact directory.
+      const directory = directoryOf(chat.workspaceId);
       const renamed = await renameChat(
         {
-          // Without the engine there is no renamer, which renameChat reports as a failure.
-          rename: opencode
-            ? ({ chatId, title, directory }) => opencode.session.update({ sessionID: chatId, title, directory: directory ?? undefined })
+          // Fail closed while workspace paths load or when the target path is unavailable.
+          rename: opencode && directory
+            ? ({ chatId, title }) => opencode.session.update({ sessionID: chatId, title, directory })
             : null,
           toast: showToast,
         },
-        { chatId: chat.id, value, previous: chat.title, directory: directoryOf(chat.workspaceId) },
+        { chatId: chat.id, value, previous: chat.title, directory },
       );
       // Only a real change refreshes the lists.
       if (renamed) refreshChatLists(queryClient);

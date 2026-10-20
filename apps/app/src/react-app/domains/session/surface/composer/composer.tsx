@@ -49,12 +49,12 @@ type ComposerProps = {
   draft: string;
   mentions: Record<string, ComposerMentionKind>;
   onDraftChange: (value: string) => void;
-  /** Sends the draft. `skills` are the tray's attached skills, to prepend as `[skill name]` tokens. */
-  onSend: (skills?: readonly string[]) => void | Promise<void>;
-  /** Steers the running turn with the draft, plus the tray's attached skills. */
-  onSteer: (skills?: readonly string[]) => void | Promise<void>;
-  /** Queues the draft for when the run finishes, plus the tray's attached skills. */
-  onQueue: (skills?: readonly string[]) => void | Promise<void>;
+  /** Sends the draft. Resolves false only when the submission was not accepted. */
+  onSend: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>;
+  /** Steers the running turn with the draft. Resolves false only when it was not accepted. */
+  onSteer: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>;
+  /** Queues the draft. Resolves false only when it was not accepted. */
+  onQueue: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>;
   onStop: () => void | Promise<void>;
   busy: boolean;
   steering: boolean;
@@ -385,14 +385,21 @@ export function ReactSessionComposer(props: ComposerProps) {
   }, []);
   // Sends, steers or queues with the tray's skills, then refocuses the editor.
   const submitWithTray = useCallback(
-    (run: (skills?: readonly string[]) => void | Promise<void>) => {
+    (run: (skills?: readonly string[]) => boolean | void | Promise<boolean | void>) => {
       // Undefined, not [], so callers without skills take their unchanged path.
       const skills = traySkills.length ? traySkills : undefined;
-      return Promise.resolve(run(skills)).finally(() => {
-        // The parent empties the draft only on success; a failed send keeps the skills for a retry.
-        if (skills && !draftRef.current.trim()) setTraySkills([]);
-        focusEditor();
-      });
+      return Promise.resolve()
+        // Starting in a promise also catches a synchronous callback throw.
+        .then(() => run(skills))
+        .then((accepted) => {
+          // False means the parent rejected/cancelled the submission; keep the tray for a retry.
+          if (accepted === false || !skills) return;
+          // Remove only what this submission used; preserve skills attached while it was in flight.
+          setTraySkills((current) => current.filter((name) => !skills.includes(name)));
+        })
+        // A rejection keeps the tray; the parent owns reporting the submission failure.
+        .catch(() => undefined)
+        .finally(focusEditor);
     },
     [focusEditor, traySkills],
   );

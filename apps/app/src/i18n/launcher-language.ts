@@ -82,15 +82,25 @@ function storage(): Storage | null {
   }
 }
 
+// A monotonically increasing read id; only the latest requested sync may publish.
+let syncGeneration = 0;
+
 /** Reads the launcher's file and, unless the person picked a language in Cowork, applies it. */
-export async function syncLauncherLanguage(read: () => Promise<SharedLanguageReading | null> = readLauncherLanguage): Promise<void> {
+export async function syncLauncherLanguage(
+  read: () => Promise<SharedLanguageReading | null> = readLauncherLanguage,
+  apply: typeof setLocale = setLocale,
+): Promise<void> {
+  // A later startup/focus read supersedes this one even if this one's I/O finishes last.
+  const generation = ++syncGeneration;
   // `read` is injectable so tests need no Electron bridge.
   const locale = launcherLocale(await read());
+  // Ignore stale I/O before it can publish or change the app language.
+  if (generation !== syncGeneration) return;
   // Following needs both a launcher language and no pick of Cowork's own.
   const following = locale !== null && !hasAppLanguagePick(storage());
   publish({ locale, following });
   // Stored with source `launcher`, so a later launcher change still applies.
-  if (following && locale) setLocale(locale, { source: "launcher" });
+  if (following && locale) apply(locale, { source: "launcher" });
 }
 
 /** "Same as Redrob Launcher": drop Cowork's own pick and follow the launcher again. */

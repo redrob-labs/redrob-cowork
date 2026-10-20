@@ -47,9 +47,14 @@ describe("composer model controls", () => {
 
   test("tracks steering until the active run stops streaming", () => {
     const sessionSurfaceSource = readFileSync(sessionSurfacePath, "utf8");
+    // The composer source owns tray cleanup after the parent accepts a submission.
+    const composerSource = readFileSync(composerPath, "utf8");
 
     // Steering forwards the composer's attached skills to the same send path.
-    expect(sessionSurfaceSource).toContain("setSteering(true);\n    await handleSend(skills);");
+    expect(sessionSurfaceSource).toContain("setSteering(true);\n    return handleSend(skills);");
+    // Tray cleanup follows explicit acceptance, never a passive draft-ref race.
+    expect(composerSource).toContain("if (accepted === false || !skills) return;");
+    expect(composerSource).not.toContain("draftRef.current.trim()");
     expect(sessionSurfaceSource).toContain("if (!chatStreaming) setSteering(false);");
     expect(sessionSurfaceSource).toContain("steering={steering}");
     expect(sessionSurfaceSource).toContain("props.onModelChange(nextModel, variant)");

@@ -96,10 +96,9 @@ export async function renameProject(
 /**
  * Delete a project, Felix's pick: its chats go too, then the project leaves Cowork's list. The
  * folder and every file in it stay on disk (the server's delete never touches them). The chats
- * are listed fresh (top-level ones; a chat's sub-tasks go with it), then deleted one at a time; if
- * listing or any delete fails the project is kept, so nothing is left half-gone and the person can
- * try again. `forget` also drops it from the desktop's own list, as the old sidebar's Remove did,
- * so a refresh cannot bring it back.
+ * are listed fresh (top-level ones; a chat's sub-tasks go with it), then deleted one at a time.
+ * If a later delete fails, earlier deletes cannot be rolled back by the current server API, so the
+ * project stays available for retry and the failure explicitly reports partial completion.
  */
 export async function deleteProject(
   deps: {
@@ -109,16 +108,25 @@ export async function deleteProject(
   },
   input: { projectId: string },
 ): Promise<boolean> {
+  // Count successful chat deletes so a later failure can truthfully report partial completion.
+  let deletedChats = 0;
   try {
     // Offline fails before anything is deleted.
     const client = required(deps.client);
     // Listed now, not from the page's cache, so a chat made since is not left behind.
     const { items } = await client.listSessions(input.projectId, { roots: true });
-    // In order, so the first failure stops the rest and keeps the project.
-    for (const chat of items) await client.deleteSession(input.projectId, chat.id);
-    // Only once every chat is gone does the project go.
+    // In order: stop at the first failure and keep the project available for retry.
+    for (const chat of items) {
+      await client.deleteSession(input.projectId, chat.id);
+      deletedChats += 1;
+    }
+    // Only once every listed chat is gone does the project go.
     await client.deleteWorkspace(input.projectId);
   } catch {
+    if (deletedChats > 0) {
+      deps.toast(t("cowork.project_delete_partial"), t("cowork.settings_try_again"), "danger");
+      return false;
+    }
     return failed(deps.toast, t("cowork.project_delete_failed"));
   }
   // Best effort: the project is already gone from the server either way.

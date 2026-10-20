@@ -87,16 +87,17 @@ export const useNewChatProjectStore = create<NewChatProjectState>((set) => ({
   choose: (project) => set({ project }),
 }));
 
-/**
- * The project picked in the hero's Add to project, or null when there is none. Reading it clears
- * the pick, so the next new chat starts fresh.
- */
-export function takeNewChatProject(): string | null {
+/** The project picked in the hero's Add to project, or null when there is none. */
+export function selectedNewChatProject(): NewChatProject | null {
   // Read outside React: the send handler runs once, not on every render.
+  return useNewChatProjectStore.getState().project;
+}
+
+/** Clears `projectId` after its task dispatch was accepted, without erasing a newer pick. */
+export function clearNewChatProject(projectId: string): void {
   const { project, choose } = useNewChatProjectStore.getState();
-  // One-shot: the pick applies to this send only.
-  if (project) choose(null);
-  return project?.id ?? null;
+  // A newer selection made during dispatch belongs to the next task and must survive.
+  if (project?.id === projectId) choose(null);
 }
 
 /**

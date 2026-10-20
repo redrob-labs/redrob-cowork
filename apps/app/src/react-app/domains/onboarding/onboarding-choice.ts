@@ -63,7 +63,7 @@ export type OnboardingChoice = {
  * So the Claude choice is titled by what the USER has ("Claude"), and the runtime is
  * named only in the body.
  */
-export function buildOnboardingChoices(input: {
+export type OnboardingChoiceInput = {
   codex: RuntimeProbe;
   claude: RuntimeProbe;
   /** Whether the engine already holds a Redrob credential. */
@@ -71,7 +71,9 @@ export function buildOnboardingChoices(input: {
   /** Whether the engine already holds a key for these vendors. */
   anthropicKeyConnected?: boolean;
   openaiKeyConnected?: boolean;
-}): OnboardingChoice[] {
+};
+
+export function buildOnboardingChoices(input: OnboardingChoiceInput): OnboardingChoice[] {
   return [
     claudeChoice(input.claude, input.anthropicKeyConnected ?? false),
     chatgptChoice(input.codex, input.openaiKeyConnected ?? false),

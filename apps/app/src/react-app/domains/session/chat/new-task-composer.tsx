@@ -50,8 +50,8 @@ export type NewTaskComposerContext = {
 export type NewTaskComposerProps = {
   draft: string;
   onDraftChange: (value: string) => void;
-  /** Called with a non-empty draft and in-memory attachments; the caller creates the session (and workspace if needed). */
-  onRunTask: (resolvedDraft: string, attachments: ComposerAttachment[]) => void;
+  /** Called with a non-empty draft; true means the route accepted and preserved it. */
+  onRunTask: (resolvedDraft: string, attachments: ComposerAttachment[]) => boolean | Promise<boolean>;
   /** Disable submission while a default workspace is being prepared. */
   busy: boolean;
   context: NewTaskComposerContext | null;
@@ -191,10 +191,10 @@ export function NewTaskComposer(props: NewTaskComposerProps) {
     props.onDraftChange(props.draft.replaceAll(`[attachment ${id}]`, ""));
   };
 
-  const handleRunTask = (skills?: readonly string[]) => {
+  const handleRunTask = async (skills?: readonly string[]) => {
     // The composer's attached skills (its tray) ride in front of the text as `[skill name]` tokens,
     // which the route turns into skill parts when it seeds the new session.
-    props.onRunTask(withSkillTokens(resolvePastedTextPlaceholders(props.draft, pastedText), skills), attachments);
+    return props.onRunTask(withSkillTokens(resolvePastedTextPlaceholders(props.draft, pastedText), skills), attachments);
   };
 
   const handleUnsupportedFileLinks = (links: string[]) => {

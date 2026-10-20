@@ -121,6 +121,7 @@ describe("deleteProject", () => {
     );
     expect(ok).toBe(false);
     expect(order).toEqual(["chat:a"]);
+    expect(toasts[0]?.[0]).toContain("Some chats were deleted");
     expect(toasts[0]?.[2]).toBe("danger");
   });
 
