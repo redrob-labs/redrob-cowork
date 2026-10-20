@@ -8,10 +8,21 @@ import type { CoworkServerClient } from "../services/real-services";
 /** The calls the Files panel uses to preview a file. */
 export type CoworkFileClient = Pick<RedrobServerClient, "readWorkspaceFile" | "downloadWorkspaceFile">;
 
-/** The calls the Projects screens add: make a project, move a chat into it, its folders. */
+/**
+ * The calls the Projects screens add: make a project (in Cowork's folder or one the person chose),
+ * move a chat into it, its folders; and the chat and project "..." menus: delete a chat, rename and
+ * delete a project.
+ */
 export type CoworkProjectClient = Pick<
   RedrobServerClient,
-  "createManagedProject" | "moveSession" | "listAuthorizedFolders" | "setAuthorizedFolders"
+  | "createManagedProject"
+  | "createLocalWorkspace"
+  | "moveSession"
+  | "listAuthorizedFolders"
+  | "setAuthorizedFolders"
+  | "deleteSession"
+  | "deleteWorkspace"
+  | "updateWorkspaceDisplayName"
 >;
 
 /** The calls the Connectors screen adds: turn one on or off, sign in through Redrob. */

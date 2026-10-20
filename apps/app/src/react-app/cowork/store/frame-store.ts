@@ -20,7 +20,7 @@ export type PanelTab = "artifacts" | "files" | "browser";
 export type BrowserCowork = "reading" | "you" | "done";
 export type FrameModal =
   | null
-  | { kind: "project"; chatId: string | null }
+  | { kind: "project"; chatId: string | null; /** The project the chat is in now; defaults to the open one. */ fromWorkspaceId?: string }
   | { kind: "feedback" }
   | { kind: "keys" }
   /** A skill to write: a new one, maybe from a message, or one of the person's own to change. */

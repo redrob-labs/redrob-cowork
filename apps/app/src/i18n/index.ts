@@ -100,9 +100,19 @@ function locale(): Language {
 }
 
 /**
- * Set locale and persist to localStorage
+ * Where the stored language came from: `app` when the person picked it inside Cowork (onboarding
+ * or Settings), `launcher` when it was taken from Redrob Launcher's shared language file. Read by
+ * `./launcher-language`: an `app` pick wins over the launcher for Cowork, as the launcher's
+ * contract asks (redrob-launcher docs/shared-language.md, "Order of precedence").
  */
-export const setLocale = (newLocale: Language) => {
+export const LANGUAGE_SOURCE_KEY = "redrob.language.source";
+export type LanguageSource = "app" | "launcher";
+
+/**
+ * Set locale and persist to localStorage. `source` defaults to `app`: every caller outside
+ * `./launcher-language` is a person choosing a language in Cowork.
+ */
+export const setLocale = (newLocale: Language, options: { source?: LanguageSource } = {}) => {
   if (!isLanguage(newLocale)) {
     console.warn(`Invalid locale: ${newLocale}, falling back to "en"`);
     newLocale = "en";
@@ -119,6 +129,7 @@ export const setLocale = (newLocale: Language) => {
   if (typeof window !== "undefined") {
     try {
       window.localStorage.setItem(LANGUAGE_PREF_KEY, newLocale);
+      window.localStorage.setItem(LANGUAGE_SOURCE_KEY, options.source ?? "app");
     } catch (e) {
       console.warn("Failed to persist language preference:", e);
     }

@@ -67,6 +67,7 @@ import {
 import { ShareWorkspaceModal } from "../../workspace/share-workspace-modal";
 import { SessionEmptyHero } from "./session-empty-hero";
 import type { NewTaskComposerContext } from "./new-task-composer";
+import { clearNewChatProject, selectedNewChatProject } from "@/react-app/cowork/composer/add-menu";
 import { OwDotTicker } from "../../../shell/dot-ticker";
 import { useReactRenderWatchdog } from "../../../shell/react-render-watchdog";
 import { useShellConfig } from "../../../shell/shell-config";
@@ -191,7 +192,7 @@ export type SessionPageSidebarProps = {
   onOpenSession: (workspaceId: string, sessionId: string) => void;
   onPrefetchSession?: (workspaceId: string, sessionId: string) => void;
   onCreateTaskInWorkspace: (workspaceId: string, groupId?: string) => void;
-  onCreateTaskWithPrompt?: (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => void;
+  onCreateTaskWithPrompt?: (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => boolean | Promise<boolean>;
   onOpenRenameWorkspace: (workspaceId: string) => void;
   onShareWorkspace: (workspaceId: string) => void;
   onRevealWorkspace: (workspaceId: string) => void;
@@ -265,7 +266,7 @@ export type SessionPageProps = {
   extensionsActive?: boolean;
   onOpenProviderAuth?: () => void;
   /** Chat-first: create a default workspace and start a task from the empty-state composer. */
-  onChatFirstTask?: (prompt: string, attachments?: ComposerAttachment[]) => void;
+  onChatFirstTask?: (prompt: string, attachments?: ComposerAttachment[]) => boolean | Promise<boolean>;
   chatFirstBusy?: boolean;
   /** Workspace-scoped wiring for the empty-state hero's full composer. */
   newTaskComposer?: NewTaskComposerContext | null;
@@ -1271,7 +1272,7 @@ export function SessionPage(props: SessionPageProps) {
                       </Button>
                     }
                   />
-                  <TooltipContent>Find in conversation (⌘F)</TooltipContent>
+                  <TooltipContent>{`${t("find.in_conversation")} (⌘F)`}</TooltipContent>
                 </Tooltip>
               ) : null}
               {/* The Cowork frame has its own side panel button. */}
@@ -1525,7 +1526,22 @@ export function SessionPage(props: SessionPageProps) {
                     <SessionEmptyHero
                       providerCount={providerCount}
                       busy={props.chatFirstBusy}
-                      onRunTask={(prompt, attachments) => props.onChatFirstTask?.(prompt, attachments)}
+                      onRunTask={async (prompt, attachments) => {
+                        // Prefer the picked project when project-aware creation is available.
+                        const project = selectedNewChatProject();
+                        const createInProject = props.sidebar.onCreateTaskWithPrompt;
+                        if (project && createInProject) {
+                          const accepted = await createInProject(project.id, prompt, attachments);
+                          // Clear only after the route confirms it preserved the task.
+                          if (accepted) clearNewChatProject(project.id);
+                          return accepted;
+                        }
+                        // Preserve chat-first's default-workspace fallback when no project handler exists.
+                        const accepted = await props.onChatFirstTask?.(prompt, attachments) ?? false;
+                        // A successful fallback spent a project pick it could not honor.
+                        if (accepted && project) clearNewChatProject(project.id);
+                        return accepted;
+                      }}
                       onOpenProviderAuth={props.onOpenProviderAuth}
                       composer={props.newTaskComposer}
                       recentTitles={recentSessionTitles}
@@ -1621,9 +1637,16 @@ export function SessionPage(props: SessionPageProps) {
                     <div className="flex flex-1 flex-col">
                       <SessionEmptyHero
                         providerCount={providerCount}
-                        onRunTask={(prompt, attachments) =>
-                          props.sidebar.onCreateTaskWithPrompt?.(props.selectedWorkspaceId, prompt, attachments)
-                        }
+                        onRunTask={async (prompt, attachments) => {
+                          const createTask = props.sidebar.onCreateTaskWithPrompt;
+                          // No handler means no accepted dispatch: preserve the project chip for retry.
+                          if (!createTask) return false;
+                          const project = selectedNewChatProject();
+                          const accepted = await createTask(project?.id ?? props.selectedWorkspaceId, prompt, attachments);
+                          // Clear only after the route confirms it preserved the task.
+                          if (accepted && project) clearNewChatProject(project.id);
+                          return accepted;
+                        }}
                         onOpenProviderAuth={props.onOpenProviderAuth}
                         composer={props.newTaskComposer}
                         recentTitles={recentSessionTitles}
@@ -1780,8 +1803,8 @@ export function SessionPage(props: SessionPageProps) {
                 panelRailActive && "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
               )}
               onClick={openArtifactRailPane}
-              title={`Artifacts (${artifactTargetCount})`}
-              aria-label={`Artifacts (${artifactTargetCount})`}
+              title={`${t("cowork.panel_artifacts")} (${artifactTargetCount})`}
+              aria-label={`${t("cowork.panel_artifacts")} (${artifactTargetCount})`}
               aria-pressed={panelRailActive}
             >
               <FileText size={15} />

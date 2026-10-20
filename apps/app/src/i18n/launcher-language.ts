@@ -1,0 +1,136 @@
+/*
+ * Cowork follows Redrob Launcher's language (redrob-launcher docs/shared-language.md).
+ *
+ * The launcher writes `language.json` in the shared Redrob directory; the desktop app reads it
+ * through a read-only bridge (`__readSharedLanguage`) and never writes it. Order of precedence for
+ * Cowork, as the launcher's contract defines it:
+ *   1. a language the person picked inside Cowork (onboarding or Settings; source `app`),
+ *   2. the launcher's per-app override `apps["redrob-cowork"]`,
+ *   3. the launcher's suite language,
+ *   4. what Cowork already had (its stored value, else English).
+ * A code Cowork has no translation for draws in English (contract rule 4). The file is read at
+ * startup and again whenever the window regains focus (rule 3), so a change in the launcher's
+ * Settings shows up the next time Cowork is brought forward.
+ *
+ * A language stored before this sync existed carries no source. It is treated as following the
+ * launcher: the person never had a launcher to follow before, and the point of this change is that
+ * the two agree. Picking a language in Cowork's Settings makes it an `app` choice again, and the
+ * "Same as Redrob Launcher" option goes back to following.
+ */
+import { readLauncherLanguage, type SharedLanguageReading } from "../app/lib/desktop";
+import { isLanguage, LANGUAGE_SOURCE_KEY, setLocale, type Language, type LanguageSource } from "./index";
+
+/** The language the launcher asks Cowork to use, or null when the file names none. */
+export function launcherLocale(reading: SharedLanguageReading | null): Language | null {
+  // The per-app override wins over the suite language (precedence 2 over 3).
+  const code = reading?.app ?? reading?.language ?? null;
+  if (!code) return null;
+  // `pt-br` and friends: Cowork's languages are bare codes. Untranslated codes draw in English.
+  const [base] = code.split("-");
+  return isLanguage(base) ? base : "en";
+}
+
+/** Whether the stored language is Cowork's own pick (it then wins over the launcher). */
+export function hasAppLanguagePick(storage: Pick<Storage, "getItem"> | null): boolean {
+  try {
+    // A missing source (a language stored before this sync) is not a pick.
+    return storage?.getItem(LANGUAGE_SOURCE_KEY) === ("app" satisfies LanguageSource);
+  } catch {
+    // Storage that throws (private mode, quota) cannot hold a pick.
+    return false;
+  }
+}
+
+/** What Settings needs to offer "Same as Redrob Launcher (X)". */
+export type LauncherLanguageState = {
+  /** The launcher's language for Cowork, or null when there is no launcher file. */
+  locale: Language | null;
+  /** True while Cowork follows the launcher rather than its own pick. */
+  following: boolean;
+};
+
+// The last published state; replaced, never mutated, so useSyncExternalStore sees changes.
+let state: LauncherLanguageState = { locale: null, following: false };
+// Settings screens subscribed through useSyncExternalStore.
+const listeners = new Set<() => void>();
+
+// Replaces the state and notifies, but only on a real change, so focus re-reads do not re-render.
+function publish(next: LauncherLanguageState) {
+  if (next.locale === state.locale && next.following === state.following) return;
+  state = next;
+  for (const listener of listeners) listener();
+}
+
+/** For useSyncExternalStore. */
+export function subscribeToLauncherLanguage(onChange: () => void): () => void {
+  listeners.add(onChange);
+  // The unsubscribe React calls on unmount.
+  return () => listeners.delete(onChange);
+}
+
+/** For useSyncExternalStore. */
+export function launcherLanguageState(): LauncherLanguageState {
+  return state;
+}
+
+// localStorage, or null where there is no window or reading it throws.
+function storage(): Storage | null {
+  try {
+    return typeof window === "undefined" ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+// A monotonically increasing read id; only the latest requested sync may publish.
+let syncGeneration = 0;
+
+/** Reads the launcher's file and, unless the person picked a language in Cowork, applies it. */
+export async function syncLauncherLanguage(
+  read: () => Promise<SharedLanguageReading | null> = readLauncherLanguage,
+  apply: typeof setLocale = setLocale,
+): Promise<void> {
+  // A later startup/focus read supersedes this one even if this one's I/O finishes last.
+  const generation = ++syncGeneration;
+  // `read` is injectable so tests need no Electron bridge.
+  const locale = launcherLocale(await read());
+  // Ignore stale I/O before it can publish or change the app language.
+  if (generation !== syncGeneration) return;
+  // Following needs both a launcher language and no pick of Cowork's own.
+  const following = locale !== null && !hasAppLanguagePick(storage());
+  publish({ locale, following });
+  // Stored with source `launcher`, so a later launcher change still applies.
+  if (following && locale) apply(locale, { source: "launcher" });
+}
+
+/** "Same as Redrob Launcher": drop Cowork's own pick and follow the launcher again. */
+export async function followLauncherLanguage(read: () => Promise<SharedLanguageReading | null> = readLauncherLanguage): Promise<void> {
+  try {
+    // Marking the source `launcher` is what makes the sync below follow.
+    storage()?.setItem(LANGUAGE_SOURCE_KEY, "launcher" satisfies LanguageSource);
+  } catch {
+    // Storage is unavailable; the sync below still applies the launcher's language for this run.
+  }
+  await syncLauncherLanguage(read);
+}
+
+/** A language picked in Cowork's Settings: Cowork's own choice from now on. */
+export function pickAppLanguage(language: Language): void {
+  // Source `app` makes this pick win over the launcher on every later sync.
+  setLocale(language, { source: "app" });
+  // The launcher's language is still known, so Settings keeps offering to follow it.
+  publish({ locale: state.locale, following: false });
+}
+
+// Guards against a second set of focus listeners (hot reload, a second entry point).
+let started = false;
+
+/** Read at startup and on every window focus. Safe to call more than once. */
+export function startLauncherLanguageSync(): void {
+  // No window on the server or in tests without a DOM.
+  if (started || typeof window === "undefined") return;
+  started = true;
+  void syncLauncherLanguage();
+  // Contract rule 3: a launcher change shows up when Cowork is brought forward.
+  window.addEventListener("focus", () => void syncLauncherLanguage());
+}

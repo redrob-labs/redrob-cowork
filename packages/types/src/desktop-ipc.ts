@@ -164,6 +164,13 @@ export type WorkspaceExportSummary = {
 
 export type BrandIconApplyResult = { ok: boolean; reason?: string };
 export type BrandIconState = { applied: boolean; sourceUrl: string | null; reason: string | null };
+
+/**
+ * What Redrob Launcher's shared `language.json` says, reduced to what Cowork uses
+ * (redrob-launcher docs/shared-language.md). `language` is the suite language, `chosen` whether a
+ * person picked it, `app` Cowork's own per-app override (`apps["redrob-cowork"]`).
+ */
+export type SharedLanguageReading = { language: string | null; chosen: boolean; app: string | null };
 export type EvalRelaunchResult = { ok: true };
 
 export type OpencodeCommandDraft = {
@@ -536,6 +543,8 @@ export type DesktopCommandMap = {
   __openWithApp: { args: [target: string, appPath: string]; result: unknown };
   __fetch: { args: [url: string, init?: DesktopFetchInit]; result: DesktopFetchResult };
   __homeDir: { args: []; result: string };
+  /** Redrob Launcher's shared language file, read-only; null when there is none or it is unreadable. */
+  __readSharedLanguage: { args: []; result: SharedLanguageReading | null };
   __joinPath: { args: [...segments: string[]]; result: string };
   __setZoomFactor: { args: [factor: number]; result: boolean };
   __setNativeTheme: { args: [theme: string]; result: unknown };

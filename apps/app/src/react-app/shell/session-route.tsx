@@ -2260,7 +2260,9 @@ export function SessionRoute() {
     folder: string | null,
     options?: CreateWorkspaceOptions,
   ) => {
-    if (!folder) return;
+    if (!folder) return false;
+    // True only once the requested workspace (and first task, when supplied) is preserved.
+    let accepted = false;
     const projectLabel = options?.projectLabel?.trim() ?? "";
     setCreateWorkspaceBusy(true);
     setCreateWorkspaceError(null);
@@ -2365,12 +2367,15 @@ export function SessionRoute() {
         }
         navigateToWorkspaceSession(targetWorkspaceId, session?.id ?? null, { replace: true });
         if (session?.id) focusPromptSoon();
+        // A first-task request is accepted only when its session exists; ordinary creation needs the workspace.
+        accepted = options?.firstTaskPrompt || options?.firstTaskAttachments?.length ? Boolean(session?.id) : true;
       }
     } catch (error) {
       setCreateWorkspaceError(describeWorkspaceCreateError(error));
     } finally {
       setCreateWorkspaceBusy(false);
     }
+    return accepted;
   }, [baseUrl, client, local, navigateToWorkspaceSession, refreshRouteState, rememberPendingCreatedSession, token]);
 
   /**
@@ -2379,53 +2384,56 @@ export function SessionRoute() {
    * it. Falls back to the create-workspace modal off desktop.
    */
   // A new chat that sends its first prompt itself: the new chat screen, and a skill's Run.
-  const createTaskWithPrompt = (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]) => {
-    void (async () => {
-      const workspace = workspaces.find((item) => item.id === workspaceId);
-      if (!workspace) return;
-      const endpoint = endpointForWorkspace(workspace);
-      if (!endpoint?.token) return;
-      const workspaceClient = createClient(
-        endpoint.opencodeBaseUrl,
-        workspace.path?.trim() || undefined,
-        { token: endpoint.token, mode: "redrob" },
+  const createTaskWithPrompt = async (workspaceId: string, prompt: string, attachments?: ComposerAttachment[]): Promise<boolean> => {
+    const workspace = workspaces.find((item) => item.id === workspaceId);
+    // A stale/deleted project cannot accept the task.
+    if (!workspace) return false;
+    const endpoint = endpointForWorkspace(workspace);
+    // No authenticated engine endpoint means nothing can preserve the prompt yet.
+    if (!endpoint?.token) return false;
+    const workspaceClient = createClient(
+      endpoint.opencodeBaseUrl,
+      workspace.path?.trim() || undefined,
+      { token: endpoint.token, mode: "redrob" },
+    );
+    try {
+      const session = unwrap(
+        await workspaceClient.session.create({ directory: workspace.path?.trim() || undefined }),
       );
-      try {
-        const session = unwrap(
-          await workspaceClient.session.create({ directory: workspace.path?.trim() || undefined }),
-        );
-        const firstTaskPrompt = prompt.trim();
-        if (firstTaskPrompt) {
-          const firstTaskAttachments = attachments ?? [];
-          // Attachment chips only survive in-memory (File objects), so the
-          // persisted fallback draft drops their tokens.
-          saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
-          // The composer reads its draft from the composer state store,
-          // not the persisted draft store - seed both.
-          useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
-          if (firstTaskAttachments.length) {
-            useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
-          }
-          // One-step run: the session surface sends the seeded draft itself.
-          markComposerAutoSend(session.id);
-          // Plan or Run and the memory picked on the new chat screen belong to this chat now.
-          useCoworkComposerStore.getState().claimNewChat(session.id);
+      const firstTaskPrompt = prompt.trim();
+      if (firstTaskPrompt) {
+        const firstTaskAttachments = attachments ?? [];
+        // Attachment chips only survive in-memory (File objects), so the
+        // persisted fallback draft drops their tokens.
+        saveSessionDraft(workspaceId, session.id, { text: firstTaskPrompt.replace(/\[attachment [^\]]+\]/g, "").trim(), mode: "prompt" });
+        // The composer reads its draft from the composer state store,
+        // not the persisted draft store - seed both.
+        useComposerStateStore.getState().setDraft(session.id, firstTaskPrompt);
+        if (firstTaskAttachments.length) {
+          useComposerStateStore.getState().setAttachments(session.id, firstTaskAttachments);
         }
-        writeActiveWorkspaceId(workspaceId || null);
-        writeLastSessionFor(workspaceId, session.id);
-        rememberPendingCreatedSession(workspaceId, session.id);
-        applyLastUsedModelToSession(session.id);
-        setSessionsByWorkspaceId((current) => ({
-          ...current,
-          [workspaceId]: [session, ...(current[workspaceId] ?? [])],
-        }));
-        navigateToWorkspaceSession(workspaceId, session.id);
-        focusPromptSoon();
-      } catch {
-        // Fall back to normal task creation without prompt
-        void handleCreateTaskInWorkspace(workspaceId);
+        // One-step run: the session surface sends the seeded draft itself.
+        markComposerAutoSend(session.id);
+        // Plan or Run and the memory picked on the new chat screen belong to this chat now.
+        useCoworkComposerStore.getState().claimNewChat(session.id);
       }
-    })();
+      writeActiveWorkspaceId(workspaceId || null);
+      writeLastSessionFor(workspaceId, session.id);
+      rememberPendingCreatedSession(workspaceId, session.id);
+      applyLastUsedModelToSession(session.id);
+      setSessionsByWorkspaceId((current) => ({
+        ...current,
+        [workspaceId]: [session, ...(current[workspaceId] ?? [])],
+      }));
+      navigateToWorkspaceSession(workspaceId, session.id);
+      focusPromptSoon();
+      // The session and its prompt are now preserved, so callers may clear one-shot context.
+      return true;
+    } catch {
+      // Keep the hero mounted so its prompt, attachments, skills and project remain retryable.
+      toast.error(t("tools.session_create_failed"));
+      return false;
+    }
   };
 
   // A skill asked for a chat from its own screen: start it here, where chats are made.
@@ -2440,24 +2448,23 @@ export function SessionRoute() {
     if (pendingCoworkChat) startPendingChat(pendingCoworkChat);
   }, [pendingCoworkChat, workspaces]);
 
-  const handleChatFirstTask = useCallback((prompt: string, attachments?: ComposerAttachment[]) => {
-    void (async () => {
-      if (!isDesktopRuntime()) {
-        handleOpenCreateWorkspace();
-        return;
-      }
-      const home = await getDesktopHomeDir().catch(() => "");
-      if (!home) {
-        handleOpenCreateWorkspace();
-        return;
-      }
-      const folder = await joinDesktopPath(home, "Redrob Cowork Chat").catch(() => "");
-      if (!folder) {
-        handleOpenCreateWorkspace();
-        return;
-      }
-      await handleCreateWorkspace("starter", folder, { firstTaskPrompt: prompt, firstTaskAttachments: attachments ?? [] });
-    })();
+  const handleChatFirstTask = useCallback(async (prompt: string, attachments?: ComposerAttachment[]) => {
+    if (!isDesktopRuntime()) {
+      handleOpenCreateWorkspace();
+      return false;
+    }
+    const home = await getDesktopHomeDir().catch(() => "");
+    if (!home) {
+      handleOpenCreateWorkspace();
+      return false;
+    }
+    const folder = await joinDesktopPath(home, "Redrob Cowork Chat").catch(() => "");
+    if (!folder) {
+      handleOpenCreateWorkspace();
+      return false;
+    }
+    // Propagate whether workspace creation also preserved the first task.
+    return handleCreateWorkspace("starter", folder, { firstTaskPrompt: prompt, firstTaskAttachments: attachments ?? [] });
   }, [handleCreateWorkspace, handleOpenCreateWorkspace]);
 
   const createWorkspaceControlAction = useMemo<RedrobControlAction>(() => ({

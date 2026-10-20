@@ -5,11 +5,11 @@
  * The container. It owns the fetch and the action dispatch; all policy is in
  * `onboarding-choice.ts` and all markup in `onboarding-choice-view.tsx`.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-import { t } from "@/i18n";
+import { currentLocale, subscribeToLocale, t } from "@/i18n";
 import { OnboardingWizardShell } from "./onboarding-wizard-shell";
-import { buildOnboardingChoices, type OnboardingAction, type OnboardingChoice } from "./onboarding-choice";
+import { buildOnboardingChoices, type OnboardingAction, type OnboardingChoiceInput } from "./onboarding-choice";
 import { OnboardingChoiceView } from "./onboarding-choice-view";
 
 type Availability = {
@@ -46,35 +46,41 @@ export function ConnectStep({
   onBack,
   redrobConnected,
 }: ConnectStepProps) {
-  const [choices, setChoices] = useState<OnboardingChoice[] | null>(null);
+  // Store language-neutral probe data; translated choices are derived for the current locale.
+  const [choiceInput, setChoiceInput] = useState<OnboardingChoiceInput | null>(null);
   const [busyChoiceId, setBusyChoiceId] = useState<string | null>(null);
+  // Action failures keep their original message; availability failure uses a live translation below.
   const [error, setError] = useState<string | null>(null);
+  const [availabilityFailed, setAvailabilityFailed] = useState(false);
+  // Launcher sync can change this after availability resolves, so choices must subscribe and rebuild.
+  const locale = useSyncExternalStore(subscribeToLocale, currentLocale, currentLocale);
+  // Rebuild translated subtitles and steps whenever the locale or probe data changes.
+  const choices = useMemo(() => (choiceInput ? buildOnboardingChoices(choiceInput) : null), [choiceInput, locale]);
   /** The command the user should run, shown after they pick a choice that needs one. */
   const [pendingCommand, setPendingCommand] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const availability = await fetchAvailability();
-      setChoices(
-        buildOnboardingChoices({
-          codex: { binary: availability.codex.installed ? "codex" : null, signedIn: availability.codex.signedIn },
-          claude: { binary: availability.claude.installed ? "claude" : null, signedIn: availability.claude.signedIn },
-          redrobConnected,
-        }),
-      );
+      // Keep only probe facts in state; localized copy is derived above.
+      setChoiceInput({
+        codex: { binary: availability.codex.installed ? "codex" : null, signedIn: availability.codex.signedIn },
+        claude: { binary: availability.claude.installed ? "claude" : null, signedIn: availability.claude.signedIn },
+        redrobConnected,
+      });
+      setAvailabilityFailed(false);
       setError(null);
     } catch {
       // Detection failing must not block onboarding: fall back to "nothing detected",
       // which still offers all three choices and still lets the user continue. A blank
       // screen here would strand a user whose only real option is Redrob anyway.
-      setChoices(
-        buildOnboardingChoices({
-          codex: { binary: null, signedIn: null },
-          claude: { binary: null, signedIn: null },
-          redrobConnected,
-        }),
-      );
-      setError("Could not check what is installed on this computer. You can still choose below.");
+      setChoiceInput({
+        codex: { binary: null, signedIn: null },
+        claude: { binary: null, signedIn: null },
+        redrobConnected,
+      });
+      setAvailabilityFailed(true);
+      setError(null);
     }
   }, [fetchAvailability, redrobConnected]);
 
@@ -136,7 +142,13 @@ export function ConnectStep({
   return (
     <OnboardingWizardShell step="connect" title={t("onboarding.connect_title")} description={t("onboarding.connect_subtitle")} onBack={onBack}>
       <div className="flex flex-col gap-4">
-        <OnboardingChoiceView choices={choices} busyChoiceId={busyChoiceId} error={error} onAct={act} />
+        <OnboardingChoiceView
+          choices={choices}
+          busyChoiceId={busyChoiceId}
+          // Availability copy follows locale changes; action errors preserve their source message.
+          error={availabilityFailed ? t("onboarding.connect_check_failed") : error}
+          onAct={act}
+        />
         {pendingCommand ? (
           <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
             <p className="text-sm">{t("onboarding.connect_run_command")}</p>
