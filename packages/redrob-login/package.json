@@ -1,0 +1,24 @@
+{
+  "name": "@redrob/login",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Desktop sign-in with redrob-auth (Authorization Code + PKCE over loopback, device code) for Node/Bun callers",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.7",
+    "typescript": "5.9.3"
+  }
+}
