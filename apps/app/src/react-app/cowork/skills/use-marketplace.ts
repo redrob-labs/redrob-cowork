@@ -39,13 +39,13 @@ export function popularRows(rows: readonly SkillRow[], locale: string): SkillRow
 }
 
 /**
- * Page order: Your skills (installed, in origin order), then the featured workflows, then Popular.
- * Every other skill is a workflow page or a Search away.
+ * Page order: Your skills (installed, in origin order), then the workflows (one per catalogue
+ * family, its skills in run order), then Popular.
  */
 export function marketplaceSections(rows: readonly SkillRow[], locale: string) {
   return {
     yours: rows.filter((row) => row.installed !== null),
-    workflows: availableWorkflows(rows),
+    workflows: availableWorkflows(rows, locale),
     popular: popularRows(rows, locale),
   };
 }

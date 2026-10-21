@@ -33,6 +33,7 @@ describe("hero composer skill picks", () => {
     const missing = POPULAR_SKILLS.en[1] as string;
     const names = skillPicks(rows.filter((r) => r.name !== missing), "en", []).map((r) => r.name);
     expect(names).not.toContain(missing);
-    expect(names).toHaveLength(SKILL_PICK_COUNT);
+    // The strip fills from what is left of the list, never past it.
+    expect(names).toHaveLength(Math.min(SKILL_PICK_COUNT, POPULAR_SKILLS.en.length - 1));
   });
 });

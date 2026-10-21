@@ -110,6 +110,12 @@ export type SkillDisplayFields = {
   summary?: string;
   /** Short Korean catalogue summary used below the title. */
   summaryKo?: string;
+  /** English name of the skill family, from the catalogue's `metadata.category`. */
+  category?: string;
+  /** Korean name of the skill family, from the catalogue's `metadata.category_ko`. */
+  categoryKo?: string;
+  /** Run order within the family, from `metadata.step`; skills that share a step are alternatives. */
+  step?: number;
 };
 
 /** A skill in the Console's library, installed or not. */

@@ -60,7 +60,7 @@ export function coworkRoutes(chat: ReactNode) {
     <Route key="memory" path="/memory" element={ready(<CoworkMemoryScreen />)} />,
     <Route key="memory-scope" path="/memory/:scope" element={ready(<CoworkMemoryScreen />)} />,
     <Route key="skills" path="/skills" element={ready(<SkillsScreen />)} />,
-    // A featured workflow (several skills for one job); an unknown id returns to Skills.
+    // A workflow (one catalogue skill family); an unknown id returns to Skills.
     <Route key="workflow" path="/skills/workflow/:id" element={ready(<WorkflowScreen />)} />,
     <Route key="skill" path="/skill/:name" element={ready(<SkillScreen />)} />,
     // Playbooks became skills: old links land on Skills.
