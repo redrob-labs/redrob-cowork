@@ -440,7 +440,7 @@ export function ModelChartHome(props: {
               onClick={() => props.onOpen(banner.pick)}
             >
               <span className="model-chart__glass" style={glassStyle(`banner-${banner.id}`)} aria-hidden="true" />
-              <img className="model-chart__banner-art" src={`/brand/banner-art/${banner.art}.png`} alt="" aria-hidden="true" loading="lazy" draggable={false} />
+              <img className="model-chart__banner-art" src={resolveExtensionIconSrc(`/brand/banner-art/${banner.art}.png`)} alt="" aria-hidden="true" loading="lazy" draggable={false} />
               <span className="model-chart__banner-scrim" aria-hidden="true" />
               <span className="model-chart__banner-eyebrow">{banner.eyebrow}</span>
               <span className="model-chart__banner-title">{banner.title}</span>
