@@ -92,6 +92,7 @@ const {
   powerMonitor,
   powerSaveBlocker,
   Notification: ElectronNotification,
+  screen,
   session,
   shell,
   systemPreferences,
@@ -2525,7 +2526,12 @@ async function createMainWindow() {
 
   const bootSidecar = await readBrandIconSidecar();
   const bootSourceUrl = typeof bootSidecar?.sourceUrl === "string" ? bootSidecar.sourceUrl : null;
-  const cachedBrandImage = bootSourceUrl ? resolveBrandIconImage() : null;
+  let cachedBrandImage = null;
+  try {
+    cachedBrandImage = bootSourceUrl ? resolveBrandIconImage() : null;
+  } catch (error) {
+    console.error("[brand-icon] failed to resolve cached brand icon before window creation", error);
+  }
   const windowIconImage = cachedBrandImage ?? APP_ICON_IMAGE;
   if (process.platform === "win32" && cachedBrandImage && bootSourceUrl) {
     try {
@@ -2544,9 +2550,20 @@ async function createMainWindow() {
   // Round 14, item E: show the launch splash before the (hidden) main window loads its renderer.
   showSplashWindow(windowIconImage);
 
+  // Never open larger than the primary display's work area (small laptop screens, high DPI scaling).
+  let initialWidth = 1180;
+  let initialHeight = 820;
+  try {
+    const workArea = screen.getPrimaryDisplay().workAreaSize;
+    initialWidth = Math.min(initialWidth, workArea.width);
+    initialHeight = Math.min(initialHeight, workArea.height);
+  } catch (error) {
+    console.error("[window] failed to read the primary display work area", error);
+  }
+
   mainWindow = new BrowserWindow({
-    width: 1180,
-    height: 820,
+    width: initialWidth,
+    height: initialHeight,
     title: currentDisplayAppName,
     show: false,
     ...(process.platform === "win32" ? { skipTaskbar: true } : {}),
@@ -2791,9 +2808,19 @@ or use: pnpm dev:worktree`);
   });
 
   app.whenReady().then(async () => {
-    const systemCaCertificates = await runtimeManager.systemCaCertificates();
-    session.defaultSession.setCertificateVerifyProc(createSystemCaCertificateVerifyProc(systemCaCertificates));
-    installMediaPermissionHandlers(session, () => mainWindow);
+    // Every step before createMainWindow is non-essential: a throw here must not leave a
+    // windowless main process, which also blocks the updater from ever replacing the app.
+    try {
+      const systemCaCertificates = await runtimeManager.systemCaCertificates();
+      session.defaultSession.setCertificateVerifyProc(createSystemCaCertificateVerifyProc(systemCaCertificates));
+    } catch (error) {
+      console.error("[startup] failed to install system CA certificates", error);
+    }
+    try {
+      installMediaPermissionHandlers(session, () => mainWindow);
+    } catch (error) {
+      console.error("[startup] failed to install media permission handlers", error);
+    }
     await runPendingNukeCleanup({
       env: process.env,
       homedir: os.homedir(),
@@ -2802,31 +2829,56 @@ or use: pnpm dev:worktree`);
     }).catch((error) => {
       console.warn("[nuke] pending cleanup failed", error);
     });
-    const bootstrapConfig = await workspaceStore.getDesktopBootstrapConfig();
-    currentDisplayAppName = applyBrandAppName(
-      BLANK_SLATE_LAUNCH.enabled ? null : bootstrapConfig.brandAppName,
-      {
-      fallbackName: APP_NAME,
-      platform: process.platform,
-      updateElectronAppName: true,
-      runtimeProcess: process,
-      app,
-      applicationMenu,
-      },
-    );
+    let bootstrapConfig = {};
+    try {
+      bootstrapConfig = (await workspaceStore.getDesktopBootstrapConfig()) ?? {};
+    } catch (error) {
+      console.error("[startup] failed to read desktop bootstrap config", error);
+    }
+    try {
+      currentDisplayAppName = applyBrandAppName(
+        BLANK_SLATE_LAUNCH.enabled ? null : bootstrapConfig.brandAppName,
+        {
+        fallbackName: APP_NAME,
+        platform: process.platform,
+        updateElectronAppName: true,
+        runtimeProcess: process,
+        app,
+        applicationMenu,
+        },
+      );
+    } catch (error) {
+      console.error("[startup] failed to apply brand app name", error);
+    }
     if (process.platform === "win32" && !BLANK_SLATE_LAUNCH.enabled) {
-      await registerWindowsDisplayShortcut();
+      try {
+        await registerWindowsDisplayShortcut();
+      } catch (error) {
+        console.error("[brand-icon] failed to register Windows display shortcut", error);
+      }
     }
     if (process.platform !== "linux" && !BLANK_SLATE_LAUNCH.enabled) {
-      await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);
+      try {
+        await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);
+      } catch (error) {
+        console.error("[brand-icon] failed to apply bootstrap brand icon", error);
+      }
     }
-    applicationMenu.install();
+    try {
+      applicationMenu.install();
+    } catch (error) {
+      console.error("[startup] failed to install application menu", error);
+    }
     await runtimeManager.prepareFreshRuntime().catch(() => undefined);
 
     // Use Tauri's existing workspace state file as canonical so rollback and
     // Electron see the same workspace list. Import the short-lived
     // Electron-only filename only when the shared file is missing.
-    await workspaceStore.migrateLegacyElectronWorkspaceStateIfNeeded();
+    try {
+      await workspaceStore.migrateLegacyElectronWorkspaceStateIfNeeded();
+    } catch (error) {
+      console.error("[startup] failed to migrate legacy workspace state", error);
+    }
     await uiControlServer.start().catch((error) => {
       console.warn("[ui-control] failed to start", error);
     });
@@ -2838,7 +2890,11 @@ or use: pnpm dev:worktree`);
     queueDeepLinks(forwardedDeepLinks(process.argv));
     const win = await createMainWindow();
     if (process.platform === "linux" && !BLANK_SLATE_LAUNCH.enabled) {
-      await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);
+      try {
+        await applyDesktopBootstrapBrandIcon(bootstrapConfig, applyBrandIconUrl);
+      } catch (error) {
+        console.error("[brand-icon] failed to apply bootstrap brand icon", error);
+      }
     }
     win.webContents.on("did-finish-load", () => {
       flushPendingDeepLinks();
@@ -2855,6 +2911,14 @@ or use: pnpm dev:worktree`);
     // a working app first. Renderer-owned checks pass the selected release
     // channel explicitly, avoiding stale stable-feed results for alpha users.
     void ensureAutoUpdater();
+  }).catch((error) => {
+    // Last resort: tell the user and exit instead of lingering as a windowless process.
+    console.error("[startup] fatal error before the main window opened", error);
+    try {
+      dialog.showErrorBox("Redrob Cowork", String(error?.stack || error));
+    } finally {
+      app.quit();
+    }
   });
 
   app.on("activate", async () => {
