@@ -4,6 +4,8 @@
  * `<name>@3x.png`, copied as delivered. A skill without art keeps its tone-coded circle.
  */
 
+import { resolveExtensionIconSrc } from "../../design-system/extension-icon-src";
+
 /** Stable skill names that have cover art. */
 const SKILL_ART_NAMES: ReadonlySet<string> = new Set([
   "humanizing-english-casual",
@@ -46,6 +48,6 @@ const SKILL_ART_NAMES: ReadonlySet<string> = new Set([
 /** The art's `src` and `srcSet` (128, 256 and 384 px wide), or null when the skill has none. */
 export function skillArt(name: string): { src: string; srcSet: string } | null {
   if (!SKILL_ART_NAMES.has(name)) return null;
-  const base = `/skill-art/${encodeURIComponent(name)}`;
+  const base = resolveExtensionIconSrc(`/skill-art/${encodeURIComponent(name)}`);
   return { src: `${base}.png`, srcSet: `${base}.png 128w, ${base}@2x.png 256w, ${base}@3x.png 384w` };
 }

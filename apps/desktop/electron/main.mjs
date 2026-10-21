@@ -2430,8 +2430,8 @@ function splashHtml() {
 </style></head><body>
   <div class="card">
     <div class="marks" aria-hidden="true">
-      <img class="mark group" src="${group}" alt="" />
-      <img class="mark cowork" src="${cowork}" alt="" />
+      ${group ? `<img class="mark group" src="${group}" alt="" />` : ""}
+      ${cowork ? `<img class="mark cowork" src="${cowork}" alt="" />` : ""}
     </div>
     <div class="word">Redrob Cowork</div>
   </div>
