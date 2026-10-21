@@ -1830,7 +1830,7 @@ export function createRuntimeManager({
     // Bounded and hidden. These run on the onboarding engine step, so an engine
     // that starts but never answers would otherwise hang that screen with no
     // timeout at all, and on Windows each probe flashed a console window.
-    const probeOptions = { encoding: "utf8", timeout: 15_000, windowsHide: true };
+    const probeOptions = { encoding: /** @type {const} */ ("utf8"), timeout: 15_000, windowsHide: true };
     const versionResult = spawnSync(resolved.path, ["--version"], probeOptions);
     const helpResult = spawnSync(resolved.path, ["serve", "--help"], probeOptions);
     const notes = [`Using ${resolved.source}: ${resolved.path}`];
