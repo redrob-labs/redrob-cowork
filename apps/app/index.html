@@ -57,9 +57,13 @@
             ? new Promise(function (resolve) { setTimeout(resolve, remaining); })
             : undefined;
         });
+        // Resolve the logos next to the splash stylesheet, whose href Vite rewrites with the
+        // build base: an absolute "/splash/..." string points at the drive root under file://.
+        var splashCss = document.querySelector('link[href*="redrob-splash.css"]');
+        var splashBase = splashCss ? splashCss.href : new URL("splash/", document.baseURI).href;
         window.showRedrobSplash({
-          logoLight: "/splash/redrob-logo-primary.png",
-          logoDark: "/splash/redrob-logo-primary-white.png",
+          logoLight: new URL("redrob-logo-primary.png", splashBase).href,
+          logoDark: new URL("redrob-logo-primary-white.png", splashBase).href,
           ready: ready,
         });
       })();
