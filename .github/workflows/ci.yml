@@ -1,11 +1,13 @@
-# The one pull-request CI: a seconds-long scripts job and one tests job (skipped for
-# docs-only and version-only pull requests).
+# The one pull-request CI: a seconds-long scripts job and one compile job named "tests"
+# (typecheck only on pull requests; skipped for docs-only and version-only pull requests).
+# Unit tests run only on a by-hand workflow_dispatch run.
 # No push or schedule triggers. Releases live in release-macos-aarch64.yml.
 
 name: ci
 
 on:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,6 +30,7 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
+          if [ -z "$BASE" ]; then echo "heavy=true" | tee -a "$GITHUB_OUTPUT"; exit 0; fi
           heavy=false
           version_line='^[+-][[:space:]]*("version"[[:space:]]*:|version[[:space:]]*=)[[:space:]]*"[^"]*",?[[:space:]]*$'
           while IFS= read -r f; do
@@ -105,8 +108,17 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Typecheck
+      - name: Typecheck (web UI)
         run: pnpm typecheck
 
+      - name: Typecheck (desktop electron)
+        run: pnpm --filter @redrob/desktop typecheck:electron
+
+      - name: Desktop bridge check
+        run: pnpm --filter @redrob/desktop check:electron
+
+      # Pull requests compile once; the release build compiles again. Tests run by hand
+      # (workflow_dispatch) only.
       - name: Unit tests
+        if: github.event_name != 'pull_request'
         run: pnpm test
