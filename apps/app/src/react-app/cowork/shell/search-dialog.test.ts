@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import type { Chat, CoworkFile, Project, CoworkSkill, Schedule } from "../services/types";
 import type { SkillRow } from "../skills/skills";
-import { WORKFLOW_IDS, availableWorkflows, workflowPath, workflowTitle } from "../skills/workflows";
+import { availableWorkflows, workflowPath, workflowTitle } from "../skills/workflows";
 import { CATALOGUE_2026_10_19 } from "../../../../tests/helpers/console-catalogue-names";
 import { searchResults, searchResultsForTab, type SearchData } from "./search-dialog";
 
@@ -57,13 +57,15 @@ describe("Cowork search", () => {
 
   test("every catalogue skill and workflow is searchable and opens its page", () => {
     const lib = (name: string): SkillRow => ({ name, description: "", tags: {}, origin: "library", installed: null });
-    const catalogue = CATALOGUE_2026_10_19.map((name) => name === "kr-lawyer-nda" ? { ...lib(name), titleKo: "비밀유지계약서" } : lib(name));
-    const full: SearchData = { chats: [], projects: [], skills: [], schedules: [], artifacts: [], catalogue, workflows: availableWorkflows(catalogue) };
+    const grouped = ["kc-proposal", "kc-report"].map((name, index) => ({ ...lib(name), category: "(Korean) Consulting", categoryKo: "(국내) 경영 컨설팅", step: index + 1 }));
+    const catalogue = [...CATALOGUE_2026_10_19.map((name) => name === "kr-lawyer-nda" ? { ...lib(name), titleKo: "비밀유지계약서" } : lib(name)), ...grouped];
+    const workflows = availableWorkflows(catalogue, "en");
+    const full: SearchData = { chats: [], projects: [], skills: [], schedules: [], artifacts: [], catalogue, workflows };
     for (const name of CATALOGUE_2026_10_19) {
       expect(searchResultsForTab("skills", name, full).some((r) => r.path === `/skill/${name}`)).toBe(true);
       expect(searchResultsForTab("all", name, full).some((r) => r.path === `/skill/${name}`)).toBe(true);
     }
-    for (const id of WORKFLOW_IDS) expect(searchResultsForTab("all", workflowTitle(id), full).map((r) => r.path)).toContain(workflowPath(id));
+    for (const workflow of workflows) expect(searchResultsForTab("all", workflowTitle(workflow, "en"), full).map((r) => r.path)).toContain(workflowPath(workflow.id));
     expect(searchResultsForTab("skills", "비밀유지", full).map((r) => r.path)).toContain("/skill/kr-lawyer-nda");
     // An empty All query lists only places and chats.
     expect(searchResultsForTab("all", "", full).some((r) => r.id.startsWith("skill-"))).toBe(false);

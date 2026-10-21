@@ -1,14 +1,31 @@
 /** @jsxImportSource react */
+import { skillArt } from "./skill-art";
 import { skillTone } from "./skills";
 
 type SkillIconProps = {
-  /** Stable skill id used to choose the same tone everywhere. */
+  /** Stable skill id: picks the cover art, or the same tone everywhere when there is none. */
   name: string;
   /** Visual size for marketplace tile, detail hero, compact row, `pick` (hero composer strip), `mini` (composer tray), or `fill` (sized by its parent, e.g. a workflow mosaic cell). */
   size: "tile" | "hero" | "row" | "pick" | "mini" | "fill";
 };
 
-/** Decorative marketplace artwork: a tone-coded circle chosen from the skill's stable name. */
+/** Rendered CSS width per size, so the browser picks the right art file for the screen density. */
+const ART_SIZES: Record<SkillIconProps["size"], string> = {
+  tile: "72px",
+  hero: "128px",
+  row: "40px",
+  pick: "28px",
+  mini: "22px",
+  // A mosaic cell: (72% of the 160px card, less the 8px gap) / 2; the hero mosaic is smaller.
+  fill: "54px",
+};
+
+/** Decorative marketplace artwork: the skill's cover art when it has one, else a tone-coded circle from its stable name. */
 export function SkillIcon({ name, size }: SkillIconProps) {
-  return <span className="cowork-skill-icon" data-size={size} data-tone={skillTone(name)} aria-hidden="true" />;
+  const art = skillArt(name);
+  return (
+    <span className="cowork-skill-icon" data-size={size} data-tone={skillTone(name)} data-art={art ? "" : undefined} aria-hidden="true">
+      {art ? <img className="cowork-skill-icon__art" src={art.src} srcSet={art.srcSet} sizes={ART_SIZES[size]} alt="" draggable={false} decoding="async" /> : null}
+    </span>
+  );
 }

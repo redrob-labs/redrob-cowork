@@ -2676,6 +2676,17 @@
   width: 22px;
   height: 22px;
 }
+/* Cover art: the round PNG fills the circle, so no tone shows at its anti-aliased edge. */
+.cowork-skill-icon[data-art][data-tone] {
+  background: transparent;
+}
+.cowork-skill-icon__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
 
 /* Composer skill tray: attached skills as small circles in the panel's upper section. Hover or focus
    shows the title (DS tooltip) and a remove badge; clicking the chip detaches the skill. */
@@ -2858,7 +2869,7 @@
   font-family: var(--font-mono);
 }
 
-/* ---------- Skills: featured workflows (album-cover cards, workflow page) ---------- */
+/* ---------- Skills: workflows (album-cover cards, workflow page) ---------- */
 .cowork-skill-icon[data-size="fill"] {
   width: 100%;
   height: 100%;
@@ -2933,11 +2944,6 @@
   line-height: 18px;
   font-weight: 600;
   color: var(--ink-primary);
-}
-.cowork-workflow-card__sub {
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--ink-secondary);
 }
 .cowork-workflow-card__count {
   font-size: 12px;
@@ -3027,7 +3033,7 @@
     transform: none;
   }
 }
-/* ---------- end featured workflows ---------- */
+/* ---------- end workflows ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .cowork-skill-icon,

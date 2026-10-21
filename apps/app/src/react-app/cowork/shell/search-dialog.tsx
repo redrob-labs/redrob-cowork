@@ -10,7 +10,7 @@ import { createCoworkServices } from "../services/real-services";
 import type { Chat, CoworkFile, Project, CoworkSkill, Schedule } from "../services/types";
 import { CATALOGUE_CACHE_MS } from "../skills/console-catalogue";
 import { skillDisplayTitle, skillPath, skillRows, type SkillRow } from "../skills/skills";
-import { availableWorkflows, workflowPath, workflowSearchText, workflowTitle, type WorkflowId } from "../skills/workflows";
+import { availableWorkflows, workflowPath, workflowSearchText, workflowTitle, type Workflow } from "../skills/workflows";
 import { CoworkDialog } from "./cowork-dialog";
 import { useCoworkConnection } from "./cowork-connection";
 import { chatPath } from "./cowork-routes";
@@ -50,25 +50,25 @@ export type SearchData = {
   artifacts: readonly CoworkFile[];
   /** Installed skills plus the whole public catalogue (all of it, not only what is added). */
   catalogue?: readonly SkillRow[];
-  /** The featured workflows available in that catalogue. */
-  workflows?: ReadonlyArray<{ id: WorkflowId; rows: SkillRow[] }>;
+  /** The workflows (catalogue families) in that catalogue. */
+  workflows?: readonly Workflow[];
 };
 
 /** The Skills tab's limit: wider than the others so the catalogue can be browsed from Search. */
 const SKILL_RESULT_LIMIT = 24;
 
 /**
- * Every skill (installed or in the catalogue) and every featured workflow as a search hit.
+ * Every skill (installed or in the catalogue) and every workflow (catalogue family) as a search hit.
  * A skill opens its own page; a workflow opens its workflow page. Titles,
  * Korean titles, summaries and the stable name all match.
  */
 export function skillSearchResults(data: SearchData, locale: string = currentLocale()): SearchResult[] {
   const workflows = (data.workflows ?? []).map((workflow): SearchResult => ({
     id: `workflow-${workflow.id}`,
-    label: workflowTitle(workflow.id),
+    label: workflowTitle(workflow, locale),
     meta: t("cowork.skills_workflow_eyebrow"),
     path: workflowPath(workflow.id),
-    terms: workflowSearchText(workflow.id, workflow.rows, locale),
+    terms: workflowSearchText(workflow, locale),
   }));
   const rows: ReadonlyArray<Pick<SkillRow, "name" | "title" | "titleKo" | "summary" | "summaryKo">> = data.catalogue ?? data.skills;
   const skills = rows.map((skill): SearchResult => ({
@@ -182,7 +182,7 @@ export function SearchDialog(props: { onClose: () => void }) {
   const { catalogue, workflows } = useMemo(() => {
     if (library.isPending) return { catalogue: [], workflows: [] };
     const rows = skillRows({ installed: installedSkills, library: library.data?.data ?? null });
-    return { catalogue: rows, workflows: availableWorkflows(rows) };
+    return { catalogue: rows, workflows: availableWorkflows(rows, currentLocale()) };
   }, [installedSkills, library.data, library.isPending]);
   const data: SearchData = {
     chats: unwrap(chats.data, [] as Chat[]),
